@@ -64,8 +64,8 @@ load rpc cli
 
 show listcommands
 
-    9 {datadir} (listcommands|list|l)
-    9 [listcommands|list|l]
+    9 {datadir} (listcommands|l)
+    9 [listcommands|l]
 
 query from full node
 
@@ -89,8 +89,8 @@ run shell
 
 reset to factory defaults
 
-	9 {datadir} [reinit]
-	9 [reinit]
+	9 {datadir} [factory]
+	9 [factory]
 
 new datadir at ./test
 
