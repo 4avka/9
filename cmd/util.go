@@ -34,14 +34,12 @@ func NormalizeAddresses(addrs string, defaultPort string, out *[]string) {
 
 		a := addrS[i]
 
-		// o := ""
 		NormalizeAddress(a, defaultPort, &a)
 
 		if a != "" {
 
 			*O = append(*O, a)
 		}
-
 	}
 
 	// atomically switch out if there was valid addresses
@@ -49,7 +47,6 @@ func NormalizeAddresses(addrs string, defaultPort string, out *[]string) {
 
 		*out = *O
 	}
-
 }
 
 // NormalizeAddress reads and corrects an address if it is missing pieces
@@ -71,5 +68,4 @@ func NormalizeAddress(addr, defaultPort string, out *string) {
 
 		*out = o
 	}
-
 }

@@ -13,6 +13,8 @@ type Line struct {
 	Value interface{}
 }
 
+type Lines map[string]*Line
+
 var LogLevels = []string{"off", "critical", "warning", "error", "info", "debug", "trace"}
 var Networks = []string{"mainnet", "testnet", "simnet", "regtestnet"}
 
@@ -75,6 +77,8 @@ func Network(def, usage string) *Line {
 // NetAddr is for a single network address ie scheme://host:port
 func NetAddr(def, usage string) *Line {
 
+	// TODO: make this check and use random port if port is used
+
 	return &Line{}
 }
 
@@ -84,17 +88,39 @@ func NetAddrs(def, usage string) *Line {
 	return &Line{}
 }
 
-type Lines map[string]*Line
+// Int is for a single 64 bit integer. We see no point in complicating things,
+// so this is golang `int` with no special meanings
+func Int(def, usage string) *Line {
 
-// Config is the declaration of our set of application configuration variables.
-// Custom functions are written per type that generate a Line struct and contain
-// a validator/setter function that checks the input
-var Config = Lines{
-	"datadir":   Path("~/.", "base directory containing configuration and data"),
-	"loglevel":  LogLevel("info", "sets the base default log level"),
-	"subsystem": SubSystem("", "[subsystem:loglevel ]+ listsubsystems to see available"),
-	"network":   Network("mainnet", "network to connect to"),
-	"addpeers":  NetAddrs("", "permanent p2p network peers"),
-	"connect":   NetAddrs("", "whitelisted peers"),
-	"rpc":       NetAddr("localhost:11048", "node rpc to connect to"),
+	return &Line{}
+}
+
+// IntBounded is an integer whose value must be between a min and max
+func IntBounded(def, usage string, min, max int) *Line {
+
+	return &Line{}
+}
+
+// Enable is a boolean value
+func Enable(usage string) *Line {
+
+	return &Line{}
+}
+
+// Disable is a boolean value
+func Disable(usage string) *Line {
+
+	return &Line{}
+}
+
+// Duration is a time value in golang 24h60m60s format
+func Duration(def, usage string) *Line {
+
+	return &Line{}
+}
+
+// String is just a boring old string
+func String(def, usage string) *Line {
+
+	return &Line{}
 }
