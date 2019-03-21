@@ -57,11 +57,6 @@ launch configuration cli
     9 {datadir} [conf]
     9 [conf]
 
-load rpc cli
-
-    9 {datadir} [cli]
-    9 [cli]
-
 show listcommands
 
     9 {datadir} (listcommands|l)
