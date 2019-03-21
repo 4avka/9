@@ -1,8 +1,9 @@
  <img src="https://git.parallelcoin.io/com/assets/raw/branch/master/logo/logo64x64.png"> <sup><i>9</i></sup> 
 **Parallelcoin**
-### all-in-one next generation server application suite.
 
-## what is parallelcoin?
+##  ***9*** <sub>[all in one everything]</sub>
+
+# what is parallelcoin?
 
 Parallelcoin is an altcoin that appeared around the time of the MtGox hack and the first appearance of ASIC miners on the market.
 
@@ -10,17 +11,17 @@ The original creator of the token shortly afterwards disappeared again, and hasn
 
 It was shortly afterwards adopted and after some time finally programmers were found to bring this old miner-focused coin into the next generation.
 
-# roadmap
+## roadmap
 
-#### where we've been
+##### where we've been
 
 1. Original creation of coin by Parallaxis, release 8 February 2014
 2. Community Takeover Announcement https://bitcointalk.org/index.php?topic=1097017 23 June 2015
 3. Loki Verloren started working on a new server 20 May 2018 based on btcsuite's [btcd](https://github.com/btcsuite/btcd)
 
-#### where we're going
+### plan 9 from crypto space!
 
-## plan 9 from crypto space!
+##### where we're going
 
 We are very proud of the work so far and we think that people will love the new Parallelcoin:
 
@@ -43,11 +44,11 @@ We are very proud of the work so far and we think that people will love the new 
     - short time between blocks tends to favour miners nearer to the origin of  the transaction - instead of going to the cheapest surplus electricity
     - more practical for face to face transactions due to shorter clearance time, without any additional systems overlaying it
 
-4. Release of Plan 9 from Crypto Space software suite, mid April 2019
-5. Hard Fork scheduled for ~ block 199999 ~ May 2019
-6. 3 months intensive monitoring and bug-catching until end of July
-7. Begin intensive work towards implementing the Distributed Journal Cache Protocol with its Proof of Causality logical clocks and probabalistic graph analysis, first working beta by January 2020
-8. Migrate DUO ledger to DJCP and and start building out SDK and first applications.
+1. Release of Plan 9 from Crypto Space software suite, mid April 2019
+2. Hard Fork scheduled for ~ block 199999 ~ May 2019
+3. 3 months intensive monitoring and bug-catching until end of July
+4. Begin intensive work towards implementing the Distributed Journal Cache Protocol with its Proof of Causality logical clocks and probabalistic graph analysis, first working beta by January 2020
+5. Migrate DUO ledger to DJCP and and start building out SDK and first applications.
 
 ## Application Feng Shui
 
@@ -89,3 +90,7 @@ Plus, hopefully you'll enjoy that part so much you want to help make it better.
 ## Building
 
 ***9*** is built with Go 1.12 with modules fully enabled. You can just `go build` or `go install` in the root of the repository and voila.
+
+## Documentation
+
+See the [doc](doc/) directory for more information.

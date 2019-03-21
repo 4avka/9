@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"net"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -288,3 +289,11 @@ func Algos(def, usage string) *Line {
 		return false
 	}, usage, o}
 }
+
+// ValidName checks to see a name is a valid name - first letter alphabetical, last alpha/numeric, all between also . and -
+func ValidName(s string) bool {
+	re := regexp.MustCompile("[a-z][a-z0-9-.][a-z0-9]+")
+	return re.Match([]byte(s))
+}
+
+//
