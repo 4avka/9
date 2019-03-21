@@ -6,8 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"git.parallelcoin.io/dev/pod/cmd/node"
-	"git.parallelcoin.io/dev/pod/pkg/util"
+	"git.parallelcoin.io/dev/9/pkg/util"
 )
 
 // CleanAndExpandPath expands environment variables and leading ~ in the passed path, cleans the result, and returns it.
@@ -24,48 +23,56 @@ func CleanAndExpandPath(path string) string {
 	return filepath.Clean(os.ExpandEnv(path))
 }
 
-// NormalizeAddresses reads and collects a space separated list of addresses contained in a string
-func NormalizeAddresses(addrs string, defaultPort string, out *[]string) {
+// NormalizeAddress returns addr with the passed default port appended if there is not already a port specified.
+func NormalizeAddress(
+	addr,
+	defaultPort string,
 
-	O := new([]string)
-	addrS := strings.Split(addrs, " ")
+) string {
 
-	for i := range addrS {
-
-		a := addrS[i]
-
-		NormalizeAddress(a, defaultPort, &a)
-
-		if a != "" {
-
-			*O = append(*O, a)
-		}
-	}
-
-	// atomically switch out if there was valid addresses
-	if len(*O) > 0 {
-
-		*out = *O
-	}
-}
-
-// NormalizeAddress reads and corrects an address if it is missing pieces
-func NormalizeAddress(addr, defaultPort string, out *string) {
-
-	o := node.NormalizeAddress(addr, defaultPort)
-	_, _, err := net.ParseCIDR(o)
+	_, _, err := net.SplitHostPort(addr)
 
 	if err != nil {
 
-		ip := net.ParseIP(addr)
+		return net.JoinHostPort(addr, defaultPort)
+	}
 
-		if ip != nil {
+	return addr
+}
 
-			*out = o
+// NormalizeAddresses returns a new slice with all the passed peer addresses normalized with the given default port, and all duplicates removed.
+func NormalizeAddresses(
+	addrs []string,
+	defaultPort string,
+
+) []string {
+
+	for i, addr := range addrs {
+
+		addrs[i] = NormalizeAddress(addr, defaultPort)
+	}
+
+	return RemoveDuplicateAddresses(addrs)
+}
+
+// RemoveDuplicateAddresses returns a new slice with all duplicate entries in addrs removed.
+func RemoveDuplicateAddresses(
+	addrs []string,
+
+) []string {
+
+	result := make([]string, 0, len(addrs))
+	seen := map[string]struct{}{}
+
+	for _, val := range addrs {
+
+		if _, ok := seen[val]; !ok {
+
+			result = append(result, val)
+			seen[val] = struct{}{}
 		}
 
-	} else {
-
-		*out = o
 	}
+
+	return result
 }

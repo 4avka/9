@@ -171,7 +171,7 @@ func Int(def, usage string) *Line {
 // IntBounded is an integer whose value must be between a min and max
 func IntBounded(def, usage string, min, max int) *Line {
 
-	var o *int
+	o := new(int)
 	n, e := strconv.Atoi(def)
 	if e == nil {
 
@@ -196,7 +196,7 @@ func IntBounded(def, usage string, min, max int) *Line {
 // Enable is a boolean value
 func Enable(usage string) *Line {
 
-	var o *bool
+	o := new(bool)
 	*o = false
 	return &Line{false, func(s string) bool {
 
@@ -207,7 +207,7 @@ func Enable(usage string) *Line {
 // Disable is a boolean value
 func Disable(usage string) *Line {
 
-	var o *bool
+	o := new(bool)
 	*o = true
 	return &Line{false, func(s string) bool {
 

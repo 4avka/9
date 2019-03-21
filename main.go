@@ -7,7 +7,7 @@ import (
 	"runtime/debug"
 
 	"git.parallelcoin.io/dev/9/cmd"
-	"github.com/btcsuite/btcd/limits"
+	"git.parallelcoin.io/dev/9/pkg/util/limits"
 )
 
 func main() {

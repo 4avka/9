@@ -1,7 +1,7 @@
 package fork
 
 import (
-	cl "git.parallelcoin.io/dev/pod/pkg/util/cl"
+	cl "git.parallelcoin.io/dev/9/pkg/util/cl"
 )
 
 // Log is the logger for the peer package
