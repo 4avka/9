@@ -1,5 +1,15 @@
 package cmd
 
+import (
+	"fmt"
+	"net"
+	"strconv"
+	"strings"
+	"time"
+
+	"git.parallelcoin.io/dev/9/pkg/chain/fork"
+)
+
 // Line is a configuration line, made into map becomes a
 // configuration thingy that has set-like properties.
 type Line struct {
@@ -74,71 +84,207 @@ func Network(def, usage string) *Line {
 	return &Line{def, networkValidate, usage, p}
 }
 
+var netAddr func(s string) bool
+
 // NetAddr is for a single network address ie scheme://host:port
 func NetAddr(def, usage string) *Line {
 
-	// TODO: make this check and use random port if port is used
+	o := new(string)
+	defaultPort, _, _ := net.SplitHostPort(def)
 
-	return &Line{}
+	netAddr = func(s string) bool {
+		_, _, err := net.SplitHostPort(s)
+
+		if err != nil {
+
+			a := net.JoinHostPort(s, defaultPort)
+			o = &a
+			return true
+		}
+		o = &s
+
+		return true
+	}
+	return &Line{def, netAddr, usage, o}
 }
 
-// NetAddrs is for a multiple network addresses ie scheme://host:port, separated by spaces
+// NetAddrs is for a multiple network addresses ie scheme://host:port, separated by spaces. If a default is given, its port is taken as the default port. If only a number is present, it is used as the defaultPort
 func NetAddrs(def, usage string) *Line {
 
-	return &Line{}
+	o := new([]string)
+	var defaultPort string
+	n, e := strconv.Atoi(def)
+	if e == nil {
+
+		defaultPort = fmt.Sprint(n)
+	} else if len(def) > 1 {
+
+		defaultPort, _, _ = net.SplitHostPort(def)
+	}
+
+	netAddrs := func(ss string) bool {
+
+		s := strings.Split(ss, " ")
+
+		for _, x := range s {
+
+			_, _, err := net.SplitHostPort(x)
+
+			if err != nil {
+
+				a := net.JoinHostPort(x, defaultPort)
+				*o = append(*o, a)
+				return true
+			}
+			*o = append(*o, x)
+		}
+
+		return true
+	}
+	return &Line{def, netAddrs, usage, o}
 }
 
 // Int is for a single 64 bit integer. We see no point in complicating things,
 // so this is golang `int` with no special meanings
 func Int(def, usage string) *Line {
 
-	return &Line{}
+	var o *int
+	n, e := strconv.Atoi(def)
+	if e == nil {
+
+		*o = n
+	}
+	return &Line{def, func(s string) bool {
+
+		n, e := strconv.Atoi(def)
+		if e == nil {
+
+			*o = n
+		} else {
+			return false
+		}
+
+		return true
+	}, usage, o}
 }
 
 // IntBounded is an integer whose value must be between a min and max
 func IntBounded(def, usage string, min, max int) *Line {
 
-	return &Line{}
+	var o *int
+	n, e := strconv.Atoi(def)
+	if e == nil {
+
+		*o = n
+	}
+	return &Line{def, func(s string) bool {
+
+		n, e := strconv.Atoi(def)
+		if e == nil {
+
+			*o = n
+		} else {
+			return false
+		}
+		if n < min || n > max {
+			return false
+		}
+		return true
+	}, usage, o}
 }
 
 // Enable is a boolean value
 func Enable(usage string) *Line {
 
-	return &Line{}
+	var o *bool
+	*o = false
+	return &Line{false, func(s string) bool {
+
+		return true
+	}, usage, o}
 }
 
 // Disable is a boolean value
 func Disable(usage string) *Line {
 
-	return &Line{}
+	var o *bool
+	*o = true
+	return &Line{false, func(s string) bool {
+
+		return true
+	}, usage, o}
 }
 
-// Duration is a time value in golang 24h60m60s format
+// Duration is a time value in golang 24h60m60s format. If it fails to parse it will return zero duration (as well as if it was zero duration)
 func Duration(def, usage string) *Line {
 
-	return &Line{}
+	o, e := time.ParseDuration(def)
+	if e != nil {
+		o = time.Second * 0
+	}
+	return &Line{def, func(s string) bool {
+		o, e = time.ParseDuration(s)
+		if e != nil {
+			o = time.Second * 0
+		}
+		return true
+	}, usage, &o}
 }
 
-// String is just a boring old string
+// String is just a boring old string. There is no limitations on what a string can contain, it will have any leading or trailing whitespace trimmed.
 func String(def, usage string) *Line {
-
-	return &Line{}
+	o := strings.TrimSpace(def)
+	return &Line{def, func(s string) bool {
+		o = strings.TrimSpace(def)
+		return true
+	}, usage, &o}
 }
 
-// StringSlice is an array of strings
+// StringSlice is an array of strings, encoded as a series of strings separated by backticks `
 func StringSlice(def, usage string) *Line {
 
-	return &Line{}
+	s := strings.TrimSpace(def)
+	ss := strings.Split(s, "`")
+
+	return &Line{def, func(s string) bool {
+		s = strings.TrimSpace(s)
+		ss = strings.Split(s, "`")
+		return true
+	}, usage, &ss}
 }
 
-// Float is a 64 bit floating point number
+// Float is a 64 bit floating point number. Returns zero if nothing parsed out.
 func Float(def, usage string) *Line {
-
-	return &Line{}
+	f, e := strconv.ParseFloat(def, 64)
+	if e != nil {
+		f = float64(0.0)
+	}
+	return &Line{def, func(s string) bool {
+		f, e = strconv.ParseFloat(s, 64)
+		if e != nil {
+			f = float64(0.0)
+		}
+		return true
+	}, usage, &f}
 }
 
-// Algos is the available mining algorithms
+// Algos is the available mining algorithms, read out of the fork package
 func Algos(def, usage string) *Line {
 
-	return &Line{}
+	o := new(string)
+	for _, x := range fork.P9AlgoVers {
+		if x == def {
+			*o = def
+		}
+	}
+	return &Line{def, func(s string) bool {
+
+		for _, x := range fork.P9AlgoVers {
+			if x == def {
+				*o = def
+				return true
+			}
+		}
+		return false
+	}, usage, o}
 }
