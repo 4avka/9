@@ -124,3 +124,21 @@ func String(def, usage string) *Line {
 
 	return &Line{}
 }
+
+// StringSlice is an array of strings
+func StringSlice(def, usage string) *Line {
+
+	return &Line{}
+}
+
+// Float is a 64 bit floating point number
+func Float(def, usage string) *Line {
+
+	return &Line{}
+}
+
+// Algos is the available mining algorithms
+func Algos(def, usage string) *Line {
+
+	return &Line{}
+}
