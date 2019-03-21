@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"git.parallelcoin.io/dev/9/pkg/chain/fork"
+	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
 
 // Line is a configuration line, made into map becomes a
@@ -56,14 +57,33 @@ func Path(def, usage string) *Line {
 }
 
 // SubSystem is just a list of alphanumeric names followed by a
-// colon followed by a string value, space separated, all lower case
+// colon followed by a string value, space separated, all lower case.
 func SubSystem(def, usage string) *Line {
-	var p *string
+
+	p := make(map[string]string)
+
 	return &Line{def, func(s string) bool {
-		// TODO: scan clog registry and verify valid log levels
-		*p = s
-		return true
-	}, usage, p}
+
+		ss := strings.Split(strings.TrimSpace(s), " ")
+
+		for _, y := range ss {
+
+			sss := strings.Split(y, ":")
+			for _, x := range cl.Register.List() {
+
+				if x == sss[0] {
+
+					if _, ok := p[x]; !ok {
+
+						cl.Register.Get(x).SetLevel(sss[1])
+						p[x] = sss[1]
+					}
+					return true
+				}
+			}
+		}
+		return false
+	}, usage, &p}
 }
 
 func Network(def, usage string) *Line {
