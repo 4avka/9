@@ -54,8 +54,8 @@ show help
 
 launch configuration cli
 
-    9 {datadir} [conf]
-    9 [conf]
+    9 {datadir} [conf|c]
+    9 [conf|c]
 
 show listcommands
 
