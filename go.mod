@@ -8,6 +8,7 @@ require (
 	github.com/aead/skein v0.0.0-20160722084837-9365ae6e95d2
 	github.com/bitbandi/go-x11 v0.0.0-20171024232457-5fddbc9b2b09
 	github.com/bitgoin/lyra2rev2 v0.0.0-20161212102046-bae9ad2043bb
+	github.com/davecgh/go-spew v1.1.1
 	github.com/dchest/blake256 v1.0.0
 	github.com/ebfe/keccak v0.0.0-20150115210727-5cc570678d1b
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db

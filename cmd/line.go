@@ -27,11 +27,10 @@ type Line struct {
 
 type Lines map[string]*Line
 
-var LogLevels = []string{"off", "critical", "warning", "error", "info", "debug", "trace"}
 var Networks = []string{"mainnet", "testnet", "simnet", "regtestnet"}
 
 func logLevelValidate(s string) bool {
-	for _, x := range LogLevels {
+	for x := range cl.Levels {
 		if x == s {
 			return true
 		}

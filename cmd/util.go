@@ -19,16 +19,18 @@ func CleanAndExpandPath(path string) string {
 		path = strings.Replace(path, "~", homeDir, 1)
 	}
 
+	if !strings.HasPrefix(path, "/") && !strings.HasPrefix(path, ".") {
+
+		// explicitly prefix is this must be a relative path
+		path = "./" + path
+	}
+
 	// NOTE: The os.ExpandEnv doesn't work with Windows-style %VARIABLE%, but they variables can still be expanded via POSIX-style $VARIABLE.
 	return filepath.Clean(os.ExpandEnv(path))
 }
 
 // NormalizeAddress returns addr with the passed default port appended if there is not already a port specified.
-func NormalizeAddress(
-	addr,
-	defaultPort string,
-
-) string {
+func NormalizeAddress(addr, defaultPort string) string {
 
 	_, _, err := net.SplitHostPort(addr)
 
@@ -41,11 +43,7 @@ func NormalizeAddress(
 }
 
 // NormalizeAddresses returns a new slice with all the passed peer addresses normalized with the given default port, and all duplicates removed.
-func NormalizeAddresses(
-	addrs []string,
-	defaultPort string,
-
-) []string {
+func NormalizeAddresses(addrs []string, defaultPort string) []string {
 
 	for i, addr := range addrs {
 
@@ -56,10 +54,7 @@ func NormalizeAddresses(
 }
 
 // RemoveDuplicateAddresses returns a new slice with all duplicate entries in addrs removed.
-func RemoveDuplicateAddresses(
-	addrs []string,
-
-) []string {
+func RemoveDuplicateAddresses(addrs []string) []string {
 
 	result := make([]string, 0, len(addrs))
 	seen := map[string]struct{}{}
