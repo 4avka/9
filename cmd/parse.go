@@ -8,6 +8,10 @@ import (
 
 func Parse(args []string) int {
 
+	GenerateLines(lines)
+
+	return 0
+
 	for _, x := range positivetests {
 		fmt.Println("\n", x)
 		xx := strings.Split(strings.TrimSpace(x), " ")
