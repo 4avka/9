@@ -25,8 +25,9 @@ It was adopted and after some time finally programmers were found to bring this 
 We are very proud of the work so far and we think that people will love the new Parallelcoin:
 
 - 9 complex multi-algorithm orthogonal complexity proof of work hash functions
-    - cryptonote 7 v2 for cache-heavy hashesh
-    - 
+    - cryptonote 7 v2 for cache-heavy hashing
+    - aurora2i, memory bus intensive
+    - + 9 different hash algorithms already with ASIC hardware
 - 4 part averaging algorithm:
     - All time average - to prevent long term drift
     - One day trailing simple average
