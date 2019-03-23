@@ -8,7 +8,7 @@ Parallelcoin is an altcoin that appeared around the time of the MtGox hack and t
 
 The original creator of the token shortly afterwards disappeared again, and hasn't been seen since.
 
-It was shortly afterwards adopted and after some time finally programmers were found to bring this old miner-focused coin into the next generation.
+It was adopted and after some time finally programmers were found to bring this old miner-focused coin into the next generation.
 
 ## roadmap
 
