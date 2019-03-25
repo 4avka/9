@@ -6,39 +6,8 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
-// Declaration syntax used for defining a set of lines makes for a
-// much more readable specification, which also doubles as help
-// information text itself.
-//  - no tab and one string defines a path prefix opening
-//  - items have first line with name, type and a : (for humans),
-//    and several parameters that is defined by the type
-//	- integers can have a second parameter either the minimum or a
-//    range specification as 1<100 - one or other number can be omitted to
-//    omit the test
-// whitespace only matters for the beginnings of lines, errors in omissions
-// of items will cause a panic as this should be corrected at program-time
-// variable specifications always start with one tab and comments after it
-// must have two, and the parser will panic from any of these.
-//
-// strings denoting a mutual exclusive list of items have their own type.
-//  - they may not contain spaces as these are used to separate them
-//  - first item is default, each following is one of the options
-//  - there can be only one, and the flag will not register if the data
-//    does not match it
-//
-// boolean enabler/disablers just have one line as help text would most
-// likely always start with 'enable' and 'disable' it might as well be
-// the pattern filter.
-//
-// in string (and netaddr and variants) if the comment starts with 'enable'
-// this means the default is empty and putting something in it enables
-// the associated toggle, and is not stored in configuration
-//
-//  - strings with the comment starting with 'password' are interpreted
-// to be passwords and generate a random password if no value is provided
-// for convenience.
-
 // getGroups splits an array of line specifications into its sections
+//
 // It will skip past all lines that are not just one word at the beginning
 // which might be useful to using this as part of a generator
 func getGroups(lines []string) (out [][]string) {
@@ -65,6 +34,42 @@ func GenerateLines(input string) (out *Lines) {
 	return
 }
 
+// Declaration syntax used for defining a set of lines makes for a
+// much more readable specification, which also doubles as help
+// information text itself.
+//
+//  - no tab and one string defines a path prefix opening
+//
+//  - items have first line with name, type and a : (for humans),
+//    and several parameters that is defined by the type
+//
+//	- integers can have a second parameter either the minimum or a
+//    range specification as 1<100 - one or other number can be omitted to
+//    omit the test
+//
+// whitespace only matters for the beginnings of lines, errors in omissions
+// of items will cause a panic as this should be corrected at program-time
+// variable specifications always start with one tab and comments after it
+// must have two, and the parser will panic from any of these.
+//
+// strings denoting a mutual exclusive list of items have their own type.
+//
+//  - they may not contain spaces as these are used to separate them
+//  - first item is default, each following is one of the options
+//  - there can be only one, and the flag will not register if the data
+//    does not match it
+//
+// boolean enabler/disablers just have one line as help text would most
+// likely always start with 'enable' and 'disable' it might as well be
+// the pattern filter.
+//
+// in string (and netaddr and variants) if the comment starts with 'enable'
+// this means the default is empty and putting something in it enables
+// the associated toggle, and is not stored in configuration
+//
+//  - strings with the comment starting with 'password' are interpreted
+// to be passwords and generate a random password if no value is provided
+// for convenience.
 var lines = `
 app
 	cpuprofile path: cpu.prof

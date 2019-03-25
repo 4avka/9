@@ -330,7 +330,6 @@ var Subcommands = Commands{
 	},
 	"mine": {
 		"run the standalone miner",
-		Lines{},
 		func(args ...string) error {
 			return nil
 		},
@@ -349,22 +348,22 @@ var Subcommands = Commands{
 	},
 	"copy": {
 		"copies a profile (many) new one(s)",
-		Lines{
-			"datadir":  Path("~", "specify a data directory"),
-			"basename": String("test", "base name for testnet data directories"),
-			"number":   IntBounded("1", "number of data directories to create", 1, 100),
-		},
+		// Lines{
+		// 	"datadir":  Path("~", "specify a data directory"),
+		// 	"basename": String("test", "base name for testnet data directories"),
+		// 	"number":   IntBounded("1", "number of data directories to create", 1, 100),
+		// },
 		func(args ...string) error {
 			return nil
 		},
 	},
 	"new": {
 		"creates new testnet profile directories from defaults",
-		Lines{
-			"datadir":  Path("~", "specify a data directory"),
-			"basename": String("test", "base name for testnet data directories"),
-			"number":   IntBounded("1", "number of data directories to create", 1, 100),
-		},
+		// Lines{
+		// 	"datadir":  Path("~", "specify a data directory"),
+		// 	"basename": String("test", "base name for testnet data directories"),
+		// 	"number":   IntBounded("1", "number of data directories to create", 1, 100),
+		// },
 		func(args ...string) error {
 			return nil
 		},
