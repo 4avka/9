@@ -27,8 +27,6 @@ var Levels = map[string]int{
 	"trace": _trace,
 }
 
-// const errFmt = "ERR:FMT\n  "
-
 // Color turns on and off colouring of error type tag
 var Color = true
 
@@ -51,6 +49,7 @@ var wg sync.WaitGroup
 // You can call init() again to start it up again
 var Quit = make(chan struct{})
 
+// Register is the central registry for the logger
 var Register = make(Registry)
 
 var maxLen int

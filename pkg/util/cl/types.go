@@ -3,15 +3,12 @@ package cl
 import "sync"
 
 // StringClosure is a function that returns a string, used to defer execution of expensive logging operations
-
 type StringClosure func() string
 
 // Value is the generic list of things processed by the log chan
-
 type Value []interface{}
 
 type (
-
 	// Fatal is a log value that indicates level and how to interpret the interface slice
 	Fatal Value
 
@@ -24,9 +21,7 @@ type (
 	// Fatalc is for passing a closure when the log entry is expensive to compute
 	Fatalc StringClosure
 )
-
 type (
-
 	// Error is a log value that indicates level and how to interpret the interface slice
 	Error Value
 
@@ -39,9 +34,7 @@ type (
 	// Errorc is for passing a closure when the log entry is expensive to compute
 	Errorc StringClosure
 )
-
 type (
-
 	// Warn is a log value that indicates level and how to interpret the interface slice
 	Warn Value
 
@@ -54,7 +47,6 @@ type (
 	// Warnc is for passing a closure when the log entry is expensive to compute
 	Warnc StringClosure
 )
-
 type (
 
 	// Info is a log value that indicates level and how to interpret the interface slice
@@ -69,9 +61,7 @@ type (
 	// Infoc is for passing a closure when the log entry is expensive to compute
 	Infoc StringClosure
 )
-
 type (
-
 	// Debug is a log value that indicates level and how to interpret the interface slice
 	Debug Value
 
@@ -84,9 +74,7 @@ type (
 	// Debugc is for passing a closure when the log entry is expensive to compute
 	Debugc StringClosure
 )
-
 type (
-
 	// Trace is a log value that indicates level and how to interpret the interface slice
 	Trace Value
 
@@ -101,7 +89,6 @@ type (
 )
 
 // A SubSystem is a logger with a specific prefix name prepended  to the entry
-
 type SubSystem struct {
 	Name        string
 	Ch          chan interface{}
@@ -111,4 +98,5 @@ type SubSystem struct {
 	mutex       sync.Mutex
 }
 
+// Registry is a map of all the subsystems that have been started up
 type Registry map[string]*SubSystem

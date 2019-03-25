@@ -4,7 +4,6 @@ package cmd
 // Custom functions are written per type that generate a Line struct and contain
 // a validator/setter function that checks the input
 var Config = Lines{
-
 	"app.cpuprofile": Path(
 		"cpu.prof",
 		"write cpu profile",
@@ -278,80 +277,53 @@ var Config = Lines{
 var Subcommands = Commands{
 	"default": {
 		"launch the GUI",
-		Lines{
-			"datadir": Path("~", "specify a data directory"),
-		},
 		func(args ...string) error {
 			return nil
 		},
 	},
 	"droptxindex": {
 		"drop the transaction index",
-		Lines{
-			"datadir": Path("~", "specify a data directory"),
-		},
 		func(args ...string) error {
 			return nil
 		},
 	},
 	"dropaddrindex": {
 		"drop the address index",
-		Lines{
-			"datadir": Path("~", "specify a data directory"),
-		},
 		func(args ...string) error {
 			return nil
 		},
 	},
 	"dropcfindex": {
 		"drop the compact filters index",
-		Lines{
-			"datadir": Path("~", "specify a data directory"),
-		},
 		func(args ...string) error {
 			return nil
 		},
 	},
 	"node": {
 		"run a full node",
-		Lines{
-			"datadir": Path("~", "specify a data directory"),
-		},
 		func(args ...string) error {
 			return nil
 		}},
 	"wallet": {
 		"run a wallet node",
-		Lines{
-			"datadir": Path("~", "specify a data directory"),
-		},
 		func(args ...string) error {
 			return nil
 		},
 	},
 	"shell": {
 		"run a combined wallet/full node",
-		Lines{
-			"datadir": Path("~", "specify a data directory"),
-		},
 		func(args ...string) error {
 			return nil
 		},
 	},
 	"ctl": {
 		"send rpc queries to a node",
-		Lines{
-			"datadir": Path("~", "specify a data directory"),
-		},
 		func(args ...string) error {
 			return nil
 		},
 	},
 	"cli": {
 		"send rpc queries to a wallet",
-		Lines{
-			"datadir": Path("~", "specify a data directory"),
-		},
 		func(args ...string) error {
 			return nil
 		},
@@ -365,18 +337,12 @@ var Subcommands = Commands{
 	},
 	"gen.certs": {
 		"generate TLS key and certificate",
-		Lines{
-			"datadir": Path("~", "specify a data directory"),
-		},
 		func(args ...string) error {
 			return nil
 		},
 	},
 	"gen.cafile": {
 		"generate a TLS Certificate Authority",
-		Lines{
-			"datadir": Path("~", "specify a data directory"),
-		},
 		func(args ...string) error {
 			return nil
 		},
@@ -405,9 +371,6 @@ var Subcommands = Commands{
 	},
 	"conf": {
 		"run a visual CLI configuration editor",
-		Lines{
-			"datadir": Path("~", "specify a data directory"),
-		},
 		func(args ...string) error {
 			return nil
 		}},

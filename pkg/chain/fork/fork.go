@@ -22,14 +22,14 @@ type AlgoParams struct {
 
 type HardForks struct {
 	Number             uint32
-	Name               string
 	ActivationHeight   int32
+	Name               string
 	Algos              map[string]AlgoParams
 	AlgoVers           map[int32]string
 	WorkBase           int64
 	TargetTimePerBlock time.Duration
-	TestnetStart       int32
 	AveragingInterval  int64
+	TestnetStart       int32
 }
 
 // AlgoVers is the lookup for pre hardfork
@@ -66,9 +66,7 @@ var List = []HardForks{
 		Algos:            Algos,
 		AlgoVers:         AlgoVers,
 		WorkBase: func() (out int64) {
-
 			for i := range Algos {
-
 				out += Algos[i].NSperOp
 			}
 			out /= int64(len(Algos))
@@ -85,9 +83,7 @@ var List = []HardForks{
 		Algos:            P9Algos,
 		AlgoVers:         P9AlgoVers,
 		WorkBase: func() (out int64) {
-
 			for i := range P9Algos {
-
 				out += P9Algos[i].NSperOp
 			}
 			out /= int64(len(P9Algos))
@@ -144,54 +140,31 @@ var mainPowLimit = func() big.Int {
 var mainPowLimitBits = BigToCompact(&mainPowLimit)
 
 // GetAlgoID returns the 'algo_id' which in pre-hardfork is not the same as the block version number, but is afterwards
-func GetAlgoID(
-	algoname string,
-	height int32,
-) uint32 {
-
+func GetAlgoID(algoname string, height int32) uint32 {
 	if GetCurrent(height) > 1 {
-
 		return P9Algos[algoname].AlgoID
 	}
 	return Algos[algoname].AlgoID
 }
 
 // GetAlgoName returns the string identifier of an algorithm depending on hard fork activation status
-func GetAlgoName(
-	algoVer int32,
-	height int32,
-) (
-	name string,
-) {
-
+func GetAlgoName(algoVer int32, height int32) (name string) {
 	hf := GetCurrent(height)
 	name = List[hf].AlgoVers[algoVer]
 	return
 }
 
 // GetAlgoVer returns the version number for a given algorithm (by string name) at a given height. If "random" is given, a random number is taken from the system secure random source (for randomised cpu mining)
-func GetAlgoVer(
-	name string,
-	height int32,
-) (
-	version int32,
-) {
-
+func GetAlgoVer(name string, height int32) (version int32) {
 	n := "sha256d"
 	hf := GetCurrent(height)
-
 	if name == "random" {
-
 		rn, _ := rand.Int(rand.Reader,
 			big.NewInt(int64(len(P9AlgoVers)-1)))
 		randomalgover := int32(rn.Uint64())
-
 		switch hf {
-
 		case 0:
-
 			switch randomalgover & 1 {
-
 			case 0:
 				version = 2
 			case 1:
@@ -204,7 +177,6 @@ func GetAlgoVer(
 			return algo
 		}
 	} else {
-
 		n = name
 	}
 	version = List[hf].Algos[n].Version
@@ -212,38 +184,22 @@ func GetAlgoVer(
 }
 
 // GetAveragingInterval returns the active block interval target based on hard fork status
-func GetAveragingInterval(
-	height int32,
-) (
-	r int64,
-) {
-
-	r = int64(List[GetCurrent(height)].AveragingInterval)
+func GetAveragingInterval(height int32) (r int64) {
+	r = List[GetCurrent(height)].AveragingInterval
 	return
 }
 
 // GetCurrent returns the hardfork number code
-func GetCurrent(
-	height int32,
-) (
-	curr int,
-) {
-
+func GetCurrent(height int32) (curr int) {
 	if IsTestnet {
-
 		for i := range List {
-
 			if height > List[i].TestnetStart {
-
 				curr = i
 			}
 		}
 	}
-
 	for i := range List {
-
 		if height > List[i].ActivationHeight {
-
 			curr = i
 		}
 	}
@@ -251,36 +207,19 @@ func GetCurrent(
 }
 
 // GetMinBits returns the minimum diff bits based on height and testnet
-func GetMinBits(
-	algoname string,
-	height int32,
-) (
-	mb uint32,
-) {
-
+func GetMinBits(algoname string, height int32) (mb uint32) {
 	curr := GetCurrent(height)
 	mb = List[curr].Algos[algoname].MinBits
 	return
 }
 
 // GetMinDiff returns the minimum difficulty in uint256 form
-func GetMinDiff(
-	algoname string,
-	height int32,
-) (
-	md *big.Int,
-) {
-
+func GetMinDiff(algoname string, height int32) (md *big.Int) {
 	return CompactToBig(GetMinBits(algoname, height))
 }
 
 // GetTargetTimePerBlock returns the active block interval target based on hard fork status
-func GetTargetTimePerBlock(
-	height int32,
-) (
-	r int64,
-) {
-
+func GetTargetTimePerBlock(height int32) (r int64) {
 	r = int64(List[GetCurrent(height)].TargetTimePerBlock)
 	return
 }

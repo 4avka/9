@@ -104,7 +104,6 @@ func Parse(args []string) int {
 			fmt.Println("CONF")
 		}
 	}
-
 	return 0
 }
 
