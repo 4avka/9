@@ -35,7 +35,7 @@ var commands = Command{
 	"help": {
 		regexp.MustCompile("^(h|help)$"),
 		"show help text and quit",
-		`	any other command also mentioned with a help line 
+		`	any other command also mentioned with help/h 
 	will have its detailed help information printed`,
 		nil,
 		nil,
@@ -44,7 +44,7 @@ var commands = Command{
 	"conf": {
 		regexp.MustCompile("^(C|conf)$"),
 		"run interactive configuration CLI",
-		"",
+		"	<datadir> sets the data directory to read and write to",
 		opts{"datadir"},
 		precedent{"help"},
 		nil,
@@ -52,7 +52,8 @@ var commands = Command{
 	"new": {
 		regexp.MustCompile("^(N|new)$"),
 		"create new configuration with optional basename and count for testnets",
-		"",
+		`	<word> is the basename for the data directories
+	<integer> is the number of numbered data directories to create`,
 		opts{"word", "integer"},
 		precedent{"help"},
 		nil,
@@ -60,7 +61,9 @@ var commands = Command{
 	"copy": {
 		regexp.MustCompile("^(cp|copy)$"),
 		"create a set of testnet configurations based on a datadir",
-		"<datadir> is the base to work from <word> is a basename and <integer> is a number for how many to create",
+		`	<datadir> is the base to work from
+	<word> is a basename 
+	<integer> is a number for how many to create`,
 		opts{"datadir", "word", "integer"},
 		precedent{"help"},
 		nil,
@@ -68,15 +71,22 @@ var commands = Command{
 	"list": {
 		regexp.MustCompile("^(l|list|listcommands)$"),
 		"lists commands available at the RPC endpoint",
-		"",
-		opts{"datadir", "ctl", "cli"},
+		`	<datadir> is the enabled data directory
+	<ctl> is optional and implied by list
+	<wallet> indicates to connect to the wallet RPC
+	<node>, or wallet not specified to connect to full node RPC`,
+		opts{"datadir", "ctl", "wallet", "node"},
 		precedent{"help"},
 		nil,
 	},
 	"ctl": {
 		regexp.MustCompile("^(c|ctl)$"),
 		"sends rpc requests and prints the results",
-		"",
+		`	<datadir> sets the data directory to read configurations from
+	<node> indicates we are connecting to a full node RPC (overrides wallet and is default)
+	<wallet> indicates we are connecting to a wallet RPC
+	<word> and <integer> just cover the items that follow in RPC commands
+	the RPC command is expected to be everything after the ctl keyword`,
 		opts{"datadir", "node", "wallet", "word", "integer"},
 		precedent{"help", "list"},
 		nil,
@@ -84,7 +94,7 @@ var commands = Command{
 	"node": {
 		regexp.MustCompile("^(n|node)$"),
 		"runs a full node",
-		"",
+		`	<datadir> sets the data directory to read configuration and store data`,
 		opts{"datadir"},
 		precedent{"help", "ctl"},
 		nil,
@@ -92,7 +102,8 @@ var commands = Command{
 	"wallet": {
 		regexp.MustCompile("^(w|wallet)$"),
 		"runs a wallet server",
-		"",
+		`	<datadir> sets the data directory to read configuration and store data
+	<create> runs the wallet create prompt`,
 		opts{"datadir", "create"},
 		precedent{"help", "cli"},
 		nil,
@@ -100,22 +111,23 @@ var commands = Command{
 	"test": {
 		regexp.MustCompile("^(t|test)$"),
 		"run multiple full nodes from given <word> logging optionally to <datadir>",
-		"",
-		opts{"datadir", "word"},
+		`	<word> indicates the basename to search for as the path to the test configurations
+	<log> indicates to write logs to the individual data directories instead of print to stdout`,
+		opts{"word", "log"},
 		precedent{"help"},
 		nil,
 	},
 	"create": {
 		regexp.MustCompile("^(create)$"),
 		"runs the create new wallet prompt",
-		"",
+		"	<datadir> sets the data directory where the wallet will be stored",
 		opts{"datadir"},
 		precedent{"wallet", "shell", "help"},
 		nil,
 	},
 	"datadir": {
 		regexp.MustCompile("^(.*/)$"),
-		"directory to look for configuration, must end in a '/'",
+		"directory to look for configuration or other, must end in a '/'",
 		"",
 		nil,
 		nil,
@@ -132,6 +144,14 @@ var commands = Command{
 	"word": {
 		regexp.MustCompile("^([a-zA-Z0-9._-]*)$"),
 		"mostly used for testnet datadir basenames",
+		"",
+		nil,
+		nil,
+		nil,
+	},
+	"log": {
+		regexp.MustCompile("^(log)$"),
+		"write to log file instead of printing to stderr",
 		"",
 		nil,
 		nil,
