@@ -127,7 +127,7 @@ var commands = Command{
 		`	<datadir> sets the data directory to read configuration and store data
 	<create> runs the wallet create prompt`,
 		opts{"datadir", "create"},
-		precedent{"help", "cli"},
+		precedent{"help", "ctl"},
 		Wallet,
 	},
 	SHELL: {
@@ -136,7 +136,7 @@ var commands = Command{
 		`	<datadir> sets the data directory to read configuration and store data
 	<create> runs the wallet create prompt`,
 		opts{"datadir", "create"},
-		precedent{"help", "cli"},
+		precedent{"help", "ctl"},
 		Shell,
 	},
 	TEST: {
