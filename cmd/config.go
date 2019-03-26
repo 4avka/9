@@ -274,104 +274,103 @@ var Config = Lines{
 	),
 }
 
-var Subcommands = Commands{
-	"default": {
-		"launch the GUI",
-		func(args ...string) error {
-			return nil
-		},
-	},
-	"droptxindex": {
-		"drop the transaction index",
-		func(args ...string) error {
-			return nil
-		},
-	},
-	"dropaddrindex": {
-		"drop the address index",
-		func(args ...string) error {
-			return nil
-		},
-	},
-	"dropcfindex": {
-		"drop the compact filters index",
-		func(args ...string) error {
-			return nil
-		},
-	},
-	"node": {
-		"run a full node",
-		func(args ...string) error {
-			return nil
-		}},
-	"wallet": {
-		"run a wallet node",
-		func(args ...string) error {
-			return nil
-		},
-	},
-	"shell": {
-		"run a combined wallet/full node",
-		func(args ...string) error {
-			return nil
-		},
-	},
-	"ctl": {
-		"send rpc queries to a node",
-		func(args ...string) error {
-			return nil
-		},
-	},
-	"cli": {
-		"send rpc queries to a wallet",
-		func(args ...string) error {
-			return nil
-		},
-	},
-	"mine": {
-		"run the standalone miner",
-		Lines{},
-		func(args ...string) error {
-			return nil
-		},
-	},
-	"gen.certs": {
-		"generate TLS key and certificate",
-		func(args ...string) error {
-			return nil
-		},
-	},
-	"gen.cafile": {
-		"generate a TLS Certificate Authority",
-		func(args ...string) error {
-			return nil
-		},
-	},
-	"copy": {
-		"copies a profile (many) new one(s)",
-		Lines{
-			"datadir":  Path("~", "specify a data directory"),
-			"basename": String("test", "base name for testnet data directories"),
-			"number":   IntBounded("1", "number of data directories to create", 1, 100),
-		},
-		func(args ...string) error {
-			return nil
-		},
-	},
-	"new": {
-		"creates new testnet profile directories from defaults",
-		Lines{
-			"datadir":  Path("~", "specify a data directory"),
-			"basename": String("test", "base name for testnet data directories"),
-			"number":   IntBounded("1", "number of data directories to create", 1, 100),
-		},
-		func(args ...string) error {
-			return nil
-		},
-	},
-	"conf": {
-		"run a visual CLI configuration editor",
-		func(args ...string) error {
-			return nil
-		}},
-}
+// var Subcommands = Command{
+// 	"default": {
+// 		"launch the GUI",
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"droptxindex": {
+// 		"drop the transaction index",
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"dropaddrindex": {
+// 		"drop the address index",
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"dropcfindex": {
+// 		"drop the compact filters index",
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"node": {
+// 		"run a full node",
+// 		func(args ...string) error {
+// 			return nil
+// 		}},
+// 	"wallet": {
+// 		"run a wallet node",
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"shell": {
+// 		"run a combined wallet/full node",
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"ctl": {
+// 		"send rpc queries to a node",
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"cli": {
+// 		"send rpc queries to a wallet",
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"mine": {
+// 		"run the standalone miner",
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"gen.certs": {
+// 		"generate TLS key and certificate",
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"gen.cafile": {
+// 		"generate a TLS Certificate Authority",
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"copy": {
+// 		"copies a profile (many) new one(s)",
+// 		// Lines{
+// 		// 	"datadir":  Path("~", "specify a data directory"),
+// 		// 	"basename": String("test", "base name for testnet data directories"),
+// 		// 	"number":   IntBounded("1", "number of data directories to create", 1, 100),
+// 		// },
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"new": {
+// 		"creates new testnet profile directories from defaults",
+// 		// Lines{
+// 		// 	"datadir":  Path("~", "specify a data directory"),
+// 		// 	"basename": String("test", "base name for testnet data directories"),
+// 		// 	"number":   IntBounded("1", "number of data directories to create", 1, 100),
+// 		// },
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"conf": {
+// 		"run a visual CLI configuration editor",
+// 		func(args ...string) error {
+// 			return nil
+// 		}},
+// }

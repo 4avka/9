@@ -1,11 +1,8 @@
 package cmd
 
-import (
-	"fmt"
-)
+import "git.parallelcoin.io/dev/9/pkg/util/cl"
 
 func Start(args []string) int {
-	fmt.Println("starting 9")
-
+	log <- cl.Inf("starting 9")
 	return Parse(args)
 }

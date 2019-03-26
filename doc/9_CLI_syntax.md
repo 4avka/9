@@ -37,6 +37,8 @@ The declarations are compact and quite clearly denote the meaning of the paramet
 
 Command line flags do not profit thee more with their plurality. If you are filling more than 80 columns it probably won't take any longer to use a type-ahead search and tree navigator, or a simple keyword separated file in an editor.
 
+Command line parsing works by a principle of identifiable patterns matching a specified set. There is no real need for anything more complex than that, configuration interfaces are better than complex giant long command lines. Thus no command line contains more than one type of thing except it can end in an arbitrary string for subcommands.
+
 ## command line flags (exhaustive)
 
 launch gui (default datadir)
