@@ -63,8 +63,9 @@ func parseCLI(args []string) error {
 		for _, y := range x.Precedent {
 
 			for _, z := range withHandlersNames {
-				log <- cl.Info{"handlers", z, y}
-				if y == z && y != i {
+				log <- cl.Info{"handlers", i, z, y}
+				if y == z {
+					log <- cl.Info{"deleting", z}
 					delete(withHandlers, z)
 					goto out
 				}
