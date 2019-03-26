@@ -13,7 +13,9 @@ import (
 // interactive CLI.
 //
 // nil values in opt/prec indicate wildcards, empty means no other acceptable.
-type Command map[string]struct {
+type Commands map[string]Command
+
+type Command struct {
 	// How to identify a specific item
 	RE *regexp.Regexp
 	// Short help information to show
@@ -46,14 +48,16 @@ const (
 	LOG     = "log"
 	DATADIR = "datadir"
 	INTEGER = "integer"
+	FLOAT   = "float"
 	WORD    = "word"
 )
 
 var commandsList = []string{
-	HELP, CONF, NEW, COPY, LIST, CTL, NODE, WALLET, SHELL, TEST, CREATE, LOG, DATADIR, INTEGER, WORD,
+	HELP, CONF, NEW, COPY, LIST, CTL, NODE, WALLET, SHELL,
+	TEST, CREATE, LOG, DATADIR, INTEGER, FLOAT, WORD,
 }
 
-var commands = Command{
+var commands = Commands{
 	HELP: {
 		regexp.MustCompile("^(h|help)$"),
 		"show help text and quit",
@@ -175,6 +179,14 @@ var commands = Command{
 	INTEGER: {
 		regexp.MustCompile("^([0-9]+)$"),
 		"number of items to create",
+		"",
+		nil,
+		nil,
+		nil,
+	},
+	FLOAT: {
+		regexp.MustCompile("^([0-9]*[.][0-9]+)$"),
+		"a floating point value",
 		"",
 		nil,
 		nil,

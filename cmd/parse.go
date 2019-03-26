@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"errors"
+
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
 
@@ -16,6 +18,7 @@ func Parse(args []string) int {
 }
 
 func parseCLI(args []string) error {
+	log <- cl.Info{args}
 	// collect set of items in commandline
 	if len(args) < 2 {
 		log <- cl.Info{"no args given, printing help"}
@@ -37,7 +40,46 @@ func parseCLI(args []string) error {
 		}
 	}
 
-	log <- cl.Warn{args, ":", commandsFound}
+	withHandlers := make(Commands)
+	for i := range commandsFound {
+		if commands[i].Handler != nil {
+			log <- cl.Info{"found", i}
+			withHandlers[i] = commands[i]
+		}
+	}
+	// search the precedents of each in the case of multiple
+	// with handlers and delete the one that has another in the
+	// list of matching handlers. If one is left we can run it,
+	// otherwise return an error.
+	var withHandlersNames []string
+	if len(withHandlers) > 1 {
+		for i := range withHandlers {
+			withHandlersNames = append(withHandlersNames, i)
+		}
+	}
+	log <- cl.Info{"handlersnames", withHandlersNames}
+	for i, x := range withHandlers {
+		log <- cl.Info{"precedent", x.Precedent}
+		for _, y := range x.Precedent {
+
+			for _, z := range withHandlersNames {
+				log <- cl.Info{"handlers", z, y}
+				if y == z && y != i {
+					delete(withHandlers, z)
+					goto out
+				}
+			}
+		}
+	out:
+	}
+	for i := range withHandlers {
+		log <- cl.Warn{">>> resolved", i}
+	}
+	if len(withHandlers) > 1 {
+		err := errors.New("unable to resolve which command to run")
+		log <- cl.Error{err}
+		return err
+	}
 
 	return nil
 }
