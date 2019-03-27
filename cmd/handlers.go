@@ -8,13 +8,16 @@ import (
 )
 
 func optTagList(s []string) (S string) {
-	S = "[<"
-	for i, x := range s {
-		S += x
-		if i < len(s)-1 {
-			S += ">|<"
-		} else {
-			S += ">]"
+	if len(s) > 1 {
+
+		S = "[<"
+		for i, x := range s {
+			S += x
+			if i < len(s)-1 {
+				S += ">|<"
+			} else {
+				S += ">]"
+			}
 		}
 	}
 	return
