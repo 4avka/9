@@ -64,7 +64,7 @@ var commands = Commands{
 		`	any other command also mentioned with help/h 
 	will have its detailed help information printed`,
 		nil,
-		nil,
+		precedent{"help"},
 		Help,
 	},
 	CONF: {

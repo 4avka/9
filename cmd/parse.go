@@ -18,7 +18,7 @@ func Parse(args []string) int {
 }
 
 func parseCLI(args []string) error {
-	log <- cl.Info{args}
+	log <- cl.Debug{"args", args}
 	// collect set of items in commandline
 	if len(args) < 2 {
 		log <- cl.Info{"no args given, starting GUI"}
@@ -56,7 +56,6 @@ func parseCLI(args []string) error {
 	// otherwise return an error.
 	var resolved []string
 	if len(withHandlersNames) > 1 {
-
 		var common [][]string
 		for _, x := range withHandlersNames {
 			i := intersection(withHandlersNames, withHandlers[x].Precedent)
@@ -70,7 +69,31 @@ func parseCLI(args []string) error {
 				}
 			}
 		}
-
+		if len(resolved) > 1 {
+			resolved = uniq(resolved)
+			log <- cl.Debug{"second level resolution", resolved}
+			withHandlers = make(Commands)
+			common = [][]string{}
+			withHandlersNames = resolved
+			resolved = []string{}
+			for _, x := range withHandlersNames {
+				withHandlers[x] = commands[x]
+			}
+			for _, x := range withHandlersNames {
+				i := intersection(withHandlersNames, withHandlers[x].Precedent)
+				log <- cl.Debug{"intersection", withHandlersNames, ".", withHandlers[x].Precedent, "==", i}
+				common = append(common, i)
+			}
+			for _, x := range common {
+				for _, y := range x {
+					if y != "" {
+						resolved = append(resolved, y)
+					}
+				}
+			}
+			resolved = uniq(resolved)
+			log <- cl.Debug{"2nd", resolved}
+		}
 		for _, i := range resolved {
 			log <- cl.Debug{"--> resolved", i}
 		}
@@ -78,7 +101,9 @@ func parseCLI(args []string) error {
 		resolved = []string{withHandlersNames[0]}
 	}
 	if len(resolved) < 1 {
-		err := fmt.Errorf("unable to resolve which command to run, found multiple: %v", withHandlersNames)
+		err := fmt.Errorf(
+			"\nunable to resolve which command to run:\n\tfound multiple: %s\n\tinput: '%s'",
+			withHandlersNames, fmt.Sprint(args))
 		return err
 	} else {
 		log <- cl.Debug{"running", resolved}
@@ -98,6 +123,21 @@ func intersection(a, b []string) (out []string) {
 	return
 }
 
-func resolveCommand(withHandlers Commands) Commands {
-	return withHandlers
+func uniq(elements []string) []string {
+	// Use map to record duplicates as we find them.
+	encountered := map[string]bool{}
+	result := []string{}
+
+	for v := range elements {
+		if encountered[elements[v]] == true {
+			// Do not add duplicate.
+		} else {
+			// Record this element as an encountered element.
+			encountered[elements[v]] = true
+			// Append to result slice.
+			result = append(result, elements[v])
+		}
+	}
+	// Return the new slice.
+	return result
 }
