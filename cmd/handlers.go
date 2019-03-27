@@ -23,8 +23,15 @@ func optTagList(s []string) (S string) {
 	return
 }
 
-func Help(args []string, cmds, all Commands) int {
-	log <- cl.Debug{"HELP\n", "Help", args}
+func getCommands(cmds Commands) (s []string) {
+	for i := range cmds {
+		s = append(s, i)
+	}
+	return
+}
+
+func Help(args []string, cmds, tokens, all Commands) int {
+	log <- cl.Debug{"HELP\n", "Help", args, getCommands(tokens)}
 	fmt.Println(APPNAME, "-", APPDESC)
 	fmt.Println()
 	// fmt.Println("args received:", args[1:])
@@ -70,52 +77,52 @@ func Help(args []string, cmds, all Commands) int {
 	return 0
 }
 
-func Conf(args []string, cmds, all Commands) int {
-	fmt.Println("running Conf", args)
+func Conf(args []string, cmds, tokens, all Commands) int {
+	fmt.Println("running Conf", args, getCommands(tokens))
 	return 0
 }
 
-func New(args []string, cmds, all Commands) int {
-	fmt.Println("running New", args)
+func New(args []string, cmds, tokens, all Commands) int {
+	fmt.Println("running New", args, getCommands(tokens))
 	return 0
 }
 
-func Copy(args []string, cmds, all Commands) int {
-	fmt.Println("running Copy", args)
+func Copy(args []string, cmds, tokens, all Commands) int {
+	fmt.Println("running Copy", args, getCommands(tokens))
 	return 0
 }
 
-func List(args []string, cmds, all Commands) int {
-	fmt.Println("running List", args)
+func List(args []string, cmds, tokens, all Commands) int {
+	fmt.Println("running List", args, getCommands(tokens))
 	return 0
 }
 
-func Ctl(args []string, cmds, all Commands) int {
-	fmt.Println("running Ctl", args)
+func Ctl(args []string, cmds, tokens, all Commands) int {
+	fmt.Println("running Ctl", args, getCommands(tokens))
 	return 0
 }
 
-func Node(args []string, cmds, all Commands) int {
-	fmt.Println("running Node", args)
+func Node(args []string, cmds, tokens, all Commands) int {
+	fmt.Println("running Node", args, getCommands(tokens))
 	return 0
 }
 
-func Wallet(args []string, cmds, all Commands) int {
-	fmt.Println("running Wallet", args)
+func Wallet(args []string, cmds, tokens, all Commands) int {
+	fmt.Println("running Wallet", args, getCommands(tokens))
 	return 0
 }
 
-func Shell(args []string, cmds, all Commands) int {
-	fmt.Println("running Shell", args)
+func Shell(args []string, cmds, tokens, all Commands) int {
+	fmt.Println("running Shell", args, getCommands(tokens))
 	return 0
 }
 
-func Test(args []string, cmds, all Commands) int {
-	fmt.Println("running Test", args)
+func Test(args []string, cmds, tokens, all Commands) int {
+	fmt.Println("running Test", args, getCommands(tokens))
 	return 0
 }
 
-func Create(args []string, cmds, all Commands) int {
-	fmt.Println("running Create", args)
+func Create(args []string, cmds, tokens, all Commands) int {
+	fmt.Println("running Create", args, getCommands(tokens))
 	return 0
 }

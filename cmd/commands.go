@@ -28,7 +28,7 @@ type Command struct {
 	// Precedent indicates other commands that will preferentially match
 	Precedent precedent
 	// Handler
-	Handler func(args []string, cmds, all Commands) int
+	Handler func(args []string, cmds, tokens, all Commands) int
 }
 
 type opts []string
@@ -50,10 +50,10 @@ const (
 	TEST, RE_TEST       = "test", "(t|test)"
 	CREATE, RE_CREATE   = "create", "(cr|create)"
 	LOG, RE_LOG         = "log", "(L|log)"
-	DATADIR, RE_DATADIR = "datadir", "([./]+.*)"
+	DATADIR, RE_DATADIR = "datadir", "([~/.]+.*/)"
 	INTEGER, RE_INTEGER = "integer", "[0-9]+"
 	FLOAT, RE_FLOAT     = "float", "([0-9]*[.][0-9]+)"
-	WORD, RE_WORD       = "word", "([^/.]+[^ ]*)"
+	WORD, RE_WORD       = "word", "([a-zA-Z0-9._/:-]*)"
 )
 
 var commandsList = []string{
@@ -137,7 +137,7 @@ var commands = Commands{
 		"runs a full node",
 		`	<datadir> sets the data directory to read configuration and store data`,
 		opts{"datadir"},
-		precedent{"help", "ctl", "list"},
+		precedent{"help", "ctl"},
 		Node,
 	},
 	WALLET: {
@@ -147,7 +147,7 @@ var commands = Commands{
 		`	<datadir> sets the data directory to read configuration and store data
 	<create> runs the wallet create prompt`,
 		opts{"datadir", "create"},
-		precedent{"help", "ctl", "list"},
+		precedent{"help", "ctl"},
 		Wallet,
 	},
 	SHELL: {

@@ -8,7 +8,7 @@ import (
 
 func Parse(args []string) int {
 	// parse commandline
-	cmd, cmds := parseCLI(args)
+	cmd, cmds, tokens := parseCLI(args)
 	if cmd == nil {
 		help := commands[HELP]
 		cmd = &help
@@ -17,11 +17,12 @@ func Parse(args []string) int {
 	cmd.Handler(
 		args,
 		cmds,
+		tokens,
 		commands)
 	return 0
 }
 
-func parseCLI(args []string) (cmd *Command, cmds Commands) {
+func parseCLI(args []string) (cmd *Command, cmds, tokens Commands) {
 	cmds = make(Commands)
 	cmd = new(Command)
 	log <- cl.Debug{"args", args}
@@ -46,6 +47,10 @@ func parseCLI(args []string) (cmd *Command, cmds Commands) {
 				}
 			}
 		}
+	}
+	tokens = make(Commands)
+	for i := range commandsFound {
+		tokens[i] = commands[i]
 	}
 
 	var withHandlersNames []string
@@ -117,11 +122,11 @@ func parseCLI(args []string) (cmd *Command, cmds Commands) {
 			"\nunable to resolve which command to run:\n\tinput: '%s'",
 			withHandlersNames)
 		log <- cl.Error{err}
-		return nil, invoked
+		return nil, invoked, tokens
 	}
 	log <- cl.Debug{"running", resolved, args}
 	*cmd = commands[resolved[0]]
-	return cmd, invoked
+	return cmd, invoked, tokens
 }
 
 func intersection(a, b []string) (out []string) {
