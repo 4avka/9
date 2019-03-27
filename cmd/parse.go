@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"errors"
+	"fmt"
 
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
@@ -40,47 +40,57 @@ func parseCLI(args []string) error {
 		}
 	}
 
+	var withHandlersNames []string
 	withHandlers := make(Commands)
 	for i := range commandsFound {
 		if commands[i].Handler != nil {
 			log <- cl.Info{"found", i}
 			withHandlers[i] = commands[i]
+			withHandlersNames = append(withHandlersNames, i)
 		}
 	}
 	// search the precedents of each in the case of multiple
 	// with handlers and delete the one that has another in the
 	// list of matching handlers. If one is left we can run it,
 	// otherwise return an error.
-	var withHandlersNames []string
-	if len(withHandlers) > 1 {
-		for i := range withHandlers {
-			withHandlersNames = append(withHandlersNames, i)
-		}
-	}
-	log <- cl.Info{"handlersnames", withHandlersNames}
-	for i, x := range withHandlers {
-		log <- cl.Info{"precedent", x.Precedent}
-		for _, y := range x.Precedent {
+	var resolved []string
+	if len(withHandlersNames) > 1 {
 
-			for _, z := range withHandlersNames {
-				log <- cl.Info{"handlers", i, z, y}
-				if y == z {
-					log <- cl.Info{"deleting", z}
-					delete(withHandlers, z)
-					goto out
+		var common [][]string
+		for _, x := range withHandlersNames {
+			common = append(common, intersection(withHandlersNames, withHandlers[x].Precedent))
+		}
+		for _, x := range common {
+			for _, y := range x {
+				if y != "" {
+					resolved = append(resolved, y)
 				}
 			}
 		}
-	out:
+
+		for _, i := range resolved {
+			log <- cl.Warn{"--> resolved", i}
+		}
+	} else if len(withHandlersNames) == 1 {
+		resolved = append(resolved, withHandlersNames[0])
 	}
-	for i := range withHandlers {
-		log <- cl.Warn{">>> resolved", i}
-	}
-	if len(withHandlers) > 1 {
-		err := errors.New("unable to resolve which command to run")
-		log <- cl.Error{err}
+	if len(resolved) < 1 {
+		err := fmt.Errorf("unable to resolve which command to run, found multiple: %v", withHandlersNames)
 		return err
+	} else {
+		log <- cl.Warn{"running", resolved}
 	}
 
 	return nil
+}
+
+func intersection(a, b []string) (out []string) {
+	for _, x := range a {
+		for _, y := range b {
+			if x == y {
+				out = append(out, x)
+			}
+		}
+	}
+	return
 }
