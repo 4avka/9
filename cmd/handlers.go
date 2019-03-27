@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
+	"github.com/davecgh/go-spew/spew"
 )
 
 func optTagList(s []string) (S string) {
@@ -79,7 +80,7 @@ func Help(args []string, cmds, tokens, all Commands) int {
 
 func Conf(args []string, cmds, tokens, all Commands) int {
 	fmt.Println("running Conf", args, getCommands(tokens))
-
+	spew.Dump(tokens)
 	return 0
 }
 

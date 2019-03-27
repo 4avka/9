@@ -33,24 +33,23 @@ func parseCLI(args []string) (cmd *Command, cmds, tokens Commands) {
 		args = append(args, "h")
 	}
 	commandsFound := make(map[string]int)
+	tokens = make(Commands)
 	for _, x := range args[1:] {
 		for _, y := range commandsList {
 			if commands[y].RE.Match([]byte(x)) {
 				if _, ok := commandsFound[y]; ok {
+					tokens[x] = commands[y]
 					log <- cl.Debug{"found", y, x}
 					commandsFound[y]++
 					break
 				} else {
+					tokens[x] = commands[y]
 					log <- cl.Debug{"found", y, x}
 					commandsFound[y] = 1
 					break
 				}
 			}
 		}
-	}
-	tokens = make(Commands)
-	for i := range commandsFound {
-		tokens[i] = commands[i]
 	}
 
 	var withHandlersNames []string
