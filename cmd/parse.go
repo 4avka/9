@@ -38,6 +38,7 @@ func parseCLI(args []string) (cmd *Command, cmds, tokens Commands) {
 		for _, y := range commandsList {
 			if commands[y].RE.Match([]byte(x)) {
 				if _, ok := commandsFound[y]; ok {
+					// TODO change token to struct{val,command}
 					tokens[x] = commands[y]
 					log <- cl.Debug{"found", y, x}
 					commandsFound[y]++
