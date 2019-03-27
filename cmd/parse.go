@@ -8,21 +8,28 @@ import (
 
 func Parse(args []string) int {
 	// parse commandline
-	err := parseCLI(args)
-	if err != nil {
-		log <- cl.Error{err}
+	cmd, cmds := parseCLI(args)
+	if cmd == nil {
+		help := commands[HELP]
+		cmd = &help
 	}
 	// read configuration
-
+	cmd.Handler(
+		args,
+		cmds,
+		commands)
 	return 0
 }
 
-func parseCLI(args []string) error {
+func parseCLI(args []string) (cmd *Command, cmds Commands) {
+	cmds = make(Commands)
+	cmd = new(Command)
 	log <- cl.Debug{"args", args}
 	// collect set of items in commandline
 	if len(args) < 2 {
-		log <- cl.Info{"no args given, starting GUI"}
-		return nil
+		log <- cl.Debug{"no args given, printing help"}
+		fmt.Print("No args given, printing help:\n\n")
+		args = append(args, "h")
 	}
 	commandsFound := make(map[string]int)
 	for _, x := range args[1:] {
@@ -45,16 +52,21 @@ func parseCLI(args []string) error {
 	withHandlers := make(Commands)
 	for i := range commandsFound {
 		if commands[i].Handler != nil {
-			log <- cl.Debug{"found", i}
+			log <- cl.Debug{"found with handler", i}
 			withHandlers[i] = commands[i]
 			withHandlersNames = append(withHandlersNames, i)
 		}
+	}
+	invoked := make(Commands)
+	for i, x := range withHandlers {
+		invoked[i] = x
 	}
 	// search the precedents of each in the case of multiple
 	// with handlers and delete the one that has another in the
 	// list of matching handlers. If one is left we can run it,
 	// otherwise return an error.
 	var resolved []string
+	log <- cl.Debug{len(withHandlersNames), withHandlersNames}
 	if len(withHandlersNames) > 1 {
 		var common [][]string
 		for _, x := range withHandlersNames {
@@ -95,7 +107,7 @@ func parseCLI(args []string) error {
 			log <- cl.Debug{"2nd", resolved}
 		}
 		for _, i := range resolved {
-			log <- cl.Debug{"--> resolved", i}
+			log <- cl.Debug{"-->resolved", i}
 		}
 	} else if len(withHandlersNames) == 1 {
 		resolved = []string{withHandlersNames[0]}
@@ -104,12 +116,12 @@ func parseCLI(args []string) error {
 		err := fmt.Errorf(
 			"\nunable to resolve which command to run:\n\tfound multiple: %s\n\tinput: '%s'",
 			withHandlersNames, fmt.Sprint(args))
-		return err
-	} else {
-		log <- cl.Debug{"running", resolved}
+		log <- cl.Error{err}
+		return nil, invoked
 	}
-
-	return nil
+	log <- cl.Debug{"running", resolved, args}
+	*cmd = commands[resolved[0]]
+	return cmd, invoked
 }
 
 func intersection(a, b []string) (out []string) {

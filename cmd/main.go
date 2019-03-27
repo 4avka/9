@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"time"
 
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
@@ -9,10 +8,8 @@ import (
 
 func Start(args []string) int {
 	log <- cl.Dbg("starting 9")
-	for i, x := range testargs[0] {
-		if err := Parse(x); err != 0 {
-			fmt.Println("error item", i, x)
-		}
+	if err := Parse(args); err != 0 {
+		panic(err)
 	}
 	// pause to let logger finish
 	time.Sleep(time.Second)
