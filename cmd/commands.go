@@ -16,6 +16,7 @@ import (
 type Commands map[string]Command
 
 type Command struct {
+	pattern string
 	// How to identify a specific item
 	RE *regexp.Regexp
 	// Short help information to show
@@ -27,29 +28,32 @@ type Command struct {
 	// Precedent indicates other commands that will preferentially match
 	Precedent precedent
 	// Handler
-	Handler func(*Command) int
+	Handler func(args []string, cmds, all Commands) int
 }
 
 type opts []string
 type precedent []string
 
 const (
-	HELP    = "help"
-	CONF    = "conf"
-	NEW     = "new"
-	COPY    = "copy"
-	LIST    = "list"
-	CTL     = "ctl"
-	NODE    = "node"
-	WALLET  = "wallet"
-	SHELL   = "shell"
-	TEST    = "test"
-	CREATE  = "create"
-	LOG     = "log"
-	DATADIR = "datadir"
-	INTEGER = "integer"
-	FLOAT   = "float"
-	WORD    = "word"
+	APPNAME = "9"
+	APPDESC = "all in one everything for parallelcoin"
+
+	HELP, RE_HELP       = "help", "(h|help)"
+	CONF, RE_CONF       = "conf", "(C|conf)"
+	NEW, RE_NEW         = "new", "(N|new)"
+	COPY, RE_COPY       = "copy", "(cp|copy)"
+	LIST, RE_LIST       = "list", "(l|list|listcommands)"
+	CTL, RE_CTL         = "ctl", "(c|ctl)"
+	NODE, RE_NODE       = "node", "(n|node)"
+	WALLET, RE_WALLET   = "wallet", "(w|wallet)"
+	SHELL, RE_SHELL     = "shell", "(s|shell)"
+	TEST, RE_TEST       = "test", "(t|test)"
+	CREATE, RE_CREATE   = "create", "(cr|create)"
+	LOG, RE_LOG         = "log", "(L|log)"
+	DATADIR, RE_DATADIR = "datadir", "([./]+.*)"
+	INTEGER, RE_INTEGER = "integer", "[0-9]+"
+	FLOAT, RE_FLOAT     = "float", "([0-9]*[.][0-9]+)"
+	WORD, RE_WORD       = "word", "([^/.]+[^ ]*)"
 )
 
 var commandsList = []string{
@@ -57,9 +61,14 @@ var commandsList = []string{
 	TEST, CREATE, LOG, DATADIR, INTEGER, FLOAT, WORD,
 }
 
+func match(s string) *regexp.Regexp {
+	return regexp.MustCompile("^" + s + "$")
+}
+
 var commands = Commands{
 	HELP: {
-		regexp.MustCompile("^(h|help)$"),
+		RE_HELP,
+		match(RE_HELP),
 		"show help text and quit",
 		`	any other command also mentioned with help/h 
 	will have its detailed help information printed`,
@@ -68,7 +77,8 @@ var commands = Commands{
 		Help,
 	},
 	CONF: {
-		regexp.MustCompile("^(C|conf)$"),
+		RE_CONF,
+		match(RE_CONF),
 		"run interactive configuration CLI",
 		"	<datadir> sets the data directory to read and write to",
 		opts{"datadir"},
@@ -76,7 +86,8 @@ var commands = Commands{
 		Conf,
 	},
 	NEW: {
-		regexp.MustCompile("^(N|new)$"),
+		RE_NEW,
+		match(RE_NEW),
 		"create new configuration with optional basename and count for testnets",
 		`	<word> is the basename for the data directories
 	<integer> is the number of numbered data directories to create`,
@@ -85,7 +96,8 @@ var commands = Commands{
 		New,
 	},
 	COPY: {
-		regexp.MustCompile("^(cp|copy)$"),
+		RE_COPY,
+		match(RE_COPY),
 		"create a set of testnet configurations based on a datadir",
 		`	<datadir> is the base to work from
 	<word> is a basename 
@@ -95,47 +107,52 @@ var commands = Commands{
 		Copy,
 	},
 	LIST: {
-		regexp.MustCompile("^(l|list|listcommands)$"),
+		RE_LIST,
+		match(RE_LIST),
 		"lists commands available at the RPC endpoint",
 		`	<datadir> is the enabled data directory
 	<ctl> is optional and implied by list
 	<wallet> indicates to connect to the wallet RPC
-	<node>, or wallet not specified to connect to full node RPC`,
+	<node> (or wallet not specified) connect to full node RPC`,
 		opts{"datadir", "ctl", "wallet", "node"},
 		precedent{"help"},
 		List,
 	},
 	CTL: {
-		regexp.MustCompile("^(c|ctl)$"),
+		RE_CTL,
+		match(RE_CTL),
 		"sends rpc requests and prints the results",
 		`	<datadir> sets the data directory to read configurations from
 	<node> indicates we are connecting to a full node RPC (overrides wallet and is default)
 	<wallet> indicates we are connecting to a wallet RPC
-	<word> and <integer> just cover the items that follow in RPC commands
+	<word>, <float> and <integer> just cover the items that follow in RPC commands
 	the RPC command is expected to be everything after the ctl keyword`,
-		opts{"datadir", "node", "wallet", "word", "integer"},
+		opts{"datadir", "node", "wallet", "word", "integer", "float"},
 		precedent{"help", "list"},
 		Ctl,
 	},
 	NODE: {
-		regexp.MustCompile("^(n|node)$"),
+		RE_NODE,
+		match(RE_NODE),
 		"runs a full node",
 		`	<datadir> sets the data directory to read configuration and store data`,
 		opts{"datadir"},
-		precedent{"help", "ctl"},
+		precedent{"help", "ctl", "list"},
 		Node,
 	},
 	WALLET: {
-		regexp.MustCompile("^(w|wallet)$"),
+		RE_WALLET,
+		match(RE_WALLET),
 		"runs a wallet server",
 		`	<datadir> sets the data directory to read configuration and store data
 	<create> runs the wallet create prompt`,
 		opts{"datadir", "create"},
-		precedent{"help", "ctl"},
+		precedent{"help", "ctl", "list"},
 		Wallet,
 	},
 	SHELL: {
-		regexp.MustCompile("^(S|shell)$"),
+		RE_SHELL,
+		match(RE_SHELL),
 		"runs a combined node/wallet server",
 		`	<datadir> sets the data directory to read configuration and store data
 	<create> runs the wallet create prompt`,
@@ -144,7 +161,8 @@ var commands = Commands{
 		Shell,
 	},
 	TEST: {
-		regexp.MustCompile("^(t|test)$"),
+		RE_TEST,
+		match(RE_TEST),
 		"run multiple full nodes from given <word> logging optionally to <datadir>",
 		`	<word> indicates the basename to search for as the path to the test configurations
 	<log> indicates to write logs to the individual data directories instead of print to stdout`,
@@ -153,7 +171,8 @@ var commands = Commands{
 		Test,
 	},
 	CREATE: {
-		regexp.MustCompile("^(create)$"),
+		RE_CREATE,
+		match(RE_CREATE),
 		"runs the create new wallet prompt",
 		"	<datadir> sets the data directory where the wallet will be stored",
 		opts{"datadir"},
@@ -161,7 +180,8 @@ var commands = Commands{
 		Create,
 	},
 	LOG: {
-		regexp.MustCompile("^(log)$"),
+		RE_LOG,
+		match(RE_LOG),
 		"write to log in <datadir> file instead of printing to stderr",
 		"",
 		nil,
@@ -169,7 +189,8 @@ var commands = Commands{
 		nil,
 	},
 	DATADIR: {
-		regexp.MustCompile("^(.*/)$"),
+		RE_DATADIR,
+		match(RE_DATADIR),
 		"directory to look for configuration or other, must end in a '/'",
 		"",
 		nil,
@@ -177,7 +198,8 @@ var commands = Commands{
 		nil,
 	},
 	INTEGER: {
-		regexp.MustCompile("^([0-9]+)$"),
+		RE_INTEGER,
+		match(RE_INTEGER),
 		"number of items to create",
 		"",
 		nil,
@@ -185,7 +207,8 @@ var commands = Commands{
 		nil,
 	},
 	FLOAT: {
-		regexp.MustCompile("^([0-9]*[.][0-9]+)$"),
+		RE_FLOAT,
+		match(RE_FLOAT),
 		"a floating point value",
 		"",
 		nil,
@@ -193,7 +216,8 @@ var commands = Commands{
 		nil,
 	},
 	WORD: {
-		regexp.MustCompile("^([a-zA-Z][a-zA-Z0-9._-]*)$"),
+		RE_WORD,
+		match(RE_WORD),
 		"mostly used for testnet datadir basenames",
 		"",
 		nil,
