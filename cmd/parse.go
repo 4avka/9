@@ -114,8 +114,8 @@ func parseCLI(args []string) (cmd *Command, cmds Commands) {
 	}
 	if len(resolved) < 1 {
 		err := fmt.Errorf(
-			"\nunable to resolve which command to run:\n\tfound multiple: %s\n\tinput: '%s'",
-			withHandlersNames, fmt.Sprint(args))
+			"\nunable to resolve which command to run:\n\tinput: '%s'",
+			withHandlersNames)
 		log <- cl.Error{err}
 		return nil, invoked
 	}

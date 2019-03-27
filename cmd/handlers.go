@@ -21,7 +21,7 @@ func optTagList(s []string) (S string) {
 }
 
 func Help(args []string, cmds, all Commands) int {
-	log <- cl.Debug{"HELP\n", args}
+	log <- cl.Debug{"HELP\n", "Help", args}
 	fmt.Println(APPNAME, "-", APPDESC)
 	fmt.Println()
 	// fmt.Println("args received:", args[1:])
@@ -68,41 +68,51 @@ func Help(args []string, cmds, all Commands) int {
 }
 
 func Conf(args []string, cmds, all Commands) int {
+	fmt.Println("running Conf", args)
 	return 0
 }
 
 func New(args []string, cmds, all Commands) int {
+	fmt.Println("running New", args)
 	return 0
 }
 
 func Copy(args []string, cmds, all Commands) int {
+	fmt.Println("running Copy", args)
 	return 0
 }
 
 func List(args []string, cmds, all Commands) int {
+	fmt.Println("running List", args)
 	return 0
 }
 
 func Ctl(args []string, cmds, all Commands) int {
+	fmt.Println("running Ctl", args)
 	return 0
 }
 
 func Node(args []string, cmds, all Commands) int {
+	fmt.Println("running Node", args)
 	return 0
 }
 
 func Wallet(args []string, cmds, all Commands) int {
+	fmt.Println("running Wallet", args)
 	return 0
 }
 
 func Shell(args []string, cmds, all Commands) int {
+	fmt.Println("running Shell", args)
 	return 0
 }
 
 func Test(args []string, cmds, all Commands) int {
+	fmt.Println("running Test", args)
 	return 0
 }
 
 func Create(args []string, cmds, all Commands) int {
+	fmt.Println("running Create", args)
 	return 0
 }

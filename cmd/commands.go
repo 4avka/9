@@ -50,10 +50,10 @@ const (
 	TEST, RE_TEST       = "test", "(t|test)"
 	CREATE, RE_CREATE   = "create", "(cr|create)"
 	LOG, RE_LOG         = "log", "(L|log)"
-	DATADIR, RE_DATADIR = "datadir", "(.*/)"
+	DATADIR, RE_DATADIR = "datadir", "([./]+.*)"
 	INTEGER, RE_INTEGER = "integer", "[0-9]+"
 	FLOAT, RE_FLOAT     = "float", "([0-9]*[.][0-9]+)"
-	WORD, RE_WORD       = "word", "([a-zA-Z][a-zA-Z0-9._-]*)"
+	WORD, RE_WORD       = "word", "([^/.]+[^ ]*)"
 )
 
 var commandsList = []string{
@@ -125,9 +125,9 @@ var commands = Commands{
 		`	<datadir> sets the data directory to read configurations from
 	<node> indicates we are connecting to a full node RPC (overrides wallet and is default)
 	<wallet> indicates we are connecting to a wallet RPC
-	<word> and <integer> just cover the items that follow in RPC commands
+	<word>, <float> and <integer> just cover the items that follow in RPC commands
 	the RPC command is expected to be everything after the ctl keyword`,
-		opts{"datadir", "node", "wallet", "word", "integer"},
+		opts{"datadir", "node", "wallet", "word", "integer", "float"},
 		precedent{"help", "list"},
 		Ctl,
 	},
@@ -137,7 +137,7 @@ var commands = Commands{
 		"runs a full node",
 		`	<datadir> sets the data directory to read configuration and store data`,
 		opts{"datadir"},
-		precedent{"help", "ctl"},
+		precedent{"help", "ctl", "list"},
 		Node,
 	},
 	WALLET: {
@@ -147,7 +147,7 @@ var commands = Commands{
 		`	<datadir> sets the data directory to read configuration and store data
 	<create> runs the wallet create prompt`,
 		opts{"datadir", "create"},
-		precedent{"help", "ctl"},
+		precedent{"help", "ctl", "list"},
 		Wallet,
 	},
 	SHELL: {
