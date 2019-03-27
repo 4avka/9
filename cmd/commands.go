@@ -50,10 +50,10 @@ const (
 	TEST, RE_TEST       = "test", "(t|test)"
 	CREATE, RE_CREATE   = "create", "(cr|create)"
 	LOG, RE_LOG         = "log", "(L|log)"
-	DATADIR, RE_DATADIR = "datadir", "([~/.]+.*/)"
+	DATADIR, RE_DATADIR = "datadir", "(([A-Za-z][:])?.*|[\\~/.]+.*)"
 	INTEGER, RE_INTEGER = "integer", "[0-9]+"
 	FLOAT, RE_FLOAT     = "float", "([0-9]*[.][0-9]+)"
-	WORD, RE_WORD       = "word", "([a-zA-Z0-9._/:-]*)"
+	WORD, RE_WORD       = "word", "([a-zA-Z0-9._-]+)"
 )
 
 var commandsList = []string{
@@ -80,7 +80,8 @@ var commands = Commands{
 		RE_CONF,
 		match(RE_CONF),
 		"run interactive configuration CLI",
-		"	<datadir> sets the data directory to read and write to",
+		`	<datadir> sets the data directory to read and write to 
+	(must start with '.', '\', '/' or '~')`,
 		opts{"datadir"},
 		precedent{"help"},
 		Conf,
@@ -100,6 +101,7 @@ var commands = Commands{
 		match(RE_COPY),
 		"create a set of testnet configurations based on a datadir",
 		`	<datadir> is the base to work from
+		(must start with '.', '\', '/' or '~')
 	<word> is a basename 
 	<integer> is a number for how many to create`,
 		opts{"datadir", "word", "integer"},
@@ -111,6 +113,7 @@ var commands = Commands{
 		match(RE_LIST),
 		"lists commands available at the RPC endpoint",
 		`	<datadir> is the enabled data directory
+		(must start with '.', '\', '/' or '~')
 	<ctl> is optional and implied by list
 	<wallet> indicates to connect to the wallet RPC
 	<node> (or wallet not specified) connect to full node RPC`,
@@ -123,6 +126,7 @@ var commands = Commands{
 		match(RE_CTL),
 		"sends rpc requests and prints the results",
 		`	<datadir> sets the data directory to read configurations from
+		(must start with '.', '\', '/' or '~')
 	<node> indicates we are connecting to a full node RPC (overrides wallet and is default)
 	<wallet> indicates we are connecting to a wallet RPC
 	<word>, <float> and <integer> just cover the items that follow in RPC commands
@@ -135,7 +139,8 @@ var commands = Commands{
 		RE_NODE,
 		match(RE_NODE),
 		"runs a full node",
-		`	<datadir> sets the data directory to read configuration and store data`,
+		`	<datadir> sets the data directory to read configuration and store data
+		(must start with '.', '\', '/' or '~')`,
 		opts{"datadir"},
 		precedent{"help", "ctl"},
 		Node,
@@ -145,6 +150,7 @@ var commands = Commands{
 		match(RE_WALLET),
 		"runs a wallet server",
 		`	<datadir> sets the data directory to read configuration and store data
+		(must start with '.', '\', '/' or '~')
 	<create> runs the wallet create prompt`,
 		opts{"datadir", "create"},
 		precedent{"help", "ctl"},
@@ -155,6 +161,7 @@ var commands = Commands{
 		match(RE_SHELL),
 		"runs a combined node/wallet server",
 		`	<datadir> sets the data directory to read configuration and store data
+		(must start with '.', '\', '/' or '~')
 	<create> runs the wallet create prompt`,
 		opts{"datadir", "create"},
 		precedent{"help", "ctl"},
@@ -174,7 +181,8 @@ var commands = Commands{
 		RE_CREATE,
 		match(RE_CREATE),
 		"runs the create new wallet prompt",
-		"	<datadir> sets the data directory where the wallet will be stored",
+		`	<datadir> sets the data directory where the wallet will be stored
+		(must start with '.', '\', '/' or '~')`,
 		opts{"datadir"},
 		precedent{"wallet", "shell", "help"},
 		Create,
@@ -183,7 +191,8 @@ var commands = Commands{
 		RE_LOG,
 		match(RE_LOG),
 		"write to log in <datadir> file instead of printing to stderr",
-		"",
+		`	<datadir> sets the data directory where the wallet will be stored
+		(must start with '.', '\', '/' or '~')`,
 		nil,
 		nil,
 		nil,
@@ -191,8 +200,9 @@ var commands = Commands{
 	DATADIR: {
 		RE_DATADIR,
 		match(RE_DATADIR),
-		"directory to look for configuration or other, must end in a '/'",
-		"",
+		"directory to look for configuration or write logs etc",
+		`	<datadir> sets the data directory where the wallet will be stored
+		(must start with '.', '\', '/' or '~')`,
 		nil,
 		nil,
 		nil,

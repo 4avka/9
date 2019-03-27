@@ -79,6 +79,7 @@ func Help(args []string, cmds, tokens, all Commands) int {
 
 func Conf(args []string, cmds, tokens, all Commands) int {
 	fmt.Println("running Conf", args, getCommands(tokens))
+
 	return 0
 }
 
