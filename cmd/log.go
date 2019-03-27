@@ -5,6 +5,6 @@ import (
 )
 
 // Log is the logger for the peer package
-var Log = cl.NewSubSystem("cmd", "info")
+var Log = cl.NewSubSystem("cmd", "trace")
 
 var log = Log.Ch

@@ -21,18 +21,19 @@ func parseCLI(args []string) error {
 	log <- cl.Info{args}
 	// collect set of items in commandline
 	if len(args) < 2 {
-		log <- cl.Info{"no args given, printing help"}
+		log <- cl.Info{"no args given, starting GUI"}
+		return nil
 	}
 	commandsFound := make(map[string]int)
 	for _, x := range args[1:] {
 		for _, y := range commandsList {
 			if commands[y].RE.Match([]byte(x)) {
 				if _, ok := commandsFound[y]; ok {
-					// log <- cl.Info{"found", i, y, x}
+					log <- cl.Debug{"found", y, x}
 					commandsFound[y]++
 					break
 				} else {
-					// log <- cl.Info{"found", i, y, x}
+					log <- cl.Debug{"found", y, x}
 					commandsFound[y] = 1
 					break
 				}
@@ -44,7 +45,7 @@ func parseCLI(args []string) error {
 	withHandlers := make(Commands)
 	for i := range commandsFound {
 		if commands[i].Handler != nil {
-			log <- cl.Info{"found", i}
+			log <- cl.Debug{"found", i}
 			withHandlers[i] = commands[i]
 			withHandlersNames = append(withHandlersNames, i)
 		}
@@ -58,7 +59,9 @@ func parseCLI(args []string) error {
 
 		var common [][]string
 		for _, x := range withHandlersNames {
-			common = append(common, intersection(withHandlersNames, withHandlers[x].Precedent))
+			i := intersection(withHandlersNames, withHandlers[x].Precedent)
+			log <- cl.Debug{"intersection", withHandlersNames, ".", withHandlers[x].Precedent, "==", i}
+			common = append(common, i)
 		}
 		for _, x := range common {
 			for _, y := range x {
@@ -69,16 +72,16 @@ func parseCLI(args []string) error {
 		}
 
 		for _, i := range resolved {
-			log <- cl.Warn{"--> resolved", i}
+			log <- cl.Debug{"--> resolved", i}
 		}
 	} else if len(withHandlersNames) == 1 {
-		resolved = append(resolved, withHandlersNames[0])
+		resolved = []string{withHandlersNames[0]}
 	}
 	if len(resolved) < 1 {
 		err := fmt.Errorf("unable to resolve which command to run, found multiple: %v", withHandlersNames)
 		return err
 	} else {
-		log <- cl.Warn{"running", resolved}
+		log <- cl.Debug{"running", resolved}
 	}
 
 	return nil
@@ -93,4 +96,8 @@ func intersection(a, b []string) (out []string) {
 		}
 	}
 	return
+}
+
+func resolveCommand(withHandlers Commands) Commands {
+	return withHandlers
 }

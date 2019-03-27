@@ -8,7 +8,7 @@ import (
 )
 
 func Start(args []string) int {
-	log <- cl.Inf("starting 9")
+	log <- cl.Dbg("starting 9")
 	for i, x := range testargs[0] {
 		if err := Parse(x); err != 0 {
 			fmt.Println("error item", i, x)
@@ -36,6 +36,7 @@ var testargs = [][][]string{
 		{"9", "create", "testnet", "9", "h"},
 		{"9", "w", "test/"},
 		{"9", "n", "wallet"},
+		{"9", "n", "wallet", "c", "h"},
 	},
 	{
 		// negative
