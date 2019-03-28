@@ -4,6 +4,8 @@ import (
 	"regexp"
 )
 
+type Commands map[string]Command
+
 // Command is a set-based syntax for command line invocation. A set has a
 // more limited range of possibilities when an item type cannot appear more
 // than once, but for any given task, there usually is only one thing for
@@ -13,8 +15,6 @@ import (
 // interactive CLI.
 //
 // nil values in opt/prec indicate wildcards, empty means no other acceptable.
-type Commands map[string]Command
-
 type Command struct {
 	pattern string
 	// How to identify a specific item
@@ -28,7 +28,15 @@ type Command struct {
 	// Precedent indicates other commands that will preferentially match
 	Precedent precedent
 	// Handler
-	Handler func(args []string, cmds, tokens, all Commands) int
+	Handler func(args []string, tokens Tokens, cmds, all Commands) int
+}
+
+type Tokens map[string]Token
+
+// Token is a struct that ties together CLI invocation to the Command it relates to
+type Token struct {
+	Value string
+	Cmd   Command
 }
 
 type opts []string
@@ -50,10 +58,11 @@ const (
 	TEST, RE_TEST       = "test", "(t|test)"
 	CREATE, RE_CREATE   = "create", "(cr|create)"
 	LOG, RE_LOG         = "log", "(L|log)"
-	DATADIR, RE_DATADIR = "datadir", "(([A-Za-z][:])?.*|[\\~/.]+.*)"
+	DATADIR, RE_DATADIR = "datadir", "(([A-Za-z][:])|[\\~/.]+.*)"
 	INTEGER, RE_INTEGER = "integer", "[0-9]+"
 	FLOAT, RE_FLOAT     = "float", "([0-9]*[.][0-9]+)"
 	WORD, RE_WORD       = "word", "([a-zA-Z0-9._-]+)"
+	// triggers TODO put in drop/reindex etc things
 )
 
 var commandsList = []string{
@@ -114,7 +123,7 @@ var commands = Commands{
 		"lists commands available at the RPC endpoint",
 		`	<datadir> is the enabled data directory
 		(must start with '.', '\', '/' or '~')
-	<ctl> is optional and implied by list
+	<ctl> must be present to invoke list
 	<wallet> indicates to connect to the wallet RPC
 	<node> (or wallet not specified) connect to full node RPC`,
 		opts{"datadir", "ctl", "wallet", "node"},
@@ -235,3 +244,104 @@ var commands = Commands{
 		nil,
 	},
 }
+
+// var Subcommands = Command{
+// 	"default": {
+// 		"launch the GUI",
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"droptxindex": {
+// 		"drop the transaction index",
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"dropaddrindex": {
+// 		"drop the address index",
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"dropcfindex": {
+// 		"drop the compact filters index",
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"node": {
+// 		"run a full node",
+// 		func(args ...string) error {
+// 			return nil
+// 		}},
+// 	"wallet": {
+// 		"run a wallet node",
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"shell": {
+// 		"run a combined wallet/full node",
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"ctl": {
+// 		"send rpc queries to a node",
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"cli": {
+// 		"send rpc queries to a wallet",
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"mine": {
+// 		"run the standalone miner",
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"gen.certs": {
+// 		"generate TLS key and certificate",
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"gen.cafile": {
+// 		"generate a TLS Certificate Authority",
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"copy": {
+// 		"copies a profile (many) new one(s)",
+// 		// Lines{
+// 		// 	"datadir":  Path("~", "specify a data directory"),
+// 		// 	"basename": String("test", "base name for testnet data directories"),
+// 		// 	"number":   IntBounded("1", "number of data directories to create", 1, 100),
+// 		// },
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"new": {
+// 		"creates new testnet profile directories from defaults",
+// 		// Lines{
+// 		// 	"datadir":  Path("~", "specify a data directory"),
+// 		// 	"basename": String("test", "base name for testnet data directories"),
+// 		// 	"number":   IntBounded("1", "number of data directories to create", 1, 100),
+// 		// },
+// 		func(args ...string) error {
+// 			return nil
+// 		},
+// 	},
+// 	"conf": {
+// 		"run a visual CLI configuration editor",
+// 		func(args ...string) error {
+// 			return nil
+// 		}},
+// }

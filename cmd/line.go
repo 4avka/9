@@ -19,10 +19,13 @@ type Line struct {
 	// Default is the default for this value
 	Default interface{}
 
-	// Type is basically an empty version of the possible thing. Slices with contents are assumed to be toggles, empty slices are arrays, type must match the value and default type
+	// Type is basically an empty version of the possible thing. Slices
+	// with contents are assumed to be toggles, empty slices are
+	// arrays, type must match the value and default type
 	Validator func(string) bool
 
-	// The help string that will be shown by the interactive config system
+	// The help string that will be shown by the interactive config
+	// system and cli help
 	Comment string
 
 	// Value is where this value is actually stored
@@ -143,16 +146,14 @@ func NetAddrs(def, usage string) *Line {
 	return &Line{def, netAddrs, usage, o}
 }
 
-// Int is for a single 64 bit integer. We see no point in complicating things,
-// so this is golang `int` with no special meanings
-func Int(def, usage string) *Line {
-	var o *int
-	n, e := strconv.Atoi(def)
-	if e == nil {
-		*o = n
-	}
+// Int is for a single 64 bit integer. We see no point in
+// complicating things, so this is golang `int` with no
+// special meanings
+func Int(def int, usage string) *Line {
+	o := new(int)
+	*o = def
 	return &Line{def, func(s string) bool {
-		n, e := strconv.Atoi(def)
+		n, e := strconv.Atoi(s)
 		if e == nil {
 			*o = n
 		} else {
@@ -162,15 +163,13 @@ func Int(def, usage string) *Line {
 	}, usage, o}
 }
 
-// IntBounded is an integer whose value must be between a min and max
-func IntBounded(def, usage string, min, max int) *Line {
+// IntBounded is an integer whose value must be between a min
+// and max
+func IntBounded(def int, usage string, min, max int) *Line {
 	o := new(int)
-	n, e := strconv.Atoi(def)
-	if e == nil {
-		*o = n
-	}
+	*o = def
 	return &Line{def, func(s string) bool {
-		n, e := strconv.Atoi(def)
+		n, e := strconv.Atoi(s)
 		if e == nil {
 			*o = n
 		} else {
@@ -201,7 +200,9 @@ func Disable(usage string) *Line {
 	}, usage, o}
 }
 
-// Duration is a time value in golang 24h60m60s format. If it fails to parse it will return zero duration (as well as if it was zero duration)
+// Duration is a time value in golang 24h60m60s format. If it fails to
+// parse it will return zero duration (as well as if it was zero
+// duration)
 func Duration(def, usage string) *Line {
 	o, e := time.ParseDuration(def)
 	if e != nil {
@@ -216,7 +217,9 @@ func Duration(def, usage string) *Line {
 	}, usage, &o}
 }
 
-// String is just a boring old string. There is no limitations on what a string can contain, it will have any leading or trailing whitespace trimmed.
+// String is just a boring old string. There is no limitations on what
+// a string can contain, it will have any leading or trailing
+// whitespace trimmed.
 func String(def, usage string) *Line {
 	o := strings.TrimSpace(def)
 	return &Line{def, func(s string) bool {
@@ -225,7 +228,8 @@ func String(def, usage string) *Line {
 	}, usage, &o}
 }
 
-// StringSlice is an array of strings, encoded as a series of strings separated by backticks `
+// StringSlice is an array of strings, encoded as a series of strings
+// separated by backticks `
 func StringSlice(def, usage string) *Line {
 	s := strings.TrimSpace(def)
 	ss := strings.Split(s, "`")
@@ -236,7 +240,8 @@ func StringSlice(def, usage string) *Line {
 	}, usage, &ss}
 }
 
-// Float is a 64 bit floating point number. Returns zero if nothing parsed out.
+// Float is a 64 bit floating point number. Returns zero if nothing
+// parsed out.
 func Float(def, usage string) *Line {
 	f, e := strconv.ParseFloat(def, 64)
 	if e != nil {
@@ -251,7 +256,8 @@ func Float(def, usage string) *Line {
 	}, usage, &f}
 }
 
-// Algos is the available mining algorithms, read out of the fork package
+// Algos is the available mining algorithms, read out of the fork
+// package
 func Algos(def, usage string) *Line {
 	o := new(string)
 	for _, x := range fork.P9AlgoVers {
@@ -270,7 +276,8 @@ func Algos(def, usage string) *Line {
 	}, usage, o}
 }
 
-// ValidName checks to see a name is a valid name - first letter alphabetical, last alpha/numeric, all between also . and -
+// ValidName checks to see a name is a valid name - first letter
+// alphabetical, last alpha/numeric, all between also . and -
 func ValidName(s string) bool {
 	re := regexp.MustCompile("[a-z][a-z0-9-.][a-z0-9]+")
 	return re.Match([]byte(s))

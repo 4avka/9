@@ -5,19 +5,18 @@ import (
 	"sort"
 
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
-	"github.com/davecgh/go-spew/spew"
 )
 
-func optTagList(s []string) (S string) {
-	if len(s) > 1 {
+func optTagList(s []string) (ss string) {
+	if len(ss) > 1 {
 
-		S = "[<"
+		ss = "[<"
 		for i, x := range s {
-			S += x
+			ss += x
 			if i < len(s)-1 {
-				S += ">|<"
+				ss += ">|<"
 			} else {
-				S += ">]"
+				ss += ">]"
 			}
 		}
 	}
@@ -31,8 +30,15 @@ func getCommands(cmds Commands) (s []string) {
 	return
 }
 
-func Help(args []string, cmds, tokens, all Commands) int {
-	log <- cl.Debug{"HELP\n", "Help", args, getCommands(tokens)}
+func getTokens(cmds Tokens) (s []string) {
+	for _, x := range cmds {
+		s = append(s, x.Value)
+	}
+	return
+}
+
+func Help(args []string, tokens Tokens, cmds, all Commands) int {
+	log <- cl.Debug{"HELP\n", "Help", args, getTokens(tokens)}
 	fmt.Println(APPNAME, "-", APPDESC)
 	fmt.Println()
 	// fmt.Println("args received:", args[1:])
@@ -78,53 +84,52 @@ func Help(args []string, cmds, tokens, all Commands) int {
 	return 0
 }
 
-func Conf(args []string, cmds, tokens, all Commands) int {
-	fmt.Println("running Conf", args, getCommands(tokens))
-	spew.Dump(tokens)
+func Conf(args []string, tokens Tokens, cmds, all Commands) int {
+	fmt.Println("running Conf", args)
 	return 0
 }
 
-func New(args []string, cmds, tokens, all Commands) int {
-	fmt.Println("running New", args, getCommands(tokens))
+func New(args []string, tokens Tokens, cmds, all Commands) int {
+	fmt.Println("running New", args, getTokens(tokens))
 	return 0
 }
 
-func Copy(args []string, cmds, tokens, all Commands) int {
-	fmt.Println("running Copy", args, getCommands(tokens))
+func Copy(args []string, tokens Tokens, cmds, all Commands) int {
+	fmt.Println("running Copy", args, getTokens(tokens))
 	return 0
 }
 
-func List(args []string, cmds, tokens, all Commands) int {
-	fmt.Println("running List", args, getCommands(tokens))
+func List(args []string, tokens Tokens, cmds, all Commands) int {
+	fmt.Println("running List", args, getTokens(tokens))
 	return 0
 }
 
-func Ctl(args []string, cmds, tokens, all Commands) int {
-	fmt.Println("running Ctl", args, getCommands(tokens))
+func Ctl(args []string, tokens Tokens, cmds, all Commands) int {
+	fmt.Println("running Ctl", args, getTokens(tokens))
 	return 0
 }
 
-func Node(args []string, cmds, tokens, all Commands) int {
-	fmt.Println("running Node", args, getCommands(tokens))
+func Node(args []string, tokens Tokens, cmds, all Commands) int {
+	fmt.Println("running Node", args, getTokens(tokens))
 	return 0
 }
 
-func Wallet(args []string, cmds, tokens, all Commands) int {
-	fmt.Println("running Wallet", args, getCommands(tokens))
+func Wallet(args []string, tokens Tokens, cmds, all Commands) int {
+	fmt.Println("running Wallet", args, getTokens(tokens))
 	return 0
 }
 
-func Shell(args []string, cmds, tokens, all Commands) int {
-	fmt.Println("running Shell", args, getCommands(tokens))
+func Shell(args []string, tokens Tokens, cmds, all Commands) int {
+	fmt.Println("running Shell", args, getTokens(tokens))
 	return 0
 }
 
-func Test(args []string, cmds, tokens, all Commands) int {
-	fmt.Println("running Test", args, getCommands(tokens))
+func Test(args []string, tokens Tokens, cmds, all Commands) int {
+	fmt.Println("running Test", args, getTokens(tokens))
 	return 0
 }
 
-func Create(args []string, cmds, tokens, all Commands) int {
-	fmt.Println("running Create", args, getCommands(tokens))
+func Create(args []string, tokens Tokens, cmds, all Commands) int {
+	fmt.Println("running Create", args, getTokens(tokens))
 	return 0
 }
