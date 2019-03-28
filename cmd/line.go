@@ -143,8 +143,9 @@ func NetAddrs(def, usage string) *Line {
 	return &Line{def, netAddrs, usage, o}
 }
 
-// Int is for a single 64 bit integer. We see no point in complicating things,
-// so this is golang `int` with no special meanings
+// Int is for a single 64 bit integer. We see no point in
+// complicating things, so this is golang `int` with no
+// special meanings
 func Int(def, usage string) *Line {
 	var o *int
 	n, e := strconv.Atoi(def)
@@ -162,7 +163,8 @@ func Int(def, usage string) *Line {
 	}, usage, o}
 }
 
-// IntBounded is an integer whose value must be between a min and max
+// IntBounded is an integer whose value must be between a min
+// and max
 func IntBounded(def, usage string, min, max int) *Line {
 	o := new(int)
 	n, e := strconv.Atoi(def)
