@@ -151,9 +151,9 @@ func NetAddrs(def, usage string) *Line {
 // special meanings
 func Int(def int, usage string) *Line {
 	o := new(int)
-	*o = n
+	*o = def
 	return &Line{def, func(s string) bool {
-		n, e := strconv.Atoi(def)
+		n, e := strconv.Atoi(s)
 		if e == nil {
 			*o = n
 		} else {
@@ -167,9 +167,9 @@ func Int(def int, usage string) *Line {
 // and max
 func IntBounded(def int, usage string, min, max int) *Line {
 	o := new(int)
-	*o = n
+	*o = def
 	return &Line{def, func(s string) bool {
-		n, e := strconv.Atoi(def)
+		n, e := strconv.Atoi(s)
 		if e == nil {
 			*o = n
 		} else {
