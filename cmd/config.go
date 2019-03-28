@@ -9,7 +9,7 @@ var Config = Lines{
 		"write cpu profile",
 	),
 	"app.datadir": Path(
-		"~",
+		"~/."+APPNAME,
 		"base directory containing configuration and data",
 	),
 	"app.profile": IntBounded(

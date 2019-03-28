@@ -35,8 +35,8 @@ type Tokens map[string]Token
 
 // Token is a struct that ties together CLI invocation to the Command it relates to
 type Token struct {
-	Name string
-	Cmd  Command
+	Value string
+	Cmd   Command
 }
 
 type opts []string

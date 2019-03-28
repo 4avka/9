@@ -23,12 +23,12 @@ func parseCLI(args []string) (cmd *Command, tokens Tokens, cmds Commands) {
 			if commands[y].RE.Match([]byte(x)) {
 				if _, ok := commandsFound[y]; ok {
 					// TODO change token to struct{val,command}
-					tokens[x] = Token{y, commands[y]}
+					tokens[y] = Token{x, commands[y]}
 					log <- cl.Debug{"found", y, x}
 					commandsFound[y]++
 					break
 				} else {
-					tokens[x] = Token{y, commands[y]}
+					tokens[y] = Token{x, commands[y]}
 					log <- cl.Debug{"found", y, x}
 					commandsFound[y] = 1
 					break

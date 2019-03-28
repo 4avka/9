@@ -32,7 +32,7 @@ func getCommands(cmds Commands) (s []string) {
 
 func getTokens(cmds Tokens) (s []string) {
 	for _, x := range cmds {
-		s = append(s, x.Name)
+		s = append(s, x.Value)
 	}
 	return
 }
@@ -85,8 +85,7 @@ func Help(args []string, tokens Tokens, cmds, all Commands) int {
 }
 
 func Conf(args []string, tokens Tokens, cmds, all Commands) int {
-	fmt.Println("running Conf", args, getTokens(tokens))
-	// spew.Dump(tokens)
+	fmt.Println("running Conf", args)
 	return 0
 }
 
