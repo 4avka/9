@@ -13,7 +13,7 @@ var Config = Lines{
 		"base directory containing configuration and data",
 	),
 	"app.profile": IntBounded(
-		"1100",
+		1100,
 		"http profiling on specified port",
 		1025, 65534,
 	),
@@ -21,26 +21,26 @@ var Config = Lines{
 		"enable port forwarding via UPNP",
 	),
 	"block.maxsize": IntBounded(
-		"900900",
+		900900,
 		"max block size",
 		250000, 10000000,
 	),
 	"block.maxweight": IntBounded(
-		"3006000",
+		3006000,
 		"max block weight",
 		10000, 10000000,
 	),
 	"block.minsize": IntBounded(
-		"240",
+		240,
 		"min block size",
 		240, 2<<32,
 	),
 	"block.minweight": IntBounded(
-		"2000", "min block weight",
+		2000, "min block weight",
 		2000, 100000,
 	),
 	"block.prioritysize": IntBounded(
-		"50000",
+		50000,
 		"the default size for high priority low fee transactions",
 		1000, 200000,
 	),
@@ -69,7 +69,7 @@ var Config = Lines{
 		"address of chain rpc to connect to",
 	),
 	"chain.sigcachemaxsize": IntBounded(
-		"100000", "max number of signatures to keep in memory",
+		100000, "max number of signatures to keep in memory",
 		1000, 10000000,
 	),
 	"limit.pass": String(
@@ -103,7 +103,7 @@ var Config = Lines{
 		"enable builtin CPU miner",
 	),
 	"mining.genthreads": IntBounded(
-		"-1",
+		-1,
 		"set number of threads, -1 = all",
 		-1, 4096,
 	),
@@ -146,12 +146,12 @@ var Config = Lines{
 		"address to listen on for p2p connections",
 	),
 	"p2p.maxorphanstxs": IntBounded(
-		"100",
+		100,
 		"maximum number of orphan transactions to keep",
 		10, 10000,
 	),
 	"p2p.maxpeers": IntBounded(
-		"125",
+		125,
 		"maximum number of peers to connect to",
 		2, 1024,
 	),
@@ -218,16 +218,16 @@ var Config = Lines{
 		"address to listen for node rpc clients",
 	),
 	"rpc.maxclients": IntBounded(
-		"8", "max clients for rpc",
+		8, "max clients for rpc",
 		2, 1024,
 	),
 	"rpc.maxconcurrentreqs": IntBounded(
-		"128",
+		128,
 		"maximum concurrent requests to handle",
 		2, 1024,
 	),
 	"rpc.maxwebsockets": IntBounded(
-		"8",
+		8,
 		"maximum websockets clients",
 		2, 1024,
 	),

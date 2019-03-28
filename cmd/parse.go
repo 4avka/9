@@ -1,6 +1,11 @@
 package cmd
 
-import "fmt"
+import (
+	"fmt"
+	"path/filepath"
+
+	"git.parallelcoin.io/dev/9/pkg/util/cl"
+)
 
 func Parse(args []string) int {
 	// parse commandline
@@ -18,8 +23,9 @@ func Parse(args []string) int {
 			datadir = t.Value
 		}
 	}
-	fmt.Println("loading config from:", datadir)
-
+	log <- cl.Debug{"loading config from:", datadir}
+	configFile := filepath.Join(datadir, "config")
+	fmt.Println("loading config from", configFile)
 	// run as configured
 	cmd.Handler(
 		args,
