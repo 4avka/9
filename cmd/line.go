@@ -251,7 +251,7 @@ func IntBounded(def int, usage string, min, max int) *Line {
 func Enable(usage string) *Line {
 	o := false
 	var l Line
-	l = Line{false, func(s string) bool {
+	l = Line{o, func(s string) bool {
 		l.Value = true
 		return true
 	}, usage, o}
@@ -260,10 +260,10 @@ func Enable(usage string) *Line {
 
 // Disable is a boolean value
 func Disable(usage string) *Line {
-	o := true
+	o := false
 	var l Line
-	l = Line{false, func(s string) bool {
-		l.Value = false
+	l = Line{o, func(s string) bool {
+		l.Value = true
 		return true
 	}, usage, o}
 	return &l
