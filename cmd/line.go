@@ -39,6 +39,26 @@ func (l *Line) String() string {
 
 type Lines map[string]*Line
 
+type Mapstringstring map[string]string
+type Stringslice []string
+
+func (m Mapstringstring) String() (out string) {
+	for i, x := range m {
+		out += i + ":" + x + " "
+	}
+	return strings.TrimSpace(out)
+}
+
+func (s Stringslice) String() (out string) {
+	for i, x := range s {
+		out += x
+		if i < len(s)-1 {
+			out += " "
+		}
+	}
+	return
+}
+
 func (l Lines) String() (out string) {
 	tags := make([]string, 0)
 	for i := range l {
@@ -99,7 +119,7 @@ func Path(def, usage string) *Line {
 // SubSystem is just a list of alphanumeric names followed by a
 // colon followed by a string value, space separated, all lower case.
 func SubSystem(def, usage string) *Line {
-	p := make(map[string]string)
+	p := make(Mapstringstring)
 	return &Line{def, func(s string) bool {
 		ss := strings.Split(strings.TrimSpace(s), " ")
 		for _, y := range ss {
@@ -157,7 +177,7 @@ func NetAddr(def, usage string) *Line {
 
 // NetAddrs is for a multiple network addresses ie scheme://host:port, separated by spaces. If a default is given, its port is taken as the default port. If only a number is present, it is used as the defaultPort
 func NetAddrs(def, usage string) *Line {
-	o := make([]string, 0)
+	o := make(Stringslice, 0)
 	var defaultPort string
 	n, e := strconv.Atoi(def)
 	if e == nil {
@@ -173,10 +193,10 @@ func NetAddrs(def, usage string) *Line {
 				_, _, err := net.SplitHostPort(x)
 				if err != nil {
 					a := net.JoinHostPort(x, defaultPort)
-					l.Value = append(l.Value.([]string), a)
+					l.Value = append(l.Value.(Stringslice), a)
 					return true
 				}
-				l.Value = append(l.Value.([]string), x)
+				l.Value = append(l.Value.(Stringslice), x)
 			}
 			return true
 		}, usage, o,
@@ -218,7 +238,7 @@ func IntBounded(def int, usage string, min, max int) *Line {
 			return false
 		}
 		return true
-	}, usage, o}
+	}, usage + fmt.Sprintf(" { %d < %d }", min, max), o}
 	return &l
 }
 
@@ -280,7 +300,7 @@ func String(def, usage string) *Line {
 // separated by backticks `
 func StringSlice(def, usage string) *Line {
 	s := strings.TrimSpace(def)
-	ss := strings.Split(s, "`")
+	ss := Stringslice(strings.Split(s, "`"))
 	var l Line
 	l = Line{def, func(s string) bool {
 		s = strings.TrimSpace(s)
@@ -311,7 +331,7 @@ func Float(def, usage string) *Line {
 // Algos is the available mining algorithms, read out of the fork
 // package
 func Algos(def, usage string) *Line {
-	o := ""
+	o := "random"
 	for _, x := range fork.P9AlgoVers {
 		if x == def {
 			o = def

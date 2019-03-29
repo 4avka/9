@@ -14,12 +14,14 @@ func Parse(args []string) int {
 		help := commands[HELP]
 		cmd = &help
 	}
+	var datadir string
 	// read configuration
 	dd, ok := Config["app.datadir"]
-	datadir := dd.Value.(string)
 	if ok {
+		datadir = dd.Value.(string)
 		if t, ok := tokens["datadir"]; ok {
 			datadir = t.Value
+			Config["app.datadir"].Value = datadir
 		}
 	}
 	log <- cl.Debug{"loading config from:", datadir}
