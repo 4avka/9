@@ -43,8 +43,9 @@ type opts []string
 type precedent []string
 
 const (
-	APPNAME = "9"
-	APPDESC = "all in one everything for parallelcoin"
+	APPNAME    = "9"
+	APPDESC    = "all in one everything for parallelcoin"
+	APPVERSION = "v1.9.9"
 
 	HELP, RE_HELP       = "help", "(h|help)"
 	CONF, RE_CONF       = "conf", "(C|conf)"

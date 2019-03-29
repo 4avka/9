@@ -39,7 +39,7 @@ func getTokens(cmds Tokens) (s []string) {
 
 func Help(args []string, tokens Tokens, cmds, all Commands) int {
 	log <- cl.Debug{"HELP\n", "Help", args, getTokens(tokens)}
-	fmt.Println(APPNAME, "-", APPDESC)
+	fmt.Println(APPNAME, APPVERSION, "-", APPDESC)
 	fmt.Println()
 	// fmt.Println("args received:", args[1:])
 	// fmt.Println("cmds received:", cmds)

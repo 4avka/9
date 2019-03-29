@@ -158,8 +158,11 @@ func Network(def, usage string) *Line {
 	if !networkValidate(def) {
 		panic("default network was not in available set")
 	}
+	nets := fmt.Sprint(Networks)
+	nets = nets[1 : len(nets)-1]
+	nets = " { " + nets + " }"
 	return &Line{
-		def, networkValidate, usage, p,
+		def, networkValidate, usage + nets, p,
 	}
 }
 
