@@ -32,10 +32,10 @@ func Parse(args []string) int {
 	// spew.Dump(Config)
 	// run as configured
 	_ = cmds
-	// cmd.Handler(
-	// 	args,
-	// 	tokens,
-	// 	cmds,
-	// 	commands)
+	cmd.Handler(
+		args,
+		tokens,
+		cmds,
+		commands)
 	return 0
 }
