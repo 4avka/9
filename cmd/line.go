@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -32,7 +33,46 @@ type Line struct {
 	Value interface{}
 }
 
+func (l *Line) String() string {
+	return fmt.Sprint(l.Value)
+}
+
 type Lines map[string]*Line
+
+type Mapstringstring map[string]string
+type Stringslice []string
+
+func (m Mapstringstring) String() (out string) {
+	for i, x := range m {
+		out += i + ":" + x + " "
+	}
+	return strings.TrimSpace(out)
+}
+
+func (s Stringslice) String() (out string) {
+	for i, x := range s {
+		out += x
+		if i < len(s)-1 {
+			out += " "
+		}
+	}
+	return
+}
+
+func (l Lines) String() (out string) {
+	tags := make([]string, 0)
+	for i := range l {
+		tags = append(tags, i)
+	}
+	sort.Strings(tags)
+	for _, x := range tags {
+		out += fmt.Sprint("NAME ", x)
+		out += fmt.Sprint(" VALUE ", l[x].String())
+		out += fmt.Sprint(" DEFAULT ", l[x].Default)
+		out += fmt.Sprint(" COMMENT ", l[x].Comment, "\n")
+	}
+	return
+}
 
 var Networks = []string{"mainnet", "testnet", "simnet", "regtestnet"}
 
@@ -46,26 +86,46 @@ func logLevelValidate(s string) bool {
 }
 
 func LogLevel(def, usage string) *Line {
-	var p *string
+	var p string
 	if !logLevelValidate(def) {
 		panic("log level was not in available set")
 	}
-	return &Line{def, logLevelValidate, usage, p}
+	p = def
+	options := []string{}
+	for i := range cl.Levels {
+		options = append(options, i)
+	}
+	avail := fmt.Sprint(" { ", Stringslice(options), " }")
+
+	var l Line
+	l = Line{
+		def, func(s string) bool {
+			for x := range cl.Levels {
+				if x == s {
+					l.Value = s
+					return true
+				}
+			}
+			return false
+		}, usage + avail, p,
+	}
+	return &l
 }
 
 func Path(def, usage string) *Line {
-	p := new(string)
-	*p = CleanAndExpandPath(def)
-	return &Line{def, func(s string) bool {
-		*p = CleanAndExpandPath(s)
+	p := CleanAndExpandPath(def)
+	var l Line
+	l = Line{def, func(s string) bool {
+		l.Value = CleanAndExpandPath(s)
 		return true
 	}, usage, p}
+	return &l
 }
 
 // SubSystem is just a list of alphanumeric names followed by a
 // colon followed by a string value, space separated, all lower case.
 func SubSystem(def, usage string) *Line {
-	p := make(map[string]string)
+	p := make(Mapstringstring)
 	return &Line{def, func(s string) bool {
 		ss := strings.Split(strings.TrimSpace(s), " ")
 		for _, y := range ss {
@@ -81,15 +141,15 @@ func SubSystem(def, usage string) *Line {
 			}
 		}
 		return false
-	}, usage, &p}
+	}, usage, p}
 }
 
 func Network(def, usage string) *Line {
-	p := new(string)
+	var p string
 	networkValidate := func(s string) bool {
 		for _, x := range Networks {
 			if x == s {
-				*p = s
+				p = s
 				return true
 			}
 		}
@@ -98,31 +158,31 @@ func Network(def, usage string) *Line {
 	if !networkValidate(def) {
 		panic("default network was not in available set")
 	}
-	return &Line{def, networkValidate, usage, p}
+	return &Line{
+		def, networkValidate, usage, p,
+	}
 }
-
-var netAddr func(s string) bool
 
 // NetAddr is for a single network address ie scheme://host:port
 func NetAddr(def, usage string) *Line {
-	o := new(string)
 	defaultPort, _, _ := net.SplitHostPort(def)
-	netAddr = func(s string) bool {
+	var l Line
+	l = Line{def, func(s string) bool {
 		_, _, err := net.SplitHostPort(s)
 		if err != nil {
 			a := net.JoinHostPort(s, defaultPort)
-			o = &a
+			l.Value = a
 			return true
 		}
-		o = &s
+		l.Value = s
 		return true
-	}
-	return &Line{def, netAddr, usage, o}
+	}, usage, def}
+	return &l
 }
 
 // NetAddrs is for a multiple network addresses ie scheme://host:port, separated by spaces. If a default is given, its port is taken as the default port. If only a number is present, it is used as the defaultPort
 func NetAddrs(def, usage string) *Line {
-	o := new([]string)
+	o := make(Stringslice, 0)
 	var defaultPort string
 	n, e := strconv.Atoi(def)
 	if e == nil {
@@ -130,74 +190,83 @@ func NetAddrs(def, usage string) *Line {
 	} else if len(def) > 1 {
 		defaultPort, _, _ = net.SplitHostPort(def)
 	}
-	netAddrs := func(ss string) bool {
-		s := strings.Split(ss, " ")
-		for _, x := range s {
-			_, _, err := net.SplitHostPort(x)
-			if err != nil {
-				a := net.JoinHostPort(x, defaultPort)
-				*o = append(*o, a)
-				return true
+	var l Line
+	l = Line{
+		def, func(ss string) bool {
+			s := strings.Split(ss, " ")
+			for _, x := range s {
+				_, _, err := net.SplitHostPort(x)
+				if err != nil {
+					a := net.JoinHostPort(x, defaultPort)
+					l.Value = append(l.Value.(Stringslice), a)
+					return true
+				}
+				l.Value = append(l.Value.(Stringslice), x)
 			}
-			*o = append(*o, x)
-		}
-		return true
+			return true
+		}, usage, o,
 	}
-	return &Line{def, netAddrs, usage, o}
+	return &l
 }
 
 // Int is for a single 64 bit integer. We see no point in
 // complicating things, so this is golang `int` with no
 // special meanings
 func Int(def int, usage string) *Line {
-	o := new(int)
-	*o = def
-	return &Line{def, func(s string) bool {
+	o := def
+	var l Line
+	l = Line{def, func(s string) bool {
 		n, e := strconv.Atoi(s)
 		if e == nil {
-			*o = n
+			l.Value = n
 		} else {
 			return false
 		}
 		return true
 	}, usage, o}
+	return &l
 }
 
 // IntBounded is an integer whose value must be between a min
 // and max
 func IntBounded(def int, usage string, min, max int) *Line {
-	o := new(int)
-	*o = def
-	return &Line{def, func(s string) bool {
+	o := def
+	var l Line
+	l = Line{def, func(s string) bool {
 		n, e := strconv.Atoi(s)
 		if e == nil {
-			*o = n
+			if n < min || n > max {
+				return false
+			}
+			l.Value = n
 		} else {
 			return false
 		}
-		if n < min || n > max {
-			return false
-		}
 		return true
-	}, usage, o}
+	}, usage + fmt.Sprintf(" { %d < %d }", min, max), o}
+	return &l
 }
 
 // Enable is a boolean value
 func Enable(usage string) *Line {
-	o := new(bool)
-	*o = false
-	return &Line{false, func(s string) bool {
+	o := false
+	var l Line
+	l = Line{o, func(s string) bool {
+		l.Value = true
 		return true
 	}, usage, o}
+	return &l
 }
 
 // Disable is a boolean value
 func Disable(usage string) *Line {
-	o := new(bool)
-	*o = true
-	return &Line{false, func(s string) bool {
+	o := false
+	var l Line
+	l = Line{o, func(s string) bool {
+		l.Value = true
 		return true
 	}, usage, o}
+	return &l
 }
 
 // Duration is a time value in golang 24h60m60s format. If it fails to
@@ -208,13 +277,15 @@ func Duration(def, usage string) *Line {
 	if e != nil {
 		o = time.Second * 0
 	}
-	return &Line{def, func(s string) bool {
-		o, e = time.ParseDuration(s)
+	var l Line
+	l = Line{def, func(s string) bool {
+		l.Value, e = time.ParseDuration(s)
 		if e != nil {
-			o = time.Second * 0
+			l.Value = time.Second * 0
 		}
 		return true
-	}, usage, &o}
+	}, usage, o}
+	return &l
 }
 
 // String is just a boring old string. There is no limitations on what
@@ -222,22 +293,26 @@ func Duration(def, usage string) *Line {
 // whitespace trimmed.
 func String(def, usage string) *Line {
 	o := strings.TrimSpace(def)
-	return &Line{def, func(s string) bool {
-		o = strings.TrimSpace(def)
+	var l Line
+	l = Line{def, func(s string) bool {
+		l.Value = strings.TrimSpace(s)
 		return true
-	}, usage, &o}
+	}, usage, o}
+	return &l
 }
 
 // StringSlice is an array of strings, encoded as a series of strings
 // separated by backticks `
 func StringSlice(def, usage string) *Line {
 	s := strings.TrimSpace(def)
-	ss := strings.Split(s, "`")
-	return &Line{def, func(s string) bool {
+	ss := Stringslice(strings.Split(s, "`"))
+	var l Line
+	l = Line{def, func(s string) bool {
 		s = strings.TrimSpace(s)
-		ss = strings.Split(s, "`")
+		l.Value = strings.Split(s, "`")
 		return true
-	}, usage, &ss}
+	}, usage, ss}
+	return &l
 }
 
 // Float is a 64 bit floating point number. Returns zero if nothing
@@ -247,33 +322,42 @@ func Float(def, usage string) *Line {
 	if e != nil {
 		f = float64(0.0)
 	}
-	return &Line{def, func(s string) bool {
-		f, e = strconv.ParseFloat(s, 64)
+	var l Line
+	l = Line{def, func(s string) bool {
+		l.Value, e = strconv.ParseFloat(s, 64)
 		if e != nil {
-			f = float64(0.0)
+			l.Value = float64(0.0)
 		}
 		return true
-	}, usage, &f}
+	}, usage, f}
+	return &l
 }
 
 // Algos is the available mining algorithms, read out of the fork
 // package
 func Algos(def, usage string) *Line {
-	o := new(string)
+	o := "random"
+	options := []string{}
 	for _, x := range fork.P9AlgoVers {
 		if x == def {
-			*o = def
+			o = def
 		}
+		options = append(options, x)
 	}
-	return &Line{def, func(s string) bool {
+	avail := fmt.Sprint(options)
+	avail = avail[1 : len(avail)-2]
+	avail = fmt.Sprint(" { random ", avail, " }")
+	var l Line
+	l = Line{def, func(s string) bool {
 		for _, x := range fork.P9AlgoVers {
-			if x == def {
-				*o = def
+			if x == s {
+				l.Value = s
 				return true
 			}
 		}
 		return false
-	}, usage, o}
+	}, usage + avail, o}
+	return &l
 }
 
 // ValidName checks to see a name is a valid name - first letter

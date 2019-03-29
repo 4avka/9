@@ -93,7 +93,7 @@ var Config = Lines{
 		"set mining addresses, space separated",
 	),
 	"mining.algo": Algos(
-		"",
+		"random",
 		"select from available mining algorithms",
 	),
 	"mining.bias": Float(
