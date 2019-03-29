@@ -16,8 +16,7 @@ func Parse(args []string) int {
 	}
 	// read configuration
 	dd, ok := Config["app.datadir"]
-	dsp := dd.Value.(*string)
-	datadir := *dsp
+	datadir := dd.Value.(string)
 	if ok {
 		if t, ok := tokens["datadir"]; ok {
 			datadir = t.Value
@@ -26,11 +25,15 @@ func Parse(args []string) int {
 	log <- cl.Debug{"loading config from:", datadir}
 	configFile := filepath.Join(datadir, "config")
 	fmt.Println("loading config from", configFile)
+
+	fmt.Println(Config)
+	// spew.Dump(Config)
 	// run as configured
-	cmd.Handler(
-		args,
-		tokens,
-		cmds,
-		commands)
+	_ = cmds
+	// cmd.Handler(
+	// 	args,
+	// 	tokens,
+	// 	cmds,
+	// 	commands)
 	return 0
 }
