@@ -91,6 +91,12 @@ func LogLevel(def, usage string) *Line {
 		panic("log level was not in available set")
 	}
 	p = def
+	options := []string{}
+	for i := range cl.Levels {
+		options = append(options, i)
+	}
+	avail := fmt.Sprint(" { ", Stringslice(options), " }")
+
 	var l Line
 	l = Line{
 		def, func(s string) bool {
@@ -101,7 +107,7 @@ func LogLevel(def, usage string) *Line {
 				}
 			}
 			return false
-		}, usage, p,
+		}, usage + avail, p,
 	}
 	return &l
 }
@@ -159,7 +165,6 @@ func Network(def, usage string) *Line {
 
 // NetAddr is for a single network address ie scheme://host:port
 func NetAddr(def, usage string) *Line {
-	var o string
 	defaultPort, _, _ := net.SplitHostPort(def)
 	var l Line
 	l = Line{def, func(s string) bool {
@@ -171,7 +176,7 @@ func NetAddr(def, usage string) *Line {
 		}
 		l.Value = s
 		return true
-	}, usage, o}
+	}, usage, def}
 	return &l
 }
 
@@ -332,11 +337,16 @@ func Float(def, usage string) *Line {
 // package
 func Algos(def, usage string) *Line {
 	o := "random"
+	options := []string{}
 	for _, x := range fork.P9AlgoVers {
 		if x == def {
 			o = def
 		}
+		options = append(options, x)
 	}
+	avail := fmt.Sprint(options)
+	avail = avail[1 : len(avail)-2]
+	avail = fmt.Sprint(" { random ", avail, " }")
 	var l Line
 	l = Line{def, func(s string) bool {
 		for _, x := range fork.P9AlgoVers {
@@ -346,7 +356,7 @@ func Algos(def, usage string) *Line {
 			}
 		}
 		return false
-	}, usage, o}
+	}, usage + avail, o}
 	return &l
 }
 
