@@ -2,10 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"reflect"
 	"regexp"
 	"sort"
 	"strings"
 
+	"git.parallelcoin.io/dev/9/pkg/chain/fork"
+	"git.parallelcoin.io/dev/9/pkg/util/cl"
 	"github.com/AlecAivazis/survey"
 )
 
@@ -28,14 +31,13 @@ func ConfMain() int {
 		options = uniq(lines)
 		sort.Strings(options)
 		options = append([]string{
-			"run:node",
-			"run:wallet",
-			"run:shell",
+			"run: select a server to run",
 		}, options...)
 		options = append(options, "exit")
 		prompt := &survey.Select{
-			Message: "please select an option, type to filter",
-			Options: options,
+			Message:  "ⓟ",
+			Options:  options,
+			PageSize: 9,
 		}
 		var name string
 		err := survey.AskOne(prompt, &name, nil)
@@ -62,38 +64,127 @@ out:
 }
 
 func ConfRun(subsection string) int {
-	fmt.Println("running:", subsection)
-	return 0
-}
-
-func ConfConf(subsection string) int {
-	fmt.Println("configure:", subsection)
-	var lines []string
-	re := regexp.MustCompile("(" + subsection + "[.])(.*)")
-	for i := range Config {
-		if re.Match([]byte(i)) {
-			sects := re.FindAllStringSubmatch(i, 1)
-			c := Config[i]
-			item := fmt.Sprintf("%s : %v (%v) = %v", sects[0][2], c.Comment, c.Default, c.Value)
-			lines = append(lines, item)
-		}
-	}
-	lines = append(lines, "exit")
 	prompt := &survey.Select{
-		Message: "configuration:" + subsection + " ",
-		Options: lines,
+		Message: "select server to run:",
+		Options: []string{"node", "wallet", "shell"},
 	}
 	var name string
 	err := survey.AskOne(prompt, &name, nil)
 	if err != nil {
-		fmt.Println("ERROR:", err)
+		return 1
 	}
-	if name == "exit" {
-		return 0
-	}
+	return 0
+}
 
-	// for i, x := range lines {
-	// 	fmt.Println("line", i, x)
-	// }
+func ConfConf(subsection string) int {
+	for {
+		// fmt.Println("configure:", subsection)
+		var lines []string
+		re := regexp.MustCompile("(" + subsection + "[.])(.*)")
+		for i := range Config {
+			if re.Match([]byte(i)) {
+				sects := re.FindAllStringSubmatch(i, 1)
+				c := Config[i]
+				item := fmt.Sprintf("%s : %v (%v) = %v", sects[0][2], c.Comment, c.Default, c.Value)
+				lines = append(lines, item)
+			}
+		}
+		sort.Strings(lines)
+		lines = append(lines, "exit")
+		prompt := &survey.Select{
+			Message:  "configuration:" + subsection + " ",
+			Options:  lines,
+			Help:     "select the variable to edit",
+			PageSize: 9,
+		}
+		var name string
+		err := survey.AskOne(prompt, &name, nil)
+		if err != nil {
+			fmt.Println("ERROR:", err)
+		}
+		name = strings.Split(name, " ")[0]
+		if name == "exit" {
+			break
+		}
+		// fmt.Printf("editing %s:%s\n", subsection, name)
+		key := subsection + "." + name
+		return ConfConfEdit(key)
+	}
+	return 0
+}
+
+func ConfConfEdit(key string) int {
+	if _, ok := Config[key]; !ok {
+		fmt.Println("key not found:", key)
+		return 1
+	}
+	// fmt.Println("editing key", key)
+	// spew.Dump(Config)
+	// fmt.Println("var type", reflect.TypeOf(Config[key].Value))
+	var name string
+	switch key {
+	case "p2p.network":
+		prompt := &survey.Select{
+			Message: "editing key " + key,
+			Options: Networks,
+			Default: Config[key].Value.(string),
+		}
+		err := survey.AskOne(prompt, &name, nil)
+		if err != nil {
+			fmt.Println("ERROR:", err)
+		}
+		Config[key].Value = name
+	case "log.level":
+		var options []string
+		for i := range cl.Levels {
+			options = append(options, i)
+		}
+		sort.Strings(options)
+		prompt := &survey.Select{
+			Message: "editing key " + key,
+			Options: options,
+			Default: Config[key].Value.(string),
+		}
+		err := survey.AskOne(prompt, &name, nil)
+		if err != nil {
+			fmt.Println("ERROR:", err)
+		}
+		Config[key].Value = name
+	case "mining.algo":
+		options := []string{}
+		for _, x := range fork.P9AlgoVers {
+			options = append(options, x)
+		}
+		options = append(options, "random")
+		sort.Strings(options)
+		prompt := &survey.Select{
+			Message: "editing key " + key,
+			Options: options,
+			Default: Config[key].Value.(string),
+		}
+		err := survey.AskOne(prompt, &name, nil)
+		if err != nil {
+			fmt.Println("ERROR:", err)
+		}
+		Config[key].Value = name
+	default:
+		// switch on type
+		switch t := Config[key].Value.(type) {
+		case int:
+			fmt.Println("int", t)
+		case bool:
+			t = !t
+			Config[key].Value = t
+			fmt.Println("set", key, "to", t, ":", Config[key].Comment)
+		case string:
+			fmt.Println("string", t)
+		case []string:
+			fmt.Println("[]string", t)
+		default:
+			fmt.Println(
+				"type not handled:",
+				reflect.TypeOf(Config[key].Value))
+		}
+	}
 	return 0
 }
