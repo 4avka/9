@@ -1,6 +1,4 @@
- <img src="https://git.parallelcoin.io/com/assets/raw/branch/master/logo/logo64x64.png"> <sup><i>9</i></sup>
-
-##  ***9*** <sub>[all in one everything]</sub>
+ <img src="https://git.parallelcoin.io/com/assets/raw/branch/master/logo/logo64x64.png"> <sup><i>9</i></sup><sub>[all in one everything]</sub>
 
 # what is parallelcoin?
 
