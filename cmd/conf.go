@@ -49,12 +49,12 @@ func ConfMain() int {
 		}
 		prefix := strings.Split(name, ":")[0]
 		suffix := strings.Split(name, ":")[1]
-		// fmt.Println("section:", prefix)
-		// fmt.Println("subsection:", suffix)
 		switch prefix {
 		case "run":
-			ConfRun(suffix)
-			goto out
+			r := ConfRun(suffix)
+			if r == 1 {
+				goto out
+			}
 		case "configure":
 			ConfConf(suffix)
 		}
@@ -66,12 +66,15 @@ out:
 func ConfRun(subsection string) int {
 	prompt := &survey.Select{
 		Message: "select server to run:",
-		Options: []string{"node", "wallet", "shell"},
+		Options: []string{"node", "wallet", "shell", "back"},
 	}
 	var name string
 	err := survey.AskOne(prompt, &name, nil)
 	if err != nil {
 		return 1
+	}
+	if name == "back" {
+		return 2
 	}
 	return 0
 }
@@ -90,7 +93,7 @@ func ConfConf(subsection string) int {
 			}
 		}
 		sort.Strings(lines)
-		lines = append(lines, "exit")
+		lines = append(lines, "back")
 		prompt := &survey.Select{
 			Message:  "configuration:" + subsection + " ",
 			Options:  lines,
@@ -103,7 +106,7 @@ func ConfConf(subsection string) int {
 			fmt.Println("ERROR:", err)
 		}
 		name = strings.Split(name, " ")[0]
-		if name == "exit" {
+		if name == "back" {
 			break
 		}
 		// fmt.Printf("editing %s:%s\n", subsection, name)
