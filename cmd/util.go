@@ -9,6 +9,25 @@ import (
 	"git.parallelcoin.io/dev/9/pkg/util"
 )
 
+// EnsureDir checks a file could be written to a path, creates the directories as needed
+func EnsureDir(fileName string) bool {
+	dirName := filepath.Dir(fileName)
+	if _, serr := os.Stat(dirName); serr != nil {
+		merr := os.MkdirAll(dirName, os.ModePerm)
+		if merr != nil {
+			panic(merr)
+		}
+		return true
+	}
+	return false
+}
+
+// FileExists reports whether the named file or directory exists.
+func FileExists(filePath string) bool {
+	_, err := os.Stat(filePath)
+	return err == nil
+}
+
 // CleanAndExpandPath expands environment variables and leading ~ in the passed path, cleans the result, and returns it.
 func CleanAndExpandPath(path string) string {
 	// Expand initial ~ to OS specific home directory.

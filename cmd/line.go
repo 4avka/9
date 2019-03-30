@@ -20,8 +20,8 @@ type Line struct {
 	// Default is the default for this value
 	Default interface{}
 
-	// Type is basically an empty version of the possible thing. Slices
-	// with contents are assumed to be toggles, empty slices are
+	// Type is basically an empty version of the possible thing.
+	// Slices with contents are assumed to be toggles, empty slices are
 	// arrays, type must match the value and default type
 	Validator func(string) bool
 
@@ -100,6 +100,10 @@ func LogLevel(def, usage string) *Line {
 	var l Line
 	l = Line{
 		def, func(s string) bool {
+			s = strings.TrimSpace(s)
+			if len(s) < 1 {
+				return true
+			}
 			for x := range cl.Levels {
 				if x == s {
 					l.Value = s
@@ -125,9 +129,14 @@ func Path(def, usage string) *Line {
 // SubSystem is just a list of alphanumeric names followed by a
 // colon followed by a string value, space separated, all lower case.
 func SubSystem(def, usage string) *Line {
+
 	p := make(Mapstringstring)
 	return &Line{def, func(s string) bool {
-		ss := strings.Split(strings.TrimSpace(s), " ")
+		s = strings.TrimSpace(s)
+		if len(s) < 1 {
+			return true
+		}
+		ss := strings.Split(s, " ")
 		for _, y := range ss {
 			sss := strings.Split(y, ":")
 			for _, x := range cl.Register.List() {
@@ -183,7 +192,9 @@ func NetAddr(def, usage string) *Line {
 	return &l
 }
 
-// NetAddrs is for a multiple network addresses ie scheme://host:port, separated by spaces. If a default is given, its port is taken as the default port. If only a number is present, it is used as the defaultPort
+// NetAddrs is for a multiple network addresses ie scheme://host:port, separated by spaces.
+// If a default is given, its port is taken as the default port. If only a number is present,
+// it is used as the defaultPort
 func NetAddrs(def, usage string) *Line {
 	o := make(Stringslice, 0)
 	var defaultPort string
@@ -196,6 +207,10 @@ func NetAddrs(def, usage string) *Line {
 	var l Line
 	l = Line{
 		def, func(ss string) bool {
+			ss = strings.TrimSpace(ss)
+			if len(ss) < 1 {
+				return true
+			}
 			s := strings.Split(ss, " ")
 			for _, x := range s {
 				_, _, err := net.SplitHostPort(x)
@@ -312,7 +327,10 @@ func StringSlice(def, usage string) *Line {
 	var l Line
 	l = Line{def, func(s string) bool {
 		s = strings.TrimSpace(s)
-		l.Value = strings.Split(s, "`")
+		values := strings.Split(s, "`")
+		if len(values) > 1 {
+			l.Value = values
+		}
 		return true
 	}, usage, ss}
 	return &l
@@ -348,10 +366,15 @@ func Algos(def, usage string) *Line {
 		options = append(options, x)
 	}
 	avail := fmt.Sprint(options)
-	avail = avail[1 : len(avail)-2]
+	avail = avail[1 : len(avail)-1]
 	avail = fmt.Sprint(" { random ", avail, " }")
 	var l Line
 	l = Line{def, func(s string) bool {
+		s = strings.TrimSpace(s)
+		if len(s) < 1 || s == "random" {
+			l.Value = "random"
+			return true
+		}
 		for _, x := range fork.P9AlgoVers {
 			if x == s {
 				l.Value = s
