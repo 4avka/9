@@ -196,8 +196,13 @@ func NetAddr(def, usage string) *Line {
 // If a default is given, its port is taken as the default port. If only a number is present,
 // it is used as the defaultPort
 func NetAddrs(def, usage string) *Line {
-	o := make(Stringslice, 0)
+	o := []string{}
 	var defaultPort string
+	if len(def) < 1 {
+		def = ":11047"
+	} else {
+		o = append(o, def)
+	}
 	n, e := strconv.Atoi(def)
 	if e == nil {
 		defaultPort = fmt.Sprint(n)
@@ -216,10 +221,10 @@ func NetAddrs(def, usage string) *Line {
 				_, _, err := net.SplitHostPort(x)
 				if err != nil {
 					a := net.JoinHostPort(x, defaultPort)
-					l.Value = append(l.Value.(Stringslice), a)
+					l.Value = append(l.Value.([]string), a)
 					return true
 				}
-				l.Value = append(l.Value.(Stringslice), x)
+				l.Value = append(l.Value.([]string), x)
 			}
 			return true
 		}, usage, o,
@@ -270,7 +275,7 @@ func Enable(usage string) *Line {
 	o := false
 	var l Line
 	l = Line{o, func(s string) bool {
-		l.Value = true
+		l.Value = strings.ToLower(s) == "true"
 		return true
 	}, usage, o}
 	return &l
@@ -281,7 +286,7 @@ func Disable(usage string) *Line {
 	o := false
 	var l Line
 	l = Line{o, func(s string) bool {
-		l.Value = true
+		l.Value = strings.ToLower(s) == "true"
 		return true
 	}, usage, o}
 	return &l
@@ -357,7 +362,8 @@ func Float(def, usage string) *Line {
 // Algos is the available mining algorithms, read out of the fork
 // package
 func Algos(def, usage string) *Line {
-	o := "random"
+	const modernd = "random"
+	o := modernd
 	options := []string{}
 	for _, x := range fork.P9AlgoVers {
 		if x == def {
@@ -367,12 +373,12 @@ func Algos(def, usage string) *Line {
 	}
 	avail := fmt.Sprint(options)
 	avail = avail[1 : len(avail)-1]
-	avail = fmt.Sprint(" { random ", avail, " }")
+	avail = fmt.Sprint(" { "+modernd+" ", avail, " }")
 	var l Line
 	l = Line{def, func(s string) bool {
 		s = strings.TrimSpace(s)
-		if len(s) < 1 || s == "random" {
-			l.Value = "random"
+		if len(s) < 1 || s == modernd {
+			l.Value = modernd
 			return true
 		}
 		for _, x := range fork.P9AlgoVers {

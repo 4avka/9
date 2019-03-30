@@ -1,5 +1,7 @@
 package cmd
 
+const defaultDatadir = "~/." + APPNAME
+
 // Config is the declaration of our set of application configuration variables.
 // Custom functions are written per type that generate a Line struct and contain
 // a validator/setter function that checks the input
@@ -9,7 +11,7 @@ var Config = Lines{
 		"write cpu profile",
 	),
 	"app.datadir": Path(
-		"~/."+APPNAME,
+		defaultDatadir,
 		"base directory containing configuration and data",
 	),
 	"app.profile": IntBounded(
@@ -87,6 +89,13 @@ var Config = Lines{
 	"log.subsystem": SubSystem(
 		"",
 		"[subsystem:loglevel ]+",
+	),
+	"log.file": Path(
+		defaultDatadir+"/log.txt",
+		"log file",
+	),
+	"log.nowrite": Enable(
+		"disable writing to log file",
 	),
 	"mining.addresses": StringSlice(
 		"",
@@ -256,8 +265,8 @@ var Config = Lines{
 	"tls.onetime": Enable(
 		"creates a key pair but does not write the secret for future runs",
 	),
-	"tls.server": Enable(
-		"enable tls for RPC servers",
+	"tls.server": Disable(
+		"disable tls for RPC servers",
 	),
 	"tls.skipverify": Enable(
 		"skip verifying tls certificates with CAFile",
