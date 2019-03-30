@@ -47,7 +47,7 @@ func Parse(args []string) int {
 		}
 
 	} else {
-		fmt.Println("loading config from", configFile)
+		// fmt.Println("loading config from", configFile)
 		conf, err := ioutil.ReadFile(configFile)
 		if err != nil {
 			panic(err)
@@ -66,8 +66,8 @@ func Parse(args []string) int {
 					"name", out[2], "erroneous value:", out[4])
 			}
 		}
-		fmt.Println("loaded config")
-		fmt.Println(Config)
+		// fmt.Println("loaded config")
+		// fmt.Println(Config)
 	}
 
 	// spew.Dump(Config)

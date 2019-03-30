@@ -85,8 +85,8 @@ func Help(args []string, tokens Tokens, cmds, all Commands) int {
 }
 
 func Conf(args []string, tokens Tokens, cmds, all Commands) int {
-	fmt.Println("running Conf", args)
-	return 0
+	// fmt.Println("running Conf", args)
+	return RunConf(args, tokens, cmds, all)
 }
 
 func New(args []string, tokens Tokens, cmds, all Commands) int {
