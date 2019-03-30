@@ -145,6 +145,7 @@ func ConfConfEdit(key string) int {
 			Options: options,
 			Default: Config[key].Value.(string),
 		}
+
 		err := survey.AskOne(prompt, &name, nil)
 		if err != nil {
 			fmt.Println("ERROR:", err)
