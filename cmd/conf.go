@@ -13,13 +13,27 @@ import (
 	"github.com/AlecAivazis/survey"
 )
 
+const BACK = "back"
+
 func RunConf(args []string, tokens Tokens, cmds, all Commands) int {
 	fmt.Println("ⓟarallelcoin configuration CLI")
-	ConfMain()
+	runner := ConfMain()
+	switch runner {
+	case "node":
+		Node(args, tokens, cmds, all)
+	case "wallet":
+		Wallet(args, tokens, cmds, all)
+	case "shell":
+		Shell(args, tokens, cmds, all)
+	case "":
+		return 0
+	default:
+		return 1
+	}
 	return 0
 }
 
-func ConfMain() int {
+func ConfMain() string {
 	for {
 		var options []string
 		var lines []string
@@ -46,38 +60,33 @@ func ConfMain() int {
 			fmt.Println("ERROR:", err)
 		}
 		if name == "exit" {
-			return 0
+			return ""
 		}
 		prefix := strings.Split(name, ":")[0]
 		suffix := strings.Split(name, ":")[1]
 		switch prefix {
 		case "run":
-			r := ConfRun(suffix)
-			if r == 1 {
-				goto out
-			}
+			return ConfRun()
 		case "configure":
 			ConfConf(suffix)
 		}
 	}
-out:
-	return 0
 }
 
-func ConfRun(subsection string) int {
+func ConfRun() string {
 	prompt := &survey.Select{
 		Message: "select server to run:",
-		Options: []string{"node", "wallet", "shell", "back"},
+		Options: []string{"node", "wallet", "shell", BACK},
 	}
 	var name string
 	err := survey.AskOne(prompt, &name, nil)
 	if err != nil {
-		return 1
+		return err.Error()
 	}
-	if name == "back" {
-		return 2
+	if name == BACK {
+		return ""
 	}
-	return 0
+	return name
 }
 
 var cursor string
@@ -97,7 +106,7 @@ func ConfConf(subsection string) int {
 			}
 		}
 		sort.Strings(lines)
-		lines = append(lines, "back")
+		lines = append(lines, BACK)
 		prompt := &survey.Select{
 			Message:  "configuration:" + subsection + " ",
 			Options:  lines,
@@ -110,7 +119,7 @@ func ConfConf(subsection string) int {
 			fmt.Println("ERROR:", err)
 		}
 		name = strings.Split(name, " ")[0]
-		if name == "back" {
+		if name == BACK {
 			break
 		}
 		// fmt.Printf("editing %s:%s\n", subsection, name)
@@ -267,7 +276,7 @@ func ConfConfEdit(key string) int {
 					t = Config[key].Value.([]string)
 					prompt := &survey.Select{
 						Message: key + ">",
-						Options: append(append([]string{"new"}, t...), "back"),
+						Options: append(append([]string{"new"}, t...), BACK),
 					}
 					var name string
 					err := survey.AskOne(prompt, &name, nil)
@@ -275,7 +284,7 @@ func ConfConfEdit(key string) int {
 						fmt.Println("ERROR:", err)
 					}
 					switch name {
-					case "back":
+					case BACK:
 						again = false
 						return 0
 					case "new":
