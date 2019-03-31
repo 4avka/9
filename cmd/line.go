@@ -328,7 +328,7 @@ func String(def, usage string) *Line {
 // separated by backticks `
 func StringSlice(def, usage string) *Line {
 	s := strings.TrimSpace(def)
-	ss := Stringslice(strings.Split(s, "`"))
+	ss := strings.Split(s, "`")
 	var l Line
 	l = Line{def, func(s string) bool {
 		s = strings.TrimSpace(s)
