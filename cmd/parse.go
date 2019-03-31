@@ -24,7 +24,7 @@ func Parse(args []string) int {
 	// read configuration
 	dd, ok := Config["app.datadir"]
 	if ok {
-		datadir = dd.Value.(string)
+		datadir = *dd.Value.(*string)
 		if t, ok := tokens["datadir"]; ok {
 			datadir = t.Value
 			Config["app.datadir"].Value = datadir

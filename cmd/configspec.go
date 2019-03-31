@@ -57,11 +57,11 @@ var Config = Lines{
 		"ffldb",
 		"set database backend to use for chain",
 	),
-	"chain.addrindex": Enable(
-		"enable address index (disables also transaction index)",
+	"chain.noaddrindex": Disable(
+		"disable address index (disables also transaction index)",
 	),
-	"chain.txindex": Enable(
-		"enable transaction index",
+	"chain.notxindex": Disable(
+		"disable transaction index",
 	),
 	"chain.rejectnonstd": Enable(
 		"reject nonstandard transactions even if net parameters allow it",

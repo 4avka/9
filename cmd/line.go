@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"git.parallelcoin.io/dev/9/cmd/nine"
 	"git.parallelcoin.io/dev/9/pkg/chain/fork"
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
@@ -32,20 +33,12 @@ type Line struct {
 }
 
 func (l *Line) String() string {
-	return fmt.Sprint(l.Value)
+	return fmt.Sprint(*l.Value.(*string))
 }
 
 type Lines map[string]*Line
 
-type Mapstringstring map[string]*string
 type Stringslice []string
-
-func (m Mapstringstring) String() (out string) {
-	for i, x := range m {
-		out += i + ":" + *x + " "
-	}
-	return strings.TrimSpace(out)
-}
 
 func (s Stringslice) String() (out string) {
 	for i, x := range s {
@@ -65,7 +58,7 @@ func (l Lines) String() (out string) {
 	sort.Strings(tags)
 	for _, x := range tags {
 		out += fmt.Sprint("NAME ", x)
-		out += fmt.Sprint(" VALUE ", l[x].String())
+		out += fmt.Sprint(" VALUE ", l[x])
 		out += fmt.Sprint(" DEFAULT ", l[x].Default)
 		out += fmt.Sprint(" COMMENT ", l[x].Comment, "\n")
 	}
@@ -128,7 +121,7 @@ func Path(def, usage string) *Line {
 // SubSystem is just a list of alphanumeric names followed by a
 // colon followed by a string value, space separated, all lower case.
 func SubSystem(def, usage string) *Line {
-	p := make(Mapstringstring)
+	p := make(nine.Mapstringstring)
 	return &Line{def, func(s string) bool {
 		s = strings.TrimSpace(s)
 		if len(s) < 1 {
@@ -169,7 +162,7 @@ func Network(def, usage string) *Line {
 	nets = nets[1 : len(nets)-1]
 	nets = " { " + nets + " }"
 	return &Line{
-		def, networkValidate, usage + nets, &p,
+		def, networkValidate, usage + nets, p,
 	}
 }
 

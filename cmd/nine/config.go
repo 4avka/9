@@ -1,15 +1,25 @@
 package nine
 
 import (
+	"strings"
 	"time"
 )
+
+type Mapstringstring map[string]*string
+
+func (m Mapstringstring) String() (out string) {
+	for i, x := range m {
+		out += i + ":" + *x + " "
+	}
+	return strings.TrimSpace(out)
+}
 
 type Config struct {
 	ConfigFile               *string
 	DataDir                  *string
 	LogDir                   *string
 	LogLevel                 *string
-	Subsystems               *[]string
+	Subsystems               *Mapstringstring
 	Network                  *string
 	AddPeers                 *[]string
 	ConnectPeers             *[]string
@@ -52,7 +62,7 @@ type Config struct {
 	AddCheckpoints           *[]string
 	DisableCheckpoints       *bool
 	DbType                   *string
-	Profile                  *string
+	Profile                  *int
 	CPUProfile               *string
 	Upnp                     *bool
 	MinRelayTxFee            *float64
