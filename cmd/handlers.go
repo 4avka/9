@@ -5,7 +5,6 @@ import (
 	"sort"
 
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
-	"github.com/davecgh/go-spew/spew"
 )
 
 func optTagList(s []string) (ss string) {
@@ -115,16 +114,11 @@ func Ctl(args []string, tokens Tokens, cmds, all Commands) int {
 }
 
 func Node(args []string, tokens Tokens, cmds, all Commands) int {
-	fmt.Println("running Node", args, getTokens(tokens))
-	return 0
+	return runNode(args, tokens, cmds, all)
 }
 
 func Wallet(args []string, tokens Tokens, cmds, all Commands) int {
 	fmt.Println("running Wallet", args, getTokens(tokens))
-	fmt.Println("\ncmds")
-	spew.Dump(cmds)
-	fmt.Println("\nall")
-	spew.Dump(all)
 	return 0
 }
 

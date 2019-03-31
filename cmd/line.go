@@ -20,9 +20,7 @@ type Line struct {
 	// Default is the default for this value
 	Default interface{}
 
-	// Type is basically an empty version of the possible thing.
-	// Slices with contents are assumed to be toggles, empty slices are
-	// arrays, type must match the value and default type
+	// Validator returns true if the string is properly formed for the type
 	Validator func(string) bool
 
 	// The help string that will be shown by the interactive config
@@ -39,12 +37,12 @@ func (l *Line) String() string {
 
 type Lines map[string]*Line
 
-type Mapstringstring map[string]string
+type Mapstringstring map[string]*string
 type Stringslice []string
 
 func (m Mapstringstring) String() (out string) {
 	for i, x := range m {
-		out += i + ":" + x + " "
+		out += i + ":" + *x + " "
 	}
 	return strings.TrimSpace(out)
 }
@@ -106,12 +104,12 @@ func LogLevel(def, usage string) *Line {
 			}
 			for x := range cl.Levels {
 				if x == s {
-					l.Value = s
+					l.Value = &s
 					return true
 				}
 			}
 			return false
-		}, usage + avail, p,
+		}, usage + avail, &p,
 	}
 	return &l
 }
@@ -120,16 +118,16 @@ func Path(def, usage string) *Line {
 	p := CleanAndExpandPath(def)
 	var l Line
 	l = Line{def, func(s string) bool {
-		l.Value = CleanAndExpandPath(s)
+		ss := CleanAndExpandPath(s)
+		l.Value = &ss
 		return true
-	}, usage, p}
+	}, usage, &p}
 	return &l
 }
 
 // SubSystem is just a list of alphanumeric names followed by a
 // colon followed by a string value, space separated, all lower case.
 func SubSystem(def, usage string) *Line {
-
 	p := make(Mapstringstring)
 	return &Line{def, func(s string) bool {
 		s = strings.TrimSpace(s)
@@ -143,22 +141,22 @@ func SubSystem(def, usage string) *Line {
 				if x == sss[0] {
 					if _, ok := p[x]; !ok {
 						cl.Register.Get(x).SetLevel(sss[1])
-						p[x] = sss[1]
+						p[x] = &sss[1]
 					}
 					return true
 				}
 			}
 		}
 		return false
-	}, usage, p}
+	}, usage, &p}
 }
 
 func Network(def, usage string) *Line {
-	var p string
+	var p *string
 	networkValidate := func(s string) bool {
 		for _, x := range Networks {
 			if x == s {
-				p = s
+				p = &s
 				return true
 			}
 		}
@@ -171,24 +169,26 @@ func Network(def, usage string) *Line {
 	nets = nets[1 : len(nets)-1]
 	nets = " { " + nets + " }"
 	return &Line{
-		def, networkValidate, usage + nets, p,
+		def, networkValidate, usage + nets, &p,
 	}
 }
 
 // NetAddr is for a single network address ie scheme://host:port
 func NetAddr(def, usage string) *Line {
+	p := def
 	defaultPort, _, _ := net.SplitHostPort(def)
 	var l Line
 	l = Line{def, func(s string) bool {
 		_, _, err := net.SplitHostPort(s)
 		if err != nil {
 			a := net.JoinHostPort(s, defaultPort)
-			l.Value = a
+			l.Value = &a
 			return true
+		} else {
+			l.Value = &s
 		}
-		l.Value = s
 		return true
-	}, usage, def}
+	}, usage, &p}
 	return &l
 }
 
@@ -221,13 +221,15 @@ func NetAddrs(def, usage string) *Line {
 				_, _, err := net.SplitHostPort(x)
 				if err != nil {
 					a := net.JoinHostPort(x, defaultPort)
-					l.Value = append(l.Value.([]string), a)
+					ss := append(l.Value.([]string), a)
+					l.Value = &ss
 					return true
 				}
-				l.Value = append(l.Value.([]string), x)
+				sss := append(l.Value.([]string), x)
+				l.Value = &sss
 			}
 			return true
-		}, usage, o,
+		}, usage, &o,
 	}
 	return &l
 }
@@ -241,12 +243,12 @@ func Int(def int, usage string) *Line {
 	l = Line{def, func(s string) bool {
 		n, e := strconv.Atoi(s)
 		if e == nil {
-			l.Value = n
+			l.Value = &n
 		} else {
 			return false
 		}
 		return true
-	}, usage, o}
+	}, usage, &o}
 	return &l
 }
 
@@ -261,12 +263,12 @@ func IntBounded(def int, usage string, min, max int) *Line {
 			if n < min || n > max {
 				return false
 			}
-			l.Value = n
+			l.Value = &n
 		} else {
 			return false
 		}
 		return true
-	}, usage + fmt.Sprintf(" { %d < %d }", min, max), o}
+	}, usage + fmt.Sprintf(" { %d < %d }", min, max), &o}
 	return &l
 }
 
@@ -275,9 +277,10 @@ func Enable(usage string) *Line {
 	o := false
 	var l Line
 	l = Line{o, func(s string) bool {
-		l.Value = strings.ToLower(s) == "true"
+		ss := strings.ToLower(s) == "true"
+		l.Value = &ss
 		return true
-	}, usage, o}
+	}, usage, &o}
 	return &l
 }
 
@@ -286,9 +289,10 @@ func Disable(usage string) *Line {
 	o := false
 	var l Line
 	l = Line{o, func(s string) bool {
-		l.Value = strings.ToLower(s) == "true"
+		ss := strings.ToLower(s) == "true"
+		l.Value = &ss
 		return true
-	}, usage, o}
+	}, usage, &o}
 	return &l
 }
 
@@ -302,12 +306,16 @@ func Duration(def, usage string) *Line {
 	}
 	var l Line
 	l = Line{def, func(s string) bool {
-		l.Value, e = time.ParseDuration(s)
+		var dd time.Duration
+		dd, e = time.ParseDuration(s)
 		if e != nil {
-			l.Value = time.Second * 0
+			ddd := time.Second * 0
+			l.Value = &ddd
+		} else {
+			l.Value = &dd
 		}
 		return true
-	}, usage, o}
+	}, usage, &o}
 	return &l
 }
 
@@ -318,9 +326,10 @@ func String(def, usage string) *Line {
 	o := strings.TrimSpace(def)
 	var l Line
 	l = Line{def, func(s string) bool {
-		l.Value = strings.TrimSpace(s)
+		ss := strings.TrimSpace(s)
+		l.Value = &ss
 		return true
-	}, usage, o}
+	}, usage, &o}
 	return &l
 }
 
@@ -334,10 +343,10 @@ func StringSlice(def, usage string) *Line {
 		s = strings.TrimSpace(s)
 		values := strings.Split(s, "`")
 		if len(values) > 1 {
-			l.Value = values
+			l.Value = &values
 		}
 		return true
-	}, usage, ss}
+	}, usage, &ss}
 	return &l
 }
 
@@ -350,12 +359,16 @@ func Float(def, usage string) *Line {
 	}
 	var l Line
 	l = Line{def, func(s string) bool {
-		l.Value, e = strconv.ParseFloat(s, 64)
+		var ff float64
+		ff, e = strconv.ParseFloat(s, 64)
 		if e != nil {
-			l.Value = float64(0.0)
+			fff := float64(0.0)
+			l.Value = &fff
+		} else {
+			l.Value = &ff
 		}
 		return true
-	}, usage, f}
+	}, usage, &f}
 	return &l
 }
 
@@ -388,7 +401,7 @@ func Algos(def, usage string) *Line {
 			}
 		}
 		return false
-	}, usage + avail, o}
+	}, usage + avail, &o}
 	return &l
 }
 

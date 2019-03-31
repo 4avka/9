@@ -1,284 +1,104 @@
 package cmd
 
-const defaultDatadir = "~/." + APPNAME
+import (
+	"time"
 
-// Config is the declaration of our set of application configuration variables.
-// Custom functions are written per type that generate a Line struct and contain
-// a validator/setter function that checks the input
-var Config = Lines{
-	"app.cpuprofile": Path(
-		" ",
-		"write cpu profile",
-	),
-	"app.datadir": Path(
-		defaultDatadir,
-		"base directory containing configuration and data",
-	),
-	"app.profile": IntBounded(
-		1100,
-		"http profiling on specified port",
-		1025, 65534,
-	),
-	"app.upnp": Enable(
-		"enable port forwarding via UPNP",
-	),
-	"block.maxsize": IntBounded(
-		900900,
-		"max block size",
-		250000, 10000000,
-	),
-	"block.maxweight": IntBounded(
-		3006000,
-		"max block weight",
-		10000, 10000000,
-	),
-	"block.minsize": IntBounded(
-		240,
-		"min block size",
-		240, 2<<32,
-	),
-	"block.minweight": IntBounded(
-		2000, "min block weight",
-		2000, 100000,
-	),
-	"block.prioritysize": IntBounded(
-		50000,
-		"the default size for high priority low fee transactions",
-		1000, 200000,
-	),
-	"chain.addcheckpoints": StringSlice(
-		"",
-		"add checkpoints [height:hash ]*",
-	),
-	"chain.dbtype": String(
-		"ffldb",
-		"set database backend to use for chain",
-	),
-	"chain.noaddrindex": Disable(
-		"disable address index (disables also transaction index)",
-	),
-	"chain.notxindex": Disable(
-		"disable transaction index",
-	),
-	"chain.rejectnonstandard": Enable(
-		"reject nonstandard transactions even if net parameters allow it",
-	),
-	"chain.relaynonstd": Enable(
-		"relay nonstandard transactions even if net parameters don't allow it",
-	),
-	"chain.rpc": NetAddr(
-		"127.0.0.1:11048",
-		"address of chain rpc to connect to",
-	),
-	"chain.sigcachemaxsize": IntBounded(
-		100000, "max number of signatures to keep in memory",
-		1000, 10000000,
-	),
-	"limit.pass": String(
-		"pa55word",
-		"password for limited user",
-	),
-	"limit.user": String(
-		"limit",
-		"username with limited privileges",
-	),
-	"log.level": LogLevel(
-		"info",
-		"sets the base default log level",
-	),
-	"log.subsystem": SubSystem(
-		"",
-		"[subsystem:loglevel ]+",
-	),
-	"log.file": Path(
-		defaultDatadir+"/log.txt",
-		"log file",
-	),
-	"log.nowrite": Enable(
-		"disable writing to log file",
-	),
-	"mining.addresses": StringSlice(
-		"",
-		"set mining addresses, space separated",
-	),
-	"mining.algo": Algos(
-		"random",
-		"select from available mining algorithms",
-	),
-	"mining.bias": Float(
-		"-0.5", "bias for difficulties -1 = always easy, 1 always hardest",
-	),
-	"mining.generate": Enable(
-		"enable builtin CPU miner",
-	),
-	"mining.genthreads": IntBounded(
-		-1,
-		"set number of threads, -1 = all",
-		-1, 4096,
-	),
-	"mining.listener": NetAddr(
-		"127.0.0.1:11049",
-		"set listener address for mining dispatcher",
-	),
-	"mining.pass": String(
-		"", // TODO: generate random pass
-		"password to secure mining dispatch connections",
-	),
-	"mining.switch": Duration(
-		"1s", "maximum time to mine per round",
-	),
-	"p2p.addpeer": NetAddrs(
-		"11047",
-		"add permanent p2p peer",
-	),
-	"p2p.banduration": Duration(
-		"24h",
-		"how long a ban lasts",
-	),
-	"p2p.blocksonly": Enable(
-		"relay only blocks",
-	),
-	"p2p.connect": NetAddrs(
-		"11047",
-		"connect only to these outbound peers",
-	),
-	"p2p.externalips": NetAddrs(
-		"11047",
-		"additional external IP addresses to bind to",
-	),
-	"p2p.freetxrelaylimit": Float(
-		"15.0",
-		"limit of 'free' relay in thousand bytes per minute",
-	),
-	"p2p.listen": NetAddrs(
-		"127.0.0.1:11047",
-		"address to listen on for p2p connections",
-	),
-	"p2p.maxorphanstxs": IntBounded(
-		100,
-		"maximum number of orphan transactions to keep",
-		10, 10000,
-	),
-	"p2p.maxpeers": IntBounded(
-		125,
-		"maximum number of peers to connect to",
-		2, 1024,
-	),
-	"p2p.minrelaytxfee": Float(
-		"0.0001000",
-		"minimum relay tx fee, baseline considered to be zero for relay",
-	),
-	"p2p.network": Network(
-		"mainnet",
-		"network to connect to",
-	),
-	"p2p.nobanning": Disable(
-		"disable banning of peers",
-	),
-	"p2p.nobloomfilters": Disable(
-		"disable bloom filters",
-	),
-	"p2p.nocfilters": Disable(
-		"disable cfilters",
-	),
-	"p2p.nodns": Disable(
-		"disable DNS seeding",
-	),
-	"p2p.norelaypriority": Enable(
-		"disables prioritisation of relayed transactions",
-	),
-	"p2p.trickleinterval": Duration(
-		"27s",
-		"minimum time between attempts to send new inventory to a connected peer",
-	),
-	"p2p.useragentcomments": String(
-		"",
-		"comment to add to version identifier for node",
-	),
-	"p2p.whitelist": NetAddrs(
-		"11047",
-		"peers who are never banned",
-	),
-	"proxy.address": NetAddr(
-		"127.0.0.1:9050",
-		"address of socks proxy",
-	),
-	"proxy.enable": Enable(
-		"enable socks proxy",
-	),
-	"proxy.isolation": Enable(
-		"enable randomisation of tor login to separate streams",
-	),
-	"proxy.pass": String(
-		"pa55word",
-		"username for proxy",
-	),
-	"proxy.tor": Enable(
-		"proxy is a tor proxy",
-	),
-	"proxy.user": String(
-		"user", "username for proxy",
-	),
-	"rpc.disable": Disable(
-		"disable rpc server",
-	),
-	"rpc.listen": NetAddrs(
-		"127.0.0.11048",
-		"address to listen for node rpc clients",
-	),
-	"rpc.maxclients": IntBounded(
-		8, "max clients for rpc",
-		2, 1024,
-	),
-	"rpc.maxconcurrentreqs": IntBounded(
-		128,
-		"maximum concurrent requests to handle",
-		2, 1024,
-	),
-	"rpc.maxwebsockets": IntBounded(
-		8,
-		"maximum websockets clients",
-		2, 1024,
-	),
-	"rpc.pass": String(
-		"pa55word",
-		"password for rpc services",
-	),
-	"rpc.quirks": Enable(
-		"enable json rpc quirks matching bitcoin",
-	),
-	"rpc.user": String(
-		"user",
-		"username for rpc services",
-	),
-	"rpc.wallet": NetAddr(
-		"127.0.0.1:11046",
-		"address of wallet rpc to connect to",
-	),
-	"tls.cafile": String(
-		"cafile",
-		"set the certificate authority file to use for verifying rpc connections",
-	),
-	"tls.disable": Disable(
-		"disable SSL on RPC connections",
-	),
-	"tls.onetime": Enable(
-		"creates a key pair but does not write the secret for future runs",
-	),
-	"tls.server": Disable(
-		"disable tls for RPC servers",
-	),
-	"tls.skipverify": Enable(
-		"skip verifying tls certificates with CAFile",
-	),
-	"wallet.noinitialload": Enable(
-		"disable automatic opening of the wallet at startup",
-	),
-	"wallet.pass": String(
-		"",
-		"password for the non-own transaction data in the wallet",
-	),
-	"wallet": Enable(
-		"use configured wallet rpc instead of full node",
-	),
+	"git.parallelcoin.io/dev/9/cmd/nine"
+)
+
+var config = MakeConfig(&Config)
+
+func MakeConfig(c *Lines) (out *nine.Config) {
+	var tn, sn, rn = new(bool), new(bool), new(bool)
+	cfg := *c
+	out = &nine.Config{
+		ConfigFile:               nil,
+		DataDir:                  cfg["app.datadir"].Value.(*string),
+		LogDir:                   cfg["app.datadir"].Value.(*string),
+		LogLevel:                 cfg["log.level"].Value.(*string),
+		Subsystems:               cfg["log.subsystem"].Value.(*[]string),
+		Network:                  cfg["p2p.network"].Value.(*string),
+		AddPeers:                 cfg["p2p.addpeer"].Value.(*[]string),
+		ConnectPeers:             cfg["p2p.connect"].Value.(*[]string),
+		MaxPeers:                 cfg["p2p.maxpeers"].Value.(*int),
+		Listeners:                cfg["p2p.listen"].Value.(*[]string),
+		DisableListen:            cfg["p2p.nolisten"].Value.(*bool),
+		DisableBanning:           cfg["p2p.nobanning"].Value.(*bool),
+		BanDuration:              cfg["p2p.banduration"].Value.(*time.Duration),
+		BanThreshold:             cfg["p2p.banthreshold"].Value.(*int),
+		Whitelists:               cfg["p2p.whitelist"].Value.(*[]string),
+		Username:                 cfg["rpc.user"].Value.(*string),
+		Password:                 cfg["rpc.pass"].Value.(*string),
+		ServerUser:               cfg["rpc.user"].Value.(*string),
+		ServerPass:               cfg["rpc.pass"].Value.(*string),
+		LimitUser:                cfg["limit.user"].Value.(*string),
+		LimitPass:                cfg["limit.pass"].Value.(*string),
+		RPCConnect:               cfg["rpc.connect"].Value.(*string),
+		RPCListeners:             cfg["rpc.listen"].Value.(*[]string),
+		RPCCert:                  cfg["tls.cert"].Value.(*string),
+		RPCKey:                   cfg["tls.key"].Value.(*string),
+		RPCMaxClients:            cfg["rpc.maxclients"].Value.(*int),
+		RPCMaxWebsockets:         cfg["rpc.maxwebsockets"].Value.(*int),
+		RPCMaxConcurrentReqs:     cfg["rpc.maxconcurrentreqs"].Value.(*int),
+		RPCQuirks:                cfg["rpc.quirks"].Value.(*bool),
+		DisableRPC:               cfg["rpc.disable"].Value.(*bool),
+		NoTLS:                    cfg["tls.disable"].Value.(*bool),
+		DisableDNSSeed:           cfg["p2p.nodns"].Value.(*bool),
+		ExternalIPs:              cfg["p2p.externalips"].Value.(*[]string),
+		Proxy:                    cfg["proxy.address"].Value.(*string),
+		ProxyUser:                cfg["proxy.user"].Value.(*string),
+		ProxyPass:                cfg["proxy.pass"].Value.(*string),
+		OnionProxy:               cfg["proxy.address"].Value.(*string),
+		OnionProxyUser:           cfg["proxy.user"].Value.(*string),
+		OnionProxyPass:           cfg["proxy.pass"].Value.(*string),
+		Onion:                    cfg["proxy.tor"].Value.(*bool),
+		TorIsolation:             cfg["proxy.isolation"].Value.(*bool),
+		TestNet3:                 tn,
+		RegressionTest:           rn,
+		SimNet:                   sn,
+		AddCheckpoints:           cfg["chain.addcheckpoints"].Value.(*[]string),
+		DisableCheckpoints:       cfg["chain.disablecheckpoints"].Value.(*bool),
+		DbType:                   cfg["chain.dbtype"].Value.(*string),
+		Profile:                  cfg["app.profile"].Value.(*string),
+		CPUProfile:               cfg["app.cpuprofile"].Value.(*string),
+		Upnp:                     cfg["app.upnp"].Value.(*bool),
+		MinRelayTxFee:            cfg["p2p.minrelaytxfee"].Value.(*float64),
+		FreeTxRelayLimit:         cfg["p2p.freetxrelaylimit"].Value.(*float64),
+		NoRelayPriority:          cfg["p2p.norelaypriority"].Value.(*bool),
+		TrickleInterval:          cfg["p2p.trickleinterval"].Value.(*time.Duration),
+		MaxOrphanTxs:             cfg["p2p.maxorphantxs"].Value.(*int),
+		Algo:                     cfg["mining.algo"].Value.(*string),
+		Generate:                 cfg["mining.generate"].Value.(*bool),
+		GenThreads:               cfg["mining.genthreads"].Value.(*int),
+		MiningAddrs:              cfg["mining.addresses"].Value.(*[]string),
+		MinerListener:            cfg["mining.listener"].Value.(*string),
+		MinerPass:                cfg["mining.pass"].Value.(*string),
+		BlockMinSize:             cfg["block.minsize"].Value.(*int),
+		BlockMaxSize:             cfg["block.maxsize"].Value.(*int),
+		BlockMinWeight:           cfg["block.minweight"].Value.(*int),
+		BlockMaxWeight:           cfg["block.maxweight"].Value.(*int),
+		BlockPrioritySize:        cfg["block.prioritysize"].Value.(*int),
+		UserAgentComments:        cfg["p2p.useragentcomments"].Value.(*[]string),
+		NoPeerBloomFilters:       cfg["p2p.nobloomfilters"].Value.(*bool),
+		NoCFilters:               cfg["p2p.nocfilters"].Value.(*bool),
+		SigCacheMaxSize:          cfg["chain.sigcachemaxsize"].Value.(*int),
+		BlocksOnly:               cfg["p2p.blocksonly"].Value.(*bool),
+		TxIndex:                  cfg["chain.txindex"].Value.(*bool),
+		AddrIndex:                cfg["chain.addrindex"].Value.(*bool),
+		RelayNonStd:              cfg["chain.relaynonstd"].Value.(*bool),
+		RejectNonStd:             cfg["chain.rejectnonstd"].Value.(*bool),
+		TLSSkipVerify:            cfg["tls.skipverify"].Value.(*bool),
+		Wallet:                   cfg["wallet"].Value.(*bool),
+		NoInitialLoad:            cfg["wallet.noinitialload"].Value.(*bool),
+		WalletPass:               cfg["wallet.pass"].Value.(*string),
+		WalletServer:             cfg["rpc.wallet"].Value.(*string),
+		CAFile:                   cfg["tls.cafile"].Value.(*string),
+		OneTimeTLSKey:            cfg["tls.onetime"].Value.(*bool),
+		ServerTLS:                cfg["tls.server"].Value.(*bool),
+		LegacyRPCListeners:       cfg["rpc.listen"].Value.(*[]string),
+		LegacyRPCMaxClients:      cfg["rpc.maxclients"].Value.(*int),
+		LegacyRPCMaxWebsockets:   cfg["rpc.maxwebsockets"].Value.(*int),
+		ExperimentalRPCListeners: nil,
+	}
+	return
 }

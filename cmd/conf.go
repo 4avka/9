@@ -438,5 +438,4 @@ func ConfConfEdit(key string) int {
 			break
 		}
 	}
-	return 0
 }
