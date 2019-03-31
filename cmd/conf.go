@@ -55,7 +55,7 @@ func ConfMain() string {
 		}, options...)
 		options = append(options, "exit")
 		prompt := &survey.Select{
-			Message:  "ⓟ",
+			Message:  "ⓟarallelcoin Interactive CLI",
 			Options:  options,
 			PageSize: 9,
 		}
