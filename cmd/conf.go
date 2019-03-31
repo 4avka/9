@@ -131,6 +131,9 @@ func ConfConf(subsection string) int {
 		}
 		datadir := Config["app.datadir"].Value.(string)
 		configFile := CleanAndExpandPath(filepath.Join(datadir, "config"))
+		if EnsureDir(configFile) {
+			fmt.Println("created new directory to store data", datadir)
+		}
 		fh, err := os.Create(configFile)
 		if err != nil {
 			panic(err)

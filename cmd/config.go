@@ -7,7 +7,7 @@ const defaultDatadir = "~/." + APPNAME
 // a validator/setter function that checks the input
 var Config = Lines{
 	"app.cpuprofile": Path(
-		"cpu.prof",
+		" ",
 		"write cpu profile",
 	),
 	"app.datadir": Path(
