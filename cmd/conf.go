@@ -27,8 +27,8 @@ func RunConf(args []string, tokens Tokens, cmds, all Commands) int {
 		Wallet(args, tokens, cmds, all)
 	case "shell":
 		Shell(args, tokens, cmds, all)
-	case "":
-		return 0
+	case "", BACK:
+		return 2
 	default:
 		return 1
 	}
