@@ -18,7 +18,7 @@ import (
 const BACK = "back"
 
 func RunConf(args []string, tokens Tokens, cmds, all Commands) int {
-	fmt.Println("ⓟarallelcoin configuration CLI")
+	// fmt.Println("ⓟarallelcoin configuration CLI")
 	runner := ConfMain()
 	switch runner {
 	case "node":
@@ -29,6 +29,8 @@ func RunConf(args []string, tokens Tokens, cmds, all Commands) int {
 		Shell(args, tokens, cmds, all)
 	case "", BACK:
 		return 2
+	case "exit":
+		return 0
 	default:
 		return 1
 	}
@@ -36,7 +38,8 @@ func RunConf(args []string, tokens Tokens, cmds, all Commands) int {
 }
 
 func ConfMain() string {
-	for {
+	cont := true
+	for cont {
 		var options []string
 		var lines []string
 		for i := range Config {
@@ -62,17 +65,24 @@ func ConfMain() string {
 			fmt.Println("ERROR:", err)
 		}
 		if name == "exit" {
-			return ""
+			return name
 		}
-		prefix := strings.Split(name, ":")[0]
-		suffix := strings.Split(name, ":")[1]
+		split := strings.Split(name, ":")
+		prefix := split[0]
+		var suffix string
+		if len(split) > 1 {
+			suffix = split[1]
+		}
 		switch prefix {
 		case "run":
 			return ConfRun()
 		case "configure":
-			ConfConf(suffix)
+			if suffix != "" {
+				ConfConf(suffix)
+			}
 		}
 	}
+	return ""
 }
 
 func ConfRun() string {
@@ -148,7 +158,7 @@ func ConfConf(subsection string) int {
 
 func ConfConfEdit(key string) int {
 	if _, ok := Config[key]; !ok {
-		fmt.Println("key not found:", key)
+		// fmt.Println("key not found:", key)
 		return 1
 	}
 	// fmt.Println("editing key", key)
