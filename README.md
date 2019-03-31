@@ -13,7 +13,7 @@ It was adopted and after some time finally programmers were found to bring this 
 ##### where we've been
 
 1. [Original creation of coin by Parallaxis](https://bitcointalk.org/index.php?topic=721170.msg8145710#msg8145710), release 8 February 2014
-2. Community Takeover Announcement https://bitcointalk.org/index.php?topic=1097017 23 June 2015
+2. [Community Takeover Announcement](https://bitcointalk.org/index.php?topic=1097017) 23 June 2015
 3. Loki Verloren [formally started working on a new server](https://bitcointalk.org/index.php?topic=1097017.msg39670320#msg39670320) 8 June 2018 based on btcsuite's [btcd](https://github.com/btcsuite/btcd)
 
 ### plan 9 from crypto space!
