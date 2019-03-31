@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"sort"
@@ -126,6 +128,16 @@ func ConfConf(subsection string) int {
 		key := subsection + "." + name
 		if ConfConfEdit(key) != 0 {
 			break
+		}
+		datadir := Config["app.datadir"].Value.(string)
+		configFile := CleanAndExpandPath(filepath.Join(datadir, "config"))
+		fh, err := os.Create(configFile)
+		if err != nil {
+			panic(err)
+		}
+		_, err = fmt.Fprint(fh, Config)
+		if err != nil {
+			panic(err)
 		}
 	}
 	return 0
