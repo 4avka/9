@@ -11,7 +11,8 @@ import (
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
 
-var configRE = regexp.MustCompile("(NAME )(.*)( VALUE )(.*)( DEFAULT )(.*)( COMMENT )(.*)")
+var configRE = regexp.MustCompile(
+	"(NAME )(.*)( VALUE )(.*)( DEFAULT )(.*)( COMMENT )(.*)")
 
 func Parse(args []string) int {
 	// parse commandline
@@ -47,7 +48,6 @@ func Parse(args []string) int {
 		}
 
 	} else {
-		// fmt.Println("loading config from", configFile)
 		conf, err := ioutil.ReadFile(configFile)
 		if err != nil {
 			panic(err)
@@ -71,11 +71,7 @@ func Parse(args []string) int {
 				}
 			}
 		}
-		// fmt.Println("loaded config")
-		// fmt.Println(Config)
 	}
-
-	// spew.Dump(Config)
 	// run as configured
 	_ = cmds
 	r := cmd.Handler(

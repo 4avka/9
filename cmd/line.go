@@ -17,17 +17,13 @@ import (
 // Line is a configuration line, made into map becomes a configuration thingy
 // that has set-like properties.
 type Line struct {
-
 	// Default is the default for this value
 	Default interface{}
-
 	// Validator returns true if the string is properly formed for the type
 	Validator func(string) bool
-
 	// The help string that will be shown by the interactive config system and
 	// cli help
 	Comment string
-
 	// Value is where this value is actually stored
 	Value interface{}
 }

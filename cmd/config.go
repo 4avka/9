@@ -4,9 +4,11 @@ import (
 	"time"
 
 	"git.parallelcoin.io/dev/9/cmd/nine"
+	"git.parallelcoin.io/dev/9/cmd/node"
 )
 
 var config = MakeConfig(&Config)
+var stateconfig = node.StateCfg
 
 func MakeConfig(c *Lines) (out *nine.Config) {
 	var tn, sn, rn = new(bool), new(bool), new(bool)

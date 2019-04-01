@@ -33,7 +33,8 @@ type Command struct {
 
 type Tokens map[string]Token
 
-// Token is a struct that ties together CLI invocation to the Command it relates to
+// Token is a struct that ties together CLI invocation to the Command it
+// relates to
 type Token struct {
 	Value string
 	Cmd   Command
@@ -137,10 +138,10 @@ var commands = Commands{
 		"sends rpc requests and prints the results",
 		`	<datadir> sets the data directory to read configurations from
 		(must start with '.', '\', '/' or '~')
-	<node> indicates we are connecting to a full node RPC (overrides wallet and is default)
-	<wallet> indicates we are connecting to a wallet RPC
-	<word>, <float> and <integer> just cover the items that follow in RPC commands
-	the RPC command is expected to be everything after the ctl keyword`,
+	<node> indicates we are connecting to a full node RPC (overrides wallet and
+		is default)	<wallet> indicates we are connecting to a wallet RPC
+		<word>, <float> and <integer> just cover the items that follow in RPC
+		commands the RPC command is expected to be everything after the ctl keyword`,
 		opts{"datadir", "node", "wallet", "word", "integer", "float"},
 		precedent{"help", "list"},
 		Ctl,
