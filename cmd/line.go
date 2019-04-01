@@ -14,8 +14,8 @@ import (
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
 
-// Line is a configuration line, made into map becomes a
-// configuration thingy that has set-like properties.
+// Line is a configuration line, made into map becomes a configuration thingy
+// that has set-like properties.
 type Line struct {
 
 	// Default is the default for this value
@@ -24,8 +24,8 @@ type Line struct {
 	// Validator returns true if the string is properly formed for the type
 	Validator func(string) bool
 
-	// The help string that will be shown by the interactive config
-	// system and cli help
+	// The help string that will be shown by the interactive config system and
+	// cli help
 	Comment string
 
 	// Value is where this value is actually stored
@@ -141,8 +141,8 @@ func Path(def, usage string) *Line {
 	return &l
 }
 
-// SubSystem is just a list of alphanumeric names followed by a
-// colon followed by a string value, space separated, all lower case.
+// SubSystem is just a list of alphanumeric names followed by a colon followed
+// by a string value, space separated, all lower case.
 func SubSystem(def, usage string) *Line {
 	p := make(nine.Mapstringstring)
 	return &Line{def, func(s string) bool {
@@ -208,9 +208,10 @@ func NetAddr(def, usage string) *Line {
 	return &l
 }
 
-// NetAddrs is for a multiple network addresses ie scheme://host:port, separated by spaces.
-// If a default is given, its port is taken as the default port. If only a number is present,
-// it is used as the defaultPort
+// NetAddrs is for a multiple network addresses ie scheme://host:port,
+// separated by spaces.
+// If a default is given, its port is taken as the default port. If only a
+// number is present, it is used as the defaultPort
 func NetAddrs(def, usage string) *Line {
 	o := []string{}
 	var defaultPort string
@@ -250,9 +251,8 @@ func NetAddrs(def, usage string) *Line {
 	return &l
 }
 
-// Int is for a single 64 bit integer. We see no point in
-// complicating things, so this is golang `int` with no
-// special meanings
+// Int is for a single 64 bit integer. We see no point in complicating things,
+// so this is golang `int` with no special meanings
 func Int(def int, usage string) *Line {
 	o := def
 	var l Line
@@ -268,8 +268,7 @@ func Int(def int, usage string) *Line {
 	return &l
 }
 
-// IntBounded is an integer whose value must be between a min
-// and max
+// IntBounded is an integer whose value must be between a min and max
 func IntBounded(def int, usage string, min, max int) *Line {
 	o := def
 	var l Line
@@ -312,9 +311,8 @@ func Disable(usage string) *Line {
 	return &l
 }
 
-// Duration is a time value in golang 24h60m60s format. If it fails to
-// parse it will return zero duration (as well as if it was zero
-// duration)
+// Duration is a time value in golang 24h60m60s format. If it fails to parse it
+// will return zero duration (as well as if it was zero duration)
 func Duration(def, usage string) *Line {
 	o, e := time.ParseDuration(def)
 	if e != nil {
@@ -335,9 +333,8 @@ func Duration(def, usage string) *Line {
 	return &l
 }
 
-// String is just a boring old string. There is no limitations on what
-// a string can contain, it will have any leading or trailing
-// whitespace trimmed.
+// String is just a boring old string. There is no limitations on what a string
+// can contain, it will have any leading or trailing whitespace trimmed.
 func String(def, usage string) *Line {
 	o := strings.TrimSpace(def)
 	var l Line
@@ -349,8 +346,8 @@ func String(def, usage string) *Line {
 	return &l
 }
 
-// StringSlice is an array of strings, encoded as a series of strings
-// separated by backticks `
+// StringSlice is an array of strings, encoded as a series of strings separated
+// by backticks `
 func StringSlice(def, usage string) *Line {
 	s := strings.TrimSpace(def)
 	ss := strings.Split(s, "`")
@@ -366,8 +363,7 @@ func StringSlice(def, usage string) *Line {
 	return &l
 }
 
-// Float is a 64 bit floating point number. Returns zero if nothing
-// parsed out.
+// Float is a 64 bit floating point number. Returns zero if nothing parsed out.
 func Float(def, usage string) *Line {
 	f, e := strconv.ParseFloat(def, 64)
 	if e != nil {
@@ -388,8 +384,7 @@ func Float(def, usage string) *Line {
 	return &l
 }
 
-// Algos is the available mining algorithms, read out of the fork
-// package
+// Algos is the available mining algorithms, read out of the fork package
 func Algos(def, usage string) *Line {
 	const modernd = "random"
 	o := modernd
@@ -421,8 +416,8 @@ func Algos(def, usage string) *Line {
 	return &l
 }
 
-// ValidName checks to see a name is a valid name - first letter
-// alphabetical, last alpha/numeric, all between also . and -
+// ValidName checks to see a name is a valid name - first letter alphabetical,
+// last alpha/numeric, all between also . and -
 func ValidName(s string) bool {
 	re := regexp.MustCompile("[a-z][a-z0-9-.][a-z0-9]+")
 	return re.Match([]byte(s))
