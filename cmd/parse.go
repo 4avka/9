@@ -59,11 +59,16 @@ func Parse(args []string) int {
 			if len(out) < 1 {
 				continue
 			}
-			valid := Config[out[2]].Validator(out[4])
-			if !valid {
-				fmt.Println(
-					"config parsing error on line", i,
-					"name", out[2], "erroneous value:", out[4])
+			_, ok := Config[out[2]]
+			if !ok {
+				fmt.Println("unknown key found", out[2], "ignoring")
+			} else {
+				valid := Config[out[2]].Validator(out[4])
+				if !valid {
+					fmt.Println(
+						"config parsing error on line", i,
+						"name", out[2], "erroneous value:", out[4])
+				}
 			}
 		}
 		// fmt.Println("loaded config")
