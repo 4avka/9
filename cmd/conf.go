@@ -63,7 +63,7 @@ func ConfMain() string {
 		var name string
 		err := survey.AskOne(prompt, &name, nil)
 		if err != nil {
-			fmt.Println("ERROR:", err)
+			fmt.Println("ERROR:", cl.Ine(), err)
 		}
 		if name == "exit" {
 			return name
@@ -153,7 +153,7 @@ func ConfConf(subsection string) int {
 		var name string
 		err := survey.AskOne(prompt, &name, nil)
 		if err != nil {
-			fmt.Println("ERROR:", err)
+			fmt.Println("ERROR:", cl.Ine(), err)
 		}
 		name = strings.Split(name, " ")[0]
 		if name == BACK {
@@ -201,7 +201,7 @@ func ConfConfEdit(key string) int {
 			}
 			err := survey.AskOne(prompt, &name, nil)
 			if err != nil {
-				fmt.Println("ERROR:", err)
+				fmt.Println("ERROR:", cl.Ine(), err)
 			}
 			*k = *name
 			cursor = "p2p"
@@ -219,9 +219,9 @@ func ConfConfEdit(key string) int {
 				Default: *k,
 			}
 
-			err := survey.AskOne(prompt, &name, nil)
+			err := survey.AskOne(prompt, name, nil)
 			if err != nil {
-				fmt.Println("ERROR:", err)
+				fmt.Println("ERROR:", cl.Ine(), err)
 			}
 			*k = *name
 			cursor = "log"
@@ -241,7 +241,7 @@ func ConfConfEdit(key string) int {
 			}
 			err := survey.AskOne(prompt, &name, nil)
 			if err != nil {
-				fmt.Println("ERROR:", err)
+				fmt.Println("ERROR:", cl.Ine(), err)
 			}
 			*k = *name
 			cursor = "mining"
@@ -259,7 +259,7 @@ func ConfConfEdit(key string) int {
 					}
 					err := survey.AskOne(prompt, &name, nil)
 					if err != nil {
-						fmt.Println("ERROR:", err)
+						fmt.Println("ERROR:", cl.Ine(), err)
 					}
 					if Config[key].Validator(name) {
 						prompt := &survey.Select{
@@ -269,7 +269,7 @@ func ConfConfEdit(key string) int {
 						var confirm string
 						err := survey.AskOne(prompt, &confirm, nil)
 						if err != nil {
-							fmt.Println("ERROR:", err)
+							fmt.Println("ERROR:", cl.Ine(), err)
 							continue
 						}
 						if confirm == "ok" {
@@ -301,7 +301,7 @@ func ConfConfEdit(key string) int {
 				}
 				return 0
 			case *string:
-				k := fmt.Sprint(*Config[key].Value.(*string))
+				k := fmt.Sprint(*t)
 				prompt := &survey.Input{
 					Message: key + "> ",
 					Default: k,
@@ -318,7 +318,7 @@ func ConfConfEdit(key string) int {
 					var confirm string
 					err := survey.AskOne(prompt, &confirm, nil)
 					if err != nil {
-						fmt.Println("ERROR:", err)
+						fmt.Println("ERROR:", cl.Ine(), err)
 					}
 					if confirm == "ok" {
 						Config[key].Value = &k
@@ -336,9 +336,9 @@ func ConfConfEdit(key string) int {
 						Options: append(append([]string{"new"}, *t...), BACK),
 					}
 					var name string
-					err := survey.AskOne(prompt, name, nil)
+					err := survey.AskOne(prompt, &name, nil)
 					if err != nil {
-						fmt.Println("ERROR:", err)
+						fmt.Println("ERROR:", cl.Ine(), err)
 					}
 					switch name {
 					case BACK:
@@ -354,7 +354,7 @@ func ConfConfEdit(key string) int {
 							}
 							err = survey.AskOne(prompt, &item, nil)
 							if err != nil {
-								fmt.Println("ERROR:", err)
+								fmt.Println("ERROR:", cl.Ine(), err)
 								break
 							}
 							if Config[key].Validator(item) {
@@ -365,7 +365,7 @@ func ConfConfEdit(key string) int {
 								confirm := ""
 								err = survey.AskOne(prompt, &confirm, nil)
 								if err != nil {
-									fmt.Println("ERROR:", err)
+									fmt.Println("ERROR:", cl.Ine(), err)
 									break
 								}
 								if confirm == "ok" {
@@ -387,20 +387,29 @@ func ConfConfEdit(key string) int {
 						var confirm string
 						err = survey.AskOne(prompt, &confirm, nil)
 						if err != nil {
-							fmt.Println("ERROR:", err)
+							fmt.Println("ERROR:", cl.Ine(), err)
 							break
 						}
 						if confirm == "delete" {
 							again = true
-							v := Config[key].Value.([]string)
-							for i, x := range v {
+							fmt.Println(cl.Ine(), Config[key].Value)
+							v := Config[key].Value.(*[]string)
+							for i, x := range *v {
 								if x == name {
-									if i < len(v)-1 {
-										v = append(v[:i], v[i+1:]...)
-										Config[key].Value = v
-									} else {
-										Config[key].Value = v[:i]
+									switch {
+									case len(*v) < 2:
+										fmt.Println("deleting only entry")
+										Config[key].Value = &[]string{}
+									case i < len(*v)-1:
+										fmt.Println("deleting non-terminal", len(*v))
+										vv := append((*v)[:i], (*v)[i:]...)
+										Config[key].Value = &vv
+									default:
+										fmt.Println("deleting terminal")
+										vv := (*v)[:i]
+										Config[key].Value = &vv
 									}
+									return 0
 								}
 							}
 						}
@@ -412,18 +421,18 @@ func ConfConfEdit(key string) int {
 							var edit string
 							err := survey.AskOne(prompt, &edit, nil)
 							if err != nil {
-								fmt.Println("ERROR:", err)
+								fmt.Println("ERROR:", cl.Ine(), err)
 								break
 							}
 							if Config[key].Validator(edit) {
-								u := Config[key].Value.([]string)
-								for i, x := range u {
+								u := Config[key].Value.(*[]string)
+								for i, x := range *u {
 									if x == name {
-										if i < len(u)-1 {
-											u = append(u[:i], u[i+1:]...)
-											Config[key].Value = u
+										if i < len(*u)-1 {
+											*u = append((*u)[:i], (*u)[i+1:]...)
+											Config[key].Value = *u
 										} else {
-											Config[key].Value = u[:i]
+											Config[key].Value = (*u)[:i]
 										}
 									}
 								}
@@ -444,7 +453,7 @@ func ConfConfEdit(key string) int {
 				}
 				err := survey.AskOne(prompt, &tds, nil)
 				if err != nil {
-					fmt.Println("ERROR:", err)
+					fmt.Println("ERROR:", cl.Ine(), err)
 				}
 				if Config[key].Validator(tds) {
 					prompt := &survey.Select{
@@ -454,7 +463,7 @@ func ConfConfEdit(key string) int {
 					var confirm string
 					err := survey.AskOne(prompt, &confirm, nil)
 					if err != nil {
-						fmt.Println("ERROR:", err)
+						fmt.Println("ERROR:", cl.Ine(), err)
 					}
 					if confirm == "ok" {
 						Config[key].Value = &tds
