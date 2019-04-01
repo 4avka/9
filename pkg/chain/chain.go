@@ -17,7 +17,6 @@ import (
 )
 
 const (
-
 	// maxOrphanBlocks is the maximum number of orphan blocks that can be queued.
 	maxOrphanBlocks = 100
 )

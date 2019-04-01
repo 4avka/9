@@ -207,12 +207,7 @@ func FileExists(
 }
 
 // NewCheckpointFromStr parses checkpoints in the '<height>:<hash>' format.
-func NewCheckpointFromStr(
-	checkpoint string,
-) (
-	chaincfg.Checkpoint,
-	error,
-) {
+func NewCheckpointFromStr(checkpoint string) (chaincfg.Checkpoint, error) {
 	parts := strings.Split(checkpoint, ":")
 	if len(parts) != 2 {
 		return chaincfg.Checkpoint{}, fmt.Errorf("unable to parse "+
