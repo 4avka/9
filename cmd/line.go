@@ -57,8 +57,31 @@ func (l Lines) String() (out string) {
 	}
 	sort.Strings(tags)
 	for _, x := range tags {
+		value := ""
+		switch t := l[x].Value.(type) {
+		case *bool:
+			value = fmt.Sprint(*t)
+		case *int:
+			value = fmt.Sprint(*t)
+		case *float64:
+			value = fmt.Sprintf("%.10f", *t)
+		case *string:
+			value = *t
+		case *[]string:
+			ss := *t
+			ll := len(ss) - 1
+			for i, x := range ss {
+				value += x
+				if i < ll {
+					value += " "
+				}
+			}
+		default:
+			// if we don't recognise it we can't print it
+			continue
+		}
 		out += fmt.Sprint("NAME ", x)
-		out += fmt.Sprint(" VALUE ", l[x])
+		out += fmt.Sprint(" VALUE ", value)
 		out += fmt.Sprint(" DEFAULT ", l[x].Default)
 		out += fmt.Sprint(" COMMENT ", l[x].Comment, "\n")
 	}
@@ -214,11 +237,11 @@ func NetAddrs(def, usage string) *Line {
 				_, _, err := net.SplitHostPort(x)
 				if err != nil {
 					a := net.JoinHostPort(x, defaultPort)
-					ss := append(l.Value.([]string), a)
+					ss := append(*l.Value.(*[]string), a)
 					l.Value = &ss
 					return true
 				}
-				sss := append(l.Value.([]string), x)
+				sss := append(*l.Value.(*[]string), x)
 				l.Value = &sss
 			}
 			return true

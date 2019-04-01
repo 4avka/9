@@ -6,13 +6,19 @@ const defaultDatadir = "~/." + APPNAME
 // Custom functions are written per type that generate a Line struct and contain
 // a validator/setter function that checks the input
 var Config = Lines{
+	"app.cpuprofileenable": Enable(
+		"enable writing of cpu profile",
+	),
 	"app.cpuprofile": Path(
-		" ",
+		"./cpu.prof",
 		"write cpu profile",
 	),
 	"app.datadir": Path(
 		defaultDatadir,
 		"base directory containing configuration and data",
+	),
+	"app.profileenable": Enable(
+		"enable http profiling",
 	),
 	"app.profile": IntBounded(
 		1100,
@@ -67,7 +73,7 @@ var Config = Lines{
 		"reject nonstandard transactions even if net parameters allow it",
 	),
 	"chain.relaynonstd": Enable(
-		"relay nonstandard transactions even if net parameters don't allow it",
+		"relay nonstandard transactions even if net parameters disallow it",
 	),
 	"chain.rpc": NetAddr(
 		"127.0.0.1:11048",
