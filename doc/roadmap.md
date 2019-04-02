@@ -35,6 +35,5 @@
 > *Note that this isn't as trivial as it might sound*. 
 > If you picture a small local area network with nodes nearby, within two hops, each one will be working at the same time, may have other things interfering (network packet loss, network attack attempts, congestion, etc) it is not guaranteed at all which message will cover the network first and slot into the #1 position.
 
-### Like this petri dish, eventually one strategy (organism) will dominate
+### ![multi-bacteria petri dish](https://upload.wikimedia.org/wikipedia/commons/c/c9/Pikovskaya%27s_Plate_showing_Phosphate_solubilising_microorganims.jpg) Like this petri dish, eventually one strategy (organism) will dominate
 
-![multi-bacteria petri dish](https://upload.wikimedia.org/wikipedia/commons/c/c9/Pikovskaya%27s_Plate_showing_Phosphate_solubilising_microorganims.jpg)
