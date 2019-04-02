@@ -398,9 +398,8 @@ func String(def, usage string) *Line {
 // StringSlice is an array of strings, encoded as a series of strings separated
 // by backticks `
 func StringSlice(def, usage string) *Line {
-	s := strings.TrimSpace(def)
-	sss := strings.Split(s, "`")
-	ss := &sss
+
+	var ss []string
 	var l Line
 	l = Line{def, func(s string) bool {
 		lv := l.Value.(*[]string)
@@ -410,11 +409,24 @@ func StringSlice(def, usage string) *Line {
 		} else {
 			values := strings.Split(s, "`")
 			if len(values) >= 1 {
-				*lv = values
+				for _, x := range values {
+					if len(x) > 1 {
+						*lv = append(*lv, x)
+					}
+				}
 			}
 		}
 		return true
-	}, usage, ss}
+	}, usage, &ss}
+	s := strings.TrimSpace(def)
+	sss := strings.Split(s, "`")
+	if len(sss) >= 1 {
+		for _, x := range sss {
+			if len(x) > 1 {
+				ss = append(ss, x)
+			}
+		}
+	}
 	return &l
 }
 

@@ -1,5 +1,12 @@
 package cmd
 
+import (
+	"fmt"
+
+	"git.parallelcoin.io/dev/9/cmd/node"
+	"git.parallelcoin.io/dev/9/cmd/node/mempool"
+)
+
 const defaultDatadir = "~/." + APPNAME
 
 // Config is the declaration of our set of application configuration variables.
@@ -15,24 +22,24 @@ func getConfig() *Lines {
 			CleanAndExpandPath(defaultDatadir), "base directory containing configuration and data"),
 		"app.logdir": Path(
 			"", "where logs are written"),
-		"app.profileenable": Enable(
+		"app.enableprofile": Enable(
 			"enable http profiling"),
 		"app.profile": IntBounded(
 			1100, "http profiling on specified port", 1025, 65534),
 		"app.upnp": Enable(
 			"enable port forwarding via UPNP"),
 		"block.maxsize": IntBounded(
-			900900, "max block size", 250000, 10000000),
+			node.DefaultBlockMaxSize, "max block size", node.BlockMaxWeightMin, node.BlockMaxSizeMax),
 		"block.maxweight": IntBounded(
-			3006000, "max block weight", 10000, 10000000),
+			node.DefaultBlockMaxWeight, "max block weight", node.DefaultBlockMinWeight, node.BlockMaxWeightMax),
 		"block.minsize": IntBounded(
-			240, "min block size", 240, 2<<32),
+			node.DefaultBlockMinSize, "min block size", node.BlockMaxWeightMin, node.BlockMaxSizeMax),
 		"block.minweight": IntBounded(
-			2000, "min block weight", 2000, 100000),
+			node.DefaultBlockMinWeight, "min block weight", node.BlockMaxWeightMin, node.BlockMaxWeightMax),
 		"block.prioritysize": IntBounded(
-			50000,
+			mempool.DefaultBlockPrioritySize,
 			"the default size for high priority low fee transactions",
-			1000, 200000),
+			1000, node.BlockMaxSizeMax),
 		"chain.addcheckpoints": StringSlice(
 			"", "add checkpoints [height:hash ]*"),
 		"chain.disablecheckpoints": Enable(
@@ -50,9 +57,9 @@ func getConfig() *Lines {
 		"chain.rpc": NetAddr(
 			"127.0.0.1:11048", "address of chain rpc to connect to"),
 		"chain.sigcachemaxsize": IntBounded(
-			100000, "max number of signatures to keep in memory", 1000, 10000000),
+			node.DefaultSigCacheMaxSize, "max number of signatures to keep in memory", 1000, 10000000),
 		"limit.pass": String(
-			"pa55word", "password for limited user"),
+			"pa55word1", "password for limited user"),
 		"limit.user": String(
 			"limit", "username with limited privileges"),
 		"log.level": LogLevel(
@@ -70,9 +77,10 @@ func getConfig() *Lines {
 		"mining.generate": Enable(
 			"enable builtin CPU miner"),
 		"mining.genthreads": IntBounded(
-			-1, "set number of threads, -1 = all", -1, 4096),
+			node.DefaultGenThreads,
+			"set number of threads, -1 = all", -1, 4096),
 		"mining.listener": NetAddr(
-			"127.0.0.1:11049", "set listener address for mining dispatcher"),
+			"", "set listener address for mining dispatcher"),
 		"mining.pass": String(
 			// TODO: generate random pass
 			"", "password to secure mining dispatch connections"),
@@ -81,9 +89,9 @@ func getConfig() *Lines {
 		"p2p.addpeer": NetAddrs(
 			"11047", "add permanent p2p peer"),
 		"p2p.banthreshold": Int(
-			100, "how many ban units triggers a ban"),
+			node.DefaultBanThreshold, "how many ban units triggers a ban"),
 		"p2p.banduration": Duration(
-			"24h", "how long a ban lasts"),
+			fmt.Sprint(node.DefaultBanDuration), "how long a ban lasts"),
 		"p2p.disableban": Enable(
 			"disables banning peers"),
 		"p2p.blocksonly": Enable(
@@ -99,9 +107,9 @@ func getConfig() *Lines {
 		"p2p.listen": NetAddrs(
 			"127.0.0.1:11047", "address to listen on for p2p connections"),
 		"p2p.maxorphantxs": IntBounded(
-			100, "maximum number of orphan transactions to keep", 10, 10000),
+			node.DefaultMaxOrphanTransactions, "maximum number of orphan transactions to keep", 0, 10000),
 		"p2p.maxpeers": IntBounded(
-			125, "maximum number of peers to connect to", 2, 1024),
+			node.DefaultMaxPeers, "maximum number of peers to connect to", 2, 1024),
 		"p2p.minrelaytxfee": Float(
 			"0.0001000",
 			"minimum relay tx fee, baseline considered to be zero for relay"),
@@ -143,11 +151,12 @@ func getConfig() *Lines {
 		"rpc.listen": NetAddrs(
 			"127.0.0.1:11048", "address to listen for node rpc clients"),
 		"rpc.maxclients": IntBounded(
-			8, "max clients for rpc", 2, 1024),
+			node.DefaultMaxRPCClients, "max clients for rpc", 2, 1024),
 		"rpc.maxconcurrentreqs": IntBounded(
-			128, "maximum concurrent requests to handle", 2, 1024),
+			node.DefaultMaxRPCConcurrentReqs, "maximum concurrent requests to handle", 2, 1024),
 		"rpc.maxwebsockets": IntBounded(
-			8, "maximum websockets clients", 2, 1024),
+			node.DefaultMaxRPCWebsockets,
+			"maximum websockets clients", 2, 1024),
 		"rpc.pass": String(
 			"pa55word", "password for rpc services"),
 		"rpc.quirks": Enable(

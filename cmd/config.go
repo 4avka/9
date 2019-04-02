@@ -89,6 +89,7 @@ func MakeConfig(c *Lines) (out *nine.Config) {
 		AddCheckpoints:           Tags("chain.addcheckpoints"),
 		DisableCheckpoints:       Bool("chain.disablecheckpoints"),
 		DbType:                   String("chain.dbtype"),
+		EnableProfile:            Bool("app.enableprofile"),
 		Profile:                  Int("app.profile"),
 		CPUProfile:               String("app.cpuprofile"),
 		Upnp:                     Bool("app.upnp"),
@@ -128,7 +129,7 @@ func MakeConfig(c *Lines) (out *nine.Config) {
 		LegacyRPCListeners:       Tags("rpc.listen"),
 		LegacyRPCMaxClients:      Int("rpc.maxclients"),
 		LegacyRPCMaxWebsockets:   Int("rpc.maxwebsockets"),
-		ExperimentalRPCListeners: nil,
+		ExperimentalRPCListeners: &[]string{},
 	}
 	return
 }
