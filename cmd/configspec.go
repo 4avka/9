@@ -33,9 +33,9 @@ func getConfig() *Lines {
 		"block.maxweight": IntBounded(
 			node.DefaultBlockMaxWeight, "max block weight", node.DefaultBlockMinWeight, node.BlockMaxWeightMax),
 		"block.minsize": IntBounded(
-			node.DefaultBlockMinSize, "min block size", node.BlockMaxWeightMin, node.BlockMaxSizeMax),
+			node.DefaultBlockMinSize, "min block size", node.DefaultBlockMinSize, node.BlockMaxSizeMax),
 		"block.minweight": IntBounded(
-			node.DefaultBlockMinWeight, "min block weight", node.BlockMaxWeightMin, node.BlockMaxWeightMax),
+			node.DefaultBlockMinWeight, "min block weight", node.DefaultBlockMinWeight, node.BlockMaxWeightMax),
 		"block.prioritysize": IntBounded(
 			mempool.DefaultBlockPrioritySize,
 			"the default size for high priority low fee transactions",

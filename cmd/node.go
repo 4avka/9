@@ -132,7 +132,8 @@ func runNode(args []string, tokens Tokens, cmds, all Commands) int {
 		return 1
 	}
 	// Limit the block priority and minimum block sizes to max block size.
-	log <- cl.Debug{"checking validating block priority and minimium size/weight"}
+	log <- cl.Debug{
+		"checking validating block priority and minimium size/weight"}
 	*config.BlockPrioritySize = int(minUint32(
 		uint32(*config.BlockPrioritySize),
 		uint32(*config.BlockMaxSize)))
@@ -318,5 +319,6 @@ func runNode(args []string, tokens Tokens, cmds, all Commands) int {
 		}
 	}
 	// run the node!
+
 	return 0
 }
