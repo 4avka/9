@@ -35,7 +35,7 @@ func getConfig() *Lines {
 			1000, 200000),
 		"chain.addcheckpoints": StringSlice(
 			"", "add checkpoints [height:hash ]*"),
-		"chain.disablecheckpoints": Disable(
+		"chain.disablecheckpoints": Enable(
 			"disables checkpoints (danger!)"),
 		"chain.dbtype": String(
 			"ffldb", "set database backend to use for chain"),
@@ -84,11 +84,13 @@ func getConfig() *Lines {
 			100, "how many ban units triggers a ban"),
 		"p2p.banduration": Duration(
 			"24h", "how long a ban lasts"),
+		"p2p.disableban": Enable(
+			"disables banning peers"),
 		"p2p.blocksonly": Enable(
 			"relay only blocks"),
 		"p2p.connect": NetAddrs(
 			"11047", "connect only to these outbound peers"),
-		"p2p.nolisten": Disable(
+		"p2p.nolisten": Enable(
 			"disable p2p listener"),
 		"p2p.externalips": NetAddrs(
 			"11047", "additional external IP addresses to bind to"),
@@ -107,11 +109,11 @@ func getConfig() *Lines {
 			"mainnet", "network to connect to"),
 		"p2p.nobanning": Disable(
 			"disable banning of peers"),
-		"p2p.nobloomfilters": Disable(
+		"p2p.nobloomfilters": Enable(
 			"disable bloom filters"),
-		"p2p.nocfilters": Disable(
+		"p2p.nocfilters": Enable(
 			"disable cfilters"),
-		"p2p.nodns": Disable(
+		"p2p.nodns": Enable(
 			"disable DNS seeding"),
 		"p2p.norelaypriority": Enable(
 			"disables prioritisation of relayed transactions"),
@@ -136,7 +138,7 @@ func getConfig() *Lines {
 			"user", "username for proxy"),
 		"rpc.connect": NetAddr(
 			"127.0.0.1:11048", "connect to this node RPC endpoint"),
-		"rpc.disable": Disable(
+		"rpc.disable": Enable(
 			"disable rpc server"),
 		"rpc.listen": NetAddrs(
 			"127.0.0.1:11048", "address to listen for node rpc clients"),
@@ -165,8 +167,8 @@ func getConfig() *Lines {
 			"disable SSL on RPC connections"),
 		"tls.onetime": Enable(
 			"creates a key pair but does not write the secret for future runs"),
-		"tls.server": Disable(
-			"disable tls for RPC servers"),
+		"tls.server": Enable(
+			"enable tls for RPC servers"),
 		"tls.skipverify": Enable(
 			"skip verifying tls certificates with CAFile"),
 		"wallet.noinitialload": Enable(

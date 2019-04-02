@@ -53,7 +53,7 @@ func MakeConfig(c *Lines) (out *nine.Config) {
 		MaxPeers:                 Int("p2p.maxpeers"),
 		Listeners:                Tags("p2p.listen"),
 		DisableListen:            Bool("p2p.nolisten"),
-		DisableBanning:           Bool("p2p.nobanning"),
+		DisableBanning:           Bool("p2p.disableban"),
 		BanDuration:              Duration("p2p.banduration"),
 		BanThreshold:             Int("p2p.banthreshold"),
 		Whitelists:               Tags("p2p.whitelist"),
