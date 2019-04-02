@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	netparams "git.parallelcoin.io/dev/9/pkg/chain/config/params"
+	"git.parallelcoin.io/dev/9/cmd/node"
 
 	"git.parallelcoin.io/dev/9/cmd/nine"
 	"git.parallelcoin.io/dev/9/pkg/chain/fork"
@@ -134,15 +134,17 @@ func Path(def, usage string) *Line {
 	p := ""
 	var l Line
 	l = Line{def, func(s string) bool {
-		if !strings.HasPrefix(s, "/") && !strings.HasPrefix(s, ".") &&
-			runtime.GOOS != "windows" {
-			s = filepath.Join(DataDir, s)
+		if len(s) > 0 {
+			if !strings.HasPrefix(s, "/") && !strings.HasPrefix(s, ".") &&
+				runtime.GOOS != "windows" {
+				s = filepath.Join(DataDir, s)
+			}
+			ss := CleanAndExpandPath(s)
+			if ss == "." {
+				ss = ""
+			}
+			*l.Value.(*string) = ss
 		}
-		ss := CleanAndExpandPath(s)
-		if ss == "." {
-			ss = ""
-		}
-		*l.Value.(*string) = ss
 		return true
 	}, usage, &p}
 	return &l
@@ -183,16 +185,16 @@ func Network(def, usage string) *Line {
 				switch s {
 				case "mainnet":
 					tn, sn, rn = false, false, false
-					activenetparams = &netparams.MainNetParams
+					activenetparams = &node.MainNetParams
 				case "testnet":
 					tn, sn, rn = true, false, false
-					activenetparams = &netparams.TestNet3Params
+					activenetparams = &node.TestNet3Params
 				case "simnet":
 					tn, sn, rn = false, true, false
-					activenetparams = &netparams.SimNetParams
+					activenetparams = &node.SimNetParams
 				case "regtestnet":
 					tn, sn, rn = false, false, true
-					activenetparams = &netparams.RegressionTestParams
+					activenetparams = &node.RegressionNetParams
 				}
 				return true
 			}

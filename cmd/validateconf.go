@@ -124,7 +124,7 @@ func validateRPCCredentials() int {
 		*config.RPCListeners = make([]string, 0, len(addrs))
 		log <- cl.Debug{"setting listeners"}
 		for _, addr := range addrs {
-			addr = net.JoinHostPort(addr, activenetparams.RPCClientPort)
+			addr = net.JoinHostPort(addr, activenetparams.RPCPort)
 			*config.RPCListeners = append(*config.RPCListeners, addr)
 		}
 	}
@@ -263,6 +263,7 @@ func validateDialers() int {
 	stateconfig.Dial = net.DialTimeout
 	stateconfig.Lookup = net.LookupIP
 	if *config.Proxy != "" {
+		fmt.Println("loading proxy")
 		log <- cl.Debug{"we are loading a proxy!"}
 		_, _, err := net.SplitHostPort(*config.Proxy)
 		if err != nil {
@@ -290,7 +291,7 @@ func validateDialers() int {
 		stateconfig.Dial = proxy.DialTimeout
 		// Treat the proxy as tor and perform DNS resolution through it unless the --noonion flag is set or there is an onion-specific proxy configured.
 		if *config.Onion &&
-			*config.OnionProxy == "" {
+			*config.OnionProxy != "" {
 			stateconfig.Lookup = func(host string) ([]net.IP, error) {
 				return connmgr.TorLookupIP(host, *config.Proxy)
 			}
@@ -350,7 +351,7 @@ func validateAddresses() int {
 	// Add default port to all rpc listener addresses if needed and remove duplicate addresses.
 	log <- cl.Debug{"checking rpc listener addresses"}
 	*config.RPCListeners = node.NormalizeAddresses(*config.RPCListeners,
-		activenetparams.RPCClientPort)
+		activenetparams.RPCPort)
 	// Add default port to all listener addresses if needed and remove duplicate addresses.
 	*config.Listeners = node.NormalizeAddresses(*config.Listeners,
 		activenetparams.DefaultPort)

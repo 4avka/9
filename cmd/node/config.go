@@ -1279,5 +1279,6 @@ func podLookup(
 	if strings.HasSuffix(host, ".onion") {
 		return nil, fmt.Errorf("attempt to resolve tor address %s", host)
 	}
+	fmt.Println("podLookup", cl.Ine(), StateCfg)
 	return StateCfg.Lookup(host)
 }

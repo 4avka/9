@@ -1,4 +1,5 @@
 package node
+
 import (
 	"bytes"
 	"encoding/binary"
@@ -7,20 +8,24 @@ import (
 	"math/big"
 	"math/rand"
 	"time"
-	cl "git.parallelcoin.io/dev/9/pkg/util/cl"
+
 	blockchain "git.parallelcoin.io/dev/9/pkg/chain"
 	"git.parallelcoin.io/dev/9/pkg/chain/fork"
 	chainhash "git.parallelcoin.io/dev/9/pkg/chain/hash"
 	"git.parallelcoin.io/dev/9/pkg/chain/wire"
 	"git.parallelcoin.io/dev/9/pkg/rpc/json"
 	"git.parallelcoin.io/dev/9/pkg/util"
+	cl "git.parallelcoin.io/dev/9/pkg/util/cl"
 	"github.com/conformal/fastsha256"
 )
+
 // getworkDataLen is the length of the data field of the getwork RPC. It consists of the serialized block header plus the internal sha256 padding.  The internal sha256 padding consists of a single 1 bit followed by enough zeros to pad the message out to 56 bytes followed by length of the message in bits encoded as a big-endian uint64 (8 bytes).  Thus, the resulting length is a multiple of the sha256 block size (64 bytes).
 var getworkDataLen = (1 + ((wire.MaxBlockHeaderPayload + 8) /
 	fastsha256.BlockSize)) * fastsha256.BlockSize
+
 // hash1Len is the length of the hash1 field of the getwork RPC.  It consists of a zero hash plus the internal sha256 padding.  See the getworkDataLen comment for details about the internal sha256 padding format.
 var hash1Len = (1 + ((chainhash.HashSize + 8) / fastsha256.BlockSize)) * fastsha256.BlockSize
+
 // bigToLEUint256 returns the passed big integer as an unsigned 256-bit integer encoded as little-endian bytes.  Numbers which are larger than the max unsigned 256-bit integer are truncated.
 func bigToLEUint256(
 	n *big.Int,
@@ -59,16 +64,16 @@ func handleGetWork(
 				"via --miningaddr",
 		}
 	}
-	if !(*cfg.RegressionTest || *cfg.SimNet) &&
-		s.cfg.ConnMgr.ConnectedCount() == 0 {
+	if !(*Cfg.RegressionTest || *Cfg.SimNet) &&
+		s.Cfg.ConnMgr.ConnectedCount() == 0 {
 		return nil, &json.RPCError{
 			Code:    json.ErrRPCClientNotConnected,
 			Message: "Pod is not connected to network",
 		}
 	}
 	// No point in generating or accepting work before the chain is synced.
-	latestHeight := s.cfg.Chain.BestSnapshot().Height
-	if latestHeight != 0 && !s.cfg.SyncMgr.IsCurrent() {
+	latestHeight := s.Cfg.Chain.BestSnapshot().Height
+	if latestHeight != 0 && !s.Cfg.SyncMgr.IsCurrent() {
 		return nil, &json.RPCError{
 			Code:    json.ErrRPCClientInInitialDownload,
 			Message: "Pod is not yet synchronised...",
@@ -84,11 +89,11 @@ func handleGetWork(
 	rand.Seed(time.Now().UnixNano())
 	payToAddr := StateCfg.ActiveMiningAddrs[rand.Intn(len(StateCfg.ActiveMiningAddrs))]
 	lastTxUpdate := s.gbtWorkState.lastTxUpdate
-	latestHash := &s.cfg.Chain.BestSnapshot().Hash
-	generator := s.cfg.Generator
+	latestHash := &s.Cfg.Chain.BestSnapshot().Hash
+	generator := s.Cfg.Generator
 	if state.template == nil {
 		var err error
-		state.template, err = generator.NewBlockTemplate(payToAddr, s.cfg.Algo)
+		state.template, err = generator.NewBlockTemplate(payToAddr, s.Cfg.Algo)
 		if err != nil {
 			return nil, err
 		}
@@ -111,7 +116,7 @@ func handleGetWork(
 			again. */
 		state.prevHash = nil
 		var err error
-		state.template, err = generator.NewBlockTemplate(payToAddr, s.cfg.Algo)
+		state.template, err = generator.NewBlockTemplate(payToAddr, s.Cfg.Algo)
 		if err != nil {
 			errStr := fmt.Sprintf("Failed to create new block template: %v", err)
 			log <- cl.Err(errStr)
@@ -196,6 +201,7 @@ func handleGetWork(
 	}
 	return reply, nil
 }
+
 //	handleGetWorkSubmission is a helper for handleGetWork which deals with the calling submitting work to be verified and processed. This function MUST be called with the RPC workstate locked.
 func handleGetWorkSubmission(
 	s *rpcServer,
@@ -255,9 +261,9 @@ func handleGetWorkSubmission(
 	merkles := blockchain.BuildMerkleTreeStore(block.Transactions(), false)
 	msgBlock.Header.MerkleRoot = *merkles[len(merkles)-1]
 	// Ensure the submitted block hash is less than the target difficulty.
-	pl := fork.GetMinDiff(s.cfg.Algo, s.cfg.Chain.BestSnapshot().Height)
+	pl := fork.GetMinDiff(s.Cfg.Algo, s.Cfg.Chain.BestSnapshot().Height)
 	log <- cl.Info{"powlimit", pl}
-	err = blockchain.CheckProofOfWork(block, pl, s.cfg.Chain.BestSnapshot().Height)
+	err = blockchain.CheckProofOfWork(block, pl, s.Cfg.Chain.BestSnapshot().Height)
 	if err != nil {
 		// Anything other than a rule violation is an unexpected error, so return that error as an internal error.
 		if _, ok := err.(blockchain.RuleError); !ok {
@@ -271,7 +277,7 @@ func handleGetWorkSubmission(
 		}
 		return false, nil
 	}
-	latestHash := &s.cfg.Chain.BestSnapshot().Hash
+	latestHash := &s.Cfg.Chain.BestSnapshot().Hash
 	if !msgBlock.Header.PrevBlock.IsEqual(latestHash) {
 		log <- cl.Debugf{
 			"block submitted via getwork with previous block %s is stale",
@@ -280,7 +286,7 @@ func handleGetWorkSubmission(
 		return false, nil
 	}
 	// Process this block using the same rules as blocks coming from other nodes.  This will in turn relay it to the network like normal.
-	_, isOrphan, err := s.cfg.Chain.ProcessBlock(block, 0, s.cfg.Chain.BestSnapshot().Height)
+	_, isOrphan, err := s.Cfg.Chain.ProcessBlock(block, 0, s.Cfg.Chain.BestSnapshot().Height)
 	if err != nil || isOrphan {
 		// Anything other than a rule violation is an unexpected error, so return that error as an internal error.
 		if _, ok := err.(blockchain.RuleError); !ok {
@@ -297,6 +303,7 @@ func handleGetWorkSubmission(
 	log <- cl.Info{"block submitted via getwork accepted:", blockSha}
 	return true, nil
 }
+
 // reverseUint32Array treats the passed bytes as a series of uint32s and reverses the byte order of each uint32.  The passed byte slice must be a multiple of 4 for a correct result.  The passed bytes slice is modified.
 func reverseUint32Array(
 	b []byte,

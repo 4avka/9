@@ -1,4 +1,5 @@
 package node
+
 import (
 	"bytes"
 	"container/list"
@@ -13,6 +14,7 @@ import (
 	"math"
 	"sync"
 	"time"
+
 	blockchain "git.parallelcoin.io/dev/9/pkg/chain"
 	chaincfg "git.parallelcoin.io/dev/9/pkg/chain/config"
 	chainhash "git.parallelcoin.io/dev/9/pkg/chain/hash"
@@ -25,6 +27,7 @@ import (
 	"github.com/btcsuite/websocket"
 	"golang.org/x/crypto/ripemd160"
 )
+
 // Notification types
 type notificationBlockConnected util.Block
 type notificationBlockDisconnected util.Block
@@ -33,6 +36,7 @@ type notificationRegisterAddr struct {
 	addrs []string
 }
 type notificationRegisterBlocks wsClient
+
 // Notification control requests
 type notificationRegisterClient wsClient
 type notificationRegisterNewMempoolTxs wsClient
@@ -64,6 +68,7 @@ type rescanKeys struct {
 	unspent             map[wire.OutPoint]struct{}
 }
 type semaphore chan struct{}
+
 // wsClient provides an abstraction for handling a websocket client.  The overall data flow is split into 3 main goroutines, a possible 4th goroutine for long-running operations (only started if request is made), and a websocket manager which is used to allow things such as broadcasting requested notifications to all connected websocket clients.   Inbound messages are read via the inHandler goroutine and generally dispatched to their own handler.  However, certain potentially long-running operations such as rescans, are sent to the asyncHander goroutine and are limited to one at a time.  There are two outbound message types - one for responding to client requests and another for async notifications.  Responses to client requests use SendMessage which employs a buffered channel thereby limiting the number of outstanding requests that can be made.  Notifications are sent via QueueNotification which implements a queue via notificationQueueHandler to ensure sending notifications from other subsystems can't block.  Ultimately, all messages are sent via the outHandler.
 type wsClient struct {
 	// ws client requires a mutex lock for access
@@ -97,6 +102,7 @@ type wsClient struct {
 	quit              chan struct{}
 	wg                sync.WaitGroup
 }
+
 // wsClientFilter tracks relevant addresses for each websocket client for the `rescanblocks` extension. It is modified by the `loadtxfilter` command. NOTE: This extension was ported from github.com/decred/dcrd
 type wsClientFilter struct {
 	mu sync.Mutex
@@ -110,8 +116,10 @@ type wsClientFilter struct {
 	// Outpoints of unspent outputs.
 	unspent map[wire.OutPoint]struct{}
 }
+
 // wsCommandHandler describes a callback function used to handle a specific command.
 type wsCommandHandler func(*wsClient, interface{}) (interface{}, error)
+
 // wsNotificationManager is a connection and notification manager used for websockets.  It allows websocket clients to register for notifications they are interested in.  When an event happens elsewhere in the code such as transactions being added to the memory pool or block connects/disconnects, the notification manager is provided with the relevant details needed to figure out which websocket clients need to be notified based on what they have registered for and notifies them accordingly.  It is also used to keep track of all connected websocket clients.
 type wsNotificationManager struct {
 	// server is the RPC server the notification manager is associated with.
@@ -126,24 +134,30 @@ type wsNotificationManager struct {
 	wg   sync.WaitGroup
 	quit chan struct{}
 }
+
 // wsResponse houses a message to send to a connected websocket client as well as a channel to reply on when the message is sent.
 type wsResponse struct {
 	msg      []byte
 	doneChan chan bool
 }
+
 const (
 	// websocketSendBufferSize is the number of elements the send channel can queue before blocking.  Note that this only applies to requests handled directly in the websocket client input handler or the async handler since notifications have their own queuing mechanism independent of the send channel buffer.
 	websocketSendBufferSize = 50
 )
+
 // ErrClientQuit describes the error where a client send is not processed due to the client having already been disconnected or dropped.
 var ErrClientQuit = errors.New("client quit")
+
 // ErrRescanReorg defines the error that is returned when an unrecoverable reorganize is detected during a rescan.
 var ErrRescanReorg = json.RPCError{
 	Code:    json.ErrRPCDatabase,
 	Message: "Reorganize",
 }
+
 // timeZeroVal is simply the zero value for a time.Time and is used to avoid creating multiple instances.
 var timeZeroVal time.Time
+
 // wsHandlers maps RPC command strings to appropriate websocket handler functions.  This is set by init because help references wsHandlers and thus causes a dependency loop.
 var wsHandlers map[string]wsCommandHandler
 var wsHandlersBeforeInit = map[string]wsCommandHandler{
@@ -161,6 +175,7 @@ var wsHandlersBeforeInit = map[string]wsCommandHandler{
 	"rescan":                    handleRescan,
 	"rescanblocks":              handleRescanBlocks,
 }
+
 // unspentSlice returns a slice of currently-unspent outpoints for the rescan lookup keys.  This is primarily intended to be used to register outpoints for continuous notifications after a rescan has completed.
 func (
 	r *rescanKeys,
@@ -172,6 +187,7 @@ func (
 	}
 	return ops
 }
+
 // WebsocketHandler handles a new websocket client by creating a new wsClient, starting it, and blocking until the connection closes.  Since it blocks, it must be run in a separate goroutine.  It should be invoked from the websocket server handler which runs each new connection in a new goroutine thereby satisfying the requirement.
 func (
 	s *rpcServer,
@@ -185,10 +201,10 @@ func (
 	conn.SetReadDeadline(timeZeroVal)
 	// Limit max number of websocket clients.
 	log <- cl.Info{"new websocket client", remoteAddr}
-	if s.ntfnMgr.NumClients()+1 > *cfg.RPCMaxWebsockets {
+	if s.ntfnMgr.NumClients()+1 > *Cfg.RPCMaxWebsockets {
 		log <- cl.Infof{
 			"max websocket clients exceeded [%d] - disconnecting client %s",
-			cfg.RPCMaxWebsockets,
+			Cfg.RPCMaxWebsockets,
 			remoteAddr,
 		}
 		conn.Close()
@@ -211,6 +227,7 @@ func (
 		"disconnected websocket client %s", remoteAddr,
 	}
 }
+
 // Disconnect disconnects the websocket client.
 func (
 	c *wsClient,
@@ -226,6 +243,7 @@ func (
 	c.conn.Close()
 	c.disconnected = true
 }
+
 // Disconnected returns whether or not the websocket client is disconnected.
 func (
 	c *wsClient,
@@ -235,6 +253,7 @@ func (
 	c.Unlock()
 	return isDisconnected
 }
+
 // QueueNotification queues the passed notification to be sent to the websocket client.  This function, as the name implies, is only intended for notifications since it has additional logic to prevent other subsystems, such as the memory pool and block manager, from blocking even when the send channel is full.
 // If the client is in the process of shutting down, this function returns ErrClientQuit.  This is intended to be checked by long-running notification handlers to stop processing if there is no more work needed to be done.
 func (
@@ -249,6 +268,7 @@ func (
 	c.ntfnChan <- marshalledJSON
 	return nil
 }
+
 // SendMessage sends the passed json to the websocket client.  It is backed by a buffered channel, so it will not block until the send channel is full. Note however that QueueNotification must be used for sending async notifications instead of the this function.  This approach allows a limit to the number of outstanding requests a client can make without preventing or blocking on async notifications.
 func (
 	c *wsClient,
@@ -265,6 +285,7 @@ func (
 	}
 	c.sendChan <- wsResponse{msg: marshalledJSON, doneChan: doneChan}
 }
+
 // Start begins processing input and output messages.
 func (
 	c *wsClient,
@@ -276,12 +297,14 @@ func (
 	go c.notificationQueueHandler()
 	go c.outHandler()
 }
+
 // WaitForShutdown blocks until the websocket client goroutines are stopped and the connection is closed.
 func (
 	c *wsClient,
 ) WaitForShutdown() {
 	c.wg.Wait()
 }
+
 // inHandler handles all incoming messages for the websocket connection.  It must be run as a goroutine.
 func (
 	c *wsClient,
@@ -331,7 +354,7 @@ out:
 		// Bitcoin Core serves requests with "id":null or even an absent "id", and responds to such requests with "id":null in the response.
 		// Pod does not respond to any request without and "id" or "id":null, regardless the indicated JSON-RPC protocol version unless RPC quirks are enabled. With RPC quirks enabled, such requests will be responded to if the reqeust does not indicate JSON-RPC version.
 		// RPC quirks can be enabled by the user to avoid compatibility issues with software relying on Core's behavior.
-		if request.ID == nil && !(*cfg.RPCQuirks && request.Jsonrpc == "") {
+		if request.ID == nil && !(*Cfg.RPCQuirks && request.Jsonrpc == "") {
 			if !c.authenticated {
 				break out
 			}
@@ -419,6 +442,7 @@ out:
 	c.wg.Done()
 	log <- cl.Trace{"websocket client input handler done for", c.addr}
 }
+
 // notificationQueueHandler handles the queuing of outgoing notifications for the websocket client.  This runs as a muxer for various sources of input to ensure that queuing up notifications to be sent will not block.  Otherwise, slow clients could bog down the other systems (such as the mempool or block manager) which are queuing the data.  The data is passed on to outHandler to actually be written.  It must be run as a goroutine.
 func (
 	c *wsClient,
@@ -472,6 +496,7 @@ cleanup:
 		"websocket client notification queue handler done for", c.addr,
 	}
 }
+
 // outHandler handles all outgoing messages for the websocket connection.  It must be run as a goroutine.  It uses a buffered channel to serialize output messages while allowing the sender to continue running asynchronously.  It must be run as a goroutine.
 func (
 	c *wsClient,
@@ -513,6 +538,7 @@ cleanup:
 		"websocket client output handler done for", c.addr,
 	}
 }
+
 // serviceRequest services a parsed RPC request by looking up and executing the appropriate RPC handler.  The response is marshalled and sent to the websocket client.
 func (
 	c *wsClient,
@@ -539,6 +565,7 @@ func (
 	}
 	c.SendMessage(reply, nil)
 }
+
 // addAddress adds an address to a wsClientFilter, treating it correctly based on the type of address passed as an argument. NOTE: This extension was ported from github.com/decred/dcrd
 func (
 	f *wsClientFilter,
@@ -568,6 +595,7 @@ func (
 	}
 	f.otherAddresses[a.EncodeAddress()] = struct{}{}
 }
+
 // addAddressStr parses an address from a string and then adds it to the wsClientFilter using addAddress. NOTE: This extension was ported from github.com/decred/dcrd
 func (
 	f *wsClientFilter,
@@ -582,6 +610,7 @@ func (
 	}
 	f.addAddress(a)
 }
+
 // addUnspentOutPoint adds an outpoint to the wsClientFilter. NOTE: This extension was ported from github.com/decred/dcrd
 func (
 	f *wsClientFilter,
@@ -590,6 +619,7 @@ func (
 ) {
 	f.unspent[*op] = struct{}{}
 }
+
 // existsAddress returns true if the passed address has been added to the wsClientFilter. NOTE: This extension was ported from github.com/decred/dcrd
 func (
 	f *wsClientFilter,
@@ -627,6 +657,7 @@ func (
 	_, ok := f.otherAddresses[a.EncodeAddress()]
 	return ok
 }
+
 // existsUnspentOutPoint returns true if the passed outpoint has been added to the wsClientFilter. NOTE: This extension was ported from github.com/decred/dcrd
 func (
 	f *wsClientFilter,
@@ -635,6 +666,7 @@ func (
 	_, ok := f.unspent[*op]
 	return ok
 }
+
 // removeAddress removes the passed address, if it exists, from the wsClientFilter. NOTE: This extension was ported from github.com/decred/dcrd
 func (
 	f *wsClientFilter,
@@ -664,6 +696,7 @@ func (
 	}
 	delete(f.otherAddresses, a.EncodeAddress())
 }
+
 // removeAddressStr parses an address from a string and then removes it from the wsClientFilter using removeAddress. NOTE: This extension was ported from github.com/decred/dcrd
 func (
 	f *wsClientFilter,
@@ -678,6 +711,7 @@ func (
 		delete(f.otherAddresses, s)
 	}
 }
+
 // removeUnspentOutPoint removes the passed outpoint, if it exists, from the wsClientFilter. NOTE: This extension was ported from github.com/decred/dcrd
 func (
 	f *wsClientFilter,
@@ -686,6 +720,7 @@ func (
 ) {
 	delete(f.unspent, *op)
 }
+
 // AddClient adds the passed websocket client to the notification manager.
 func (
 	m *wsNotificationManager,
@@ -694,6 +729,7 @@ func (
 ) {
 	m.queueNotification <- (*notificationRegisterClient)(wsc)
 }
+
 // NotifyBlockConnected passes a block newly-connected to the best chain to the notification manager for block and transaction notification processing.
 func (
 	m *wsNotificationManager,
@@ -707,6 +743,7 @@ func (
 	case <-m.quit:
 	}
 }
+
 // NotifyBlockDisconnected passes a block disconnected from the best chain to the notification manager for block notification processing.
 func (
 	m *wsNotificationManager,
@@ -719,6 +756,7 @@ func (
 	case <-m.quit:
 	}
 }
+
 // NotifyMempoolTx passes a transaction accepted by mempool to the notification manager for transaction notification processing.  If isNew is true, the tx is is a new transaction, rather than one added to the mempool during a reorg.
 func (
 	m *wsNotificationManager,
@@ -737,6 +775,7 @@ func (
 	case <-m.quit:
 	}
 }
+
 // NumClients returns the number of clients actively being served.
 func (
 	m *wsNotificationManager,
@@ -751,6 +790,7 @@ func (
 	}
 	return
 }
+
 // RegisterBlockUpdates requests block update notifications to the passed websocket client.
 func (
 	m *wsNotificationManager,
@@ -759,6 +799,7 @@ func (
 ) {
 	m.queueNotification <- (*notificationRegisterBlocks)(wsc)
 }
+
 // RegisterNewMempoolTxsUpdates requests notifications to the passed websocket client when new transactions are added to the memory pool.
 func (
 	m *wsNotificationManager,
@@ -767,6 +808,7 @@ func (
 ) {
 	m.queueNotification <- (*notificationRegisterNewMempoolTxs)(wsc)
 }
+
 // RegisterSpentRequests requests a notification when each of the passed outpoints is confirmed spent (contained in a block connected to the main chain) for the passed websocket client.  The request is automatically removed once the notification has been sent.
 func (
 	m *wsNotificationManager,
@@ -779,6 +821,7 @@ func (
 		ops: ops,
 	}
 }
+
 // RegisterTxOutAddressRequests requests notifications to the passed websocket client when a transaction output spends to the passed address.
 func (
 	m *wsNotificationManager,
@@ -791,6 +834,7 @@ func (
 		addrs: addrs,
 	}
 }
+
 // RemoveClient removes the passed websocket client and all notifications registered for it.
 func (
 	m *wsNotificationManager,
@@ -804,17 +848,20 @@ func (
 		// fmt.Println("chan:<-m.quit")
 	}
 }
+
 // Shutdown shuts down the manager, stopping the notification queue and notification handler goroutines.
 func (
 	m *wsNotificationManager,
 ) Shutdown() {
 	close(m.quit)
 }
+
 // Start starts the goroutines required for the manager to queue and process websocket client notifications.
 func (m *wsNotificationManager) Start() {
 	go m.queueHandler()
 	go m.notificationHandler()
 }
+
 // UnregisterBlockUpdates removes block update notifications for the passed websocket client.
 func (
 	m *wsNotificationManager,
@@ -823,6 +870,7 @@ func (
 ) {
 	m.queueNotification <- (*notificationUnregisterBlocks)(wsc)
 }
+
 // UnregisterNewMempoolTxsUpdates removes notifications to the passed websocket client when new transaction are added to the memory pool.
 func (
 	m *wsNotificationManager,
@@ -830,6 +878,7 @@ func (
 	wsc *wsClient) {
 	m.queueNotification <- (*notificationUnregisterNewMempoolTxs)(wsc)
 }
+
 // UnregisterSpentRequest removes a request from the passed websocket client to be notified when the passed outpoint is confirmed spent (contained in a block connected to the main chain).
 func (
 	m *wsNotificationManager,
@@ -840,6 +889,7 @@ func (
 		op:  op,
 	}
 }
+
 // UnregisterTxOutAddressRequest removes a request from the passed websocket client to be notified when a transaction spends to the passed address.
 func (
 	m *wsNotificationManager,
@@ -852,12 +902,14 @@ func (
 		addr: addr,
 	}
 }
+
 // WaitForShutdown blocks until all notification manager goroutines have finished.
 func (
 	m *wsNotificationManager,
 ) WaitForShutdown() {
 	m.wg.Wait()
 }
+
 // addAddrRequests adds the websocket client wsc to the address to client set addrMap so wsc will be notified for any mempool or block transaction outputs spending to any of the addresses in addrs.
 func (
 	_ *wsNotificationManager,
@@ -877,6 +929,7 @@ func (
 		cmap[wsc.quit] = wsc
 	}
 }
+
 // addSpentRequests modifies a map of watched outpoints to sets of websocket clients to add a new request watch all of the outpoints in ops and create and send a notification when spent to the websocket client wsc.
 func (
 	m *wsNotificationManager,
@@ -898,7 +951,7 @@ func (
 	// Check if any transactions spending these outputs already exists in the mempool, if so send the notification immediately.
 	spends := make(map[chainhash.Hash]*util.Tx)
 	for _, op := range ops {
-		spend := m.server.cfg.TxMemPool.CheckSpend(*op)
+		spend := m.server.Cfg.TxMemPool.CheckSpend(*op)
 		if spend != nil {
 			log <- cl.Debugf{
 				"found existing mempool spend for outpoint<%v>: %v",
@@ -911,6 +964,7 @@ func (
 		m.notifyForTx(opMap, nil, spend, nil)
 	}
 }
+
 // notificationHandler reads notifications and control messages from the queue handler and processes one at a time.
 func (
 	m *wsNotificationManager,
@@ -1013,6 +1067,7 @@ out:
 	}
 	m.wg.Done()
 }
+
 // notifyBlockConnected notifies websocket clients that have registered for block updates when a block is connected to the main chain.
 func (
 	_ *wsNotificationManager,
@@ -1032,6 +1087,7 @@ func (
 		wsc.QueueNotification(marshalledJSON)
 	}
 }
+
 // notifyBlockDisconnected notifies websocket clients that have registered for block updates when a block is disconnected from the main chain (due to a reorganize).
 func (
 	_ *wsNotificationManager,
@@ -1055,6 +1111,7 @@ func (
 		wsc.QueueNotification(marshalledJSON)
 	}
 }
+
 // notifyFilteredBlockConnected notifies websocket clients that have registered for block updates when a block is connected to the main chain.
 func (
 	m *wsNotificationManager,
@@ -1098,6 +1155,7 @@ func (
 		wsc.QueueNotification(marshalledJSON)
 	}
 }
+
 // notifyFilteredBlockDisconnected notifies websocket clients that have registered for block updates when a block is disconnected from the main chain (due to a reorganize).
 func (
 	_ *wsNotificationManager,
@@ -1131,6 +1189,7 @@ func (
 		wsc.QueueNotification(marshalledJSON)
 	}
 }
+
 // notifyForNewTx notifies websocket clients that have registered for updates when a new transaction is added to the memory pool.
 func (
 	m *wsNotificationManager,
@@ -1158,7 +1217,7 @@ func (
 				wsc.QueueNotification(marshalledJSONVerbose)
 				continue
 			}
-			net := m.server.cfg.ChainParams
+			net := m.server.Cfg.ChainParams
 			rawTx, err := createTxRawResult(net, mtx, txHashStr, nil,
 				"", 0, 0)
 			if err != nil {
@@ -1177,6 +1236,7 @@ func (
 		}
 	}
 }
+
 // notifyForTx examines the inputs and outputs of the passed transaction, notifying websocket clients of outputs spending to a watched address and inputs spending a watched outpoint.
 func (
 	m *wsNotificationManager,
@@ -1192,6 +1252,7 @@ func (
 		m.notifyForTxOuts(ops, addrs, tx, block)
 	}
 }
+
 // notifyForTxIns examines the inputs of the passed transaction and sends interested websocket clients a redeemingtx notification if any inputs spend a watched output.  If block is non-nil, any matching spent requests are removed.
 func (
 	m *wsNotificationManager,
@@ -1229,6 +1290,7 @@ func (
 		}
 	}
 }
+
 // notifyForTxOuts examines each transaction output, notifying interested websocket clients of the transaction if an output spends to a watched address.  A spent notification request is automatically registered for the client for each matching output.
 func (
 	m *wsNotificationManager,
@@ -1243,7 +1305,7 @@ func (
 	wscNotified := make(map[chan struct{}]struct{})
 	for i, txOut := range tx.MsgTx().TxOut {
 		_, txAddrs, _, err := txscript.ExtractPkScriptAddrs(
-			txOut.PkScript, m.server.cfg.ChainParams)
+			txOut.PkScript, m.server.Cfg.ChainParams)
 		if err != nil {
 			continue
 		}
@@ -1275,6 +1337,7 @@ func (
 		}
 	}
 }
+
 // notifyRelevantTxAccepted examines the inputs and outputs of the passed transaction, notifying websocket clients of outputs spending to a watched address and inputs spending a watched outpoint.  Any outputs paying to a watched address result in the output being watched as well for future notifications.
 func (
 	m *wsNotificationManager,
@@ -1296,6 +1359,7 @@ func (
 		}
 	}
 }
+
 // queueHandler maintains a queue of notifications and notification handler control messages.
 func (
 	m *wsNotificationManager,
@@ -1303,6 +1367,7 @@ func (
 	queueHandler(m.queueNotification, m.notificationMsgs, m.quit)
 	m.wg.Done()
 }
+
 // removeAddrRequest removes the websocket client wsc from the address to client set addrs so it will no longer receive notification updates for any transaction outputs send to addr.
 func (
 	_ *wsNotificationManager,
@@ -1327,6 +1392,7 @@ func (
 		delete(addrs, addr)
 	}
 }
+
 // removeSpentRequest modifies a map of watched outpoints to remove the websocket client wsc from the set of clients to be notified when a watched outpoint is spent.  If wsc is the last client, the outpoint key is removed from the map.
 func (
 	_ *wsNotificationManager,
@@ -1350,6 +1416,7 @@ func (
 		delete(ops, *op)
 	}
 }
+
 // subscribedClients returns the set of all websocket client quit channels that are registered to receive notifications regarding tx, either due to tx spending a watched output or outputting to a watched address.  Matching client's filters are updated based on this transaction's outputs and output addresses that may be relevant for a client.
 func (
 	m *wsNotificationManager,
@@ -1376,7 +1443,7 @@ func (
 	}
 	for i, output := range msgTx.TxOut {
 		_, addrs, _, err := txscript.ExtractPkScriptAddrs(
-			output.PkScript, m.server.cfg.ChainParams)
+			output.PkScript, m.server.Cfg.ChainParams)
 		if err != nil {
 			// Clients are not able to subscribe to nonstandard or non-address outputs.
 			continue
@@ -1414,6 +1481,7 @@ func (
 ) release() {
 	<-s
 }
+
 // blockDetails creates a BlockDetails struct to include in btcws notifications from a block and a transaction's block index.
 func blockDetails(
 	block *util.Block, txIndex int) *json.BlockDetails {
@@ -1427,6 +1495,7 @@ func blockDetails(
 		Time:   block.MsgBlock().Header.Timestamp.Unix(),
 	}
 }
+
 // checkAddressValidity checks the validity of each address in the passed string slice. It does this by attempting to decode each address using the current active network parameters. If any single address fails to decode properly, the function returns an error. Otherwise, nil is returned.
 func checkAddressValidity(
 	addrs []string, params *chaincfg.Params) error {
@@ -1442,6 +1511,7 @@ func checkAddressValidity(
 	}
 	return nil
 }
+
 // descendantBlock returns the appropriate JSON-RPC error if a current block fetched during a reorganize is not a direct child of the parent block hash.
 func descendantBlock(
 	prevHash *chainhash.Hash, curBlock *util.Block) error {
@@ -1455,6 +1525,7 @@ func descendantBlock(
 	}
 	return nil
 }
+
 // deserializeOutpoints deserializes each serialized outpoint.
 func deserializeOutpoints(
 	serializedOuts []json.OutPoint) ([]*wire.OutPoint, error) {
@@ -1469,6 +1540,7 @@ func deserializeOutpoints(
 	}
 	return outpoints, nil
 }
+
 // handleLoadTxFilter implements the loadtxfilter command extension for websocket connections. NOTE: This extension is ported from github.com/decred/dcrd
 func handleLoadTxFilter(
 	wsc *wsClient, icmd interface{}) (interface{}, error) {
@@ -1487,7 +1559,7 @@ func handleLoadTxFilter(
 			Index: cmd.OutPoints[i].Index,
 		}
 	}
-	params := wsc.server.cfg.ChainParams
+	params := wsc.server.Cfg.ChainParams
 	wsc.Lock()
 	if cmd.Reload || wsc.filterData == nil {
 		wsc.filterData = newWSClientFilter(cmd.Addresses, outPoints,
@@ -1506,12 +1578,14 @@ func handleLoadTxFilter(
 	}
 	return nil, nil
 }
+
 // handleNotifyBlocks implements the notifyblocks command extension for websocket connections.
 func handleNotifyBlocks(
 	wsc *wsClient, icmd interface{}) (interface{}, error) {
 	wsc.server.ntfnMgr.RegisterBlockUpdates(wsc)
 	return nil, nil
 }
+
 // handleNotifyNewTransations implements the notifynewtransactions command extension for websocket connections.
 func handleNotifyNewTransactions(
 	wsc *wsClient, icmd interface{}) (interface{}, error) {
@@ -1523,6 +1597,7 @@ func handleNotifyNewTransactions(
 	wsc.server.ntfnMgr.RegisterNewMempoolTxsUpdates(wsc)
 	return nil, nil
 }
+
 // handleNotifyReceived implements the notifyreceived command extension for websocket connections.
 func handleNotifyReceived(
 	wsc *wsClient, icmd interface{}) (interface{}, error) {
@@ -1531,13 +1606,14 @@ func handleNotifyReceived(
 		return nil, json.ErrRPCInternal
 	}
 	// Decode addresses to validate input, but the strings slice is used directly if these are all ok.
-	err := checkAddressValidity(cmd.Addresses, wsc.server.cfg.ChainParams)
+	err := checkAddressValidity(cmd.Addresses, wsc.server.Cfg.ChainParams)
 	if err != nil {
 		return nil, err
 	}
 	wsc.server.ntfnMgr.RegisterTxOutAddressRequests(wsc, cmd.Addresses)
 	return nil, nil
 }
+
 // handleNotifySpent implements the notifyspent command extension for websocket connections.
 func handleNotifySpent(
 	wsc *wsClient, icmd interface{}) (interface{}, error) {
@@ -1552,6 +1628,7 @@ func handleNotifySpent(
 	wsc.server.ntfnMgr.RegisterSpentRequests(wsc, outpoints)
 	return nil, nil
 }
+
 // handleRescan implements the rescan command extension for websocket connections.
 // NOTE: This does not smartly handle reorgs, and fixing requires database changes (for safe, concurrent access to full block ranges, and support for other chains than the best chain).  It will, however, detect whether a reorg removed a block that was previously processed, and result in the handler erroring.  Clients must handle this by finding a block still in the chain (perhaps from a rescanprogress notification) to resume their rescan.
 func handleRescan(
@@ -1587,7 +1664,7 @@ func handleRescan(
 	}
 	var compressedPubkey [33]byte
 	var uncompressedPubkey [65]byte
-	params := wsc.server.cfg.ChainParams
+	params := wsc.server.Cfg.ChainParams
 	for _, addrStr := range cmd.Addresses {
 		addr, err := util.DecodeAddress(addrStr, params)
 		if err != nil {
@@ -1627,7 +1704,7 @@ func handleRescan(
 	for _, outpoint := range outpoints {
 		lookups.unspent[*outpoint] = struct{}{}
 	}
-	chain := wsc.server.cfg.Chain
+	chain := wsc.server.Cfg.Chain
 	minBlockHash, err := chainhash.NewHashFromStr(cmd.BeginBlock)
 	if err != nil {
 		return nil, rpcDecodeHexError(cmd.BeginBlock)
@@ -1682,8 +1759,8 @@ fetchRange:
 			}
 			// If the rescan is through the current block, set up the client to continue to receive notifications regarding all rescanned addresses and the current set of unspent outputs.
 			// This is done safely by temporarily grabbing exclusive access of the block manager.  If no more blocks have been attached between this pause and the fetch above, then it is safe to register the websocket client for continuous notifications if necessary.  Otherwise, continue the fetch loop again to rescan the new blocks (or error due to an irrecoverable reorganize).
-			pauseGuard := wsc.server.cfg.SyncMgr.Pause()
-			best := wsc.server.cfg.Chain.BestSnapshot()
+			pauseGuard := wsc.server.Cfg.SyncMgr.Pause()
+			best := wsc.server.Cfg.Chain.BestSnapshot()
 			curHash := &best.Hash
 			again := true
 			if lastBlockHash == nil || *lastBlockHash == *curHash {
@@ -1804,6 +1881,7 @@ fetchRange:
 	log <- cl.Info{"finished rescan"}
 	return nil, nil
 }
+
 // handleRescanBlocks implements the rescanblocks command extension for websocket connections. NOTE: This extension is ported from github.com/decred/dcrd
 func handleRescanBlocks(
 	wsc *wsClient, icmd interface{}) (interface{}, error) {
@@ -1831,8 +1909,8 @@ func handleRescanBlocks(
 	}
 	discoveredData := make([]json.RescannedBlock, 0, len(blockHashes))
 	// Iterate over each block in the request and rescan.  When a block contains relevant transactions, add it to the response.
-	bc := wsc.server.cfg.Chain
-	params := wsc.server.cfg.ChainParams
+	bc := wsc.server.Cfg.Chain
+	params := wsc.server.Cfg.ChainParams
 	var lastBlockHash *chainhash.Hash
 	for i := range blockHashes {
 		block, err := bc.BlockByHash(blockHashes[i])
@@ -1860,23 +1938,27 @@ func handleRescanBlocks(
 	}
 	return &discoveredData, nil
 }
+
 // handleSession implements the session command extension for websocket connections.
 func handleSession(
 	wsc *wsClient, icmd interface{}) (interface{}, error) {
 	return &json.SessionResult{SessionID: wsc.sessionID}, nil
 }
+
 // handleStopNotifyBlocks implements the stopnotifyblocks command extension for websocket connections.
 func handleStopNotifyBlocks(
 	wsc *wsClient, icmd interface{}) (interface{}, error) {
 	wsc.server.ntfnMgr.UnregisterBlockUpdates(wsc)
 	return nil, nil
 }
+
 // handleStopNotifyNewTransations implements the stopnotifynewtransactions command extension for websocket connections.
 func handleStopNotifyNewTransactions(
 	wsc *wsClient, icmd interface{}) (interface{}, error) {
 	wsc.server.ntfnMgr.UnregisterNewMempoolTxsUpdates(wsc)
 	return nil, nil
 }
+
 // handleStopNotifyReceived implements the stopnotifyreceived command extension for websocket connections.
 func handleStopNotifyReceived(
 	wsc *wsClient, icmd interface{}) (interface{}, error) {
@@ -1885,7 +1967,7 @@ func handleStopNotifyReceived(
 		return nil, json.ErrRPCInternal
 	}
 	// Decode addresses to validate input, but the strings slice is used directly if these are all ok.
-	err := checkAddressValidity(cmd.Addresses, wsc.server.cfg.ChainParams)
+	err := checkAddressValidity(cmd.Addresses, wsc.server.Cfg.ChainParams)
 	if err != nil {
 		return nil, err
 	}
@@ -1894,6 +1976,7 @@ func handleStopNotifyReceived(
 	}
 	return nil, nil
 }
+
 // handleStopNotifySpent implements the stopnotifyspent command extension for websocket connections.
 func handleStopNotifySpent(
 	wsc *wsClient, icmd interface{}) (interface{}, error) {
@@ -1910,6 +1993,7 @@ func handleStopNotifySpent(
 	}
 	return nil, nil
 }
+
 // handleWebsocketHelp implements the help command for websocket connections.
 func handleWebsocketHelp(
 	wsc *wsClient, icmd interface{}) (interface{}, error) {
@@ -1958,6 +2042,7 @@ func makeSemaphore(
 	n int) semaphore {
 	return make(chan struct{}, n)
 }
+
 // newRedeemingTxNotification returns a new marshalled redeemingtx notification with the passed parameters.
 func newRedeemingTxNotification(
 	txHex string, index int, block *util.Block) ([]byte, error) {
@@ -1965,6 +2050,7 @@ func newRedeemingTxNotification(
 	ntfn := json.NewRedeemingTxNtfn(txHex, blockDetails(block, index))
 	return json.MarshalCmd(nil, ntfn)
 }
+
 // newWSClientFilter creates a new, empty wsClientFilter struct to be used for a websocket client. NOTE: This extension was ported from github.com/decred/dcrd
 func newWSClientFilter(
 	addresses []string, unspentOutPoints []wire.OutPoint, params *chaincfg.Params) *wsClientFilter {
@@ -1984,6 +2070,7 @@ func newWSClientFilter(
 	}
 	return filter
 }
+
 // newWebsocketClient returns a new websocket client given the notification manager, websocket connection, remote address, and whether or not the client has already been authenticated (via HTTP Basic access authentication).  The returned client is ready to start.  Once started, the client will process incoming and outgoing messages in separate goroutines complete with queuing and asynchrous handling for long-running operations.
 func newWebsocketClient(
 	server *rpcServer, conn *websocket.Conn,
@@ -2001,13 +2088,14 @@ func newWebsocketClient(
 		server:            server,
 		addrRequests:      make(map[string]struct{}),
 		spentRequests:     make(map[wire.OutPoint]struct{}),
-		serviceRequestSem: makeSemaphore(*cfg.RPCMaxConcurrentReqs),
+		serviceRequestSem: makeSemaphore(*Cfg.RPCMaxConcurrentReqs),
 		ntfnChan:          make(chan []byte, 1), // nonblocking sync
 		sendChan:          make(chan wsResponse, websocketSendBufferSize),
 		quit:              make(chan struct{}),
 	}
 	return client, nil
 }
+
 // newWsNotificationManager returns a new notification manager ready for use. See wsNotificationManager for more details.
 func newWsNotificationManager(
 	server *rpcServer) *wsNotificationManager {
@@ -2019,6 +2107,7 @@ func newWsNotificationManager(
 		quit:              make(chan struct{}),
 	}
 }
+
 // queueHandler manages a queue of empty interfaces, reading from in and sending the oldest unsent to out.  This handler stops when either of the in or quit channels are closed, and closes out before returning, without waiting to send any variables still remaining in the queue.
 func queueHandler(
 	in <-chan interface{}, out chan<- interface{}, quit <-chan struct{}) {
@@ -2063,6 +2152,7 @@ out:
 	}
 	close(out)
 }
+
 // recoverFromReorg attempts to recover from a detected reorganize during a rescan.  It fetches a new range of block shas from the database and verifies that the new range of blocks is on the same fork as a previous range of blocks.  If this condition does not hold true, the JSON-RPC error for an unrecoverable reorganize is returned.
 func recoverFromReorg(
 	chain *blockchain.BlockChain, minBlock, maxBlock int32,
@@ -2092,6 +2182,7 @@ func recoverFromReorg(
 	}
 	return hashList, nil
 }
+
 // rescanBlock rescans all transactions in a single block.  This is a helper function for handleRescan.
 func rescanBlock(
 	wsc *wsClient, lookups *rescanKeys, blk *util.Block) {
@@ -2125,7 +2216,7 @@ func rescanBlock(
 		}
 		for txOutIdx, txout := range tx.MsgTx().TxOut {
 			_, addrs, _, _ := txscript.ExtractPkScriptAddrs(
-				txout.PkScript, wsc.server.cfg.ChainParams)
+				txout.PkScript, wsc.server.Cfg.ChainParams)
 			for _, addr := range addrs {
 				switch a := addr.(type) {
 				case *util.AddressPubKeyHash:
@@ -2200,6 +2291,7 @@ func rescanBlock(
 		}
 	}
 }
+
 // rescanBlockFilter rescans a block for any relevant transactions for the passed lookup keys. Any discovered transactions are returned hex encoded as a string slice. NOTE: This extension is ported from github.com/decred/dcrd
 func rescanBlockFilter(
 	filter *wsClientFilter, block *util.Block, params *chaincfg.Params) []string {
@@ -2251,6 +2343,7 @@ func rescanBlockFilter(
 	filter.mu.Unlock()
 	return transactions
 }
+
 // txHexString returns the serialized transaction encoded in hexadecimal.
 func txHexString(
 	tx *wire.MsgTx) string {

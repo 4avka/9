@@ -3,13 +3,11 @@ package cmd
 import (
 	"time"
 
-	netparams "git.parallelcoin.io/dev/9/pkg/chain/config/params"
-
 	"git.parallelcoin.io/dev/9/cmd/nine"
 	"git.parallelcoin.io/dev/9/cmd/node"
 )
 
-var activenetparams = &netparams.MainNetParams
+var activenetparams = node.ActiveNetParams
 var _c = getConfig()
 var Config = *_c
 var config = MakeConfig(&Config)
