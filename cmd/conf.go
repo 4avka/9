@@ -199,7 +199,7 @@ func ConfConfEdit(key string) int {
 				Options: Networks,
 				Default: *k,
 			}
-			err := survey.AskOne(prompt, &name, nil)
+			err := survey.AskOne(prompt, name, nil)
 			if err != nil {
 				fmt.Println("ERROR:", cl.Ine(), err)
 			}

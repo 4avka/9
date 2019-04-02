@@ -7,11 +7,13 @@ import (
 	"git.parallelcoin.io/dev/9/cmd/node"
 )
 
+var _c = getConfig()
+var Config = *_c
 var config = MakeConfig(&Config)
 var stateconfig = node.StateCfg
+var tn, sn, rn bool
 
 func MakeConfig(c *Lines) (out *nine.Config) {
-	var tn, sn, rn = new(bool), new(bool), new(bool)
 	cfg := *c
 	String := func(path string) *string {
 		return cfg[path].Value.(*string)
@@ -76,9 +78,9 @@ func MakeConfig(c *Lines) (out *nine.Config) {
 		OnionProxyPass:           String("proxy.pass"),
 		Onion:                    Bool("proxy.tor"),
 		TorIsolation:             Bool("proxy.isolation"),
-		TestNet3:                 tn,
-		RegressionTest:           rn,
-		SimNet:                   sn,
+		TestNet3:                 &tn,
+		RegressionTest:           &rn,
+		SimNet:                   &sn,
 		AddCheckpoints:           Tags("chain.addcheckpoints"),
 		DisableCheckpoints:       Bool("chain.disablecheckpoints"),
 		DbType:                   String("chain.dbtype"),

@@ -40,7 +40,7 @@ func (s Stringslice) String() (out string) {
 	for i, x := range s {
 		out += x
 		if i < len(s)-1 {
-			out += " "
+			out += "`"
 		}
 	}
 	return
@@ -169,6 +169,17 @@ func Network(def, usage string) *Line {
 		for _, x := range Networks {
 			if x == s {
 				p = &s
+				fmt.Println("network", s)
+				switch s {
+				case "mainnet":
+					tn, sn, rn = false, false, false
+				case "testnet":
+					tn, sn, rn = true, false, false
+				case "simnet":
+					tn, sn, rn = false, true, false
+				case "regtestnet":
+					tn, sn, rn = false, false, true
+				}
 				return true
 			}
 		}
@@ -213,33 +224,51 @@ func NetAddrs(def, usage string) *Line {
 	var defaultPort string
 	if len(def) < 1 {
 		def = ":11047"
-	} else {
-		o = append(o, def)
 	}
 	n, e := strconv.Atoi(def)
 	if e == nil {
 		defaultPort = fmt.Sprint(n)
 	} else if len(def) > 1 {
-		defaultPort, _, _ = net.SplitHostPort(def)
+		if len(o) < 1 {
+			o = append(o, def)
+		}
+		_, defaultPort, _ = net.SplitHostPort(def)
 	}
 	var l Line
 	l = Line{
 		def, func(ss string) bool {
+			lv := l.Value.(*[]string)
 			ss = strings.TrimSpace(ss)
 			if len(ss) < 1 {
 				return true
 			}
 			s := strings.Split(ss, " ")
 			for _, x := range s {
-				_, _, err := net.SplitHostPort(x)
+				ho, po, err := net.SplitHostPort(x)
 				if err != nil {
 					a := net.JoinHostPort(x, defaultPort)
 					ss := append(*l.Value.(*[]string), a)
-					l.Value = &ss
+					*lv = ss
 					return true
+				} else {
+					a := net.JoinHostPort(ho, po)
+					ss := append(*l.Value.(*[]string), a)
+					*lv = ss
 				}
-				sss := append(*l.Value.(*[]string), x)
-				l.Value = &sss
+				// eliminate duplicates
+				llv := *lv
+				mapset := make(map[string]bool)
+				// maps only store one of each key
+				for _, x := range llv {
+					mapset[x] = true
+				}
+				out := []string{}
+				// only one of each exact string will be copied back
+				for i := range mapset {
+					out = append(out, i)
+				}
+				sort.Strings(out)
+				*lv = out
 			}
 			return true
 		}, usage, &o,
@@ -346,16 +375,22 @@ func String(def, usage string) *Line {
 // by backticks `
 func StringSlice(def, usage string) *Line {
 	s := strings.TrimSpace(def)
-	ss := strings.Split(s, "`")
+	sss := strings.Split(s, "`")
+	ss := &sss
 	var l Line
 	l = Line{def, func(s string) bool {
+		lv := l.Value.(*[]string)
 		s = strings.TrimSpace(s)
-		values := strings.Split(s, "`")
-		if len(values) > 1 {
-			l.Value = &values
+		if len(s) < 1 {
+			*lv = []string{}
+		} else {
+			values := strings.Split(s, "`")
+			if len(values) >= 1 {
+				*lv = values
+			}
 		}
 		return true
-	}, usage, &ss}
+	}, usage, ss}
 	return &l
 }
 
