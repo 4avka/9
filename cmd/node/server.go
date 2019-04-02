@@ -448,9 +448,9 @@ func (s *server) Start() {
 	if *Cfg.Generate {
 		s.cpuMiner.Start()
 	}
-	if *Cfg.MinerListener != "" {
-		s.minerController.Start()
-	}
+	// if *Cfg.MinerListener != "" {
+	// 	s.minerController.Start()
+	// }
 }
 
 // Stop gracefully shuts down the server by stopping and disconnecting all peers and the main listener.
@@ -466,7 +466,7 @@ func (
 	// Stop the CPU miner if needed
 	s.cpuMiner.Stop()
 	// Stop miner controller if needed
-	s.minerController.Stop()
+	// s.minerController.Stop()
 	// Shutdown the RPC server if it's not disabled.
 	if !*Cfg.DisableRPC {
 		for i := range s.rpcServers {
@@ -2621,17 +2621,17 @@ func newServer(
 		NumThreads:             s.numthreads,
 		Algo:                   s.algo,
 	})
-	s.minerController = controller.New(&controller.Config{
-		Blockchain:             s.chain,
-		ChainParams:            chainParams,
-		BlockTemplateGenerator: blockTemplateGenerator,
-		MiningAddrs:            StateCfg.ActiveMiningAddrs,
-		ProcessBlock:           s.syncManager.ProcessBlock,
-		MinerListener:          *Cfg.MinerListener,
-		MinerKey:               StateCfg.ActiveMinerKey,
-		ConnectedCount:         s.ConnectedCount,
-		IsCurrent:              s.syncManager.IsCurrent,
-	})
+	// s.minerController = controller.New(&controller.Config{
+	// 	Blockchain:             s.chain,
+	// 	ChainParams:            chainParams,
+	// 	BlockTemplateGenerator: blockTemplateGenerator,
+	// 	MiningAddrs:            StateCfg.ActiveMiningAddrs,
+	// 	ProcessBlock:           s.syncManager.ProcessBlock,
+	// 	MinerListener:          *Cfg.MinerListener,
+	// 	MinerKey:               StateCfg.ActiveMinerKey,
+	// 	ConnectedCount:         s.ConnectedCount,
+	// 	IsCurrent:              s.syncManager.IsCurrent,
+	// })
 	/*	Only setup a function to return new addresses to connect to when
 		not running in connect-only mode.  The simulation network is always
 		in connect-only mode since it is only intended to connect to
