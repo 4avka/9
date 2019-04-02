@@ -418,13 +418,9 @@ func (
 }
 
 // Start begins accepting connections from peers.
-func (
-	s *server,
-) Start() {
-	// Log<-cl.Debug{tarting server"
+func (s *server) Start() {
 	// Already started?
 	if atomic.AddInt32(&s.started, 1) != 1 {
-		// Log<-cl.Debug{lready started"
 		return
 	}
 	log <- cl.Trace{"starting server"}
