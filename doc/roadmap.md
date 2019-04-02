@@ -37,12 +37,48 @@
 > *Note that this isn't as trivial as it might sound*. 
 > If you picture a small local area network with nodes nearby, within two hops, each one will be working at the same time, may have other things interfering (network packet loss, network attack attempts, congestion, etc) it is not guaranteed at all which message will cover the network first and slot into the #1 position.
 
-#### ![multi-bacteria petri dish](https://upload.wikimedia.org/wikipedia/commons/c/c9/Pikovskaya%27s_Plate_showing_Phosphate_solubilising_microorganims.jpg) Like this petri dish, eventually one strategy (organism) will dominate
+##### ![multi-bacteria petri dish](https://upload.wikimedia.org/wikipedia/commons/c/c9/Pikovskaya%27s_Plate_showing_Phosphate_solubilising_microorganims.jpg) Like this petri dish, eventually one strategy (organism) will dominate
 
-    - Obviously, nodes will set a limit per transaction how many they care to know about at all. Later attempts will not be relayed and quickly identified by the tx hash. Only a certain number of attempts needs to be found, to cover the probabilities of radically different orderings across the network. Once there is enough of these, the overlap settles and 100% certainty can be given to the ordering.
+- Obviously, nodes will set a limit per transaction how many they care to know about at all. Later attempts will not be relayed and quickly identified by the tx hash. Only a certain number of attempts needs to be found, to cover the probabilities of radically different orderings across the network. Once there is enough of these, the overlap settles and 100% certainty can be given to the ordering.
 
 The result of this design is that at some point, the preponderance of evidence settles into an unchanging state even as more data is added. Nodes will be able to progressively update their causality graphs as new transaction publication attempts come in and in the process further layers of events will build up over top.
 
+### Probabalistic Finality
+
 Like with Nakamoto consensus blockchains, ultimately the final consensus is probabalistic. The difference is that this consensus favours near neighbours and resists partitioning *specifically at the location of transaction*.
 
-This in itself is a massive deterrent against double spend attacks, as like an informal network of traders on some popular strip of road, all have a shared interest in not being involved in allowing a neighbour to be robbed. Thus, if an attacker shows up that overwhelms the resources of the victim, it is likely in future that such an attack will be responded to with all the neighbours help as well.
+This in itself is a massive deterrent against double spend attacks, as like an informal network of traders on some popular strip of road, all have a shared interest in not being involved in allowing a neighbour to be robbed.
+
+Thus, if an attacker shows up that overwhelms the resources of the victim, it is likely in future that such an attack will be responded to with all the neighbours help as well.
+
+### Ledger Emulation - Merging Coins
+
+A key objective in creating such a low latency, locality-favouring data replication and verification protocol is enabling the implementation of arbitrary ledgers.
+
+There is no possible way that nearly instant clearance of transactions is not desirable for any cryptocurrency. However, the biggest site at which disagreement occurs in monetary theory in general has to do with supply of money and what it *should* be.
+
+Thus, the proposal is that we can find other small, vulnerable small cap altcoins with tenuous connections to the market, add their history to our history and implement their protocol (signatures, hash functions, etc, and their seecurity properties) as well as creating a role for PoW mining solely to regulate the issuance of a token on the combined network.
+
+There will still be much competition even just to mine coinbase transactions, but it will no longer have an impact on the security of the network. Double spends and network partitions (gossip-shaping) are strongly resisted by the underlying transaction order discovery protocol.
+
+*The important thing is that after making such a transition, another altcoin then also has easier paths to changing the consensus.*
+
+This is likely to result in a similar swarming pattern as we see with almost all forms of art and science. The champions of the coins will seek to differentiate but also outdo each other in similarities. **The winner will be the user.**
+
+### On-chain-off-chain-on-chain-atomic-whatevers
+
+The coins on the same protocol network can then implement the same types of features as we see with Lightning and Atomic Swap protocols, except that it is one protocol with two applications.
+
+Any node supporting both is in the running for this, and it has an interesting anti-locality effect, in contrast to the transaction confirmation. Literally, the path of the transactions and when the atomic swap transactions are first published as a complete set will very likely be the network antipodes.
+
+This kind of multi-token ledger already exists in some form, but up to now nobody has thought of the idea of independently implementing a token on top of another, faster or different replication strategy. Bitshares is an example that uses DPoS elections to allocate the reward for authoritative block publication.
+
+The main reason being in part ideological (PoS vs PoW), and in the other part, simply impractical. It all depends on what you believe, as the experiment is in progress, cause and effect patterns take time to discover.
+
+### Incentives for Coins
+
+But the probably hundreds of struggling little altcoins being hit from every direction, have a big incentive in this.
+
+- Firstly, they consolidate their token-specific knowledge, and where it is superseded, they can divert their energies elsewhere.
+- Very often between several disparate altcoin devs and users there will be more overlaps than expected. These can open the door to synergies and essentially builds up a social network between existing social networks.
+- Small coins all have in common their vulnerability to a generally larger attacker. By creating a shared base protocol, but completely open - anyone can implement a coin or ledger protocol on top of the base, but each sub-ledger can be separately replicated by nodes, so depending on word of mouth social network coordination and distribution of information.
