@@ -3,11 +3,12 @@ package cmd
 import (
 	"time"
 
+	"git.parallelcoin.io/dev/9/cmd/ll"
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
 
 // Log is the logger for the peer package
-var Log = cl.NewSubSystem("cmd", "info")
+var Log = cl.NewSubSystem("cmd", ll.DEFAULT)
 
 var log = Log.Ch
 

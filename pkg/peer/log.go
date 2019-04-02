@@ -1,28 +1,36 @@
 package peer
+
 import (
 	"fmt"
 	"strings"
 	"time"
+
+	"git.parallelcoin.io/dev/9/cmd/ll"
 	chainhash "git.parallelcoin.io/dev/9/pkg/chain/hash"
 	txscript "git.parallelcoin.io/dev/9/pkg/chain/tx/script"
 	"git.parallelcoin.io/dev/9/pkg/chain/wire"
 	cl "git.parallelcoin.io/dev/9/pkg/util/cl"
 )
+
 // Log is the logger for the peer package
-var Log = cl.NewSubSystem("peer", "info")
+var Log = cl.NewSubSystem("peer", ll.DEFAULT)
 var log = Log.Ch
+
 // UseLogger uses a specified Logger to output package logging info. This should be used in preference to SetLogWriter if the caller is also using log.
 func UseLogger(
 	logger *cl.SubSystem) {
 	Log = logger
 	log = Log.Ch
 }
+
 const (
 	// maxRejectReasonLen is the maximum length of a sanitized reject reason that will be logged.
 	maxRejectReasonLen = 250
 )
+
 // LogClosure is a closure that can be printed with %v to be used to generate expensive-to-create data for a detailed log level and avoid doing the work if the data isn't printed.
 type logClosure func() string
+
 func (c logClosure) String() string {
 	return c()
 }
@@ -30,6 +38,7 @@ func newLogClosure(
 	c func() string) logClosure {
 	return logClosure(c)
 }
+
 // directionString is a helper function that returns a string that represents the direction of a connection (inbound or outbound).
 func directionString(
 	inbound bool) string {
@@ -38,6 +47,7 @@ func directionString(
 	}
 	return "outbound"
 }
+
 // formatLockTime returns a transaction lock time as a human-readable string.
 func formatLockTime(
 	lockTime uint32) string {
@@ -47,6 +57,7 @@ func formatLockTime(
 	}
 	return time.Unix(int64(lockTime), 0).String()
 }
+
 // invSummary returns an inventory message as a human-readable string.
 func invSummary(
 	invList []*wire.InvVect) string {
@@ -75,6 +86,7 @@ func invSummary(
 	// More than one inv item.
 	return fmt.Sprintf("size %d", invLen)
 }
+
 // locatorSummary returns a block locator as a human-readable string.
 func locatorSummary(
 	locator []*chainhash.Hash, stopHash *chainhash.Hash) string {
@@ -83,6 +95,7 @@ func locatorSummary(
 	}
 	return fmt.Sprintf("no locator, stop %s", stopHash)
 }
+
 // sanitizeString strips any characters which are even remotely dangerous, such as html control characters, from the passed string.  It also limits it to the passed maximum size, which can be 0 for unlimited.  When the string is limited, it will also add "..." to the string to indicate it was truncated.
 func sanitizeString(
 	str string, maxLength uint) string {
@@ -103,6 +116,7 @@ func sanitizeString(
 	}
 	return str
 }
+
 // messageSummary returns a human-readable string which summarizes a message. Not all messages have or need a summary.  This is used for debug logging.
 func messageSummary(
 	msg wire.Message) string {
