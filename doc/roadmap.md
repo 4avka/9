@@ -1,4 +1,4 @@
-# Parallelcoin Roadmap
+# Parallelcoin Whitepaper
 ## History
 
 - [Original creation of coin by Parallaxis](https://bitcointalk.org/index.php?topic=721170.msg8145710#msg8145710), release 8 February 2014
@@ -82,3 +82,132 @@ But the probably hundreds of struggling little altcoins being hit from every dir
 - Firstly, they consolidate their token-specific knowledge, and where it is superseded, they can divert their energies elsewhere.
 - Very often between several disparate altcoin devs and users there will be more overlaps than expected. These can open the door to synergies and essentially builds up a social network between existing social networks.
 - Small coins all have in common their vulnerability to a generally larger attacker. By creating a shared base protocol, but completely open - anyone can implement a coin or ledger protocol on top of the base, but each sub-ledger can be separately replicated by nodes, so depending on word of mouth social network coordination and distribution of information.
+
+## How we will do it
+
+As the author of a white paper, my goal is to persuade you that we have the idea, and the means to achieve the aspirational goal at the centre of the project.
+
+### Objectivity and Philosophy
+
+Firstly, a little epistemology. It is generally believed, but ironically logically untenable, that some level of capture of the parameters of a phenomenon leads to repeatability.
+
+This is the central methodology of the Scientific Method. Ultimately every scientist has at the very minimum faith in the idea of there being an answer to some given question.
+
+It is quite simply, faith, based on past experience and history, and optimism, that one spend so much time of such limited short lives pondering, that an aswer *can* be found.
+
+So, at the very center of Reverse Lightning is the premise, the presupposition that given enough chatter about the chatter on the network, that at a certain point the total ordering of events reported by network nodes can be linearised with virtually 100% confidence.
+
+### Combinatorics and Permutations
+
+Fundamental to the process of sequence discovery is the principles of combinatorics and permutations. Combinatorics are factorial, permutations are exponential and polynomial.
+
+Consider a simple tree graph. If we make a rule that each node can have two children, after forking the tree this way, in only 10 generations we have 1024 individual nodes. Almost perfectly neatly logarithmic.
+
+Thus, consider the scenario of network nodes who propagate randomly to a subset of near neighbours, with no filtering except for not repeating reasonably recent messages (hash, journal cache).
+
+The nodes are the processors for database transactions, such as a payment. They are paid if their republications of transactions are determined by the network to be the first valid one.
+
+### Causality Mesh
+
+Each node thus will receive and then relay messages, usually two or three near neighbours, and in parallel it will also be looking at the causality proofs in the messages they receive.
+
+These messages will have various overlaps between their appearances in other causality proofs, and as more of these are collected, gradually less and less new events are found relating to a given event under consideration.
+
+These intersections between the sets related to contemporary causality proofs will gradually build up a normal distribution around a peak, and then at a certain point the most referred to, most senior version will be agreed upon, based on a probability threshold that is infeasible to artificially manipulate.
+
+The graph's vertices are not only composed of those tied to a specific transaction. The proofs are basically a snapshot of the contents of a node's gossip buffer's most recent additions.
+
+The numbers involved in this pattern are not simply logarithmic, they tend towards factorial (fully connected graph). I estimate somewhere between 8 and 24 would be required, and that probably more is better for finalisation in a shorter time.
+
+### The Collaborative Editing Process
+
+Each event has an initial trigger, being the user posting a transaction. This transaction is sent to a number of network nodes of course entirely at the discretion of the user.
+
+Since rapid finalisation is a key goal and desirable property of a distributed ledger, we can probably consider that quite a lot of data will be generated in response to each event. 
+
+It is not important in the long run because we don't enforce a global (bottleneck) finality, as with a blockchain and the block structure, that the amount of data can be quite large at first, since this also improves the rate at which the network can gain full confidence to pick the winner.
+
+After a transaction has had its race, and the other races accumulate records relating to each other, the network consensus is about finding a threshold of change brought about as each additional vertex is joined to the graph.
+
+As the several causality proofs arrive, each node (transaction) has several numbers that accumulate over time - the number of direct references, the lengths of each of the referential paths up until the newest known, and these trees node lengths accumulate and add downline towards the root.
+
+Amongst competing candidates, gradually one will rise to a normal differential, and bands created by the normal deviation between nodes.
+
+In Bitcoin and similar block/chain based journals, the 'main chain' is based on the inverse of the value of the hash solution, that is a proxy to represent expended resources (time and energy). The growing tip of the chain is the one with the biggest sum after all its ancestors are added together.
+
+### The Final Cut
+
+As the mesh accumulates new transactions at its growing edge, the certainty about the winners gradually becomes greater. The winners have the greatest number of nodes between them and the newest known.
+
+The winners will have the highest number of children, and more than likely no more than 3 or 4 will be close enough to require further accumulation until the rate of change in ratio between competitors flattens out towards zero.
+
+Thus, as time goes on, gradually the losers can be pruned from the chain, and in the really longer term, the proofs can be compressed, the webs of spends from a very long time ago can be collapsed and a business in archival access naturally arises.
+
+The record does not need to be indefinite in length to be authoritative. In some cultures, especially notable being judaism, there is the idea of a jubilee, which is 7 years, after which time all records may be destroyed.
+
+This is an important social safety-valve, and part of the reason why Jews are so notoriously good at building business networks. As a part of day to day business, there is some reasonable proportion of error that is unavoidable. Immutable records are good in a shorter term for justice, but in a longer term, keeping them should be entirely voluntary and without sufficient corroboration, invalid as evidence.
+
+## The Crypto-Borg
+
+In the foregoing was described the basic process of determination of consensus. In the design of the Nakamoto Consensus, all of the elements are designed for a bigger purpose. The difficulty adjustment is not to limit transactions, but to limit issuance.
+
+So, if you can keep that same ledger with equal finality (or better), without using a proof of work, blocks, or difficulty adjustmennt, you are left with a problem:
+
+#### How do we issue new tokens?
+
+The answer is simple: How do you want to? We don't need to solve blocks to stop double spends using the causality mesh.
+
+The most direct and naive issuance criteria would be to put a flat value on every winning transaction as a coinbase. Thus once a causality proof becomes probabalistically final, it is the proof the right to spend a new token into the network.
+
+However, this would present issues with spam, with users sending transactions to themselves and collecting the coinbase as well.
+
+As big tech is these days demonstrating, identifying users by fingerprinting can be remarkably effective.
+
+As such, each transaction can be considered to be part of several network paths, one being its spends, another being the locations of these transactions appearance (and this is easily discovered since we try to reward that one).
+
+Normal, honest network activity will have specific properties and patterns. It will distribute *normally*. Spammy activity does not distribute normally. It will cluster heavily around a set of addresses (growing more or less quickly), and will involve a lot of short loops between sock puppets.
+
+These properties become abundantly obvious given enough further accumulated history, and so around the same time as a transaction acquires finality, next phase is determination of spendability.
+
+Thus, spendability will be computed and finalised as the last stage of processing. The most obvious difference between spammy transactions and legitimate ones is their tendency to connect together, with more than normal amounts of closed cycles in the centre of the cluster.
+
+These values can be computed deterministically once finality is determined. 
+
+### Don't throw away that clock just yet
+
+A monetisable service and a clearly time-bound issuance can be created by making time announcement a network service.
+
+Nodes competing in this game try to broadcast at exactly some interval of time a message bearing their signature and the claimed time.
+
+By the time the next round starts, all nodes have seen all of these announcements, and like with transaction ordering, the graph they and their proofs create will have a definite width, depth, and height. The network will then award a whole coinbase to the winner with an odd number, and half a coinbase to the median pair.
+
+By putting a time signal on the network that is incentivised towards consensus, we then have counters we can use for time-based events.
+
+So not only could we keep PoW, we can add PoT (proof of time) to the token earning methods, and anyone connected to this network could depend on it as an accurate time source (nearest thing in a distributed environment).
+
+### You will be assimilated
+
+Thus, you can see that this system is capable of forming a generalised platform for any kind of distributed database system, not just ledgers.
+
+However, the important thing, from the ideological/monetary theory perspective, as well as self-determination, is that building and running a coin on this network is completely voluntary and self-assigned. Whether it is adopted or not is not a given.
+
+But if you have a ledger already with a lot of users, and those users consider a partial merger with another project to be mutually beneficial, gradually an ecosystem of neighbour-shopkeepers will arise and whatever attacks lay down the road, the smaller projects will have the potential to pool resources to combat mutual adversaries.
+
+Not only that, but a multi-token chain instantly also is an exchange system. With the timing properties of this protocol, there would be little performance difference between these and large cluster-run centralised exchanges. There would not be a latency penalty as with cross-chain atomic swaps.
+
+Since the issuance mechanism is arbitrary, obviously the causality proof competition means a base, distinctive token is required for the network. This token will have an exchange rate between tokens and with an always-on market to clear these atomic swap exchanges, meaning that you can mine for base tokens, but immediately convert however you want to as soon as your coinbases mature.
+
+So, any token that adopts this platform gets a big boost in market exposure, it gets off the treadmill of ASIC development, and its developers have tho possibility of working on the shared codebase, where they may happen to be more effective anyway.
+
+The other thing is, there is a potential tipping point, and it is historically so repetitious that it almost doesn't need to be elaborated - once a small group forms a cohesive superstructure that prevents its adversaries from continuing to farm it, this franchise tends to rapidly end up on every street corner.
+
+All coins would benefit from eliminating centralised exchange. All coins would benefit from faster transaction clearance. All coins would benefit from developers being able to stretch out sideways a bit more and perhaps find more productive work.
+
+# Conclusion
+Cryptocurrency seems to be shaping up to be *the* single most important technological development of recent times. Cryptocurrencies have stood up to pushback from the monetary establishmennt, and every company is looking at crypto as some part of its future dominance plans.
+
+Whole countries are using them to get around sanctions, poor people are using them to send money back home to help develop their homelands. Cryptocurrency is not just about money that no one dominant group can control. It's about creating a mechanism to automatically record history and refute attempts to twist facts and cherrypicking to support them - if our lives were securely, privately and reliably recorded, the process of resolving conflict becomes dramatically easier.
+
+As such, though we are a Cryptocurrency development group, really we are a distributed networks research organisation. Our short term outlook is towards cryptocurrency specifically, but ultimately to extend this same bullshit-resistant information distribution mechanism to all human affairs. 
+
+We, like most crypto enthusiasts, believe that truth has a special power, and that a true record is not just justice but also ensures prosperity.
