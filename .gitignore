@@ -13,3 +13,5 @@
 *.out
 
 test*/**
+test/config
+test/**
