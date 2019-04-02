@@ -3,11 +3,15 @@ package cmd
 import (
 	"fmt"
 	"net"
+	"path/filepath"
 	"regexp"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	netparams "git.parallelcoin.io/dev/9/pkg/chain/config/params"
 
 	"git.parallelcoin.io/dev/9/cmd/nine"
 	"git.parallelcoin.io/dev/9/pkg/chain/fork"
@@ -116,7 +120,7 @@ func LogLevel(def, usage string) *Line {
 			}
 			for x := range cl.Levels {
 				if x == s {
-					l.Value = &s
+					*l.Value.(*string) = s
 					return true
 				}
 			}
@@ -127,11 +131,18 @@ func LogLevel(def, usage string) *Line {
 }
 
 func Path(def, usage string) *Line {
-	p := CleanAndExpandPath(def)
+	p := ""
 	var l Line
 	l = Line{def, func(s string) bool {
+		if !strings.HasPrefix(s, "/") && !strings.HasPrefix(s, ".") &&
+			runtime.GOOS != "windows" {
+			s = filepath.Join(DataDir, s)
+		}
 		ss := CleanAndExpandPath(s)
-		l.Value = &ss
+		if ss == "." {
+			ss = ""
+		}
+		*l.Value.(*string) = ss
 		return true
 	}, usage, &p}
 	return &l
@@ -153,7 +164,7 @@ func SubSystem(def, usage string) *Line {
 				if x == sss[0] {
 					if _, ok := p[x]; !ok {
 						cl.Register.Get(x).SetLevel(sss[1])
-						p[x] = &sss[1]
+						*p[x] = sss[1]
 					}
 					return true
 				}
@@ -169,16 +180,19 @@ func Network(def, usage string) *Line {
 		for _, x := range Networks {
 			if x == s {
 				p = &s
-				fmt.Println("network", s)
 				switch s {
 				case "mainnet":
 					tn, sn, rn = false, false, false
+					activenetparams = &netparams.MainNetParams
 				case "testnet":
 					tn, sn, rn = true, false, false
+					activenetparams = &netparams.TestNet3Params
 				case "simnet":
 					tn, sn, rn = false, true, false
+					activenetparams = &netparams.SimNetParams
 				case "regtestnet":
 					tn, sn, rn = false, false, true
+					activenetparams = &netparams.RegressionTestParams
 				}
 				return true
 			}
@@ -205,10 +219,10 @@ func NetAddr(def, usage string) *Line {
 		_, _, err := net.SplitHostPort(s)
 		if err != nil {
 			a := net.JoinHostPort(s, defaultPort)
-			l.Value = &a
+			*l.Value.(*string) = a
 			return true
 		} else {
-			l.Value = &s
+			*l.Value.(*string) = s
 		}
 		return true
 	}, usage, &p}
@@ -284,7 +298,7 @@ func Int(def int, usage string) *Line {
 	l = Line{def, func(s string) bool {
 		n, e := strconv.Atoi(s)
 		if e == nil {
-			l.Value = &n
+			*l.Value.(*int) = n
 		} else {
 			return false
 		}
@@ -303,7 +317,7 @@ func IntBounded(def int, usage string, min, max int) *Line {
 			if n < min || n > max {
 				return false
 			}
-			l.Value = &n
+			*l.Value.(*int) = n
 		} else {
 			return false
 		}
@@ -317,8 +331,13 @@ func Enable(usage string) *Line {
 	o := false
 	var l Line
 	l = Line{o, func(s string) bool {
-		ss := strings.ToLower(s) == "true"
-		l.Value = &ss
+		lv := l.Value.(*bool)
+		if strings.ToLower(s) == "true" {
+			*lv = true
+		}
+		if strings.ToLower(s) == "false" {
+			*lv = false
+		}
 		return true
 	}, usage, &o}
 	return &l
@@ -326,11 +345,16 @@ func Enable(usage string) *Line {
 
 // Disable is a boolean value
 func Disable(usage string) *Line {
-	o := false
+	o := true
 	var l Line
 	l = Line{o, func(s string) bool {
-		ss := strings.ToLower(s) == "true"
-		l.Value = &ss
+		lv := l.Value.(*bool)
+		if strings.ToLower(s) == "true" {
+			*lv = true
+		}
+		if strings.ToLower(s) == "false" {
+			*lv = false
+		}
 		return true
 	}, usage, &o}
 	return &l
@@ -349,9 +373,9 @@ func Duration(def, usage string) *Line {
 		dd, e = time.ParseDuration(s)
 		if e != nil {
 			ddd := time.Second * 0
-			l.Value = &ddd
+			*l.Value.(*time.Duration) = ddd
 		} else {
-			l.Value = &dd
+			*l.Value.(*time.Duration) = dd
 		}
 		return true
 	}, usage, &o}
@@ -365,7 +389,7 @@ func String(def, usage string) *Line {
 	var l Line
 	l = Line{def, func(s string) bool {
 		ss := strings.TrimSpace(s)
-		l.Value = &ss
+		*l.Value.(*string) = ss
 		return true
 	}, usage, &o}
 	return &l
@@ -403,12 +427,13 @@ func Float(def, usage string) *Line {
 	var l Line
 	l = Line{def, func(s string) bool {
 		var ff float64
+		lv := l.Value.(*float64)
 		ff, e = strconv.ParseFloat(s, 64)
 		if e != nil {
 			fff := float64(0.0)
-			l.Value = &fff
+			*lv = fff
 		} else {
-			l.Value = &ff
+			*lv = ff
 		}
 		return true
 	}, usage, &f}
@@ -432,13 +457,14 @@ func Algos(def, usage string) *Line {
 	var l Line
 	l = Line{def, func(s string) bool {
 		s = strings.TrimSpace(s)
+		lv := l.Value.(*string)
 		if len(s) < 1 || s == modernd {
-			l.Value = modernd
+			*lv = modernd
 			return true
 		}
 		for _, x := range fork.P9AlgoVers {
 			if x == s {
-				l.Value = s
+				*lv = s
 				return true
 			}
 		}

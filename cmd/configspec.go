@@ -7,12 +7,14 @@ const defaultDatadir = "~/." + APPNAME
 // a validator/setter function that checks the input
 func getConfig() *Lines {
 	return &Lines{
-		"app.cpuprofileenable": Enable(
-			"enable writing of cpu profile"),
 		"app.cpuprofile": Path(
-			"./cpu.prof", "write cpu profile"),
+			"", "write cpu profile"),
+		"app.appdatadir": Path(
+			"", "subcommand data dir, automatically set by subcommand name"),
 		"app.datadir": Path(
-			defaultDatadir, "base directory containing configuration and data"),
+			CleanAndExpandPath(defaultDatadir), "base directory containing configuration and data"),
+		"app.logdir": Path(
+			"", "where logs are written"),
 		"app.profileenable": Enable(
 			"enable http profiling"),
 		"app.profile": IntBounded(
@@ -37,10 +39,10 @@ func getConfig() *Lines {
 			"disables checkpoints (danger!)"),
 		"chain.dbtype": String(
 			"ffldb", "set database backend to use for chain"),
-		"chain.noaddrindex": Disable(
-			"disable address index (disables also transaction index)"),
-		"chain.notxindex": Disable(
-			"disable transaction index"),
+		"chain.addrindex": Disable(
+			"enable address index (disables also transaction index)"),
+		"chain.txindex": Disable(
+			"enable transaction index"),
 		"chain.rejectnonstd": Enable(
 			"reject nonstandard transactions even if net parameters allow it"),
 		"chain.relaynonstd": Enable(
@@ -57,8 +59,6 @@ func getConfig() *Lines {
 			"info", "sets the base default log level"),
 		"log.subsystem": SubSystem(
 			"", "[subsystem:loglevel ]+"),
-		"log.file": Path(
-			defaultDatadir+"/log.txt", "log file"),
 		"log.nowrite": Enable(
 			"disable writing to log file"),
 		"mining.addresses": StringSlice(
@@ -158,8 +158,8 @@ func getConfig() *Lines {
 			"tls.key", "file containing tls key"),
 		"tls.cert": Path(
 			"tls.cert", "file containing tls certificate"),
-		"tls.cafile": String(
-			"cafile",
+		"tls.cafile": Path(
+			"tls.cafile",
 			"set the certificate authority file to use for verifying rpc connections"),
 		"tls.disable": Disable(
 			"disable SSL on RPC connections"),

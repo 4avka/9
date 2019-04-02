@@ -22,14 +22,24 @@ func Parse(args []string) int {
 		cmd = &help
 	}
 	var datadir string
-	// read configuration
-	dd, ok := Config["app.datadir"]
-	if ok {
-		datadir = *dd.Value.(*string)
-		if t, ok := tokens["datadir"]; ok {
-			datadir = t.Value
-			Config["app.datadir"].Value = datadir
-		}
+	if dd, ok := tokens[DATADIR]; ok {
+		datadir = dd.Value
+		*config.DataDir = datadir
+	}
+	if *Config["tls.cert"].Value.(*string) == "" {
+		rpccert := CleanAndExpandPath(
+			filepath.Join(datadir, Config["tls.cert"].Default.(string)))
+		*Config["tls.cert"].Value.(*string) = rpccert
+	}
+	if *Config["tls.key"].Value.(*string) == "" {
+		rpckey := CleanAndExpandPath(
+			filepath.Join(datadir, Config["tls.key"].Default.(string)))
+		*Config["tls.key"].Value.(*string) = rpckey
+	}
+	if *Config["tls.cafile"].Value.(*string) == "" {
+		cafile := CleanAndExpandPath(
+			filepath.Join(datadir, Config["tls.cafile"].Default.(string)))
+		*Config["tls.cafile"].Value.(*string) = cafile
 	}
 	log <- cl.Debug{"loading config from:", datadir}
 	configFile := CleanAndExpandPath(filepath.Join(datadir, "config"))
@@ -72,6 +82,7 @@ func Parse(args []string) int {
 			}
 		}
 	}
+	config.ConfigFile = &configFile
 	// run as configured
 	_ = cmds
 	r := cmd.Handler(

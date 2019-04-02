@@ -3,15 +3,19 @@ package cmd
 import (
 	"time"
 
+	netparams "git.parallelcoin.io/dev/9/pkg/chain/config/params"
+
 	"git.parallelcoin.io/dev/9/cmd/nine"
 	"git.parallelcoin.io/dev/9/cmd/node"
 )
 
+var activenetparams = &netparams.MainNetParams
 var _c = getConfig()
 var Config = *_c
 var config = MakeConfig(&Config)
 var stateconfig = node.StateCfg
 var tn, sn, rn bool
+var DataDir string
 
 func MakeConfig(c *Lines) (out *nine.Config) {
 	cfg := *c
@@ -38,8 +42,9 @@ func MakeConfig(c *Lines) (out *nine.Config) {
 	}
 	out = &nine.Config{
 		ConfigFile:               nil,
-		DataDir:                  String("app.datadir"),
-		LogDir:                   String("app.datadir"),
+		AppDataDir:               String("app.appdatadir"),
+		DataDir:                  &DataDir,
+		LogDir:                   String("app.logdir"),
 		LogLevel:                 String("log.level"),
 		Subsystems:               Map("log.subsystem"),
 		Network:                  String("p2p.network"),
@@ -108,8 +113,8 @@ func MakeConfig(c *Lines) (out *nine.Config) {
 		NoCFilters:               Bool("p2p.nocfilters"),
 		SigCacheMaxSize:          Int("chain.sigcachemaxsize"),
 		BlocksOnly:               Bool("p2p.blocksonly"),
-		TxIndex:                  Bool("chain.notxindex"),
-		AddrIndex:                Bool("chain.noaddrindex"),
+		TxIndex:                  Bool("chain.txindex"),
+		AddrIndex:                Bool("chain.addrindex"),
 		RelayNonStd:              Bool("chain.relaynonstd"),
 		RejectNonStd:             Bool("chain.rejectnonstd"),
 		TLSSkipVerify:            Bool("tls.skipverify"),

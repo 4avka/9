@@ -16,6 +16,7 @@ func (m Mapstringstring) String() (out string) {
 
 type Config struct {
 	ConfigFile               *string
+	AppDataDir               *string
 	DataDir                  *string
 	LogDir                   *string
 	LogLevel                 *string

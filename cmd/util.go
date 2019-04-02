@@ -4,6 +4,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"git.parallelcoin.io/dev/9/pkg/util"
@@ -35,12 +36,14 @@ func CleanAndExpandPath(path string) string {
 		homeDir := filepath.Dir(util.AppDataDir("pod", false))
 		path = strings.Replace(path, "~", homeDir, 1)
 	}
-	if !strings.HasPrefix(path, "/") && !strings.HasPrefix(path, ".") {
+	// NOTE: The os.ExpandEnv doesn't work with Windows-style %VARIABLE%, but they variables can still be expanded via POSIX-style $VARIABLE.
+	path = filepath.Clean(os.ExpandEnv(path))
+	if !strings.HasPrefix(path, "/") && !strings.HasPrefix(path, ".") &&
+		runtime.GOOS != "windows" {
 		// explicitly prefix is this must be a relative path
 		path = "./" + path
 	}
-	// NOTE: The os.ExpandEnv doesn't work with Windows-style %VARIABLE%, but they variables can still be expanded via POSIX-style $VARIABLE.
-	return filepath.Clean(os.ExpandEnv(path))
+	return path
 }
 
 // NormalizeAddress returns addr with the passed default port appended if there is not already a port specified.
