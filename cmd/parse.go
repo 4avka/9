@@ -29,6 +29,8 @@ func Parse(args []string) int {
 		*config.DataDir = Config["app.datadir"].Default.(string)
 		datadir = *config.DataDir
 	}
+	setAppDataDir(cmd.name)
+
 	if *Config["tls.cert"].Value.(*string) == "" {
 		rpccert := CleanAndExpandPath(
 			filepath.Join(datadir, Config["tls.cert"].Default.(string)))

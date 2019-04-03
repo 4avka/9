@@ -17,6 +17,7 @@ var DataDir string
 var ConfigFile string
 
 func MakeConfig(c *Lines) (out *nine.Config) {
+
 	cfg := *c
 	String := func(path string) *string {
 		return cfg[path].Value.(*string)

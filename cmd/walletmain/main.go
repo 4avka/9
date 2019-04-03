@@ -44,7 +44,7 @@ func Main(c *nine.Config, activeNet *node.Params) error {
 			log <- cl.Error{http.ListenAndServe(listenAddr, nil)}
 		}()
 	}
-	dbDir := NetworkDir(*cfg.DataDir, activeNet.Params)
+	dbDir := NetworkDir(*cfg.AppDataDir, activeNet.Params)
 	log <- cl.Debug{"dbDir", dbDir, *cfg.DataDir, *cfg.DataDir, activeNet.Params.Name}
 	loader := wallet.NewLoader(activeNet.Params, dbDir, 250)
 	// Create and start HTTP server to serve wallet client connections.

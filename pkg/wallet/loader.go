@@ -70,65 +70,42 @@ var errNoConsole = errors.New("db upgrade requires console access for additional
 
 // CreateNewWallet creates a new wallet using the provided public and private passphrases.  The seed is optional.  If non-nil, addresses are derived from this seed.  If nil, a secure random seed is generated.
 func (l *Loader) CreateNewWallet(pubPassphrase, privPassphrase, seed []byte,
-
 	bday time.Time) (*Wallet, error) {
-
 	defer l.mu.Unlock()
 	l.mu.Lock()
-
 	if l.wallet != nil {
-
 		return nil, ErrLoaded
 	}
-
 	dbPath := filepath.Join(l.dbDirPath, WalletDbName)
 	exists, err := fileExists(dbPath)
-
 	if err != nil {
-
 		return nil, err
 	}
-
 	if exists {
-
 		return nil, errors.New("ERROR: " + dbPath + " already exists")
 	}
-
 	// Create the wallet database backed by bolt db.
 	err = os.MkdirAll(l.dbDirPath, 0700)
-
 	if err != nil {
-
 		return nil, err
 	}
-
 	db, err := walletdb.Create("bdb", dbPath)
-
 	if err != nil {
-
 		return nil, err
 	}
-
 	// Initialize the newly created database for the wallet before opening.
 	err = Create(
 		db, pubPassphrase, privPassphrase, seed, l.chainParams, bday,
 	)
-
 	if err != nil {
-
 		return nil, err
 	}
-
 	// Open the newly-created wallet.
 	w, err := Open(db, pubPassphrase, nil, l.chainParams, l.recoveryWindow)
-
 	if err != nil {
-
 		return nil, err
 	}
-
 	w.Start()
-
 	l.onLoaded(w, db)
 	return w, nil
 }
@@ -303,9 +280,7 @@ func (l *Loader) onLoaded(w *Wallet, db walletdb.DB) {
 
 // NewLoader constructs a Loader with an optional recovery window. If the recovery window is non-zero, the wallet will attempt to recovery addresses starting from the last SyncedTo height.
 func NewLoader(
-	chainParams *chaincfg.Params, dbDirPath string,
-
-	recoveryWindow uint32) *Loader {
+	chainParams *chaincfg.Params, dbDirPath string, recoveryWindow uint32) *Loader {
 
 	return &Loader{
 

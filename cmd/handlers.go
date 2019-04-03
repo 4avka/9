@@ -119,6 +119,7 @@ func List(args []string, tokens Tokens, cmds, all Commands) int {
 }
 
 func Ctl(args []string, tokens Tokens, cmds, all Commands) int {
+	setAppDataDir("node")
 	if j := validateProxyListeners(); j != 0 {
 		return j
 	}
@@ -143,6 +144,7 @@ func Node(args []string, tokens Tokens, cmds, all Commands) int {
 
 func Wallet(args []string, tokens Tokens, cmds, all Commands) int {
 	spew.Dump(*config)
+	cl.Register.SetAllLevels(*config.LogLevel)
 	setAppDataDir("wallet")
 	walletmain.CreateWallet(config, activenetparams)
 	walletmain.Main(config, activenetparams)

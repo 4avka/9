@@ -2,6 +2,7 @@ package wallettx
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -119,28 +120,21 @@ func (l *Loader) RunAfterLoad(fn func(*Wallet)) {
 // this seed.  If nil, a secure random seed is generated.
 func (l *Loader) CreateNewWallet(pubPassphrase, privPassphrase, seed []byte,
 	bday time.Time) (*Wallet, error) {
-
 	defer l.mu.Unlock()
 	l.mu.Lock()
-
 	if l.wallet != nil {
-
 		return nil, ErrLoaded
 	}
-
 	dbPath := filepath.Join(l.dbDirPath, WalletDbName)
+	fmt.Println("tx", l.dbDirPath, WalletDbName, dbPath)
+
 	exists, err := fileExists(dbPath)
-
 	if err != nil {
-
 		return nil, err
 	}
-
 	if exists {
-
 		return nil, errors.New("ERROR: " + dbPath + " already exists")
 	}
-
 	// Create the wallet database backed by bolt db.
 	err = os.MkdirAll(l.dbDirPath, 0700)
 

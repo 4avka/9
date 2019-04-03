@@ -148,23 +148,20 @@ func Main(serverChan chan<- *server) (err error) {
 }
 
 // dbPath returns the path to the block database given a database type.
-func blockDbPath(
-	dbType string,
-) string {
+func blockDbPath(dbType string) string {
 	// The database name is based on the database type.
 	dbName := blockDbNamePrefix + "_" + dbType
 	if dbType == "sqlite" {
 		dbName += ".db"
 	}
-	dbPath := filepath.Join(*Cfg.DataDir, dbName)
+	dbPath := filepath.Join(
+		filepath.Join(
+			*Cfg.AppDataDir, NetName(ActiveNetParams)), dbName)
 	return dbPath
 }
 
 // loadBlockDB loads (or creates when needed) the block database taking into account the selected database backend and returns a handle to it.  It also additional logic such warning the user if there are multiple databases which consume space on the file system and ensuring the regression test database is clean when in regression test mode.
-func loadBlockDB() (
-	database.DB,
-	error,
-) {
+func loadBlockDB() (database.DB, error) {
 	// The memdb backend does not have a file path associated with it, so handle it uniquely.  We also don't want to worry about the multiple database type warnings when running with the memory database.
 	if *Cfg.DbType == "memdb" {
 		log <- cl.Inf("creating block database in memory")
@@ -175,6 +172,7 @@ func loadBlockDB() (
 		return db, nil
 	}
 	warnMultipleDBs()
+
 	// The database name is based on the database type.
 	dbPath := blockDbPath(*Cfg.DbType)
 	// The regression test is special in that it needs a clean database for each run, so remove it now if it already exists.

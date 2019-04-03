@@ -168,6 +168,15 @@ func validateBlockLimits() int {
 		fmt.Println("cannot both relay and reject nonstandard transactions")
 		return 1
 	}
+	// // Append the network type to the data directory so it is "namespaced" per network.  In addition to the block database, there are other pieces of data that are saved to disk such as address manager state. All data is specific to a network, so namespacing the data directory means each individual piece of serialized data does not have to worry about changing names per network and such.
+	// *config.DataDir = CleanAndExpandPath(*config.DataDir)
+	// *config.DataDir =
+	// 	filepath.Join(*config.DataDir, node.NetName(activenetparams))
+	// // Append the network type to the log directory so it is "namespaced" per network in the same fashion as the data directory.
+	// *config.LogDir = CleanAndExpandPath(*config.LogDir)
+	// *config.LogDir =
+	// 	filepath.Join(*config.LogDir, node.NetName(activenetparams))
+
 	return 0
 }
 
@@ -350,16 +359,20 @@ func validateAddresses() int {
 	}
 	// Add default port to all rpc listener addresses if needed and remove duplicate addresses.
 	log <- cl.Debug{"checking rpc listener addresses"}
-	*config.RPCListeners = node.NormalizeAddresses(*config.RPCListeners,
-		activenetparams.RPCPort)
+	*config.RPCListeners =
+		node.NormalizeAddresses(*config.RPCListeners,
+			activenetparams.RPCPort)
 	// Add default port to all listener addresses if needed and remove duplicate addresses.
-	*config.Listeners = node.NormalizeAddresses(*config.Listeners,
-		activenetparams.DefaultPort)
+	*config.Listeners =
+		node.NormalizeAddresses(*config.Listeners,
+			activenetparams.DefaultPort)
 	// Add default port to all added peer addresses if needed and remove duplicate addresses.
-	*config.AddPeers = node.NormalizeAddresses(*config.AddPeers,
-		activenetparams.DefaultPort)
-	*config.ConnectPeers = node.NormalizeAddresses(*config.ConnectPeers,
-		activenetparams.DefaultPort)
+	*config.AddPeers =
+		node.NormalizeAddresses(*config.AddPeers,
+			activenetparams.DefaultPort)
+	*config.ConnectPeers =
+		node.NormalizeAddresses(*config.ConnectPeers,
+			activenetparams.DefaultPort)
 	// --onionproxy and not --onion are contradictory (TODO: this is kinda stupid hm? switch *and* toggle by presence of flag value, one should be enough)
 	return 0
 }
