@@ -182,6 +182,7 @@ func Network(def, usage string) *Line {
 		for _, x := range Networks {
 			if x == s {
 				p = &s
+				fork.IsTestnet = false
 				switch s {
 				case "mainnet":
 					tn, sn, rn = false, false, false
@@ -189,6 +190,7 @@ func Network(def, usage string) *Line {
 				case "testnet":
 					tn, sn, rn = true, false, false
 					activenetparams = &node.TestNet3Params
+					fork.IsTestnet = true
 				case "simnet":
 					tn, sn, rn = false, true, false
 					activenetparams = &node.SimNetParams
@@ -236,55 +238,53 @@ func NetAddr(def, usage string) *Line {
 // If a default is given, its port is taken as the default port. If only a
 // number is present, it is used as the defaultPort
 func NetAddrs(def, usage string) *Line {
-	o := []string{}
+	var o []string
 	var defaultPort string
-	if len(def) < 1 {
-		def = ":11047"
-	}
-	n, e := strconv.Atoi(def)
+	_, e := strconv.Atoi(def)
 	if e == nil {
-		defaultPort = fmt.Sprint(n)
+		defaultPort = def
 	} else if len(def) > 1 {
-		if len(o) < 1 {
-			o = append(o, def)
-		}
-		_, defaultPort, _ = net.SplitHostPort(def)
+		_, defaultPort, e = net.SplitHostPort(def)
+		o = []string{def}
 	}
+	log <- cl.Debug{defaultPort}
 	var l Line
 	l = Line{
 		def, func(ss string) bool {
+			log <- cl.Debug{ss}
 			lv := l.Value.(*[]string)
 			ss = strings.TrimSpace(ss)
-			if len(ss) < 1 {
-				return true
-			}
-			s := strings.Split(ss, " ")
-			for _, x := range s {
-				ho, po, err := net.SplitHostPort(x)
-				if err != nil {
-					a := net.JoinHostPort(x, defaultPort)
-					ss := append(*l.Value.(*[]string), a)
-					*lv = ss
-					return true
-				} else {
-					a := net.JoinHostPort(ho, po)
-					ss := append(*l.Value.(*[]string), a)
-					*lv = ss
+			if len(ss) > 0 {
+				s := strings.Split(ss, " ")
+				fmt.Println(s, len(s))
+				for _, x := range s {
+					fmt.Println("sx", s, x)
+					ho, po, err := net.SplitHostPort(x)
+					if err != nil {
+						a := net.JoinHostPort(x, defaultPort)
+						ss := append(*l.Value.(*[]string), a)
+						*lv = ss
+						return true
+					} else {
+						a := net.JoinHostPort(ho, po)
+						ss := append(*l.Value.(*[]string), a)
+						*lv = ss
+					}
+					// eliminate duplicates
+					llv := *lv
+					mapset := make(map[string]bool)
+					// maps only store one of each key
+					for _, x := range llv {
+						mapset[x] = true
+					}
+					out := []string{}
+					// only one of each exact string will be copied back
+					for i := range mapset {
+						out = append(out, i)
+					}
+					sort.Strings(out)
+					*lv = out
 				}
-				// eliminate duplicates
-				llv := *lv
-				mapset := make(map[string]bool)
-				// maps only store one of each key
-				for _, x := range llv {
-					mapset[x] = true
-				}
-				out := []string{}
-				// only one of each exact string will be copied back
-				for i := range mapset {
-					out = append(out, i)
-				}
-				sort.Strings(out)
-				*lv = out
 			}
 			return true
 		}, usage, &o,

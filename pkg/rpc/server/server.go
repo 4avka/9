@@ -6,11 +6,11 @@
 // Full documentation of the API implemented by this package is maintained in a
 // language-agnostic document:
 //
-//   https://git.parallelcoin.io/dev/pod/walletmain/blob/master/rpc/documentation/api.md
+//   https://git.parallelcoin.io/dev/9/walletmain/blob/master/rpc/documentation/api.md
 //
 // Any API changes must be performed according to the steps listed here:
 //
-//   https://git.parallelcoin.io/dev/pod/walletmain/blob/master/rpc/documentation/serverchanges.md
+//   https://git.parallelcoin.io/dev/9/walletmain/blob/master/rpc/documentation/serverchanges.md
 package rpcserver
 
 import (
@@ -19,12 +19,12 @@ import (
 	"sync"
 	"time"
 
+	"git.parallelcoin.io/dev/9/cmd/node"
 	"git.parallelcoin.io/dev/9/pkg/wallet"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 
-	netparams "git.parallelcoin.io/dev/9/pkg/chain/config/params"
 	chainhash "git.parallelcoin.io/dev/9/pkg/chain/hash"
 	txscript "git.parallelcoin.io/dev/9/pkg/chain/tx/script"
 	"git.parallelcoin.io/dev/9/pkg/chain/wire"
@@ -120,7 +120,7 @@ type walletServer struct {
 
 type loaderServer struct {
 	loader    *wallet.Loader
-	activeNet *netparams.Params
+	activeNet *node.Params
 	rpcClient *chain.RPCClient
 	mu        sync.Mutex
 }
@@ -824,7 +824,7 @@ func (s *walletServer) AccountNotifications(req *pb.AccountNotificationsRequest,
 // and registers it with the gRPC server.
 func StartWalletLoaderService(
 	server *grpc.Server, loader *wallet.Loader,
-	activeNet *netparams.Params) {
+	activeNet *node.Params) {
 
 	service := &loaderServer{loader: loader, activeNet: activeNet}
 	pb.RegisterWalletLoaderServiceServer(server, service)
@@ -935,7 +935,7 @@ func (s *loaderServer) StartConsensusRPC(ctx context.Context, req *pb.StartConse
 	}
 
 	networkAddress, err := cfgutil.NormalizeAddress(req.NetworkAddress,
-		s.activeNet.RPCClientPort)
+		s.activeNet.RPCPort)
 
 	if err != nil {
 

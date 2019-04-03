@@ -154,9 +154,7 @@ func promptListBool(
 
 // prompts until they enter a matching response.
 func promptPass(
-
 	reader *bufio.Reader, prefix string, confirm bool) ([]byte, error) {
-
 	// Prompt the user until they enter a passphrase.
 	prompt := fmt.Sprintf("%s: ", prefix)
 
@@ -203,81 +201,50 @@ func promptPass(
 }
 
 // PrivatePass prompts the user for a private passphrase with varying behavior
-
 // depending on whether the passed legacy keystore exists.  When it does, the
-
 // user is prompted for the existing passphrase which is then used to unlock it.
-
 // On the other hand, when the legacy keystore is nil, the user is prompted for
-
 // a new private passphrase.  All prompts are repeated until the user enters a
-
 // valid response.
 func PrivatePass(
-
 	reader *bufio.Reader, legacyKeyStore *keystore.Store) ([]byte, error) {
-
 	// When there is not an existing legacy wallet, simply prompt the user
-
 	// for a new private passphase and return it.
-
 	if legacyKeyStore == nil {
-
 		return promptPass(reader,
 			"Creating new wallet\n\nEnter the private passphrase for your new wallet", true)
 	}
-
 	// At this point, there is an existing legacy wallet, so prompt the user
-
 	// for the existing private passphrase and ensure it properly unlocks
-
 	// the legacy wallet so all of the addresses can later be imported.
 	fmt.Println("You have an existing legacy wallet.  All addresses from your existing legacy wallet will be imported into the new wallet format.")
-
 	for {
-
 		privPass, err := promptPass(reader, "Enter the private passphrase for your existing wallet", false)
-
 		if err != nil {
-
 			return nil, err
 		}
-
 		// Keep prompting the user until the passphrase is correct.
-
 		if err := legacyKeyStore.Unlock([]byte(privPass)); err != nil {
-
 			if err == keystore.ErrWrongPassphrase {
-
 				fmt.Println(err)
 				continue
 			}
-
 			return nil, err
 		}
-
 		return privPass, nil
 	}
 }
 
 // PublicPass prompts the user whether they want to add an additional layer of
-
 // encryption to the wallet.  When the user answers yes and there is already a
-
 // public passphrase provided via the passed config, it prompts them whether or
-
 // not to use that configured passphrase.  It will also detect when the same
-
 // passphrase is used for the private and public passphrase and prompt the user
-
 // if they are sure they want to use the same passphrase for both.  Finally, all
-
 // prompts are repeated until the user enters a valid response.
 func PublicPass(
 	reader *bufio.Reader, privPass []byte,
-
 	defaultPubPassphrase, configPubPassphrase []byte) ([]byte, error) {
-
 	pubPass := defaultPubPassphrase
 	usePubPass, err := promptListBool(reader, "Do you want "+
 		"to add an additional layer of encryption for public "+

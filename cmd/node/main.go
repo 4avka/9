@@ -77,7 +77,7 @@ func Main(serverChan chan<- *server) (err error) {
 	// Load the block database.
 	var db database.DB
 	log <- cl.Debug{
-		"loading db with", ActiveNetParams.Params.Name, *Cfg.TestNet3}
+		"loading db with", ActiveNetParams.Params.Name}
 	db, err = loadBlockDB()
 	if err != nil {
 		log <- cl.Error{err}
@@ -123,7 +123,6 @@ func Main(serverChan chan<- *server) (err error) {
 	// Create server and start it.
 	server, err := newServer(*Cfg.Listeners, db, ActiveNetParams.Params, interrupt.ShutdownRequestChan, *Cfg.Algo)
 	if err != nil {
-		// TODO: this logging could do with some beautifying.
 		log <- cl.Errorf{
 			"unable to start server on %v: %v", *Cfg.Listeners, err}
 		return err

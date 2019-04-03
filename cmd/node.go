@@ -1,8 +1,12 @@
 package cmd
 
-import "git.parallelcoin.io/dev/9/cmd/node"
+import (
+	"git.parallelcoin.io/dev/9/cmd/node"
+	"git.parallelcoin.io/dev/9/pkg/util/cl"
+)
 
 func runNode(args []string, tokens Tokens, cmds, all Commands) int {
+	log <- cl.Debug{"runNode"}
 	setAppDataDir("node")
 	if validateWhitelists() != 0 ||
 		validateProxyListeners() != 0 ||

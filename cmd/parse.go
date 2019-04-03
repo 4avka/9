@@ -44,8 +44,8 @@ func Parse(args []string) int {
 			filepath.Join(datadir, Config["tls.cafile"].Default.(string)))
 		*Config["tls.cafile"].Value.(*string) = cafile
 	}
-	log <- cl.Debug{"loading config from:", datadir}
 	configFile := CleanAndExpandPath(filepath.Join(datadir, "config"))
+	log <- cl.Debug{"loading config from:", configFile}
 	if !FileExists(configFile) {
 		fmt.Println("config file not found: creating new one at ", configFile)
 		if EnsureDir(configFile) {
@@ -74,7 +74,7 @@ func Parse(args []string) int {
 			}
 			_, ok := Config[out[2]]
 			if !ok {
-				fmt.Println("unknown key found", out[2], "ignoring")
+				// fmt.Println("unknown key found", out[2], "ignoring")
 			} else {
 				valid := Config[out[2]].Validator(out[4])
 				if !valid {
@@ -85,7 +85,10 @@ func Parse(args []string) int {
 			}
 		}
 	}
-	config.ConfigFile = &configFile
+	*config.ConfigFile = configFile
+	fmt.Println("setting debug level to", *config.LogLevel)
+	cl.Register.SetAllLevels(*config.LogLevel)
+	log <- cl.Debug{"yay"}
 	// run as configured
 	_ = cmds
 	r := cmd.Handler(

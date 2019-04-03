@@ -16,6 +16,7 @@ func Start(args []string) int {
 	log <- cl.Dbg("starting 9")
 
 	if err := Parse(args); err != 0 {
+		time.Sleep(time.Second)
 		panic(err)
 	}
 	// pause to let logger finish

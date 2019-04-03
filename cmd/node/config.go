@@ -162,7 +162,7 @@ const (
 	DefaultMinerListener         = "127.0.0.1:11011"
 	DefaultMaxOrphanTransactions = 100
 	DefaultMaxOrphanTxSize       = 100000
-	DefaultSigCacheMaxSize       = 100000
+	DefaultSigCacheMaxSize       = 1000000
 	// These are set to default on because more often one wants them than not
 	DefaultTxIndex   = true
 	DefaultAddrIndex = true
@@ -1279,6 +1279,6 @@ func podLookup(
 	if strings.HasSuffix(host, ".onion") {
 		return nil, fmt.Errorf("attempt to resolve tor address %s", host)
 	}
-	fmt.Println("podLookup", cl.Ine(), StateCfg)
+	// fmt.Println("podLookup", cl.Ine(), StateCfg)
 	return StateCfg.Lookup(host)
 }

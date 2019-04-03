@@ -14,6 +14,7 @@ var config = MakeConfig(&Config)
 var stateconfig = node.StateCfg
 var tn, sn, rn bool
 var DataDir string
+var ConfigFile string
 
 func MakeConfig(c *Lines) (out *nine.Config) {
 	cfg := *c
@@ -38,8 +39,9 @@ func MakeConfig(c *Lines) (out *nine.Config) {
 	Duration := func(path string) *time.Duration {
 		return cfg[path].Value.(*time.Duration)
 	}
+
 	out = &nine.Config{
-		ConfigFile:               nil,
+		ConfigFile:               &ConfigFile,
 		AppDataDir:               String("app.appdatadir"),
 		DataDir:                  &DataDir,
 		LogDir:                   String("app.logdir"),

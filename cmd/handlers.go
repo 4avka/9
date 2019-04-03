@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"sort"
 
+	"git.parallelcoin.io/dev/9/cmd/walletmain"
+	"github.com/davecgh/go-spew/spew"
+
 	"git.parallelcoin.io/dev/9/cmd/ctl"
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
@@ -139,7 +142,10 @@ func Node(args []string, tokens Tokens, cmds, all Commands) int {
 }
 
 func Wallet(args []string, tokens Tokens, cmds, all Commands) int {
-	fmt.Println("running Wallet", args, getTokens(tokens))
+	spew.Dump(*config)
+	setAppDataDir("wallet")
+	walletmain.CreateWallet(config, activenetparams)
+	walletmain.Main(config, activenetparams)
 	return 0
 }
 

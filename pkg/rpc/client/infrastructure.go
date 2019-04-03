@@ -1161,14 +1161,13 @@ func newHTTPClient(
 }
 
 // dial opens a websocket connection using the passed connection configuration details.
-func dial(
-	config *ConnConfig) (*websocket.Conn, error) {
+func dial(config *ConnConfig) (*websocket.Conn, error) {
 
 	// Setup TLS if not disabled.
 	var tlsConfig *tls.Config
 	var scheme = "ws"
 
-	if !config.TLS {
+	if config.TLS {
 
 		tlsConfig = &tls.Config{
 			MinVersion: tls.VersionTLS12,
@@ -1304,17 +1303,17 @@ func New(
 
 // Connect establishes the initial websocket connection.  This is necessary when a client was created after setting the DisableConnectOnNew field of the Config struct. Up to tries number of connections (each after an increasing backoff) will be tried if the connection can not be established.  The special value of 0 indicates an unlimited number of connection attempts. This method will error if the client is not configured for websockets, if the connection has already been established, or if none of the connection attempts were successful.
 func (c *Client) Connect(tries int) error {
-
+	log <- cl.Debug{"attempting connection"}
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
 
 	if c.config.HTTPPostMode {
-
+		log <- cl.Debug{"not websocket client"}
 		return ErrNotWebsocketClient
 	}
 
 	if c.wsConn != nil {
-
+		log <- cl.Debug{"client already connected"}
 		return ErrClientAlreadyConnected
 	}
 
@@ -1323,16 +1322,13 @@ func (c *Client) Connect(tries int) error {
 	var backoff time.Duration
 
 	for i := 0; tries == 0 || i < tries; i++ {
-
+		log <- cl.Debug{"try", i}
 		var wsConn *websocket.Conn
 		wsConn, err = dial(c.config)
-
 		if err != nil {
-
+			log <- cl.Error{"dial error", err}
 			backoff = connectionRetryInterval * time.Duration(i+1)
-
 			if backoff > time.Minute {
-
 				backoff = time.Minute
 			}
 			time.Sleep(backoff)
@@ -1341,7 +1337,6 @@ func (c *Client) Connect(tries int) error {
 		// Connection was established.  Set the websocket connection member of the client and start the goroutines necessary to run the client.
 
 		log <- cl.Info{
-
 			"established connection to RPC server", c.config.Host,
 		}
 		c.wsConn = wsConn
