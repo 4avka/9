@@ -16,7 +16,7 @@ import (
 	"fmt"
 	"log"
 	"git.parallelcoin.io/util"
-	"git.parallelcoin.io/dev/pod/pkg/chain/config"
+	"git.parallelcoin.io/dev/9/pkg/chain/config"
 )
 var testnet = flag.Bool("testnet", false, "operate on the testnet Bitcoin network")
 // By default (without -testnet), use mainnet.

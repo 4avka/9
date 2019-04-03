@@ -19,7 +19,8 @@ func getConfig() *Lines {
 		"app.appdatadir": Path(
 			"", "subcommand data dir, automatically set by subcommand name"),
 		"app.datadir": Path(
-			CleanAndExpandPath(defaultDatadir), "base directory containing configuration and data"),
+			CleanAndExpandPath(defaultDatadir),
+			"base directory containing configuration and data"),
 		"app.logdir": Path(
 			"", "where logs are written"),
 		"app.enableprofile": Enable(
@@ -115,7 +116,7 @@ func getConfig() *Lines {
 			"minimum relay tx fee, baseline considered to be zero for relay"),
 		"p2p.network": Network(
 			"mainnet", "network to connect to"),
-		"p2p.nobanning": Disable(
+		"p2p.nobanning": Enable(
 			"disable banning of peers"),
 		"p2p.nobloomfilters": Enable(
 			"disable bloom filters"),
@@ -184,7 +185,7 @@ func getConfig() *Lines {
 			"disable automatic opening of the wallet at startup"),
 		"wallet.pass": String(
 			"", "password for the non-own transaction data in the wallet"),
-		"wallet": Enable(
+		"wallet.enable": Enable(
 			"use configured wallet rpc instead of full node"),
 	}
 }

@@ -400,7 +400,7 @@ func (
 				break out
 			case <-ticker.C:
 				// fmt.Println("chan:<-ticker.C")
-				remaining = remaining - tickDuration
+				remaining -= -tickDuration
 				if remaining < time.Second {
 					continue
 				}

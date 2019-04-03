@@ -117,7 +117,7 @@ func MakeConfig(c *Lines) (out *nine.Config) {
 		RelayNonStd:              Bool("chain.relaynonstd"),
 		RejectNonStd:             Bool("chain.rejectnonstd"),
 		TLSSkipVerify:            Bool("tls.skipverify"),
-		Wallet:                   Bool("wallet"),
+		Wallet:                   Bool("wallet.enable"),
 		NoInitialLoad:            Bool("wallet.noinitialload"),
 		WalletPass:               String("wallet.pass"),
 		WalletServer:             String("rpc.wallet"),

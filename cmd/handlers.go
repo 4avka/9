@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 
+	"git.parallelcoin.io/dev/9/cmd/ctl"
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
 
@@ -104,12 +105,32 @@ func Copy(args []string, tokens Tokens, cmds, all Commands) int {
 }
 
 func List(args []string, tokens Tokens, cmds, all Commands) int {
-	fmt.Println("running List", args, getTokens(tokens))
+	if j := validateProxyListeners(); j != 0 {
+		return j
+	}
+	if _, ok := tokens[WALLET]; ok {
+		*config.Wallet = true
+	}
+	ctl.ListCommands()
 	return 0
 }
 
 func Ctl(args []string, tokens Tokens, cmds, all Commands) int {
-	fmt.Println("running Ctl", args, getTokens(tokens))
+	if j := validateProxyListeners(); j != 0 {
+		return j
+	}
+	if _, ok := tokens[WALLET]; ok {
+		*config.Wallet = true
+	}
+	var i int
+	var x string
+	for i, x = range args {
+		if cmds[CTL].RE.Match([]byte(x)) {
+			i++
+			break
+		}
+	}
+	ctl.Main(args[i:], config)
 	return 0
 }
 
