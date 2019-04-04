@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -12,13 +13,19 @@ import (
 )
 
 func (l *Lines) Group(s string, items ...*Line) (out *Lines) {
-	out = make(map[string]*Line)
+	ll := make(Lines)
+	out = &ll
 	for i, x := range items {
+		if x == nil || x.Name == "" {
+			continue
+		}
 		// Prepend group name to item name
 		x.Name = s + "." + x.Name
-		// Store in map
-		x.Validate(&items[i], x.Initial)
-		*out[x.Name] = x
+		if x.Validate != nil {
+			// Store in map
+			x.Validate(items[i], x.Initial)
+		}
+		(*out)[x.Name] = x
 	}
 	return
 }
@@ -65,20 +72,23 @@ func Tags(s string) *Line {
 	return &Line{
 		Name: s,
 		Validate: func(l *Line, si interface{}) bool {
-			s := strings.TrimSpace(si.(string))
-			if len(s) < 1 {
-				l.SLICE([]string{})
-			} else {
-				values := strings.Split(s, "`")
-				if len(values) >= 1 {
-					for _, x := range values {
-						if len(x) > 1 {
-							l.SLICE(append(*l.SLICE(), x))
+			if si != nil {
+				s := strings.TrimSpace(si.(string))
+				if len(s) < 1 {
+					l.SLICE([]string{})
+				} else {
+					values := strings.Split(s, "`")
+					if len(values) >= 1 {
+						for _, x := range values {
+							if len(x) > 1 {
+								l.SLICE(append(*l.SLICE(), x))
+							}
 						}
 					}
 				}
+				return true
 			}
-			return true
+			return false
 		},
 	}
 }
@@ -87,6 +97,9 @@ func Tag(s string) *Line {
 	return &Line{
 		Name: s,
 		Validate: func(l *Line, si interface{}) bool {
+			if si == nil {
+				return false
+			}
 			l.STRING(strings.TrimSpace(si.(string)))
 			return true
 		},
@@ -97,6 +110,9 @@ func File(s string) *Line {
 	return &Line{
 		Name: s,
 		Validate: func(l *Line, si interface{}) bool {
+			if si == nil {
+				return false
+			}
 			s := si.(string)
 			if len(s) > 0 {
 				if !strings.HasPrefix(s, "/") &&
@@ -119,6 +135,9 @@ func Dir(s string) *Line {
 	return &Line{
 		Name: s,
 		Validate: func(l *Line, si interface{}) bool {
+			if si == nil {
+				return false
+			}
 			s := si.(string)
 			if len(s) > 0 {
 				if !strings.HasPrefix(s, "/") &&
@@ -187,6 +206,9 @@ func Net(s string) *Line {
 }
 
 func bv(l *Line, si interface{}) bool {
+	if si == nil {
+		return false
+	}
 	switch strings.ToLower(si.(string)) {
 	case "true":
 		l.BOOL(true)
@@ -214,15 +236,20 @@ func Enabled(s string) (o *Line) {
 
 // Default sets a default value for the Line
 func (l *Line) Default(d interface{}) (out *Line) {
+	if l == nil || l.Value == nil {
+		return &Line{}
+	}
 	_ = l.Validate(l, d)
 	return
 }
 
 // Usage is the short text explaining a configuration option
 func (l *Line) Usage(s string) *Line {
-	// All lines *should* have a Usage and it *should* be last so validate!
-	_ = l.Validate(l, l.Initial)
-	l.Comment = s
+	if l != nil && l.Value != nil {
+		// All lines *should* have a Usage and it *should* be last so validate!
+		_ = l.Validate(l, l.Initial)
+		l.Comment = s
+	}
 	return l
 }
 
@@ -248,10 +275,14 @@ func (l *Line) Max(i int) *Line {
 		v = func(*Line, interface{}) bool { return true }
 	}
 	l.Validate = func(*Line, interface{}) bool {
-		if *l.INT() < i {
-			l.INT(i)
+		if l != nil {
+			fmt.Println(l, l.INT)
+			if *l.INT() < i {
+				l.INT(i)
+			}
+			return v(l, l.INT())
 		}
-		return v(l, l.INT())
+		return false
 	}
 	return l
 }

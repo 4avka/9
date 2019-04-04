@@ -24,10 +24,10 @@ func Parse(args []string) int {
 	var datadir string
 	if dd, ok := tokens[DATADIR]; ok {
 		datadir = dd.Value
-		*config.DataDir = datadir
+		*Config.DataDir = datadir
 	} else {
-		*config.DataDir = Config["app.datadir"].Initial.(string)
-		datadir = *config.DataDir
+		*Config.DataDir = (*config)["app.datadir"].Initial.(string)
+		datadir = *Config.DataDir
 	}
 	setAppDataDir(cmd.name)
 
@@ -61,11 +61,11 @@ func Parse(args []string) int {
 			if len(out) < 1 {
 				continue
 			}
-			_, ok := Config[out[2]]
+			_, ok := (*config)[out[2]]
 			if !ok {
 				// fmt.Println("unknown key found", out[2], "ignoring")
 			} else {
-				valid := Config[out[2]].Validate(out[4])
+				valid := (*config)[out[2]].Validate((*config)[out[2]], out[4])
 				if !valid {
 					fmt.Println(
 						"config parsing error on line", i,
@@ -74,10 +74,14 @@ func Parse(args []string) int {
 			}
 		}
 	}
-	switchDefaultAddrs(*Config["p2p.network"].Value.(*string))
-	*config.ConfigFile = configFile
-	fmt.Println("setting debug level to", *config.LogLevel)
-	cl.Register.SetAllLevels(*config.LogLevel)
+	if Config.Network != nil {
+		switchDefaultAddrs(*Config.Network)
+	}
+	*Config.ConfigFile = configFile
+	if Config.LogLevel != nil {
+		fmt.Println("setting debug level to", *Config.LogLevel)
+		cl.Register.SetAllLevels(*Config.LogLevel)
+	}
 	log <- cl.Debug{"yay"}
 	// run as configured
 	_ = cmds

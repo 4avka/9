@@ -16,7 +16,9 @@ func getConfig() *Lines {
 	l := make(Lines)
 	return l.Group("p2p",
 		// This is first because it sets the port bases on the rest of this set
-		Net("network").Default("mainnet").Usage("network to connect to"),
+		Net("network").
+			Default("mainnet").
+			Usage("network to connect to"),
 	).Group("app",
 		File("cpuprofile").Usage("write cpu profile to this file, empty disables cpu profiling"),
 		Dir("datadir").Default(defaultDatadir).Usage("base folder to keep data for an instance of 9"),

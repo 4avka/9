@@ -22,7 +22,7 @@ func runNode(args []string, tokens Tokens, cmds, all Commands) int {
 	}
 	// run the node!
 	node.StateCfg = stateconfig
-	node.Cfg = config
+	node.Cfg = Config
 	node.ActiveNetParams = activenetparams
 	if node.Main(nil) != nil {
 		return 1

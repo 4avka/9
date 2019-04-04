@@ -106,20 +106,20 @@ func List(args []string, tokens Tokens, cmds, all Commands) int {
 		return j
 	}
 	if _, ok := tokens[WALLET]; ok {
-		*config.Wallet = true
+		*Config.Wallet = true
 	}
 	ctl.ListCommands()
 	return 0
 }
 
 func Ctl(args []string, tokens Tokens, cmds, all Commands) int {
-	cl.Register.SetAllLevels(*config.LogLevel)
+	cl.Register.SetAllLevels(*Config.LogLevel)
 	setAppDataDir("node")
 	if j := validateProxyListeners(); j != 0 {
 		return j
 	}
 	if _, ok := tokens[WALLET]; ok {
-		*config.Wallet = true
+		*Config.Wallet = true
 	}
 	var i int
 	var x string
@@ -129,38 +129,38 @@ func Ctl(args []string, tokens Tokens, cmds, all Commands) int {
 			break
 		}
 	}
-	ctl.Main(args[i:], config)
+	ctl.Main(args[i:], Config)
 	return 0
 }
 
 func Node(args []string, tokens Tokens, cmds, all Commands) int {
-	cl.Register.SetAllLevels(*config.LogLevel)
+	cl.Register.SetAllLevels(*Config.LogLevel)
 	return runNode(args, tokens, cmds, all)
 }
 
 func Wallet(args []string, tokens Tokens, cmds, all Commands) int {
 	spew.Dump(*config)
-	cl.Register.SetAllLevels(*config.LogLevel)
+	cl.Register.SetAllLevels(*Config.LogLevel)
 	setAppDataDir("wallet")
-	walletmain.CreateWallet(config, activenetparams)
-	walletmain.Main(config, activenetparams)
+	walletmain.CreateWallet(Config, activenetparams)
+	walletmain.Main(Config, activenetparams)
 	return 0
 }
 
 func Shell(args []string, tokens Tokens, cmds, all Commands) int {
-	cl.Register.SetAllLevels(*config.LogLevel)
+	cl.Register.SetAllLevels(*Config.LogLevel)
 	fmt.Println("running Shell", args, getTokens(tokens))
 	return 0
 }
 
 func Test(args []string, tokens Tokens, cmds, all Commands) int {
-	cl.Register.SetAllLevels(*config.LogLevel)
+	cl.Register.SetAllLevels(*Config.LogLevel)
 	fmt.Println("running Test", args, getTokens(tokens))
 	return 0
 }
 
 func Create(args []string, tokens Tokens, cmds, all Commands) int {
-	cl.Register.SetAllLevels(*config.LogLevel)
+	cl.Register.SetAllLevels(*Config.LogLevel)
 	fmt.Println("running Create", args, getTokens(tokens))
 	return 0
 }

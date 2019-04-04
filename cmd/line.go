@@ -32,43 +32,55 @@ func (l *Line) Label(name string) *Line {
 }
 
 func (l *Line) BOOL(v ...bool) *bool {
-	if len(v) == 1 {
+	if len(v) == 1 && l != nil && l.Value != nil {
 		*l.Value.(*bool) = v[0]
+		return l.Value.(*bool)
+	} else {
+		return nil
 	}
-	return l.Value.(*bool)
 }
 
 func (l *Line) STRING(v ...string) *string {
-	if len(v) == 1 {
+	if len(v) == 1 && l != nil && l.Value != nil {
 		*l.Value.(*string) = v[0]
+	} else {
+		return nil
 	}
 	return l.Value.(*string)
 }
 
 func (l *Line) INT(v ...int) *int {
-	if len(v) == 1 {
+	if len(v) == 1 && l != nil && l.Value != nil {
 		*l.Value.(*int) = v[0]
+	} else {
+		return nil
 	}
 	return l.Value.(*int)
 }
 
 func (l *Line) FLOAT(v ...float64) *float64 {
-	if len(v) == 1 {
+	if len(v) == 1 && l != nil && l.Value != nil {
 		*l.Value.(*float64) = v[0]
+	} else {
+		return nil
 	}
 	return l.Value.(*float64)
 }
 
 func (l *Line) SLICE(v ...[]string) *[]string {
-	if len(v) == 1 {
+	if len(v) == 1 && l != nil && l.Value != nil {
 		*l.Value.(*[]string) = v[0]
+	} else {
+		return nil
 	}
 	return l.Value.(*[]string)
 }
 
 func (l *Line) MAP(v ...nine.Mapstringstring) nine.Mapstringstring {
-	if len(v) == 1 {
+	if len(v) == 1 && l != nil && l.Value != nil {
 		*l.Value.(*nine.Mapstringstring) = v[0]
+	} else {
+		return nil
 	}
 	return *l.Value.(*nine.Mapstringstring)
 }
@@ -219,33 +231,41 @@ var Networks = []string{"mainnet", "testnet", "simnet", "regtestnet"}
 // }
 
 func setDefaultTLSPaths(datadir string) {
-	if *Config["tls.cert"].Value.(*string) == "" {
-		rpccert := CleanAndExpandPath(
-			filepath.Join(datadir, Config["tls.cert"].Initial.(string)))
-		*Config["tls.cert"].Value.(*string) = rpccert
+	c := *config
+	if _, ok := c["tls.cert"]; ok {
+		if *c["tls.cert"].Value.(*string) == "" {
+			rpccert := CleanAndExpandPath(
+				filepath.Join(datadir, c["tls.cert"].Initial.(string)))
+			*c["tls.cert"].Value.(*string) = rpccert
+		}
 	}
-	if *Config["tls.key"].Value.(*string) == "" {
-		rpckey := CleanAndExpandPath(
-			filepath.Join(datadir, Config["tls.key"].Initial.(string)))
-		*Config["tls.key"].Value.(*string) = rpckey
+	if _, ok := c["tls.key"]; ok {
+		if *c["tls.key"].Value.(*string) == "" {
+			rpckey := CleanAndExpandPath(
+				filepath.Join(datadir, c["tls.key"].Initial.(string)))
+			*c["tls.key"].Value.(*string) = rpckey
+		}
 	}
-	if *Config["tls.cafile"].Value.(*string) == "" {
-		cafile := CleanAndExpandPath(
-			filepath.Join(datadir, Config["tls.cafile"].Initial.(string)))
-		*Config["tls.cafile"].Value.(*string) = cafile
+	if _, ok := c["tls.cafile"]; ok {
+		if *c["tls.cafile"].Value.(*string) == "" {
+			cafile := CleanAndExpandPath(
+				filepath.Join(datadir, c["tls.cafile"].Initial.(string)))
+			*c["tls.cafile"].Value.(*string) = cafile
+		}
 	}
 }
 
 func setDefaultPorts(base int) {
-	Config["chain.rpc"].Initial = fmt.Sprintf("127.0.0.1:%d7", base)
-	Config["p2p.addpeer"].Initial = fmt.Sprintf("%d7", base)
-	Config["p2p.connect"].Initial = fmt.Sprintf("%d7", base)
-	Config["p2p.externalips"].Initial = fmt.Sprintf("%d7", base)
-	Config["p2p.listen"].Initial = fmt.Sprintf("127.0.0.1:%d7", base)
-	Config["p2p.whitelist"].Initial = fmt.Sprintf("%d7", base)
-	Config["rpc.connect"].Initial = fmt.Sprintf("127.0.0.1:%d8", base)
-	Config["rpc.listen"].Initial = fmt.Sprintf("127.0.0.1:%d8", base)
-	Config["rpc.wallet"].Initial = fmt.Sprintf("127.0.0.1:%d6", base)
+	c := *config
+	c["chain.rpc"].Initial = fmt.Sprintf("127.0.0.1:%d7", base)
+	c["p2p.addpeer"].Initial = fmt.Sprintf("%d7", base)
+	c["p2p.connect"].Initial = fmt.Sprintf("%d7", base)
+	c["p2p.externalips"].Initial = fmt.Sprintf("%d7", base)
+	c["p2p.listen"].Initial = fmt.Sprintf("127.0.0.1:%d7", base)
+	c["p2p.whitelist"].Initial = fmt.Sprintf("%d7", base)
+	c["rpc.connect"].Initial = fmt.Sprintf("127.0.0.1:%d8", base)
+	c["rpc.listen"].Initial = fmt.Sprintf("127.0.0.1:%d8", base)
+	c["rpc.wallet"].Initial = fmt.Sprintf("127.0.0.1:%d6", base)
 }
 
 func switchDefaultAddrs(s string) {

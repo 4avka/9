@@ -8,37 +8,56 @@ import (
 )
 
 var activenetparams = node.ActiveNetParams
-var _c = getConfig()
-var Config = *_c
-var config = MakeConfig(&Config)
+var config = getConfig()
+var Config = MakeConfig(config)
 var stateconfig = node.StateCfg
 var tn, sn, rn bool
 var DataDir string
 var ConfigFile string
 
 func MakeConfig(c *Lines) (out *nine.Config) {
-
 	cfg := *c
-	String := func(path string) *string {
-		return cfg[path].Value.(*string)
+	String := func(path string) (out *string) {
+		if cfg[path] != nil && cfg[path].Value != nil {
+			return cfg[path].Value.(*string)
+		}
+		return
 	}
-	Tags := func(path string) *[]string {
-		return cfg[path].Value.(*[]string)
+	Tags := func(path string) (out *[]string) {
+		if cfg[path] != nil && cfg[path].Value != nil {
+			return cfg[path].Value.(*[]string)
+		}
+		return
 	}
-	Map := func(path string) *nine.Mapstringstring {
-		return cfg[path].Value.(*nine.Mapstringstring)
+	Map := func(path string) (out *nine.Mapstringstring) {
+		if cfg[path] != nil && cfg[path].Value != nil {
+			return cfg[path].Value.(*nine.Mapstringstring)
+		}
+		return
 	}
-	Int := func(path string) *int {
-		return cfg[path].Value.(*int)
+	Int := func(path string) (out *int) {
+		if cfg[path] != nil && cfg[path].Value != nil {
+			return cfg[path].Value.(*int)
+		}
+		return
 	}
-	Bool := func(path string) *bool {
-		return cfg[path].Value.(*bool)
+	Bool := func(path string) (out *bool) {
+		if cfg[path] != nil && cfg[path].Value != nil {
+			return cfg[path].Value.(*bool)
+		}
+		return
 	}
-	Float := func(path string) *float64 {
-		return cfg[path].Value.(*float64)
+	Float := func(path string) (out *float64) {
+		if cfg[path] != nil && cfg[path].Value != nil {
+			return cfg[path].Value.(*float64)
+		}
+		return
 	}
-	Duration := func(path string) *time.Duration {
-		return cfg[path].Value.(*time.Duration)
+	Duration := func(path string) (out *time.Duration) {
+		if cfg[path] != nil && cfg[path].Value != nil {
+			return cfg[path].Value.(*time.Duration)
+		}
+		return
 	}
 
 	out = &nine.Config{
