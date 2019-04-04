@@ -26,26 +26,13 @@ func Parse(args []string) int {
 		datadir = dd.Value
 		*config.DataDir = datadir
 	} else {
-		*config.DataDir = Config["app.datadir"].Default.(string)
+		*config.DataDir = Config["app.datadir"].Initial.(string)
 		datadir = *config.DataDir
 	}
 	setAppDataDir(cmd.name)
 
-	if *Config["tls.cert"].Value.(*string) == "" {
-		rpccert := CleanAndExpandPath(
-			filepath.Join(datadir, Config["tls.cert"].Default.(string)))
-		*Config["tls.cert"].Value.(*string) = rpccert
-	}
-	if *Config["tls.key"].Value.(*string) == "" {
-		rpckey := CleanAndExpandPath(
-			filepath.Join(datadir, Config["tls.key"].Default.(string)))
-		*Config["tls.key"].Value.(*string) = rpckey
-	}
-	if *Config["tls.cafile"].Value.(*string) == "" {
-		cafile := CleanAndExpandPath(
-			filepath.Join(datadir, Config["tls.cafile"].Default.(string)))
-		*Config["tls.cafile"].Value.(*string) = cafile
-	}
+	setDefaultTLSPaths(datadir)
+
 	configFile := CleanAndExpandPath(filepath.Join(datadir, "config"))
 	log <- cl.Debug{"loading config from:", configFile}
 	if !FileExists(configFile) {
@@ -78,7 +65,7 @@ func Parse(args []string) int {
 			if !ok {
 				// fmt.Println("unknown key found", out[2], "ignoring")
 			} else {
-				valid := Config[out[2]].Validator(out[4])
+				valid := Config[out[2]].Validate(out[4])
 				if !valid {
 					fmt.Println(
 						"config parsing error on line", i,
@@ -87,6 +74,7 @@ func Parse(args []string) int {
 			}
 		}
 	}
+	switchDefaultAddrs(*Config["p2p.network"].Value.(*string))
 	*config.ConfigFile = configFile
 	fmt.Println("setting debug level to", *config.LogLevel)
 	cl.Register.SetAllLevels(*config.LogLevel)

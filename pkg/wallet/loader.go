@@ -124,68 +124,43 @@ func (l *Loader) LoadedWallet() (*Wallet, bool) {
 }
 
 // OpenExistingWallet opens the wallet from the loader's wallet database path and the public passphrase.  If the loader is being called by a context where standard input prompts may be used during wallet upgrades, setting canConsolePrompt will enables these prompts.
-func (l *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool) (*Wallet, error) {
-
+func (l *Loader) OpenExistingWallet(
+	pubPassphrase []byte, canConsolePrompt bool) (*Wallet, error) {
 	defer l.mu.Unlock()
 	l.mu.Lock()
-
 	log <- cl.Trace{"opening existing wallet", l.dbDirPath}
-
 	if l.wallet != nil {
-
 		log <- cl.Trc("already loaded wallet")
-
 		return nil, ErrLoaded
 	}
-
 	// Ensure that the network directory exists.
-
 	if err := checkCreateDir(l.dbDirPath); err != nil {
-
 		log <- cl.Error{"cannot create directory", l.dbDirPath}
-
 		return nil, err
 	}
-
 	// Open the database using the boltdb backend.
 	dbPath := filepath.Join(l.dbDirPath, WalletDbName)
 	db, err := walletdb.Open("bdb", dbPath)
-
 	if err != nil {
-
 		log <- cl.Error{"failed to open database '" + l.dbDirPath + "':", err, cl.Ine()}
-
 		return nil, err
 	}
-
 	var cbs *waddrmgr.OpenCallbacks
-
 	if canConsolePrompt {
-
 		cbs = &waddrmgr.OpenCallbacks{
-
 			ObtainSeed:        prompt.ProvideSeed,
 			ObtainPrivatePass: prompt.ProvidePrivPassphrase,
 		}
-
 	} else {
-
 		cbs = &waddrmgr.OpenCallbacks{
-
 			ObtainSeed:        noConsole,
 			ObtainPrivatePass: noConsole,
 		}
-
 	}
-
 	w, err := Open(db, pubPassphrase, cbs, l.chainParams, l.recoveryWindow)
-
 	if err != nil {
-
 		// If opening the wallet fails (e.g. because of wrong
-
 		// passphrase), we must close the backing database to
-
 		// allow future calls to walletdb.Open().
 		e := db.Close()
 
@@ -204,31 +179,24 @@ func (l *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool)
 	return w, nil
 }
 
-// RunAfterLoad adds a function to be executed when the loader creates or opens a wallet.  Functions are executed in a single goroutine in the order they are added.
+// RunAfterLoad adds a function to be executed when the loader creates or opens
+// a wallet.  Functions are executed in a single goroutine in the order they
+// are added.
 func (l *Loader) RunAfterLoad(fn func(*Wallet)) {
-
 	l.mu.Lock()
-
 	if l.wallet != nil {
-
 		w := l.wallet
 		l.mu.Unlock()
 		fn(w)
-
 	} else {
-
 		l.callbacks = append(l.callbacks, fn)
 		l.mu.Unlock()
 	}
-
 }
 
 // UnloadWallet stops the loaded wallet, if any, and closes the wallet database.
-
 // This returns ErrNotLoaded if the wallet has not been loaded with
-
 // CreateNewWallet or LoadExistingWallet.  The Loader may be reused if this
-
 // function returns without error.
 func (l *Loader) UnloadWallet() error {
 
@@ -255,60 +223,47 @@ func (l *Loader) UnloadWallet() error {
 }
 
 // WalletExists returns whether a file exists at the loader's database path.
-
 // This may return an error for unexpected I/O failures.
 func (l *Loader) WalletExists() (bool, error) {
-
 	dbPath := filepath.Join(l.dbDirPath, WalletDbName)
 	return fileExists(dbPath)
 }
 
 // onLoaded executes each added callback and prevents loader from loading any
-
 // additional wallets.  Requires mutex to be locked.
 func (l *Loader) onLoaded(w *Wallet, db walletdb.DB) {
-
 	for _, fn := range l.callbacks {
-
 		fn(w)
 	}
-
 	l.wallet = w
 	l.db = db
 	l.callbacks = nil // not needed anymore
 }
 
-// NewLoader constructs a Loader with an optional recovery window. If the recovery window is non-zero, the wallet will attempt to recovery addresses starting from the last SyncedTo height.
+// NewLoader constructs a Loader with an optional recovery window. If the
+//recovery window is non-zero, the wallet will attempt to recovery addresses
+//starting from the last SyncedTo height.
 func NewLoader(
 	chainParams *chaincfg.Params, dbDirPath string, recoveryWindow uint32) *Loader {
-
 	return &Loader{
-
 		chainParams:    chainParams,
 		dbDirPath:      dbDirPath,
 		recoveryWindow: recoveryWindow,
 	}
-
 }
+
 func fileExists(
-
 	filePath string) (bool, error) {
-
 	_, err := os.Stat(filePath)
-
 	if err != nil {
-
 		if os.IsNotExist(err) {
-
 			return false, nil
 		}
-
 		return false, err
 	}
-
 	return true, nil
 }
-func noConsole() ([]byte, error) {
 
+func noConsole() ([]byte, error) {
 	return nil, errNoConsole
 }

@@ -80,7 +80,6 @@ func match(s string) *regexp.Regexp {
 var commands = Commands{
 	HELP: {
 		HELP,
-
 		RE_HELP,
 		match(RE_HELP),
 		"show help text and quit",
@@ -92,7 +91,6 @@ var commands = Commands{
 	},
 	CONF: {
 		CONF,
-
 		RE_CONF,
 		match(RE_CONF),
 		"run interactive configuration CLI",
@@ -104,7 +102,6 @@ var commands = Commands{
 	},
 	NEW: {
 		NEW,
-
 		RE_NEW,
 		match(RE_NEW),
 		"create new configuration with optional basename and count for testnets",
@@ -116,7 +113,6 @@ var commands = Commands{
 	},
 	COPY: {
 		COPY,
-
 		RE_COPY,
 		match(RE_COPY),
 		"create a set of testnet configurations based on a datadir",
@@ -130,7 +126,6 @@ var commands = Commands{
 	},
 	LIST: {
 		LIST,
-
 		RE_LIST,
 		match(RE_LIST),
 		"lists commands available at the RPC endpoint",
@@ -145,7 +140,6 @@ var commands = Commands{
 	},
 	CTL: {
 		CTL,
-
 		RE_CTL,
 		match(RE_CTL),
 		"sends rpc requests and prints the results",
@@ -161,7 +155,6 @@ var commands = Commands{
 	},
 	NODE: {
 		NODE,
-
 		RE_NODE,
 		match(RE_NODE),
 		"runs a full node",
@@ -173,7 +166,6 @@ var commands = Commands{
 	},
 	WALLET: {
 		WALLET,
-
 		RE_WALLET,
 		match(RE_WALLET),
 		"runs a wallet server",
@@ -186,7 +178,6 @@ var commands = Commands{
 	},
 	SHELL: {
 		SHELL,
-
 		RE_SHELL,
 		match(RE_SHELL),
 		"runs a combined node/wallet server",
@@ -199,7 +190,6 @@ var commands = Commands{
 	},
 	TEST: {
 		TEST,
-
 		RE_TEST,
 		match(RE_TEST),
 		"run multiple full nodes from given <word> logging optionally to <datadir>",
@@ -211,7 +201,6 @@ var commands = Commands{
 	},
 	CREATE: {
 		CREATE,
-
 		RE_CREATE,
 		match(RE_CREATE),
 		"runs the create new wallet prompt",
@@ -223,7 +212,6 @@ var commands = Commands{
 	},
 	LOG: {
 		LOG,
-
 		RE_LOG,
 		match(RE_LOG),
 		"write to log in <datadir> file instead of printing to stderr",
@@ -235,7 +223,6 @@ var commands = Commands{
 	},
 	DATADIR: {
 		DATADIR,
-
 		RE_DATADIR,
 		match(RE_DATADIR),
 		"directory to look for configuration or write logs etc",
@@ -247,7 +234,6 @@ var commands = Commands{
 	},
 	INTEGER: {
 		INTEGER,
-
 		RE_INTEGER,
 		match(RE_INTEGER),
 		"number of items to create",
@@ -258,7 +244,6 @@ var commands = Commands{
 	},
 	FLOAT: {
 		FLOAT,
-
 		RE_FLOAT,
 		match(RE_FLOAT),
 		"a floating point value",
@@ -269,7 +254,6 @@ var commands = Commands{
 	},
 	WORD: {
 		WORD,
-
 		RE_WORD,
 		match(RE_WORD),
 		"mostly used for testnet datadir basenames",

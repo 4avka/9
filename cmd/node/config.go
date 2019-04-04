@@ -154,9 +154,9 @@ const (
 	DefaultBlockMinWeight        = 10
 	DefaultBlockMaxWeight        = 3000000
 	BlockMaxSizeMin              = 1000
-	BlockMaxSizeMax              = blockchain.MaxBlockBaseSize - 1000
-	BlockMaxWeightMin            = 4000
-	BlockMaxWeightMax            = blockchain.MaxBlockWeight - 4000
+	BlockSizeMax                 = blockchain.MaxBlockBaseSize - 1000
+	BlockWeightMin               = 4000
+	BlockWeightMax               = blockchain.MaxBlockWeight - 4000
 	DefaultGenerate              = false
 	DefaultGenThreads            = 1
 	DefaultMinerListener         = "127.0.0.1:11011"

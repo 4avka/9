@@ -152,7 +152,7 @@ func openRPCKeyPair() (tls.Certificate, error) {
 	keyExists := !os.IsNotExist(e)
 	switch {
 	case *cfg.OneTimeTLSKey && keyExists:
-		err := fmt.Errorf("one time TLS keys are enabled, but TLS key `%s` already exists", cfg.RPCKey)
+		err := fmt.Errorf("one time TLS keys are enabled, but TLS key `%s` already exists", *cfg.RPCKey)
 		return tls.Certificate{}, err
 	case *cfg.OneTimeTLSKey:
 		return generateRPCKeyPair(false)

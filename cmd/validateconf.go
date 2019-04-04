@@ -168,15 +168,6 @@ func validateBlockLimits() int {
 		fmt.Println("cannot both relay and reject nonstandard transactions")
 		return 1
 	}
-	// // Append the network type to the data directory so it is "namespaced" per network.  In addition to the block database, there are other pieces of data that are saved to disk such as address manager state. All data is specific to a network, so namespacing the data directory means each individual piece of serialized data does not have to worry about changing names per network and such.
-	// *config.DataDir = CleanAndExpandPath(*config.DataDir)
-	// *config.DataDir =
-	// 	filepath.Join(*config.DataDir, node.NetName(activenetparams))
-	// // Append the network type to the log directory so it is "namespaced" per network in the same fashion as the data directory.
-	// *config.LogDir = CleanAndExpandPath(*config.LogDir)
-	// *config.LogDir =
-	// 	filepath.Join(*config.LogDir, node.NetName(activenetparams))
-
 	return 0
 }
 

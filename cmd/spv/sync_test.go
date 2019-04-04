@@ -1,4 +1,5 @@
 package spv_test
+
 import (
 	"bytes"
 	"encoding/hex"
@@ -12,22 +13,25 @@ import (
 	"sync"
 	"testing"
 	"time"
+
 	"git.parallelcoin.io/dev/9/cmd/node/integration/rpctest"
+	"git.parallelcoin.io/dev/9/cmd/spv"
 	chaincfg "git.parallelcoin.io/dev/9/pkg/chain/config"
 	chainhash "git.parallelcoin.io/dev/9/pkg/chain/hash"
 	txauthor "git.parallelcoin.io/dev/9/pkg/chain/tx/author"
 	txscript "git.parallelcoin.io/dev/9/pkg/chain/tx/script"
 	"git.parallelcoin.io/dev/9/pkg/chain/wire"
-	"git.parallelcoin.io/dev/9/pkg/log"
 	rpcclient "git.parallelcoin.io/dev/9/pkg/rpc/client"
 	"git.parallelcoin.io/dev/9/pkg/rpc/json"
 	"git.parallelcoin.io/dev/9/pkg/util"
 	ec "git.parallelcoin.io/dev/9/pkg/util/elliptic"
 	"git.parallelcoin.io/dev/9/pkg/util/gcs/builder"
+	"git.parallelcoin.io/dev/9/pkg/util/log"
 	waddrmgr "git.parallelcoin.io/dev/9/pkg/wallet/addrmgr"
 	walletdb "git.parallelcoin.io/dev/9/pkg/wallet/db"
 	_ "git.parallelcoin.io/dev/9/pkg/wallet/db/bdb"
 )
+
 var (
 	// Try log.LevelInfo for output like you'd see in normal operation,
 	// or log.LevelTrace to help debug code. Anything but
@@ -43,7 +47,7 @@ var (
 	// TODO: Implement load limiting for both outgoing and incoming
 	// messages.
 	numQueryThreads = 20
-	queryOptions    = []neutrino.QueryOption{}
+	queryOptions    = []spv.QueryOption{}
 	// The logged sequence of events we want to see. The value of i
 	// represents the block for which a loop is generating a log entry,
 	// given for readability only.
@@ -168,6 +172,7 @@ var (
 	// OnFilteredBlockDisconnected.
 	ourKnownTxsByFilteredBlock = make(map[chainhash.Hash][]*util.Tx)
 )
+
 // secSource is an implementation of btcwallet/txauthor/SecretsSource that
 // stores WitnessPubKeyHash addresses.
 type secSource struct {
@@ -175,6 +180,7 @@ type secSource struct {
 	scripts map[string]*[]byte
 	params  *chaincfg.Params
 }
+
 func (s *secSource) add(privKey *ec.PrivateKey) (util.Address, error) {
 	pubKeyHash := util.Hash160(privKey.PubKey().SerializeCompressed())
 	addr, err := util.NewAddressWitnessPubKeyHash(pubKeyHash, s.params)
@@ -197,6 +203,7 @@ func (s *secSource) add(privKey *ec.PrivateKey) (util.Address, error) {
 	}
 	return addr, nil
 }
+
 // GetKey is required by the txscript.KeyDB interface
 func (s *secSource) GetKey(addr util.Address) (*ec.PrivateKey, bool,
 	error) {
@@ -206,6 +213,7 @@ func (s *secSource) GetKey(addr util.Address) (*ec.PrivateKey, bool,
 	}
 	return privKey, true, nil
 }
+
 // GetScript is required by the txscript.ScriptDB interface
 func (s *secSource) GetScript(addr util.Address) ([]byte, error) {
 	script, ok := s.scripts[addr.String()]
@@ -214,6 +222,7 @@ func (s *secSource) GetScript(addr util.Address) ([]byte, error) {
 	}
 	return *script, nil
 }
+
 // ChainParams is required by the SecretsSource interface
 func (s *secSource) ChainParams() *chaincfg.Params {
 	return s.params
@@ -226,17 +235,19 @@ func newSecSource(
 		params:  params,
 	}
 }
+
 type testLogger struct {
 	t *testing.T
 }
 type neutrinoHarness struct {
 	h1, h2, h3 *rpctest.Harness
-	svc        *neutrino.ChainService
+	svc        *spv.ChainService
 }
 type syncTestCase struct {
 	name string
 	test func(harness *neutrinoHarness, t *testing.T)
 }
+
 var testCases = []*syncTestCase{
 	{
 		name: "initial sync",
@@ -259,6 +270,7 @@ var testCases = []*syncTestCase{
 		test: testRescanResults,
 	},
 }
+
 // Make sure the client synchronizes with the correct node.
 func testInitialSync(
 	harness *neutrinoHarness, t *testing.T) {
@@ -267,11 +279,12 @@ func testInitialSync(
 		t.Fatalf("Couldn't sync ChainService: %s", err)
 	}
 }
+
 // Variables used to track state between multiple rescan tests.
 var (
 	quitRescan                chan struct{}
 	errChan                   <-chan error
-	rescan                    *neutrino.Rescan
+	rescan                    *spv.Rescan
 	startBlock                waddrmgr.BlockStamp
 	secSrc                    *secSource
 	addr1, addr2, addr3       util.Address
@@ -279,6 +292,7 @@ var (
 	tx1, tx2, tx3             *wire.MsgTx
 	ourOutPoint               wire.OutPoint
 )
+
 // testRescan tests several rescan modes. This should be broken up into
 // smaller tests.
 func testRescan(
@@ -366,11 +380,11 @@ func testRescan(
 			" %s", tx1.TxHash())
 	}
 	spendReport, err := harness.svc.GetUtxo(
-		neutrino.WatchInputs(neutrino.InputWithScript{
+		spv.WatchInputs(spv.InputWithScript{
 			PkScript: script1,
 			OutPoint: ourOutPoint,
 		}),
-		neutrino.StartBlock(&waddrmgr.BlockStamp{Height: 1101}),
+		spv.StartBlock(&waddrmgr.BlockStamp{Height: 1101}),
 	)
 	if err != nil {
 		t.Fatalf("Couldn't get UTXO %s: %s", ourOutPoint, err)
@@ -493,7 +507,7 @@ func testStartRescan(
 	banPeer(harness.svc, harness.h2)
 	err = harness.svc.SendTransaction(authTx1.Tx,
 		append(queryOptions,
-			neutrino.PeerConnectTimeout(3*time.Second))...)
+			spv.PeerConnectTimeout(3*time.Second))...)
 	if err != nil && !strings.Contains(err.Error(), "already have") {
 		t.Fatalf("Unable to send transaction to network: %s", err)
 	}
@@ -533,7 +547,7 @@ func testStartRescan(
 	banPeer(harness.svc, harness.h2)
 	err = harness.svc.SendTransaction(authTx2.Tx,
 		append(queryOptions,
-			neutrino.PeerConnectTimeout(3*time.Second))...)
+			spv.PeerConnectTimeout(3*time.Second))...)
 	if err != nil && !strings.Contains(err.Error(), "already have") {
 		t.Fatalf("Unable to send transaction to network: %s", err)
 	}
@@ -553,7 +567,7 @@ func testStartRescan(
 	}
 	// Update the filter with the second address, and we should have 2 more
 	// relevant transactions.
-	err = rescan.Update(neutrino.AddAddrs(addr2), neutrino.Rewind(1095))
+	err = rescan.Update(spv.AddAddrs(addr2), spv.Rewind(1095))
 	if err != nil {
 		t.Fatalf("Couldn't update the rescan filter: %s", err)
 	}
@@ -585,11 +599,11 @@ func testStartRescan(
 	}
 	// Check and make sure the previous UTXO is now spent.
 	spendReport, err := harness.svc.GetUtxo(
-		neutrino.WatchInputs(neutrino.InputWithScript{
+		spv.WatchInputs(spv.InputWithScript{
 			PkScript: script1,
 			OutPoint: ourOutPoint,
 		}),
-		neutrino.StartBlock(&waddrmgr.BlockStamp{Height: 801}),
+		spv.StartBlock(&waddrmgr.BlockStamp{Height: 801}),
 	)
 	if err != nil {
 		t.Fatalf("Couldn't get UTXO %s: %s", ourOutPoint, err)
@@ -714,17 +728,18 @@ func testRescanResults(
 	close(quitRescan)
 	err = <-errChan
 	quitRescan = nil
-	if err != neutrino.ErrRescanExit {
+	if err != spv.ErrRescanExit {
 		t.Fatalf("Rescan ended with error: %s", err)
 	}
 	// Immediately try to add a new update to to the rescan that was just
 	// shut down. This should fail as it is no longer running.
 	rescan.WaitForShutdown()
-	err = rescan.Update(neutrino.AddAddrs(addr2), neutrino.Rewind(1095))
+	err = rescan.Update(spv.AddAddrs(addr2), spv.Rewind(1095))
 	if err == nil {
 		t.Fatalf("Expected update call to fail, it did not")
 	}
 }
+
 // testRandomBlocks goes through all blocks in random order and ensures we can
 // correctly get cfilters from them. It uses numQueryThreads goroutines running
 // at the same time to go through this. 50 is comfortable on my somewhat dated
@@ -937,10 +952,10 @@ func TestNeutrinoSync(
 	logger := log.NewBackend(os.Stdout)
 	chainLogger := logger.Logger("CHAIN")
 	chainLogger.SetLevel(logLevel)
-	neutrino.UseLogger(chainLogger)
+	// spv.UseLogger(chainLogger)
 	rpcLogger := logger.Logger("RPCC")
 	rpcLogger.SetLevel(logLevel)
-	rpcclient.UseLogger(rpcLogger)
+	// rpcclient.UseLogger(rpcLogger)
 	// Create a btcd SimNet node and generate 800 blocks
 	h1, err := rpctest.New(
 		&chaincfg.SimNetParams, nil, []string{"--txindex"},
@@ -1035,7 +1050,7 @@ func TestNeutrinoSync(
 	if err != nil {
 		t.Fatalf("Error opening DB: %s\n", err)
 	}
-	config := neutrino.Config{
+	config := spv.Config{
 		DataDir:     tempDir,
 		Database:    db,
 		ChainParams: modParams,
@@ -1045,10 +1060,10 @@ func TestNeutrinoSync(
 			h1.P2PAddress(),
 		},
 	}
-	neutrino.MaxPeers = 3
-	neutrino.BanDuration = 5 * time.Second
-	neutrino.QueryPeerConnectTimeout = 10 * time.Second
-	svc, err := neutrino.NewChainService(config)
+	spv.MaxPeers = 3
+	spv.BanDuration = 5 * time.Second
+	spv.QueryPeerConnectTimeout = 10 * time.Second
+	svc, err := spv.NewChainService(config)
 	if err != nil {
 		t.Fatalf("Error creating ChainService: %s", err)
 	}
@@ -1062,6 +1077,7 @@ func TestNeutrinoSync(
 		})
 	}
 }
+
 // csd does a connect-sync-disconnect between nodes in order to support
 // reorg testing. It brings up and tears down a temporary node, otherwise the
 // nodes try to reconnect to each other which results in unintended reorgs.
@@ -1085,6 +1101,7 @@ func csd(
 	}
 	return rpctest.JoinNodes(harnesses, rpctest.Blocks)
 }
+
 // checkErrChan tries to read the passed error channel if possible and logs the
 // error it found, if any. This is useful to help troubleshoot any timeouts
 // during a rescan.
@@ -1096,9 +1113,10 @@ func checkErrChan(
 	default:
 	}
 }
+
 // waitForSync waits for the ChainService to sync to the current chain state.
 func waitForSync(
-	t *testing.T, svc *neutrino.ChainService,
+	t *testing.T, svc *spv.ChainService,
 	correctSyncNode *rpctest.Harness) error {
 	knownBestHash, knownBestHeight, err :=
 		correctSyncNode.Node.GetBestBlock()
@@ -1253,19 +1271,20 @@ func waitForSync(
 	}
 	return nil
 }
+
 // startRescan starts a rescan in another goroutine, and logs all notifications
 // from the rescan. At the end, the log should match one we precomputed based
 // on the flow of the test. The rescan starts at the genesis block and the
 // notifications continue until the `quit` channel is closed.
 func startRescan(
-	t *testing.T, svc *neutrino.ChainService, addr util.Address,
+	t *testing.T, svc *spv.ChainService, addr util.Address,
 	startBlock *waddrmgr.BlockStamp, quit <-chan struct{}) (
-	*neutrino.Rescan, <-chan error) {
+	*spv.Rescan, <-chan error) {
 	rescan := svc.NewRescan(
-		neutrino.QuitChan(quit),
-		neutrino.WatchAddrs(addr),
-		neutrino.StartBlock(startBlock),
-		neutrino.NotificationHandlers(
+		spv.QuitChan(quit),
+		spv.WatchAddrs(addr),
+		spv.StartBlock(startBlock),
+		spv.NotificationHandlers(
 			rpcclient.NotificationHandlers{
 				OnBlockConnected: func(
 					hash *chainhash.Hash,
@@ -1357,6 +1376,7 @@ func startRescan(
 	errChan := rescan.Start()
 	return rescan, errChan
 }
+
 // checkRescanStatus returns the number of relevant transactions we currently
 // know about and the currently known height.
 func checkRescanStatus() (int, int32, error) {
@@ -1385,10 +1405,11 @@ func checkRescanStatus() (int, int32, error) {
 	}
 	return txCount[0], curBlockHeight, nil
 }
+
 // banPeer bans and disconnects the requested harness from the ChainService
 // instance for BanDuration seconds.
 func banPeer(
-	svc *neutrino.ChainService, harness *rpctest.Harness) {
+	svc *spv.ChainService, harness *rpctest.Harness) {
 	peers := svc.Peers()
 	for _, peer := range peers {
 		if peer.Addr() == harness.P2PAddress() {
@@ -1397,6 +1418,7 @@ func banPeer(
 		}
 	}
 }
+
 // goroutineDump returns a string with the current goroutine dump in order to
 // show what's going on in case of timeout.
 func goroutineDump() string {

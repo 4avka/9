@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"math"
 	"net"
+	"path/filepath"
 	"runtime"
 	"sort"
 	"strconv"
@@ -2428,7 +2429,8 @@ func newServer(
 	if *Cfg.NoCFilters {
 		services &^= wire.SFNodeCF
 	}
-	amgr := addrmgr.New(*Cfg.DataDir, podLookup)
+	amgr := addrmgr.New(filepath.Join(
+		*Cfg.AppDataDir, NetName(ActiveNetParams)), podLookup)
 	var listeners []net.Listener
 	var nat NAT
 	if !*Cfg.DisableListen {

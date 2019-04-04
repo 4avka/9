@@ -8,9 +8,7 @@ import (
 )
 
 // Log is the logger for the peer package
-var Log = cl.NewSubSystem("cmd", ll.DEFAULT)
-
-var log = Log.Ch
+var log = cl.NewSubSystem("cmd", ll.DEFAULT).Ch
 
 func Start(args []string) int {
 	log <- cl.Dbg("starting 9")

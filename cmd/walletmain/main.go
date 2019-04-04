@@ -35,9 +35,7 @@ func Main(c *nine.Config, activeNet *node.Params) error {
 		go func() {
 			listenAddr :=
 				net.JoinHostPort("127.0.0.1", fmt.Sprint(*cfg.Profile))
-			log <- cl.Info{
-				"profile server listening on", listenAddr,
-			}
+			log <- cl.Info{"profile server listening on", listenAddr}
 			profileRedirect := http.RedirectHandler("/debug/pprof",
 				http.StatusSeeOther)
 			http.Handle("/", profileRedirect)

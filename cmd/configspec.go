@@ -1,191 +1,124 @@
 package cmd
 
-import (
-	"fmt"
-
-	"git.parallelcoin.io/dev/9/cmd/node"
-	"git.parallelcoin.io/dev/9/cmd/node/mempool"
-)
-
-const defaultDatadir = "~/." + APPNAME
+var defaultDatadir = CleanAndExpandPath("~/." + APPNAME)
 
 // Config is the declaration of our set of application configuration variables.
 // Custom functions are written per type that generate a Line struct and contain
 // a validator/setter function that checks the input
 func getConfig() *Lines {
+	// l := make(Lines)
+	// l.Group("p2p",
+	// 		// This is first because it sets the port bases on the rest of this set
+	// 		Net("network").Def("mainnet").Usage("network to connect to"),
+	// 	).Group("app",
+	// 		File("cpuprofile").Usage("write cpu profile to this file, empty disables cpu profiling"),
+	// 		Dir("datadir").Default(defaultDatadir).Usage("base folder to keep data for an instance of 9"),
+	// 		Dir("appdatadir").Usage("subcommand data directory, sets to datadir/appname if unset"),
+	// 		Dir("logdir").Usage("where logs are written, defaults to the appdatadir if unset"),
+	// 		Port("profile").Default("1104").Usage("http profiling on specified port"),
+	// 		Enable("upnp").Usage("enable port forwarding via UPNP"),
+	// 	).Group("block",
+	// 		Int("maxsize").Default(node.DefaultBlockMaxSize).Min(node.BlockWeightMin).Max(node.BlockSizeMax).Usage("max block size in bytes"),
+	// 		Int("maxweight").Default(node.DefaultBlockMaxWeight).Min(node.DefaultBlockMinWeight).Max(node.BlockWeightMax).Usage("max block weight"),
+	// 		Int("minsize").Default(node.DefaultBlockMinSize).Min(node.DefaultBlockMinSize, node.BlockSizeMax).Usage("min block size"),
+	// 		Int("minweight").Default(node.DefaultBlockMinWeight).Min(node.DefaultBlockMinWeight, node.BlockWeightMax).Usage("min block weight"),
+	// 		Int("prioritysize").Default(mempool.DefaultBlockPrioritySize).Min(1000).Max(node.BlockSizeMax).Usage("the default size for high priority low fee transactions" ),
+	// 	).Group("chain",
+	// 		Tags("addcheckpoints").Usage("add checkpoints [height:hash ]*"),
+	// 		Bool("disablecheckpoints").Usage("disables checkpoints (danger!)"),
+	// 		Tag("dbtype").Default("ffldb").Usage("set database backend to use for chain"),
+	// 		Enabled("addrindex").Usage("enable address index (disables also transaction index)"),
+	// 		Enabled("txindex").Usage("enable transaction index"),
+	// 		Enable("rejectnonstd").Usage("reject nonstandard transactions even if net parameters allow it"),
+	// 		Enable("relaynonstd").Usage("relay nonstandard transactions even if net parameters disallow it"),
+	// 		("rpc":                NetAddr("127.0.0.1:11048", "address of chain rpc to connect to"),
+	// 		("sigcachemaxsize":    IntBounded(node.DefaultSigCacheMaxSize, "max number of signatures to keep in memory", 1000, 10000000),
+	// 		("pass":               String("pa55word1", "password for limited user"),
+	// 		("user":               String("limit", "username with limited privileges"),
+
+	// )
 	return &Lines{
-		"app.cpuprofile": Path(
-			"", "write cpu profile"),
-		"app.appdatadir": Path(
-			"", "subcommand data dir, automatically set by subcommand name"),
-		"app.datadir": Path(
-			CleanAndExpandPath(defaultDatadir),
-			"base directory containing configuration and data"),
-		"app.logdir": Path(
-			"", "where logs are written"),
-		"app.enableprofile": Enable(
-			"enable http profiling"),
-		"app.profile": IntBounded(
-			1100, "http profiling on specified port", 1025, 65534),
-		"app.upnp": Enable(
-			"enable port forwarding via UPNP"),
-		"block.maxsize": IntBounded(
-			node.DefaultBlockMaxSize, "max block size", node.BlockMaxWeightMin, node.BlockMaxSizeMax),
-		"block.maxweight": IntBounded(
-			node.DefaultBlockMaxWeight, "max block weight", node.DefaultBlockMinWeight, node.BlockMaxWeightMax),
-		"block.minsize": IntBounded(
-			node.DefaultBlockMinSize, "min block size", node.DefaultBlockMinSize, node.BlockMaxSizeMax),
-		"block.minweight": IntBounded(
-			node.DefaultBlockMinWeight, "min block weight", node.DefaultBlockMinWeight, node.BlockMaxWeightMax),
-		"block.prioritysize": IntBounded(
-			mempool.DefaultBlockPrioritySize,
-			"the default size for high priority low fee transactions",
-			1000, node.BlockMaxSizeMax),
-		"chain.addcheckpoints": StringSlice(
-			"", "add checkpoints [height:hash ]*"),
-		"chain.disablecheckpoints": Enable(
-			"disables checkpoints (danger!)"),
-		"chain.dbtype": String(
-			"ffldb", "set database backend to use for chain"),
-		"chain.addrindex": Disable(
-			"enable address index (disables also transaction index)"),
-		"chain.txindex": Disable(
-			"enable transaction index"),
-		"chain.rejectnonstd": Enable(
-			"reject nonstandard transactions even if net parameters allow it"),
-		"chain.relaynonstd": Enable(
-			"relay nonstandard transactions even if net parameters disallow it"),
-		"chain.rpc": NetAddr(
-			"127.0.0.1:11048", "address of chain rpc to connect to"),
-		"chain.sigcachemaxsize": IntBounded(
-			node.DefaultSigCacheMaxSize, "max number of signatures to keep in memory", 1000, 10000000),
-		"limit.pass": String(
-			"pa55word1", "password for limited user"),
-		"limit.user": String(
-			"limit", "username with limited privileges"),
-		"log.level": LogLevel(
-			"info", "sets the base default log level"),
-		"log.subsystem": SubSystem(
-			"", "[subsystem:loglevel ]+"),
-		"log.nowrite": Enable(
-			"disable writing to log file"),
-		"mining.addresses": StringSlice(
-			"", "set mining addresses, space separated"),
-		"mining.algo": Algos(
-			"random", "select from available mining algorithms"),
-		"mining.bias": Float(
-			"-0.5", "bias for difficulties -1 = always easy, 1 always hardest"),
-		"mining.generate": Enable(
-			"enable builtin CPU miner"),
-		"mining.genthreads": IntBounded(
-			node.DefaultGenThreads,
-			"set number of threads, -1 = all", -1, 4096),
-		"mining.listener": NetAddr(
-			"", "set listener address for mining dispatcher"),
-		"mining.pass": String(
-			// TODO: generate random pass
-			"", "password to secure mining dispatch connections"),
-		"mining.switch": Duration(
-			"1s", "maximum time to mine per round"),
-		"p2p.addpeer": NetAddrs(
-			"11047", "add permanent p2p peer"),
-		"p2p.banthreshold": Int(
-			node.DefaultBanThreshold, "how many ban units triggers a ban"),
-		"p2p.banduration": Duration(
-			fmt.Sprint(node.DefaultBanDuration), "how long a ban lasts"),
-		"p2p.disableban": Enable(
-			"disables banning peers"),
-		"p2p.blocksonly": Enable(
-			"relay only blocks"),
-		"p2p.connect": NetAddrs(
-			"11047", "connect only to these outbound peers"),
-		"p2p.nolisten": Enable(
-			"disable p2p listener"),
-		"p2p.externalips": NetAddrs(
-			"11047", "additional external IP addresses to bind to"),
-		"p2p.freetxrelaylimit": Float(
-			"15.0", "limit of 'free' relay in thousand bytes per minute"),
-		"p2p.listen": NetAddrs(
-			"127.0.0.1:11047", "address to listen on for p2p connections"),
-		"p2p.maxorphantxs": IntBounded(
-			node.DefaultMaxOrphanTransactions, "maximum number of orphan transactions to keep", 0, 10000),
-		"p2p.maxpeers": IntBounded(
-			node.DefaultMaxPeers, "maximum number of peers to connect to", 2, 1024),
-		"p2p.minrelaytxfee": Float(
-			"0.0001000",
-			"minimum relay tx fee, baseline considered to be zero for relay"),
-		"p2p.network": Network(
-			"mainnet", "network to connect to"),
-		"p2p.nobanning": Enable(
-			"disable banning of peers"),
-		"p2p.nobloomfilters": Enable(
-			"disable bloom filters"),
-		"p2p.nocfilters": Enable(
-			"disable cfilters"),
-		"p2p.nodns": Enable(
-			"disable DNS seeding"),
-		"p2p.norelaypriority": Enable(
-			"disables prioritisation of relayed transactions"),
-		"p2p.trickleinterval": Duration(
-			"27s",
-			"minimum time between attempts to send new inventory to a connected peer"),
-		"p2p.useragentcomments": StringSlice(
-			"", "comment to add to version identifier for node"),
-		"p2p.whitelist": NetAddrs(
-			"11047", "peers who are never banned"),
-		"proxy.address": NetAddr(
-			"127.0.0.1:9050", "address of socks proxy"),
-		"proxy.enable": Enable(
-			"enable socks proxy"),
-		"proxy.isolation": Enable(
-			"enable randomisation of tor login to separate streams"),
-		"proxy.pass": String(
-			"pa55word", "password for proxy"),
-		"proxy.tor": Enable(
-			"proxy is a tor proxy"),
-		"proxy.user": String(
-			"user", "username for proxy"),
-		"rpc.connect": NetAddr(
-			"127.0.0.1:11048", "connect to this node RPC endpoint"),
-		"rpc.disable": Enable(
-			"disable rpc server"),
-		"rpc.listen": NetAddrs(
-			"127.0.0.1:11048", "address to listen for node rpc clients"),
-		"rpc.maxclients": IntBounded(
-			node.DefaultMaxRPCClients, "max clients for rpc", 2, 1024),
-		"rpc.maxconcurrentreqs": IntBounded(
-			node.DefaultMaxRPCConcurrentReqs, "maximum concurrent requests to handle", 2, 1024),
-		"rpc.maxwebsockets": IntBounded(
-			node.DefaultMaxRPCWebsockets,
-			"maximum websockets clients", 2, 1024),
-		"rpc.pass": String(
-			"pa55word", "password for rpc services"),
-		"rpc.quirks": Enable(
-			"enable json rpc quirks matching bitcoin core"),
-		"rpc.user": String(
-			"user", "username for rpc services"),
-		"rpc.wallet": NetAddr(
-			"127.0.0.1:11046", "address of wallet rpc to connect to"),
-		"tls.key": Path(
-			"tls.key", "file containing tls key"),
-		"tls.cert": Path(
-			"tls.cert", "file containing tls certificate"),
-		"tls.cafile": Path(
-			"tls.cafile",
-			"set the certificate authority file to use for verifying rpc connections"),
-		"tls.disable": Disable(
-			"disable SSL on RPC connections"),
-		"tls.onetime": Enable(
-			"creates a key pair but does not write the secret for future runs"),
-		"tls.server": Enable(
-			"enable tls for RPC servers"),
-		"tls.skipverify": Enable(
-			"skip verifying tls certificates with CAFile"),
-		"wallet.noinitialload": Enable(
-			"disable automatic opening of the wallet at startup"),
-		"wallet.pass": String(
-			"", "password for the non-own transaction data in the wallet"),
-		"wallet.enable": Enable(
-			"use configured wallet rpc instead of full node"),
+		// this runs first					and sets correct defaults per network
+		// Net("p2p.network":					Network().Def("mainnet").Usage("network to connect to"),
+		// File("app.cpuprofile":					Path("", "write cpu profile"),
+		// Dir("app.appdatadir":					Path("", "subcommand data dir, automatically set by subcommand name"),
+		// Dir("app.datadir":					Path(defaultDatadir, "base directory containing configuration and data"),
+		// Dir("app.logdir":					Path("", "where logs are written"),
+		// Enable("app.enableprofile":					Enable("enable http profiling"),
+		// Int("app.profile":					IntBounded(1100, "http profiling on specified port", 1025, 65534),
+		// Enable("app.upnp":					Enable("enable port forwarding via UPNP"),
+		// Int("block.maxsize":					IntBounded(node.DefaultBlockMaxSize, "max block size", node.BlockWeightMin, node.BlockSizeMax),
+		// Int("block.maxweight":					IntBounded(node.DefaultBlockMaxWeight, "max block weight", node.DefaultBlockMinWeight, node.BlockWeightMax),
+		// Int("block.minsize":					IntBounded(node.DefaultBlockMinSize, "min block size", node.DefaultBlockMinSize, node.BlockSizeMax),
+		// Int("block.minweight":					IntBounded(node.DefaultBlockMinWeight, "min block weight", node.DefaultBlockMinWeight, node.BlockWeightMax),
+		// Int("block.prioritysize":					IntBounded(mempool.DefaultBlockPrioritySize, "the default size for high priority low fee transactions", 1000, node.BlockSizeMax),
+		// Tags("chain.addcheckpoints":					StringSlice("", "add checkpoints [height:hash ]*"),
+		// Enable("chain.disablecheckpoints":					Enable("disables checkpoints (danger!)"),
+		// Tag("chain.dbtype":					String("ffldb", "set database backend to use for chain"),
+		// Enabled("chain.addrindex":					Disable("enable address index (disables also transaction index)"),
+		// Enabled("chain.txindex":					Disable("enable transaction index"),
+		// Enable("chain.rejectnonstd":					Enable("reject nonstandard transactions even if net parameters allow it"),
+		// Enable("chain.relaynonstd":					Enable("relay nonstandard transactions even if net parameters disallow it"),
+		// Addr("chain.rpc":					NetAddr("127.0.0.1:11048", "address of chain rpc to connect to"),
+		// Int("chain.sigcachemaxsize":					IntBounded(node.DefaultSigCacheMaxSize, "max number of signatures to keep in memory", 1000, 10000000),
+		// Tag("limit.pass":					String("pa55word1", "password for limited user"),
+		// Tag("limit.user":					String("limit", "username with limited privileges"),
+		// Log("log.level":					Log("").Default("info").Usage("sets the base default log level"),
+		// Tags("log.subsystem":					SubSystem("", "[subsystem:loglevel ]+"),
+		// Enable("log.nowrite":					Enable("disable writing to log file"),
+		// Tags("mining.addresses":					StringSlice("", "set mining addresses, space separated"),
+		// Algo("mining.algo":					Algos("random", "select from available mining algorithms"),
+		// Float("mining.bias":					Float("-0.5", "bias for difficulties -1 = always easy, 1 always hardest"),
+		// Enable("mining.generate":					Enable("enable builtin CPU miner"),
+		// Int("mining.genthreads":					IntBounded(node.DefaultGenThreads, "set number of threads, -1 = all", -1, 4096),
+		// Addr("mining.listener":					NetAddr("", "set listener address for mining dispatcher"),
+		// Tag("mining.pass":					String("", "password to secure mining dispatch connections"), // TODO: generate random pass
+		// Duration("mining.switch":					Duration("1s", "maximum time to mine per round"),
+		// Addrs("p2p.addpeer":					NetAddrs("11047", "add permanent p2p peer"),
+		// Int("p2p.banthreshold":					Int(node.DefaultBanThreshold, "how many ban units triggers a ban"),
+		// Duration("p2p.banduration":					Duration(fmt.Sprint(node.DefaultBanDuration), "how long a ban lasts"),
+		// Enable("p2p.disableban":					Enable("disables banning peers"),
+		// Enable("p2p.blocksonly":					Enable("relay only blocks"),
+		// Addrs("p2p.connect":					NetAddrs("11047", "connect only to these outbound peers"),
+		// Enable("p2p.nolisten":					Enable("disable p2p listener"),
+		// Addrs("p2p.externalips":					NetAddrs("11047", "additional external IP addresses to bind to"),
+		// Float("p2p.freetxrelaylimit":					Float("15.0", "limit of 'free' relay in thousand bytes per minute"),
+		// Addrs("p2p.listen":					NetAddrs("127.0.0.1:11047", "address to listen on for p2p connections"),
+		// Int("p2p.maxorphantxs":					IntBounded(node.DefaultMaxOrphanTransactions, "maximum number of orphan transactions to keep", 0, 10000),
+		// Int("p2p.maxpeers":					IntBounded(node.DefaultMaxPeers, "maximum number of peers to connect to", 2, 1024),
+		// Float("p2p.minrelaytxfee":					Float("0.0001000", "minimum relay tx fee, baseline considered to be zero for relay"),
+		// Enable("p2p.nobanning":					Enable("disable banning of peers"),
+		// Enable("p2p.nobloomfilters":					Enable("disable bloom filters"),
+		// Enable("p2p.nocfilters":					Enable("disable cfilters"),
+		// Enable("p2p.nodns":					Enable("disable DNS seeding"),
+		// Enable("p2p.norelaypriority":					Enable("disables prioritisation of relayed transactions"),
+		// Duration("p2p.trickleinterval":					Duration("27s", "minimum time between attempts to send new inventory to a connected peer"),
+		// Tags("p2p.useragentcomments":					StringSlice("", "comment to add to version identifier for node"),
+		// Addrs("p2p.whitelist":					NetAddrs("11047", "peers who are never banned"),
+		// Addr("proxy.address":					NetAddr("127.0.0.1:9050", "address of socks proxy"),
+		// Enable("proxy.isolation":					Enable("enable randomisation of tor login to separate streams"),
+		// Tag("proxy.pass":					String("pa55word", "password for proxy"),
+		// Enable("proxy.tor":					Enable("proxy is a tor proxy"),
+		// Tag("proxy.user":					String("user", "username for proxy"),
+		// Addr("rpc.connect":					NetAddr("127.0.0.1:11048", "connect to this node RPC endpoint"),
+		// Enable("rpc.disable":					Enable("disable rpc server"),
+		// Addrs("rpc.listen":					NetAddrs("127.0.0.1:11048", "address to listen for node rpc clients"),
+		// Int("rpc.maxclients":					IntBounded(node.DefaultMaxRPCClients, "max clients for rpc", 2, 1024),
+		// Int("rpc.maxconcurrentreqs":					IntBounded(node.DefaultMaxRPCConcurrentReqs, "maximum concurrent requests to handle", 2, 1024),
+		// Int("rpc.maxwebsockets":					IntBounded(node.DefaultMaxRPCWebsockets, "maximum websockets clients", 2, 1024),
+		// Tag("rpc.pass":					String("pa55word", "password for rpc services"),
+		// Enable("rpc.quirks":					Enable("enable json rpc quirks matching bitcoin core"),
+		// Tag("rpc.user":					String("user", "username for rpc services"),
+		// Addr("rpc.wallet":					NetAddr("127.0.0.1:11046", "address of wallet rpc to connect to"),
+		// File("tls.key":					Path("tls.key", "file containing tls key"),
+		// File("tls.cert":					Path("tls.cert", "file containing tls certificate"),
+		// File("tls.cafile":					Path("tls.cafile", "set the certificate authority file to use for verifying rpc connections"),
+		// Enable("tls.disable":					Disable("disable SSL on RPC connections"),
+		// Enable("tls.onetime":					Enable("creates a key pair but does not write the secret for future runs"),
+		// Enabled("tls.server":					Enable("enable tls for RPC servers"),
+		// Enable("tls.skipverify":					Enable("skip verifying tls certificates with CAFile"),
+		// Enable("wallet.noinitialload":					Enable("disable automatic opening of the wallet at startup"),
+		// Tag("wallet.pass":					String("", "password for the non-own transaction data in the wallet"),
+		// Tag("wallet.enable":					Enable("use configured wallet rpc instead of full node"),
 	}
 }

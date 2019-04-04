@@ -138,7 +138,7 @@ func ConfConf(subsection string) int {
 					continue
 				}
 
-				item := fmt.Sprintf("%s : %v (%v) = %v", sects[0][2], c.Comment, c.Default, value)
+				item := fmt.Sprintf("%s : %v (%v) = %v", sects[0][2], c.Comment, c.Initial, value)
 				lines = append(lines, item)
 			}
 		}
@@ -164,8 +164,10 @@ func ConfConf(subsection string) int {
 		if ConfConfEdit(key) != 0 {
 			break
 		}
-		datadir := Config["app.datadir"].Value.(*string)
-		configFile := CleanAndExpandPath(filepath.Join(*datadir, "config"))
+		datadir := *config.DataDir
+		log <- cl.Info{"config location", datadir}
+		configFile := CleanAndExpandPath(filepath.Join(datadir, "config"))
+		log <- cl.Info{"configFile", configFile}
 		if EnsureDir(configFile) {
 			fmt.Println("created new directory to store data", datadir)
 		}
@@ -193,17 +195,17 @@ func ConfConfEdit(key string) int {
 		name := new(string)
 		switch key {
 		case "p2p.network":
-			k := Config[key].Value.(*string)
+			k := Config[key].Initial.(string)
 			prompt := &survey.Select{
 				Message: "editing key " + key,
 				Options: Networks,
-				Default: *k,
+				Default: k,
 			}
 			err := survey.AskOne(prompt, name, nil)
 			if err != nil {
 				fmt.Println("ERROR:", cl.Ine(), err)
 			}
-			*k = *name
+			*Config[key].Value.(*string) = *name
 			cursor = "p2p"
 			return 0
 		case "log.level":
@@ -261,7 +263,7 @@ func ConfConfEdit(key string) int {
 					if err != nil {
 						fmt.Println("ERROR:", cl.Ine(), err)
 					}
-					if Config[key].Validator(name) {
+					if Config[key].Validate(Config[key], name) {
 						prompt := &survey.Select{
 							Message: key + " set to " + name,
 							Options: []string{"ok", "cancel"},
@@ -310,7 +312,7 @@ func ConfConfEdit(key string) int {
 				if err != nil {
 					fmt.Println("ERROR:", cl.Ine(), err)
 				}
-				if Config[key].Validator(*name) {
+				if Config[key].Validate(*name) {
 					prompt := &survey.Select{
 						Message: key + " set to " + k,
 						Options: []string{"ok", "cancel"},
@@ -357,7 +359,7 @@ func ConfConfEdit(key string) int {
 								fmt.Println("ERROR:", cl.Ine(), err)
 								break
 							}
-							if Config[key].Validator(item) {
+							if Config[key].Validate(item) {
 								prompt := &survey.Select{
 									Message: "confirm '" + item + "'",
 									Options: []string{"ok", "edit", "cancel"},
@@ -424,7 +426,7 @@ func ConfConfEdit(key string) int {
 								fmt.Println("ERROR:", cl.Ine(), err)
 								break
 							}
-							if Config[key].Validator(edit) {
+							if Config[key].Validate(edit) {
 								u := Config[key].Value.(*[]string)
 								for i, x := range *u {
 									if x == name {
@@ -455,7 +457,7 @@ func ConfConfEdit(key string) int {
 				if err != nil {
 					fmt.Println("ERROR:", cl.Ine(), err)
 				}
-				if Config[key].Validator(tds) {
+				if Config[key].Validate(tds) {
 					prompt := &survey.Select{
 						Message: key + " set to " + tds,
 						Options: []string{"ok", "cancel"},

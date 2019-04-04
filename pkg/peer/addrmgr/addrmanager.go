@@ -1195,10 +1195,9 @@ func (a *AddrManager) GetBestLocalAddress(remoteAddr *wire.NetAddress) *wire.Net
 	return bestAddress
 }
 
-// New returns a new bitcoin address manager. Use Start to begin processing asynchronous address updates.
-func New(
-	dataDir string, lookupFunc func(
-		string) ([]net.IP, error)) *AddrManager {
+// New returns a new address manager. Use Start to begin processing asynchronous address updates.
+func New(dataDir string, lookupFunc func(
+	string) ([]net.IP, error)) *AddrManager {
 
 	am := AddrManager{
 		peersFile:      filepath.Join(dataDir, "peers.json"),

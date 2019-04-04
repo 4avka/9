@@ -45,9 +45,6 @@ func Help(args []string, tokens Tokens, cmds, all Commands) int {
 	log <- cl.Debug{"HELP\n", "Help", args, getTokens(tokens)}
 	fmt.Println(APPNAME, APPVERSION, "-", APPDESC)
 	fmt.Println()
-	// fmt.Println("args received:", args[1:])
-	// fmt.Println("cmds received:", cmds)
-	// fmt.Println()
 	fmt.Println("help with", APPNAME)
 	fmt.Println()
 	if len(cmds) == 1 {
@@ -63,8 +60,6 @@ func Help(args []string, tokens Tokens, cmds, all Commands) int {
 					x, all[x].pattern,
 					optTagList(all[x].Optional),
 					all[x].Usage)
-				// fmt.Println(x.Detail)
-				// fmt.Println()
 			}
 		}
 	} else {
@@ -89,9 +84,8 @@ func Help(args []string, tokens Tokens, cmds, all Commands) int {
 }
 
 func Conf(args []string, tokens Tokens, cmds, all Commands) int {
-	// fmt.Println("running Conf", args)
 	var r int
-	for r = RunConf(args, tokens, cmds, all); r == 2; {
+	for r = 2; r == 2; {
 		r = RunConf(args, tokens, cmds, all)
 	}
 	return r
@@ -119,6 +113,7 @@ func List(args []string, tokens Tokens, cmds, all Commands) int {
 }
 
 func Ctl(args []string, tokens Tokens, cmds, all Commands) int {
+	cl.Register.SetAllLevels(*config.LogLevel)
 	setAppDataDir("node")
 	if j := validateProxyListeners(); j != 0 {
 		return j
@@ -139,6 +134,7 @@ func Ctl(args []string, tokens Tokens, cmds, all Commands) int {
 }
 
 func Node(args []string, tokens Tokens, cmds, all Commands) int {
+	cl.Register.SetAllLevels(*config.LogLevel)
 	return runNode(args, tokens, cmds, all)
 }
 
@@ -152,16 +148,19 @@ func Wallet(args []string, tokens Tokens, cmds, all Commands) int {
 }
 
 func Shell(args []string, tokens Tokens, cmds, all Commands) int {
+	cl.Register.SetAllLevels(*config.LogLevel)
 	fmt.Println("running Shell", args, getTokens(tokens))
 	return 0
 }
 
 func Test(args []string, tokens Tokens, cmds, all Commands) int {
+	cl.Register.SetAllLevels(*config.LogLevel)
 	fmt.Println("running Test", args, getTokens(tokens))
 	return 0
 }
 
 func Create(args []string, tokens Tokens, cmds, all Commands) int {
+	cl.Register.SetAllLevels(*config.LogLevel)
 	fmt.Println("running Create", args, getTokens(tokens))
 	return 0
 }
