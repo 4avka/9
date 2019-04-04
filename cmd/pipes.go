@@ -11,7 +11,7 @@ import (
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
 
-func Group(s string, items ...Line) (out Lines) {
+func (l *Lines) Group(s string, items ...*Line) (out *Lines) {
 	out = make(map[string]*Line)
 	for i, x := range items {
 		// Prepend group name to item name
@@ -38,6 +38,10 @@ func Int(s string) *Line {
 }
 
 func Float(s string) *Line {
+	return &Line{Name: s}
+}
+
+func Duration(s string) *Line {
 	return &Line{Name: s}
 }
 
@@ -131,6 +135,22 @@ func Dir(s string) *Line {
 			return true
 		},
 	}
+}
+
+func Port(s string) *Line {
+	return &Line{}
+}
+
+func Addr(s string) *Line {
+	return &Line{}
+}
+
+func Addrs(s string) *Line {
+	return &Line{}
+}
+
+func Algo(s string) *Line {
+	return &Line{}
 }
 
 func Net(s string) *Line {
