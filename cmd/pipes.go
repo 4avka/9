@@ -10,13 +10,32 @@ import (
 	"git.parallelcoin.io/dev/9/cmd/node"
 	"git.parallelcoin.io/dev/9/pkg/chain/fork"
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
+	"github.com/davecgh/go-spew/spew"
 )
+
+func NewConfig() *Lines {
+	return &Lines{}
+}
+
+func maybeStringPointer(si interface{}) string {
+	switch st := si.(type) {
+	case string:
+		return st
+	case *string:
+		return *st
+	default:
+		return ""
+	}
+}
 
 func (l *Lines) Group(s string, items ...*Line) (out *Lines) {
 	ll := make(Lines)
 	out = &ll
+	fmt.Println(items)
 	for i, x := range items {
-		if x == nil || x.Name == "" {
+		if x.Name == "" {
+			// spew.Dump(x)
+			fmt.Println("name should not be empty!")
 			continue
 		}
 		// Prepend group name to item name
@@ -27,57 +46,80 @@ func (l *Lines) Group(s string, items ...*Line) (out *Lines) {
 		}
 		(*out)[x.Name] = x
 	}
+	fmt.Println("\n", s)
+	// spew.Dump(items)
+	// spew.Dump(*out)
 	return
 }
 
 func Int(s string) *Line {
-	return &Line{
+	o := Line{
 		Name: s,
 		Validate: func(l *Line, si interface{}) bool {
-			s := si.(string)
-			n, e := strconv.Atoi(s)
+			if si == nil {
+				return false
+			}
+			ss := *si.(*string)
+			n, e := strconv.Atoi(ss)
 			if e != nil {
 				l.INT(n)
 			}
 			return true
 		},
 	}
+	return &o
 }
 
 func Float(s string) *Line {
-	return &Line{Name: s}
+	o := Line{Name: s,
+		Validate: func(l *Line, si interface{}) bool {
+			if si == nil {
+				return false
+			}
+			ss := *si.(*string)
+			n, e := strconv.ParseFloat(ss, 64)
+			if e != nil {
+				l.FLOAT(n)
+			}
+			return true
+		},
+	}
+	return &o
 }
 
 func Duration(s string) *Line {
-	return &Line{Name: s}
+	o := Line{Name: s}
+	return &o
 }
 
 func Log(s string) *Line {
-	return &Line{
+	o := Line{
 		Name: s,
 		Validate: func(l *Line, si interface{}) bool {
-			s := si.(string)
+			ss := *si.(*string)
 			for x := range cl.Levels {
-				if x == s {
-					l.STRING(s)
+				if x == ss {
+					l.STRING(ss)
 					return true
 				}
 			}
 			return false
 		},
 	}
+	return &o
 }
 
 func Tags(s string) *Line {
-	return &Line{
+	o := Line{
 		Name: s,
 		Validate: func(l *Line, si interface{}) bool {
 			if si != nil {
-				s := strings.TrimSpace(si.(string))
-				if len(s) < 1 {
+				ss := strings.TrimSpace(*si.(*string))
+				if len(ss) < 1 {
 					l.SLICE([]string{})
+					return false
 				} else {
-					values := strings.Split(s, "`")
+					values := strings.Split(ss, "`")
 					if len(values) >= 1 {
 						for _, x := range values {
 							if len(x) > 1 {
@@ -91,29 +133,32 @@ func Tags(s string) *Line {
 			return false
 		},
 	}
+	return &o
 }
 
 func Tag(s string) *Line {
-	return &Line{
+	o := Line{
 		Name: s,
 		Validate: func(l *Line, si interface{}) bool {
+			s := maybeStringPointer(si)
 			if si == nil {
 				return false
 			}
-			l.STRING(strings.TrimSpace(si.(string)))
+			l.STRING(strings.TrimSpace(s))
 			return true
 		},
 	}
+	return &o
 }
 
 func File(s string) *Line {
-	return &Line{
+	out := Line{
 		Name: s,
 		Validate: func(l *Line, si interface{}) bool {
 			if si == nil {
 				return false
 			}
-			s := si.(string)
+			s := maybeStringPointer(si)
 			if len(s) > 0 {
 				if !strings.HasPrefix(s, "/") &&
 					!strings.HasPrefix(s, ".") &&
@@ -129,16 +174,17 @@ func File(s string) *Line {
 			return true
 		},
 	}
+	return &out
 }
 
 func Dir(s string) *Line {
-	return &Line{
+	out := Line{
 		Name: s,
 		Validate: func(l *Line, si interface{}) bool {
 			if si == nil {
 				return false
 			}
-			s := si.(string)
+			s := maybeStringPointer(si)
 			if len(s) > 0 {
 				if !strings.HasPrefix(s, "/") &&
 					!strings.HasPrefix(s, ".") &&
@@ -150,33 +196,39 @@ func Dir(s string) *Line {
 					s = ""
 				}
 				l.STRING(s)
+				return true
 			}
-			return true
+			return false
 		},
 	}
+	return &out
 }
 
 func Port(s string) *Line {
-	return &Line{}
+	o := Line{Name: s}
+	return &o
 }
 
 func Addr(s string) *Line {
-	return &Line{}
+	o := Line{Name: s}
+	return &o
 }
 
 func Addrs(s string) *Line {
-	return &Line{}
+	o := Line{Name: s}
+	return &o
 }
 
 func Algo(s string) *Line {
-	return &Line{}
+	o := Line{Name: s}
+	return &o
 }
 
-func Net(s string) *Line {
-	return &Line{
+func Net(s string) (o *Line) {
+	o = &Line{
 		Name: s,
 		Validate: func(l *Line, si interface{}) bool {
-			s := si.(string)
+			s := maybeStringPointer(si)
 			for _, x := range Networks {
 				if x == s {
 					fork.IsTestnet = false
@@ -197,19 +249,22 @@ func Net(s string) *Line {
 						activenetparams = &node.MainNetParams
 					}
 					log <- cl.Info{"running on", s}
+					l.STRING(s)
 					return true
 				}
 			}
+			fmt.Println("returning invalid")
 			return false
 		},
 	}
+	return o
 }
 
 func bv(l *Line, si interface{}) bool {
 	if si == nil {
 		return false
 	}
-	switch strings.ToLower(si.(string)) {
+	switch strings.ToLower(*si.(*string)) {
 	case "true":
 		l.BOOL(true)
 	case "false":
@@ -221,10 +276,10 @@ func bv(l *Line, si interface{}) bool {
 }
 
 // Enable is a boolean that defaults to false
-func Enable(s string) (o *Line) {
-	o = &Line{Name: s, Validate: bv}
-	o.BOOL(false)
-	return o
+func Enable(s string) *Line {
+	g := false
+	o := Line{Name: s, Validate: bv, Value: &g}
+	return &o
 }
 
 // Enabled is a boolean that defaults to true
@@ -236,18 +291,21 @@ func Enabled(s string) (o *Line) {
 
 // Default sets a default value for the Line
 func (l *Line) Default(d interface{}) (out *Line) {
-	if l == nil || l.Value == nil {
+	// spew.Dump(l)
+	if l == nil {
+		fmt.Println("empty *line")
 		return &Line{}
 	}
-	_ = l.Validate(l, d)
-	return
+	fmt.Println(l.Validate(l, d))
+	fmt.Println(*l.Value.(*string))
+	return l
 }
 
 // Usage is the short text explaining a configuration option
 func (l *Line) Usage(s string) *Line {
-	if l != nil && l.Value != nil {
+	spew.Dump(l)
+	if l != nil {
 		// All lines *should* have a Usage and it *should* be last so validate!
-		_ = l.Validate(l, l.Initial)
 		l.Comment = s
 	}
 	return l

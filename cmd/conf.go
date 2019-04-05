@@ -17,7 +17,7 @@ import (
 const BACK = "back"
 
 func RunConf(args []string, tokens Tokens, cmds, all Commands) int {
-	// fmt.Println("ⓟarallelcoin configuration CLI")
+	fmt.Println("ⓟarallelcoin configuration CLI")
 	runner := ConfMain()
 	switch runner {
 	case "node":

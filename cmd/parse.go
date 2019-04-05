@@ -75,7 +75,7 @@ func Parse(args []string) int {
 		}
 	}
 	if Config.Network != nil {
-		switchDefaultAddrs(*Config.Network)
+		// switchDefaultAddrs(*Config.Network)
 	}
 	*Config.ConfigFile = configFile
 	if Config.LogLevel != nil {

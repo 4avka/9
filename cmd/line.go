@@ -32,57 +32,69 @@ func (l *Line) Label(name string) *Line {
 }
 
 func (l *Line) BOOL(v ...bool) *bool {
-	if len(v) == 1 && l != nil && l.Value != nil {
-		*l.Value.(*bool) = v[0]
-		return l.Value.(*bool)
-	} else {
-		return nil
+	if len(v) == 1 {
+		l.Value = &v[0]
+		if l.Initial == nil {
+			i := v[0]
+			l.Initial = &i
+		}
 	}
+	return l.Value.(*bool)
 }
 
 func (l *Line) STRING(v ...string) *string {
-	if len(v) == 1 && l != nil && l.Value != nil {
-		*l.Value.(*string) = v[0]
-	} else {
-		return nil
+	if len(v) == 1 {
+		l.Value = &v[0]
+		if l.Initial == nil {
+			i := v[0]
+			l.Initial = &i
+		}
 	}
 	return l.Value.(*string)
 }
 
 func (l *Line) INT(v ...int) *int {
-	if len(v) == 1 && l != nil && l.Value != nil {
-		*l.Value.(*int) = v[0]
-	} else {
-		return nil
+	if len(v) == 1 {
+		l.Value = &v[0]
+		if l.Initial == nil {
+			i := v[0]
+			l.Initial = &i
+		}
 	}
 	return l.Value.(*int)
 }
 
 func (l *Line) FLOAT(v ...float64) *float64 {
-	if len(v) == 1 && l != nil && l.Value != nil {
-		*l.Value.(*float64) = v[0]
-	} else {
-		return nil
+	if len(v) == 1 {
+		l.Value = &v[0]
+		if l.Initial == nil {
+			i := v[0]
+			l.Initial = &i
+		}
 	}
 	return l.Value.(*float64)
 }
 
 func (l *Line) SLICE(v ...[]string) *[]string {
-	if len(v) == 1 && l != nil && l.Value != nil {
-		*l.Value.(*[]string) = v[0]
-	} else {
-		return nil
+	if len(v) == 1 {
+		l.Value = &v[0]
+		if l.Initial == nil {
+			i := v[0]
+			l.Initial = &i
+		}
 	}
 	return l.Value.(*[]string)
 }
 
-func (l *Line) MAP(v ...nine.Mapstringstring) nine.Mapstringstring {
-	if len(v) == 1 && l != nil && l.Value != nil {
-		*l.Value.(*nine.Mapstringstring) = v[0]
-	} else {
-		return nil
+func (l *Line) MAP(v ...nine.Mapstringstring) *nine.Mapstringstring {
+	if len(v) == 1 {
+		l.Value = &v[0]
+		if l.Initial == nil {
+			i := v[0]
+			l.Initial = &i
+		}
 	}
-	return *l.Value.(*nine.Mapstringstring)
+	return l.Value.(*nine.Mapstringstring)
 }
 
 type Lines map[string]*Line
@@ -457,9 +469,17 @@ func switchDefaultAddrs(s string) {
 // 		dd, e = time.ParseDuration(*s)
 // 		if e != nil {
 // 			ddd := time.Second * 0
-// 			*l.Value.(*time.Duration) = ddd
+// switch lv := l.Value.(type) {
+// case *bool:
+// 	return lv
+// default:
+// }
 // 		} else {
-// 			*l.Value.(*time.Duration) = dd
+// switch lv := l.Value.(type) {
+// case *bool:
+// 	return lv
+// default:
+// }
 // 		}
 // 		return true
 // 	}, usage, &o}
@@ -474,7 +494,11 @@ func switchDefaultAddrs(s string) {
 // 	l = Line{def, func(si interface{}) bool {
 // 		s := si.(string)
 // 		ss := strings.TrimSpace(s)
-// 		*l.Value.(*string) = ss
+// switch lv := l.Value.(type) {
+// case *bool:
+// 	return lv
+// default:
+// }
 // 		return true
 // 	}, usage, &o}
 // 	return &l
