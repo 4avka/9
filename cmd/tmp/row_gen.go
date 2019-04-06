@@ -10,13 +10,6 @@ func (r *RowGenerators) RunAll(ctx *Row) {
 	}
 }
 
-func (r *Rows) InitAll() {
-	R := *r
-	for _, x := range R {
-		x.Init()
-	}
-}
-
 func Default(in interface{}) RowGenerator {
 	return func(ctx *Row) {
 		ctx.Value = in

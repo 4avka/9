@@ -10,3 +10,10 @@ type Row struct {
 	Usage    string
 }
 type Rows map[string]*Row
+
+func (r *Rows) InitAll() {
+	R := *r
+	for _, x := range R {
+		x.Init()
+	}
+}
