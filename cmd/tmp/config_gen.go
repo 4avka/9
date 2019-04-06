@@ -17,6 +17,7 @@ func App(name string, g ...ConfigGenerator) (c *Configuration) {
 	}
 	G := ConfigGenerators(g)
 	G.RunAll(c)
+	c.InitAll()
 	return
 }
 
@@ -37,7 +38,7 @@ func Version(version string) func(*Configuration) {
 	}
 }
 
-func File(name string, g ...ConfigGenerator) ConfigGenerator {
+func File(name string, g ...RowGenerator) ConfigGenerator {
 	return func(ctx *Configuration) {
 		f := Inits["file"]
 		ctx.Rows[name] = &Row{
@@ -46,9 +47,9 @@ func File(name string, g ...ConfigGenerator) ConfigGenerator {
 			Get:      f.Getter,
 			Put:      f.Putter,
 		}
-		G := ConfigGenerators(g)
+		G := RowGenerators(g)
 		ctx.Rows[name].Init = func() {
-			G.RunAll(ctx)
+			G.RunAll(ctx.Rows[name])
 		}
 	}
 }
