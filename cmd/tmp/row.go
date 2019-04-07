@@ -15,8 +15,15 @@ type RowGenerator func(ctx *Row)
 type RowGenerators []RowGenerator
 
 func (r *RowGenerators) RunAll(row *Row) {
+	var init func()
 	for _, x := range *r {
-		x(row)
+		// TODO construct Init() and then run after this block
+		init = row.Init
+		row.Init = func() {
+			x(row)
+			init()
+		}
 	}
+	init()
 	return
 }
