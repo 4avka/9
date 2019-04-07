@@ -1,19 +1,10 @@
 package config
 
-type Row struct {
-	Name     string
-	Value    interface{}
-	Init     func()
-	Get      func() interface{}
-	Put      func(interface{}) bool
-	Validate func(*Row, interface{}) bool
-	Usage    string
-}
-type Rows map[string]*Row
-
-func (r *Rows) InitAll() {
+func (r *RowGenerators) RunAll(ctx *Rows) {
 	R := *r
 	for _, x := range R {
-		x.Init()
+		c := &Row{}
+		x(c)
+		(*ctx)[c.Name] = c
 	}
 }
