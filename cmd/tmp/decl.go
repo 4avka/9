@@ -40,6 +40,78 @@ func File(name string, g ...RowGenerator) CatGenerator {
 	}
 }
 
+func Dir(name string, g ...RowGenerator) CatGenerator {
+	return func(ctx *Cat) {
+		C := *ctx
+		c := &Row{Name: name}
+		G := RowGenerators(g)
+		G.RunAll(c)
+		C[name] = *c
+	}
+}
+
+func Port(name string, g ...RowGenerator) CatGenerator {
+	return func(ctx *Cat) {
+		C := *ctx
+		c := &Row{Name: name}
+		G := RowGenerators(g)
+		G.RunAll(c)
+		C[name] = *c
+	}
+}
+
+func Enable(name string, g ...RowGenerator) CatGenerator {
+	enabled := false
+	return func(ctx *Cat) {
+		C := *ctx
+		c := &Row{Name: name, Value: &enabled}
+		G := RowGenerators(g)
+		G.RunAll(c)
+		C[name] = *c
+	}
+}
+
+func Enabled(name string, g ...RowGenerator) CatGenerator {
+	enabled := true
+	return func(ctx *Cat) {
+		C := *ctx
+		c := &Row{Name: name, Value: &enabled}
+		G := RowGenerators(g)
+		G.RunAll(c)
+		C[name] = *c
+	}
+}
+
+func Int(name string, g ...RowGenerator) CatGenerator {
+	return func(ctx *Cat) {
+		C := *ctx
+		c := &Row{Name: name}
+		G := RowGenerators(g)
+		G.RunAll(c)
+		C[name] = *c
+	}
+}
+
+func Tag(name string, g ...RowGenerator) CatGenerator {
+	return func(ctx *Cat) {
+		C := *ctx
+		c := &Row{Name: name}
+		G := RowGenerators(g)
+		G.RunAll(c)
+		C[name] = *c
+	}
+}
+
+func Tags(name string, g ...RowGenerator) CatGenerator {
+	return func(ctx *Cat) {
+		C := *ctx
+		c := &Row{Name: name}
+		G := RowGenerators(g)
+		G.RunAll(c)
+		C[name] = *c
+	}
+}
+
 // which is populated by
 
 func Usage(usage string) RowGenerator {
