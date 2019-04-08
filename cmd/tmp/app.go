@@ -1,5 +1,7 @@
 package config
 
+type Cats map[string]Cat
+
 type App struct {
 	Name    string
 	Usage   string
