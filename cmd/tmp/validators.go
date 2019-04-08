@@ -139,6 +139,7 @@ var Valid = struct {
 	},
 	Int: func(r *Row, in interface{}) bool {
 		var s string
+		var ii int
 		isString := false
 		switch I := in.(type) {
 		case string:
@@ -148,18 +149,21 @@ var Valid = struct {
 			s = *I
 			isString = true
 		case int:
+			ii = I
 		case *int:
+			ii = *I
 		default:
 			return false
 		}
 		if isString {
-			_ = s
-		} else {
-
+			n, e := strconv.Atoi(s)
+			if e != nil {
+				return false
+			}
+			ii = n
 		}
-		_ = s
 		if r != nil {
-
+			r.Value = ii
 		}
 		return true
 	},
@@ -171,16 +175,20 @@ var Valid = struct {
 		case *string:
 			s = *I
 		default:
-			return true
+			return false
 		}
-		_ = s
+		s = strings.TrimSpace(s)
+		if len(s) < 1 {
+			return false
+		}
 		if r != nil {
-
+			r.Value = &s
 		}
-		return false
+		return true
 	},
 	Tags: func(r *Row, in interface{}) bool {
 		var s string
+		var ss []string
 		isString := false
 		switch I := in.(type) {
 		case string:
@@ -190,18 +198,28 @@ var Valid = struct {
 			s = *I
 			isString = true
 		case []string:
+			ss = I
 		case *[]string:
+			ss = *I
 		default:
 			return false
 		}
 		if isString {
-			_ = s
-		} else {
-
+			s = strings.TrimSpace(s)
+			sss := strings.Split(s, " ")
+			var ssss []string
+			for _, x := range sss {
+				if len(x) > 0 {
+					ssss = append(ssss, x)
+				}
+			}
+			if len(ssss) < 1 {
+				return false
+			}
+			ss = ssss
 		}
-		_ = s
 		if r != nil {
-
+			r.Value = ss
 		}
 		return true
 	},
