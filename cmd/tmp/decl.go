@@ -29,3 +29,21 @@ func Group(name string, g ...CatGenerator) AppGenerator {
 }
 
 // which is made from
+
+func File(name string, g ...RowGenerator) CatGenerator {
+	return func(ctx *Cat) {
+		C := *ctx
+		c := &Row{Name: name}
+		G := RowGenerators(g)
+		G.RunAll(c)
+		C[name] = *c
+	}
+}
+
+// which is populated by
+
+func Usage(usage string) RowGenerator {
+	return func(ctx *Row) {
+		ctx.Usage = usage
+	}
+}
