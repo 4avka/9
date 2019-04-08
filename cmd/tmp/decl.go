@@ -30,6 +30,8 @@ func Group(name string, g ...CatGenerator) AppGenerator {
 
 // which is made from
 
+// TODO: these need to make and use inits and attach validator/accossors
+
 func File(name string, g ...RowGenerator) CatGenerator {
 	return func(ctx *Cat) {
 		C := *ctx

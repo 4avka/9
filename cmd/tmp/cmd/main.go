@@ -66,9 +66,9 @@ func main() {
 			Enable("disablecheckpoints",
 				Usage("disables checkpoints (danger!)"),
 			),
-			Tag("dbtype"), // 	Default("ffldb"),
-			// 	Usage("set database backend to use for chain"),
-
+			Tag("dbtype", // 	Default("ffldb"),
+				Usage("set database backend to use for chain"),
+			),
 			Enabled("addrindex",
 				Usage("enable address index (disables also transaction index)"),
 			),
