@@ -3,6 +3,7 @@ package config
 import (
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -66,10 +67,11 @@ var Valid = struct {
 			}
 			return true
 		}
-		return true
+		return false
 	},
 	Port: func(r *Row, in interface{}) bool {
 		var s string
+		var ii int
 		isString := false
 		switch I := in.(type) {
 		case string:
@@ -79,23 +81,30 @@ var Valid = struct {
 			s = *I
 			isString = true
 		case int:
+			ii = I
 		case *int:
+			ii = *I
 		default:
 			return false
 		}
 		if isString {
-			_ = s
-		} else {
-
+			n, e := strconv.Atoi(s)
+			if e != nil {
+				return false
+			}
+			ii = n
 		}
-		_ = s
+		if ii < 1025 || ii > 65535 {
+			return false
+		}
 		if r != nil {
-
+			r.Value = &ii
 		}
-		return true
+		return false
 	},
 	Bool: func(r *Row, in interface{}) bool {
 		var s string
+		var b bool
 		isString := false
 		switch I := in.(type) {
 		case string:
@@ -105,20 +114,28 @@ var Valid = struct {
 			s = *I
 			isString = true
 		case bool:
+			b = I
 		case *bool:
+			b = *I
 		default:
-			return true
+			return false
 		}
 		if isString {
-			_ = s
-		} else {
-
+			if strings.ToUpper(s) == "TRUE" {
+				b = true
+				goto boolout
+			}
+			if strings.ToUpper(s) == "FALSE" {
+				b = false
+				goto boolout
+			}
+			return false
 		}
-		_ = s
+	boolout:
 		if r != nil {
-
+			r.Value = &b
 		}
-		return false
+		return true
 	},
 	Int: func(r *Row, in interface{}) bool {
 		var s string
