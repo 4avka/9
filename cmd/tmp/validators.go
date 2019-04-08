@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+	"net"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -10,12 +12,60 @@ import (
 
 var DataDir string
 
+func GenAddr(name string, port int) func(r *Row, in interface{}) bool {
+	return func(r *Row, in interface{}) bool {
+		var s string
+		switch I := in.(type) {
+		case string:
+			s = I
+		case *string:
+			s = *I
+		default:
+			return false
+		}
+		_, _, err := net.SplitHostPort(s)
+		if err != nil {
+			s = net.JoinHostPort(s, fmt.Sprint(port))
+		}
+		if r != nil {
+			r.Value = s
+		}
+		return true
+	}
+}
+func GenAddrs(name string, port int) func(r *Row, in interface{}) bool {
+	return func(r *Row, in interface{}) bool {
+		var s string
+		isString := false
+		switch I := in.(type) {
+		case string:
+			s = I
+			isString = true
+		case *string:
+			s = *I
+			isString = true
+		case []string:
+		case *[]string:
+		default:
+			return false
+		}
+		if isString {
+			_ = s
+		}
+		_ = s
+		if r != nil {
+
+		}
+		return true
+	}
+}
+
 // Valid is a collection of validator functions for the different types used
 // in a configuration. These functions optionally can accept a *Row and with
 // this they assign the validated, parsed value into the Value slot.
 var Valid = struct {
-	File, Dir, Port, Bool, Int, Tag, Tags, Addr, Addrs, Algo, Float,
-	Duration, Net, Level func(*Row, interface{}) bool
+	File, Dir, Port, Bool, Int, Tag, Tags, Algo, Float, Duration, Net,
+	Level func(*Row, interface{}) bool
 }{
 	File: func(r *Row, in interface{}) bool {
 		var s string
@@ -223,48 +273,52 @@ var Valid = struct {
 		}
 		return true
 	},
-	Addr: func(r *Row, in interface{}) bool {
-		var s string
-		switch I := in.(type) {
-		case string:
-			s = I
-		case *string:
-			s = *I
-		default:
-			return false
-		}
-		_ = s
-		if r != nil {
+	// TODO: write generators for these to set default port
+	// Addr: func(r *Row, in interface{}) bool {
+	// 	var s string
+	// 	switch I := in.(type) {
+	// 	case string:
+	// 		s = I
+	// 	case *string:
+	// 		s = *I
+	// 	default:
+	// 		return false
+	// 	}
+	// 	_, _, err := net.SplitHostPort(s)
+	// 	if err != nil {
+	// 		s = net.JoinHostPort(s, fmt.Sprint(defPort))
+	// 	}
+	// 	if r != nil {
+	// 		r.Value = s
+	// 	}
+	// 	return true
+	// },
+	// Addrs: func(r *Row, in interface{}) bool {
+	// 	var s string
+	// 	isString := false
+	// 	switch I := in.(type) {
+	// 	case string:
+	// 		s = I
+	// 		isString = true
+	// 	case *string:
+	// 		s = *I
+	// 		isString = true
+	// 	case []string:
+	// 	case *[]string:
+	// 	default:
+	// 		return false
+	// 	}
+	// 	if isString {
+	// 		_ = s
+	// 	} else {
 
-		}
-		return true
-	},
-	Addrs: func(r *Row, in interface{}) bool {
-		var s string
-		isString := false
-		switch I := in.(type) {
-		case string:
-			s = I
-			isString = true
-		case *string:
-			s = *I
-			isString = true
-		case []string:
-		case *[]string:
-		default:
-			return false
-		}
-		if isString {
-			_ = s
-		} else {
+	// 	}
+	// 	_ = s
+	// 	if r != nil {
 
-		}
-		_ = s
-		if r != nil {
-
-		}
-		return true
-	},
+	// 	}
+	// 	return true
+	// },
 	Algo: func(r *Row, in interface{}) bool {
 		var s string
 		switch I := in.(type) {

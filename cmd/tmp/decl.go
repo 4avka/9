@@ -140,13 +140,27 @@ func Tags(name string, g ...RowGenerator) CatGenerator {
 	}
 }
 
-func Addr(name string, g ...RowGenerator) CatGenerator {
+func Addr(name string, defPort int, g ...RowGenerator) CatGenerator {
 	G := RowGenerators(g)
 	return func(ctx *Cat) {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
-			cc.Validate = Valid.Addr
+			cc.Validate = GenAddr(name, defPort)
+			G.RunAll(cc)
+		}
+		c.Init(c)
+		(*ctx)[name] = *c
+	}
+}
+
+func Addrs(name string, defPort int, g ...RowGenerator) CatGenerator {
+	G := RowGenerators(g)
+	return func(ctx *Cat) {
+		c := &Row{}
+		c.Init = func(cc *Row) {
+			cc.Name = name
+			cc.Validate = GenAddrs(name, defPort)
 			G.RunAll(cc)
 		}
 		c.Init(c)
@@ -204,19 +218,6 @@ func Duration(name string, g ...RowGenerator) CatGenerator {
 		c.Init = func(cc *Row) {
 			cc.Name = name
 			cc.Validate = Valid.Duration
-			G.RunAll(cc)
-		}
-		c.Init(c)
-		(*ctx)[name] = *c
-	}
-}
-func Addrs(name string, g ...RowGenerator) CatGenerator {
-	G := RowGenerators(g)
-	return func(ctx *Cat) {
-		c := &Row{}
-		c.Init = func(cc *Row) {
-			cc.Name = name
-			cc.Validate = Valid.Addrs
 			G.RunAll(cc)
 		}
 		c.Init(c)
