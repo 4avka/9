@@ -112,6 +112,79 @@ func Tags(name string, g ...RowGenerator) CatGenerator {
 	}
 }
 
+func Addr(name string, g ...RowGenerator) CatGenerator {
+	return func(ctx *Cat) {
+		C := *ctx
+		c := &Row{Name: name}
+		G := RowGenerators(g)
+		G.RunAll(c)
+		C[name] = *c
+	}
+}
+
+func Level(g ...RowGenerator) CatGenerator {
+	const lvl = "level"
+	return func(ctx *Cat) {
+		C := *ctx
+		c := &Row{Name: lvl}
+		G := RowGenerators(g)
+		G.RunAll(c)
+		C[lvl] = *c
+	}
+}
+
+func Algo(name string, g ...RowGenerator) CatGenerator {
+	const lvl = "level"
+	return func(ctx *Cat) {
+		C := *ctx
+		c := &Row{Name: lvl}
+		G := RowGenerators(g)
+		G.RunAll(c)
+		C[lvl] = *c
+	}
+}
+
+func Float(name string, g ...RowGenerator) CatGenerator {
+	const lvl = "level"
+	return func(ctx *Cat) {
+		C := *ctx
+		c := &Row{Name: lvl}
+		G := RowGenerators(g)
+		G.RunAll(c)
+		C[lvl] = *c
+	}
+}
+
+func Duration(name string, g ...RowGenerator) CatGenerator {
+	const lvl = "level"
+	return func(ctx *Cat) {
+		C := *ctx
+		c := &Row{Name: lvl}
+		G := RowGenerators(g)
+		G.RunAll(c)
+		C[lvl] = *c
+	}
+}
+func Addrs(name string, g ...RowGenerator) CatGenerator {
+	return func(ctx *Cat) {
+		C := *ctx
+		c := &Row{Name: name}
+		G := RowGenerators(g)
+		G.RunAll(c)
+		C[name] = *c
+	}
+}
+
+func Net(name string, g ...RowGenerator) CatGenerator {
+	return func(ctx *Cat) {
+		C := *ctx
+		c := &Row{Name: name}
+		G := RowGenerators(g)
+		G.RunAll(c)
+		C[name] = *c
+	}
+}
+
 // which is populated by
 
 func Usage(usage string) RowGenerator {
