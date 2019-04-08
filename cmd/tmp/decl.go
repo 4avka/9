@@ -137,7 +137,7 @@ func Algo(name string, g ...RowGenerator) CatGenerator {
 	const lvl = "level"
 	return func(ctx *Cat) {
 		C := *ctx
-		c := &Row{Name: lvl}
+		c := &Row{Name: name}
 		G := RowGenerators(g)
 		G.RunAll(c)
 		C[lvl] = *c
@@ -148,7 +148,7 @@ func Float(name string, g ...RowGenerator) CatGenerator {
 	const lvl = "level"
 	return func(ctx *Cat) {
 		C := *ctx
-		c := &Row{Name: lvl}
+		c := &Row{Name: name}
 		G := RowGenerators(g)
 		G.RunAll(c)
 		C[lvl] = *c
@@ -159,7 +159,7 @@ func Duration(name string, g ...RowGenerator) CatGenerator {
 	const lvl = "level"
 	return func(ctx *Cat) {
 		C := *ctx
-		c := &Row{Name: lvl}
+		c := &Row{Name: name}
 		G := RowGenerators(g)
 		G.RunAll(c)
 		C[lvl] = *c
