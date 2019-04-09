@@ -10,9 +10,11 @@ import (
 	"time"
 
 	"git.parallelcoin.io/dev/9/pkg/chain/fork"
+	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
 
 var DataDir string
+var Networks = []string{"mainnet", "testnet", "simnet", "regtestnet"}
 
 // GenAddr returns a validator with a set default port assumed if one is not present
 func GenAddr(name string, port int) func(r *Row, in interface{}) bool {
@@ -392,6 +394,7 @@ var Valid = struct {
 	},
 	Duration: func(r *Row, in interface{}) bool {
 		var s string
+		var t *time.Duration
 		isString := false
 		switch I := in.(type) {
 		case string:
@@ -401,18 +404,21 @@ var Valid = struct {
 			s = *I
 			isString = true
 		case time.Duration:
+			t = &I
 		case *time.Duration:
+			t = I
 		default:
 			return false
 		}
 		if isString {
-			_ = s
-		} else {
-
+			dd, e := time.ParseDuration(s)
+			if e != nil {
+				return false
+			}
+			t = &dd
 		}
-		_ = s
 		if r != nil {
-
+			r.Value = t
 		}
 		return true
 	},
@@ -426,11 +432,17 @@ var Valid = struct {
 		default:
 			return false
 		}
-		_ = s
-		if r != nil {
-
+		found := false
+		for _, x := range Networks {
+			if x == s {
+				found = true
+			}
 		}
-		return true
+		_ = s
+		if r != nil && found {
+			r.Value = s
+		}
+		return found
 	},
 	Level: func(r *Row, in interface{}) bool {
 		var s string
@@ -442,10 +454,15 @@ var Valid = struct {
 		default:
 			return false
 		}
-		_ = s
-		if r != nil {
-
+		found := false
+		for x := range cl.Levels {
+			if x == s {
+				found = true
+			}
 		}
-		return true
+		if r != nil && found {
+			r.Value = &s
+		}
+		return found
 	},
 }
