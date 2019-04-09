@@ -241,8 +241,66 @@ func Net(name string, g ...RowGenerator) CatGenerator {
 
 // which is populated by
 
+// Usage populates the usage field for information about a config item
 func Usage(usage string) RowGenerator {
 	return func(ctx *Row) {
 		ctx.Usage = usage
+	}
+}
+
+// Default sets the default value for a config item
+func Default(in interface{}) RowGenerator {
+	return func(ctx *Row) {
+		ctx.Validate(ctx, in)
+	}
+}
+
+// Min attaches to the validator a test that enforces a minimum
+func Min(min int) RowGenerator {
+	return func(ctx *Row) {
+		v := ctx.Validate
+		ctx.Validate = func(r *Row, in interface{}) bool {
+			n := min
+			switch I := in.(type) {
+			case int:
+				n = I
+			case *int:
+				n = *I
+			}
+			if n < min {
+				in = min
+			}
+			// none of the above will affect if this wasn't an int
+			return v(r, in)
+		}
+	}
+}
+
+// Max attaches to the validator a test that enforces a maximum
+func Max(max int) RowGenerator {
+	return func(ctx *Row) {
+		v := ctx.Validate
+		ctx.Validate = func(r *Row, in interface{}) bool {
+			n := max
+			switch I := in.(type) {
+			case int:
+				n = I
+			case *int:
+				n = *I
+			}
+			if n > max {
+				in = max
+			}
+			// none of the above will affect if this wasn't an int
+			return v(r, in)
+		}
+	}
+}
+
+// RandomsString generates a random number and converts to base32 for
+// a default random password of some number of characters
+func RandomString(in int) RowGenerator {
+	return func(ctx *Row) {
+
 	}
 }

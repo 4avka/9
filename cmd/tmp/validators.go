@@ -12,6 +12,7 @@ import (
 
 var DataDir string
 
+// GenAddr returns a validator with a set default port assumed if one is not present
 func GenAddr(name string, port int) func(r *Row, in interface{}) bool {
 	return func(r *Row, in interface{}) bool {
 		var s string
@@ -33,6 +34,8 @@ func GenAddr(name string, port int) func(r *Row, in interface{}) bool {
 		return true
 	}
 }
+
+// GenAddrs returns a validator with a set default port assumed if one is not present
 func GenAddrs(name string, port int) func(r *Row, in interface{}) bool {
 	return func(r *Row, in interface{}) bool {
 		var s string
