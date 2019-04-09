@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"git.parallelcoin.io/dev/9/pkg/chain/fork"
 )
 
 var DataDir string
@@ -61,6 +63,15 @@ func GenAddrs(name string, port int) func(r *Row, in interface{}) bool {
 		}
 		return true
 	}
+}
+
+func getAlgoOptions() (options []string) {
+	var modernd = "random"
+	for _, x := range fork.P9AlgoVers {
+		options = append(options, x)
+	}
+	options = append(options, modernd)
+	return
 }
 
 // Valid is a collection of validator functions for the different types used
@@ -332,14 +343,25 @@ var Valid = struct {
 		default:
 			return false
 		}
-		_ = s
+		var o *string
+		options := getAlgoOptions()
+		for _, x := range options {
+			if s == x {
+				o = &s
+			}
+		}
+		if o == nil {
+			rnd := "random"
+			o = &rnd
+		}
 		if r != nil {
-
+			r.Value = o
 		}
 		return true
 	},
 	Float: func(r *Row, in interface{}) bool {
 		var s string
+		var f float64
 		isString := false
 		switch I := in.(type) {
 		case string:
@@ -349,18 +371,22 @@ var Valid = struct {
 			s = *I
 			isString = true
 		case float64:
+			f = I
 		case *float64:
+			f = *I
 		default:
 			return false
 		}
 		if isString {
-			_ = s
-		} else {
-
+			ff, e := strconv.ParseFloat(s, 64)
+			if e != nil {
+				return false
+			}
+			f = ff
 		}
 		_ = s
 		if r != nil {
-
+			r.Value = f
 		}
 		return true
 	},

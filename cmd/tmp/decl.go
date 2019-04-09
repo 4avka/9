@@ -1,5 +1,10 @@
 package config
 
+import (
+	"math/rand"
+	"time"
+)
+
 func NewApp(name string, g ...AppGenerator) (out *App) {
 	gen := AppGenerators(g)
 	out = &App{
@@ -299,8 +304,32 @@ func Max(max int) RowGenerator {
 
 // RandomsString generates a random number and converts to base32 for
 // a default random password of some number of characters
-func RandomString(in int) RowGenerator {
+func RandomString(n int) RowGenerator {
+	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+		"0123456789"
+	const (
+		letterIdxBits = 6                    // 6 bits to represent a letter index
+		letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
+		letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
+	)
+	var src = rand.NewSource(time.Now().UnixNano())
 	return func(ctx *Row) {
+		b := make([]byte, n)
+		l := len(letterBytes)
+		// A src.Int63() generates 63 random bits, enough for letterIdxMax characters!
+		for i, cache, remain := n-1, src.Int63(), letterIdxMax; i >= 0; {
+			if remain == 0 {
+				cache, remain = src.Int63(), letterIdxMax
+			}
+			if idx := int(cache & letterIdxMask); idx < l {
+				b[i] = letterBytes[idx]
+				i--
+			}
+			cache >>= letterIdxBits
+			remain--
+		}
 
+		sb := string(b)
+		ctx.Value = &sb
 	}
 }
