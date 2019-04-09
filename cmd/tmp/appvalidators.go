@@ -34,7 +34,11 @@ func GenAddr(name string, port int) func(r *Row, in interface{}) bool {
 			*s = net.JoinHostPort(*s, fmt.Sprint(port))
 		}
 		if r != nil {
-			r.Value = s
+			if r.Value != nil {
+				*r.Value.(*string) = *s
+			} else {
+				r.Value = s
+			}
 		}
 		return true
 	}
@@ -73,7 +77,11 @@ func GenAddrs(name string, port int) func(r *Row, in interface{}) bool {
 		}
 		if ss != nil {
 			if r != nil {
-				r.Value = ss
+				if r.Value != nil {
+					*r.Value.(*[]string) = *ss
+				} else {
+					r.Value = ss
+				}
 			}
 			return true
 		}
@@ -144,7 +152,11 @@ var Valid = struct {
 				ss = ""
 			}
 			if r != nil {
-				r.Value = &ss
+				if r.Value != nil {
+					*r.Value.(*string) = ss
+				} else {
+					r.Value = &ss
+				}
 			}
 			return true
 		}
@@ -179,7 +191,11 @@ var Valid = struct {
 			return false
 		}
 		if r != nil {
-			r.Value = &ii
+			if r.Value != nil {
+				*r.Value.(*int) = ii
+			} else {
+				r.Value = &ii
+			}
 		}
 		return false
 	},
@@ -214,7 +230,11 @@ var Valid = struct {
 		}
 	boolout:
 		if r != nil {
-			r.Value = &b
+			if r.Value != nil {
+				*r.Value.(*bool) = b
+			} else {
+				r.Value = &b
+			}
 		}
 		return true
 	},
@@ -244,7 +264,11 @@ var Valid = struct {
 			ii = n
 		}
 		if r != nil {
-			r.Value = &ii
+			if r.Value != nil {
+				*r.Value.(*int) = ii
+			} else {
+				r.Value = &ii
+			}
 		}
 		return true
 	},
@@ -263,7 +287,11 @@ var Valid = struct {
 			return false
 		}
 		if r != nil {
-			r.Value = &s
+			if r.Value != nil {
+				*r.Value.(*string) = s
+			} else {
+				r.Value = &s
+			}
 		}
 		return true
 	},
@@ -300,7 +328,11 @@ var Valid = struct {
 			ss = ssss
 		}
 		if r != nil {
-			r.Value = ss
+			if r.Value != nil {
+				*r.Value.(*[]string) = ss
+			} else {
+				r.Value = ss
+			}
 		}
 		return true
 	},
@@ -326,7 +358,11 @@ var Valid = struct {
 			o = &rnd
 		}
 		if r != nil {
-			r.Value = o
+			if r.Value != nil {
+				*r.Value.(*string) = *o
+			} else {
+				r.Value = o
+			}
 		}
 		return true
 	},
@@ -357,7 +393,11 @@ var Valid = struct {
 		}
 		_ = s
 		if r != nil {
-			r.Value = f
+			if r.Value != nil {
+				*r.Value.(*float64) = *f
+			} else {
+				r.Value = f
+			}
 		}
 		return true
 	},
@@ -387,7 +427,11 @@ var Valid = struct {
 			t = &dd
 		}
 		if r != nil {
-			r.Value = t
+			if r.Value != nil {
+				*r.Value.(*time.Duration) = *t
+			} else {
+				r.Value = t
+			}
 		}
 		return true
 	},
@@ -408,7 +452,11 @@ var Valid = struct {
 			}
 		}
 		if r != nil && found {
-			r.Value = s
+			if r.Value != nil {
+				*r.Value.(*string) = *s
+			} else {
+				r.Value = s
+			}
 		}
 		return found
 	},
@@ -429,7 +477,11 @@ var Valid = struct {
 			}
 		}
 		if r != nil && found {
-			r.Value = &s
+			if r.Value != nil {
+				*r.Value.(*string) = s
+			} else {
+				r.Value = &s
+			}
 		}
 		return found
 	},
