@@ -12,7 +12,6 @@ func parseCLI(args []string) (cmd *Command, tokens Tokens, cmds Commands) {
 	log <- cl.Debug{"args", args}
 	// collect set of items in commandline
 	if len(args) < 2 {
-		log <- cl.Debug{"no args given, printing help"}
 		fmt.Print("No args given, printing help:\n\n")
 		args = append(args, "h")
 	}

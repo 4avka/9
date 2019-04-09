@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 
+	"git.parallelcoin.io/dev/9/cmd/node"
 	"git.parallelcoin.io/dev/9/cmd/walletmain"
 
 	"git.parallelcoin.io/dev/9/cmd/ctl"
@@ -134,7 +135,27 @@ func Ctl(args []string, tokens Tokens, cmds, all Commands) int {
 
 func Node(args []string, tokens Tokens, cmds, all Commands) int {
 	cl.Register.SetAllLevels(*Config.LogLevel)
-	return runNode(args, tokens, cmds, all)
+	setAppDataDir("node")
+	if validateWhitelists() != 0 ||
+		validateProxyListeners() != 0 ||
+		validatePasswords() != 0 ||
+		validateRPCCredentials() != 0 ||
+		validateBlockLimits() != 0 ||
+		validateUAComments() != 0 ||
+		validateMiner() != 0 ||
+		validateCheckpoints() != 0 ||
+		validateAddresses() != 0 ||
+		validateDialers() != 0 {
+		return 1
+	}
+	// run the node!
+	node.StateCfg = stateconfig
+	node.Cfg = Config
+	node.ActiveNetParams = activenetparams
+	if node.Main(nil) != nil {
+		return 1
+	}
+	return 0
 }
 
 func Wallet(args []string, tokens Tokens, cmds, all Commands) int {
