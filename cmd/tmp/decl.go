@@ -1,7 +1,9 @@
 package config
 
 import (
+	"fmt"
 	"math/rand"
+	"reflect"
 	"time"
 )
 
@@ -255,8 +257,40 @@ func Usage(usage string) RowGenerator {
 
 // Default sets the default value for a config item
 func Default(in interface{}) RowGenerator {
+	var ii interface{}
 	return func(ctx *Row) {
-		ctx.Validate(ctx, in)
+		switch I := in.(type) {
+		case string:
+			ii = &I
+		case []string:
+			ii = &I
+		case int:
+			ii = &I
+		case float64:
+			ii = &I
+		case bool:
+			ii = &I
+		case time.Duration:
+			ii = &I
+		case *string:
+			ii = I
+		case *[]string:
+			ii = I
+		case *int:
+			ii = I
+		case *float64:
+			ii = I
+		case *bool:
+			ii = I
+		case *time.Duration:
+			ii = I
+		default:
+			fmt.Println(ctx.Name, reflect.TypeOf(in))
+			return
+		}
+		if !ctx.Validate(ctx, ii) {
+			fmt.Println(ctx.Name, "fail validate", reflect.TypeOf(ii), ii)
+		}
 	}
 }
 
@@ -305,9 +339,8 @@ func Max(max int) RowGenerator {
 // RandomsString generates a random number and converts to base32 for
 // a default random password of some number of characters
 func RandomString(n int) RowGenerator {
-	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-		"0123456789"
 	const (
+		letterBytes   = "abcdefghijklmnopqrstuvwxyz234567"
 		letterIdxBits = 6                    // 6 bits to represent a letter index
 		letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
 		letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits

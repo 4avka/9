@@ -4,7 +4,6 @@ type Cats map[string]Cat
 
 type App struct {
 	Name    string
-	Usage   string
 	Version func() string
 	Cats    Cats
 }

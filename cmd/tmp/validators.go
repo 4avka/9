@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"strconv"
 	"strings"
@@ -19,18 +20,18 @@ var Networks = []string{"mainnet", "testnet", "simnet", "regtestnet"}
 // GenAddr returns a validator with a set default port assumed if one is not present
 func GenAddr(name string, port int) func(r *Row, in interface{}) bool {
 	return func(r *Row, in interface{}) bool {
-		var s string
+		var s *string
 		switch I := in.(type) {
 		case string:
-			s = I
+			s = &I
 		case *string:
-			s = *I
+			s = I
 		default:
 			return false
 		}
-		_, _, err := net.SplitHostPort(s)
+		_, _, err := net.SplitHostPort(*s)
 		if err != nil {
-			s = net.JoinHostPort(s, fmt.Sprint(port))
+			*s = net.JoinHostPort(*s, fmt.Sprint(port))
 		}
 		if r != nil {
 			r.Value = s
@@ -43,6 +44,7 @@ func GenAddr(name string, port int) func(r *Row, in interface{}) bool {
 func GenAddrs(name string, port int) func(r *Row, in interface{}) bool {
 	return func(r *Row, in interface{}) bool {
 		var s string
+		ss := &[]string{}
 		isString := false
 		switch I := in.(type) {
 		case string:
@@ -52,18 +54,30 @@ func GenAddrs(name string, port int) func(r *Row, in interface{}) bool {
 			s = *I
 			isString = true
 		case []string:
+			ss = &I
 		case *[]string:
+			ss = I
 		default:
 			return false
 		}
 		if isString {
-			_ = s
+			sss := strings.Split(s, " ")
+			if len(sss) < 1 {
+				return false
+			}
+			for _, x := range sss {
+				if len(x) > 0 {
+					*ss = append(*ss, x)
+				}
+			}
 		}
-		_ = s
-		if r != nil {
-
+		if ss != nil {
+			if r != nil {
+				r.Value = ss
+			}
+			return true
 		}
-		return true
+		return false
 	}
 }
 
@@ -110,6 +124,7 @@ var Valid = struct {
 		return false
 	},
 	Dir: func(r *Row, in interface{}) bool {
+		fmt.Println(reflect.TypeOf(in))
 		var s string
 		switch I := in.(type) {
 		case string:
@@ -229,7 +244,7 @@ var Valid = struct {
 			ii = n
 		}
 		if r != nil {
-			r.Value = ii
+			r.Value = &ii
 		}
 		return true
 	},
@@ -363,7 +378,7 @@ var Valid = struct {
 	},
 	Float: func(r *Row, in interface{}) bool {
 		var s string
-		var f float64
+		var f *float64
 		isString := false
 		switch I := in.(type) {
 		case string:
@@ -373,9 +388,9 @@ var Valid = struct {
 			s = *I
 			isString = true
 		case float64:
-			f = I
+			f = &I
 		case *float64:
-			f = *I
+			f = I
 		default:
 			return false
 		}
@@ -384,7 +399,7 @@ var Valid = struct {
 			if e != nil {
 				return false
 			}
-			f = ff
+			f = &ff
 		}
 		_ = s
 		if r != nil {
@@ -423,22 +438,21 @@ var Valid = struct {
 		return true
 	},
 	Net: func(r *Row, in interface{}) bool {
-		var s string
+		var s *string
 		switch I := in.(type) {
 		case string:
-			s = I
+			s = &I
 		case *string:
-			s = *I
+			s = I
 		default:
 			return false
 		}
 		found := false
 		for _, x := range Networks {
-			if x == s {
+			if x == *s {
 				found = true
 			}
 		}
-		_ = s
 		if r != nil && found {
 			r.Value = s
 		}
