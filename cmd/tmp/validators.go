@@ -304,52 +304,6 @@ var Valid = struct {
 		}
 		return true
 	},
-	// TODO: write generators for these to set default port
-	// Addr: func(r *Row, in interface{}) bool {
-	// 	var s string
-	// 	switch I := in.(type) {
-	// 	case string:
-	// 		s = I
-	// 	case *string:
-	// 		s = *I
-	// 	default:
-	// 		return false
-	// 	}
-	// 	_, _, err := net.SplitHostPort(s)
-	// 	if err != nil {
-	// 		s = net.JoinHostPort(s, fmt.Sprint(defPort))
-	// 	}
-	// 	if r != nil {
-	// 		r.Value = s
-	// 	}
-	// 	return true
-	// },
-	// Addrs: func(r *Row, in interface{}) bool {
-	// 	var s string
-	// 	isString := false
-	// 	switch I := in.(type) {
-	// 	case string:
-	// 		s = I
-	// 		isString = true
-	// 	case *string:
-	// 		s = *I
-	// 		isString = true
-	// 	case []string:
-	// 	case *[]string:
-	// 	default:
-	// 		return false
-	// 	}
-	// 	if isString {
-	// 		_ = s
-	// 	} else {
-
-	// 	}
-	// 	_ = s
-	// 	if r != nil {
-
-	// 	}
-	// 	return true
-	// },
 	Algo: func(r *Row, in interface{}) bool {
 		var s string
 		switch I := in.(type) {

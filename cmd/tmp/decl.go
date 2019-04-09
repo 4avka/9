@@ -37,8 +37,6 @@ func Group(name string, g ...CatGenerator) AppGenerator {
 
 // which is made from
 
-// TODO: these need to attach validator/accessors
-
 func File(name string, g ...RowGenerator) CatGenerator {
 	G := RowGenerators(g)
 	return func(ctx *Cat) {
@@ -46,6 +44,12 @@ func File(name string, g ...RowGenerator) CatGenerator {
 		c.Init = func(cc *Row) {
 			cc.Name = name
 			cc.Validate = Valid.File
+			cc.Get = func() interface{} {
+				return cc.Value
+			}
+			cc.Put = func(in interface{}) bool {
+				return cc.Validate(cc, in)
+			}
 			G.RunAll(cc)
 		}
 		c.Init(c)
@@ -60,6 +64,12 @@ func Dir(name string, g ...RowGenerator) CatGenerator {
 		c.Init = func(cc *Row) {
 			cc.Name = name
 			cc.Validate = Valid.Dir
+			cc.Get = func() interface{} {
+				return cc.Value
+			}
+			cc.Put = func(in interface{}) bool {
+				return cc.Validate(cc, in)
+			}
 			G.RunAll(cc)
 		}
 		c.Init(c)
@@ -74,6 +84,12 @@ func Port(name string, g ...RowGenerator) CatGenerator {
 		c.Init = func(cc *Row) {
 			cc.Name = name
 			cc.Validate = Valid.Port
+			cc.Get = func() interface{} {
+				return cc.Value
+			}
+			cc.Put = func(in interface{}) bool {
+				return cc.Validate(cc, in)
+			}
 			G.RunAll(cc)
 		}
 		c.Init(c)
@@ -86,8 +102,14 @@ func boolRow(name string, enabled bool, g RowGenerators) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Get = func() interface{} {
+				return cc.Value
+			}
 			cc.Validate = Valid.Bool
 			cc.Value = &enabled
+			cc.Put = func(in interface{}) bool {
+				return cc.Validate(cc, in)
+			}
 			g.RunAll(cc)
 		}
 		c.Init(c)
@@ -111,7 +133,13 @@ func Int(name string, g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Get = func() interface{} {
+				return cc.Value
+			}
 			cc.Validate = Valid.Int
+			cc.Put = func(in interface{}) bool {
+				return cc.Validate(cc, in)
+			}
 			G.RunAll(cc)
 		}
 		c.Init(c)
@@ -125,7 +153,13 @@ func Tag(name string, g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Get = func() interface{} {
+				return cc.Value
+			}
 			cc.Validate = Valid.Tag
+			cc.Put = func(in interface{}) bool {
+				return cc.Validate(cc, in)
+			}
 			G.RunAll(cc)
 		}
 		c.Init(c)
@@ -139,7 +173,13 @@ func Tags(name string, g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Get = func() interface{} {
+				return cc.Value
+			}
 			cc.Validate = Valid.Tags
+			cc.Put = func(in interface{}) bool {
+				return cc.Validate(cc, in)
+			}
 			G.RunAll(cc)
 		}
 		c.Init(c)
@@ -153,7 +193,13 @@ func Addr(name string, defPort int, g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Get = func() interface{} {
+				return cc.Value
+			}
 			cc.Validate = GenAddr(name, defPort)
+			cc.Put = func(in interface{}) bool {
+				return cc.Validate(cc, in)
+			}
 			G.RunAll(cc)
 		}
 		c.Init(c)
@@ -167,7 +213,13 @@ func Addrs(name string, defPort int, g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Get = func() interface{} {
+				return cc.Value
+			}
 			cc.Validate = GenAddrs(name, defPort)
+			cc.Put = func(in interface{}) bool {
+				return cc.Validate(cc, in)
+			}
 			G.RunAll(cc)
 		}
 		c.Init(c)
@@ -182,7 +234,13 @@ func Level(g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = lvl
+			cc.Get = func() interface{} {
+				return cc.Value
+			}
 			cc.Validate = Valid.Level
+			cc.Put = func(in interface{}) bool {
+				return cc.Validate(cc, in)
+			}
 			G.RunAll(cc)
 		}
 		c.Init(c)
@@ -196,7 +254,13 @@ func Algo(name string, g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Get = func() interface{} {
+				return cc.Value
+			}
 			cc.Validate = Valid.Algo
+			cc.Put = func(in interface{}) bool {
+				return cc.Validate(cc, in)
+			}
 			G.RunAll(cc)
 		}
 		c.Init(c)
@@ -210,7 +274,13 @@ func Float(name string, g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Get = func() interface{} {
+				return cc.Value
+			}
 			cc.Validate = Valid.Float
+			cc.Put = func(in interface{}) bool {
+				return cc.Validate(cc, in)
+			}
 			G.RunAll(cc)
 		}
 		c.Init(c)
@@ -224,7 +294,13 @@ func Duration(name string, g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Get = func() interface{} {
+				return cc.Value
+			}
 			cc.Validate = Valid.Duration
+			cc.Put = func(in interface{}) bool {
+				return cc.Validate(cc, in)
+			}
 			G.RunAll(cc)
 		}
 		c.Init(c)
@@ -238,7 +314,13 @@ func Net(name string, g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Get = func() interface{} {
+				return cc.Value
+			}
 			cc.Validate = Valid.Net
+			cc.Put = func(in interface{}) bool {
+				return cc.Validate(cc, in)
+			}
 			G.RunAll(cc)
 		}
 		c.Init(c)

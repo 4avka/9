@@ -229,7 +229,6 @@ func main() {
 		),
 		Group("proxy",
 			Addr("address", 9050,
-				// Default("127.0.0.1:9050"),
 				Usage("address of socks proxy"),
 			),
 			Enable("isolation",
