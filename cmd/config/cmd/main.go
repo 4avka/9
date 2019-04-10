@@ -23,8 +23,7 @@ func main() {
 		Cmd("conf",
 			Pattern("(C|conf)"),
 			Short("run interactive configuration CLI"),
-			Detail(`	<datadir> sets the data directory to read and write to 
-	(must start with '.', '\', '/' or '~')`),
+			Detail(`	<datadir> sets the data directory to read and write to`),
 			Opts("datadir"),
 			Precs("help"),
 			Handler(func(args []string, tokens Tokens, cmds, all Commands) int { return 0 }),
@@ -42,7 +41,6 @@ func main() {
 			Pattern("(cp|copy)"),
 			Short("create a set of testnet configurations based on a datadir"),
 			Detail(`	<datadir> is the base to work from
-		S(must start with '.', '\', '/' or '~')
 	<word> is a basename 
 	<integer> is a number for how many to create`),
 			Opts("datadir", "word", "integer"),
@@ -53,7 +51,6 @@ func main() {
 			Pattern("(l|list|listcommands)"),
 			Short("lists commands available at the RPC endpoint"),
 			Detail(`	<datadir> is the enabled data directory
-		(must start with '.', '\', '/' or '~')
 	<ctl> must be present to invoke list
 	<wallet> indicates to connect to the wallet RPC
 	<node> (or wallet not specified) connect to full node RPC`),
@@ -65,7 +62,6 @@ func main() {
 			Pattern("(c|ctl)"),
 			Short("sends rpc requests and prints the results"),
 			Detail(`	<datadir> sets the data directory to read configurations from
-		(must start with '.', '\', '/' or '~')
 	<node> indicates we are connecting to a full node RPC (overrides wallet and
 	is default)	<wallet> indicates we are connecting to a wallet RPC
 	<word>, <float> and <integer> just cover the items that follow in RPC
@@ -77,8 +73,7 @@ func main() {
 		Cmd("node",
 			Pattern("(n|node)"),
 			Short("runs a full node"),
-			Detail(`	<datadir> sets the data directory to read configuration and store data
-	(must start with '.', '\', '/' or '~')`),
+			Detail(`	<datadir> sets the data directory to read configuration and store data`),
 			Opts("datadir"),
 			Precs("help", "ctl"),
 			Handler(func(args []string, tokens Tokens, cmds, all Commands) int { return 0 }),
@@ -87,7 +82,6 @@ func main() {
 			Pattern("(w|wallet)"),
 			Short("runs a wallet server"),
 			Detail(`	<datadir> sets the data directory to read configuration and store data
-		(must start with '.', '\', '/' or '~')
 	<create> runs the wallet create prompt`),
 			Opts("datadir", "create"),
 			Precs("help", "ctl"),
@@ -97,7 +91,6 @@ func main() {
 			Pattern("(s|shell)"),
 			Short("runs a combined node/wallet server"),
 			Detail(`	<datadir> sets the data directory to read configuration and store data
-		(must start with '.', '\', '/' or '~')
 	<create> runs the wallet create prompt`),
 			Opts("datadir", "create"),
 			Precs("help"),
@@ -115,8 +108,7 @@ func main() {
 		Cmd("create",
 			Pattern("(cr|create)"),
 			Short("runs the create new wallet prompt"),
-			Detail(`	<datadir> sets the data directory where the wallet will be stored
-	(must start with '.', '\', '/' or '~')`),
+			Detail(`	<datadir> sets the data directory where the wallet will be stored`),
 			Opts("datadir"),
 			Precs("wallet", "shell", "help"),
 			Handler(func(args []string, tokens Tokens, cmds, all Commands) int { return 0 }),
@@ -124,8 +116,7 @@ func main() {
 		Cmd("log",
 			Pattern("(L|log)"),
 			Short("write to log in <datadir> file instead of printing to stderr"),
-			Detail(`	<datadir> sets the data directory where the wallet will be stored
-			(must start with '.', '\', '/' or '~')`),
+			Detail(`	<datadir> sets the data directory where the wallet will be stored`),
 			Opts(),
 			Precs("help", "node", "wallet", "shell", "test"),
 			Handler(func(args []string, tokens Tokens, cmds, all Commands) int { return 0 }),
@@ -133,8 +124,7 @@ func main() {
 		Cmd("datadir",
 			Pattern("(([A-Za-z][:])|[\\~/.]+.*)"),
 			Short("directory to look for configuration or write logs etc"),
-			Detail(`	<datadir> sets the data directory where the wallet will be stored
-			(must start with '.', '\', '/' or '~')`),
+			Detail(`	<datadir> sets the data directory where the wallet will be stored`),
 			Opts(),
 			Precs("help"),
 			Handler(func(args []string, tokens Tokens, cmds, all Commands) int { return 0 }),
