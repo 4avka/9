@@ -40,7 +40,7 @@ func ConfMain(app *config.App) string {
 		options := []string{
 			"run: select a server to run",
 		}
-		for i := range app.Cats {
+		for _, i := range app.Cats.GetSortedKeys() {
 			options = append(options, "configure: "+i)
 		}
 		options = append(options, "exit")
@@ -49,22 +49,21 @@ func ConfMain(app *config.App) string {
 			Options:  options,
 			PageSize: 9,
 		}
-		err := survey.AskOne(prompt, &name, nil)
-		if err != nil {
+		if err := survey.AskOne(prompt, &name, nil); err != nil {
 			fmt.Println("ERROR:", cl.Ine(), err)
 		}
-		ss := strings.Split(name, ":")[0]
-		fmt.Println("ss", ss)
+		ss := strings.Split(name, ":")
+		fmt.Print("\n", ss[0], "\n\n")
 		switch {
 		case name == "exit":
 			fmt.Println("exiting")
 			return name
-		case ss == "run":
+		case ss[0] == "run":
 			fmt.Println("running a server")
 			return ConfRun(app)
-		case ss == "configure":
+		case ss[0] == "configure":
 			fmt.Println("configuring a subsection")
-			ConfConf(app, name)
+			ConfConf(app, ss[1])
 		}
 	}
 	return ""
@@ -73,14 +72,14 @@ func ConfMain(app *config.App) string {
 func ConfRun(app *config.App) string {
 	prompt := &survey.Select{
 		Message: "select server to run:",
-		Options: []string{"node", "wallet", "shell", BACK},
+		Options: []string{"node", "wallet", "shell", "back"},
 	}
 	var name string
 	err := survey.AskOne(prompt, &name, nil)
 	if err != nil {
 		return err.Error()
 	}
-	if name == BACK {
+	if name == "back" {
 		return ""
 	}
 	return name

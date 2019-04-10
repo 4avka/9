@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"regexp"
+	"sort"
 	"time"
 
 	"git.parallelcoin.io/dev/9/cmd/nine"
@@ -203,4 +204,48 @@ func (r *CommandGenerators) RunAll() *Command {
 		x(c)
 	}
 	return c
+}
+
+// GetSortedKeys returns the keys of a map in alphabetical order
+func (r *CatJSON) GetSortedKeys() (out []string) {
+	for i := range *r {
+		out = append(out, i)
+	}
+	sort.Strings(out)
+	return
+}
+func (r *CatsJSON) GetSortedKeys() (out []string) {
+	for i := range *r {
+		out = append(out, i)
+	}
+	sort.Strings(out)
+	return
+}
+func (r *Cats) GetSortedKeys() (out []string) {
+	for i := range *r {
+		out = append(out, i)
+	}
+	sort.Strings(out)
+	return
+}
+func (r *Cat) GetSortedKeys() (out []string) {
+	for i := range *r {
+		out = append(out, i)
+	}
+	sort.Strings(out)
+	return
+}
+func (r *Tokens) GetSortedKeys() (out []string) {
+	for i := range *r {
+		out = append(out, i)
+	}
+	sort.Strings(out)
+	return
+}
+func (r *Commands) GetSortedKeys() (out []string) {
+	for i := range *r {
+		out = append(out, i)
+	}
+	sort.Strings(out)
+	return
 }
