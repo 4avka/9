@@ -95,7 +95,7 @@ func Precs(precs ...string) CommandGenerator {
 	}
 }
 
-func Handler(hnd func(args []string, tokens Tokens, cmds, all Commands) int) CommandGenerator {
+func Handler(hnd func(args []string, tokens Tokens, app *App) int) CommandGenerator {
 	return func(ctx *Command) {
 		ctx.Handler = hnd
 	}

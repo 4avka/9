@@ -8,12 +8,20 @@ import (
 	"strings"
 	"time"
 
+	"git.parallelcoin.io/dev/9/cmd/nine"
+
 	"git.parallelcoin.io/dev/9/pkg/chain/fork"
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
 
 var DataDir string
 var Networks = []string{"mainnet", "testnet", "simnet", "regtestnet"}
+var NetParams = map[string]*nine.Params{
+	"mainnet":    &nine.MainNetParams,
+	"testnet":    &nine.TestNet3Params,
+	"simnet":     &nine.SimNetParams,
+	"regtestnet": &nine.RegressionNetParams,
+}
 
 // GenAddr returns a validator with a set default port assumed if one is not present
 func GenAddr(name string, port int) func(r *Row, in interface{}) bool {
@@ -446,6 +454,7 @@ var Valid = struct {
 		for _, x := range Networks {
 			if x == *s {
 				found = true
+				*nine.ActiveNetParams = *NetParams[x]
 			}
 		}
 		if r != nil && found {

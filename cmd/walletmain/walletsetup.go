@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"git.parallelcoin.io/dev/9/cmd/nine"
-	"git.parallelcoin.io/dev/9/cmd/node"
 	chaincfg "git.parallelcoin.io/dev/9/pkg/chain/config"
 	"git.parallelcoin.io/dev/9/pkg/chain/wire"
 	cl "git.parallelcoin.io/dev/9/pkg/util/cl"
@@ -47,7 +46,7 @@ func CreateSimulationWallet(
 }
 
 // CreateWallet prompts the user for information needed to generate a new wallet and generates the wallet accordingly.  The new wallet will reside at the provided path.
-func CreateWallet(cfg *nine.Config, activeNet *node.Params) error {
+func CreateWallet(cfg *nine.Config, activeNet *nine.Params) error {
 	log <- cl.Info{*cfg.AppDataDir}
 	dbDir := NetworkDir(*cfg.AppDataDir, activeNet.Params)
 	loader := wallet.NewLoader(activeNet.Params, dbDir, 250)

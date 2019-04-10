@@ -9,7 +9,6 @@ import (
 	"sync"
 
 	"git.parallelcoin.io/dev/9/cmd/nine"
-	"git.parallelcoin.io/dev/9/cmd/node"
 	"git.parallelcoin.io/dev/9/pkg/chain/fork"
 	legacyrpc "git.parallelcoin.io/dev/9/pkg/rpc/legacy"
 	cl "git.parallelcoin.io/dev/9/pkg/util/cl"
@@ -24,14 +23,14 @@ var (
 
 // Main is a work-around main function that is required since deferred functions (such as log flushing) are not called with calls to os.Exit.
 // Instead, main runs this function and checks for a non-nil error, at point any defers have already run, and if the error is non-nil, the program can be exited with an error exit status.
-func Main(c *nine.Config, activeNet *node.Params) error {
+func Main(c *nine.Config, activeNet *nine.Params) error {
 	fmt.Println("wallet Main")
 	cfg = c
 	ActiveNet = activeNet
 	if ActiveNet.Name == "testnet" {
 		fork.IsTestnet = true
 	}
-	if *cfg.EnableProfile {
+	if cfg.Profile != nil {
 		go func() {
 			listenAddr :=
 				net.JoinHostPort("127.0.0.1", fmt.Sprint(*cfg.Profile))

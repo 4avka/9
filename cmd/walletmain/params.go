@@ -1,6 +1,6 @@
 package walletmain
 
-import "git.parallelcoin.io/dev/9/cmd/node"
+import "git.parallelcoin.io/dev/9/cmd/nine"
 
 // ActiveNet is the active network
-var ActiveNet = &node.MainNetParams
+var ActiveNet = &nine.MainNetParams

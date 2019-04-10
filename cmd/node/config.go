@@ -105,22 +105,6 @@ type Config struct {
 	RejectNonStd         *bool            `long:"rejectnonstd" description:"Reject non-standard transactions regardless of the default settings for the active network."`
 }
 
-// StateConfig stores current state of the node
-type StateConfig struct {
-	Lookup              func(string) ([]net.IP, error)
-	Oniondial           func(string, string, time.Duration) (net.Conn, error)
-	Dial                func(string, string, time.Duration) (net.Conn, error)
-	AddedCheckpoints    []chaincfg.Checkpoint
-	ActiveMiningAddrs   []util.Address
-	ActiveMinerKey      []byte
-	ActiveMinRelayTxFee util.Amount
-	ActiveWhitelists    []*net.IPNet
-	DropAddrIndex       bool
-	DropTxIndex         bool
-	DropCfIndex         bool
-	Save                bool
-}
-
 // serviceOptions defines the configuration options for the daemon as a service on Windows.
 type serviceOptions struct {
 	ServiceCommand string `short:"s" long:"service" description:"Service command {install, remove, start, stop}"`

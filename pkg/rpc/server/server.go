@@ -19,7 +19,7 @@ import (
 	"sync"
 	"time"
 
-	"git.parallelcoin.io/dev/9/cmd/node"
+	"git.parallelcoin.io/dev/9/cmd/nine"
 	"git.parallelcoin.io/dev/9/pkg/wallet"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -120,7 +120,7 @@ type walletServer struct {
 
 type loaderServer struct {
 	loader    *wallet.Loader
-	activeNet *node.Params
+	activeNet *nine.Params
 	rpcClient *chain.RPCClient
 	mu        sync.Mutex
 }
@@ -824,7 +824,7 @@ func (s *walletServer) AccountNotifications(req *pb.AccountNotificationsRequest,
 // and registers it with the gRPC server.
 func StartWalletLoaderService(
 	server *grpc.Server, loader *wallet.Loader,
-	activeNet *node.Params) {
+	activeNet *nine.Params) {
 
 	service := &loaderServer{loader: loader, activeNet: activeNet}
 	pb.RegisterWalletLoaderServiceServer(server, service)

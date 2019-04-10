@@ -2506,7 +2506,8 @@ func newServer(
 	var checkpoints []chaincfg.Checkpoint
 	if !*Cfg.DisableCheckpoints {
 		checkpoints = mergeCheckpoints(
-			s.chainParams.Checkpoints, StateCfg.AddedCheckpoints)
+			s.chainParams.Checkpoints,
+			StateCfg.AddedCheckpoints)
 	}
 	// Create a new block chain instance with the appropriate configuration.
 	var err error

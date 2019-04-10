@@ -16,6 +16,7 @@ type App struct {
 	Default  func(ctx *App) int
 	Cats     Cats
 	Commands Commands
+	Config   *nine.Config
 }
 
 type Line struct {
@@ -180,7 +181,7 @@ type Tokens map[string]Token
 type Optional []string
 type Precedent []string
 
-type CommandHandler func(args []string, tokens Tokens, cmds, all Commands) int
+type CommandHandler func(args []string, tokens Tokens, app *App) int
 
 type Command struct {
 	Name      string

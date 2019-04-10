@@ -19,7 +19,7 @@ import (
 // blockDbNamePrefix is the prefix for the block database name.  The database type is appended to this value to form the full block database name.
 const blockDbNamePrefix = "blocks"
 
-var StateCfg = &StateConfig{}
+var StateCfg = &nine.StateConfig{}
 var Cfg = &nine.Config{}
 
 // winServiceMain is only invoked on Windows.  It detects when pod is running as a service and reacts accordingly.
