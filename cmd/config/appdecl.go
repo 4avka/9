@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"math/rand"
 	"reflect"
+	"regexp"
 	"time"
 )
 
 func NewApp(name string, g ...AppGenerator) (out *App) {
 	gen := AppGenerators(g)
 	out = &App{
-		Name: name,
-		Cats: make(Cats),
+		Name:     name,
+		Cats:     make(Cats),
+		Commands: make(Commands),
 	}
 	gen.RunAll(out)
 	return
@@ -35,7 +37,53 @@ func Group(name string, g ...CatGenerator) AppGenerator {
 	}
 }
 
-// which is made from
+func Cmd(name string, g ...CommandGenerator) AppGenerator {
+	G := CommandGenerators(g)
+	return func(ctx *App) {
+		ctx.Commands[name] = G.RunAll()
+	}
+}
+
+// Command Item Generators
+
+func Pattern(patt string) CommandGenerator {
+	return func(ctx *Command) {
+		ctx.Pattern = patt
+		ctx.RE = regexp.MustCompile(ctx.Pattern)
+	}
+}
+
+func Short(usage string) CommandGenerator {
+	return func(ctx *Command) {
+		ctx.Short = usage
+	}
+}
+
+func Detail(usage string) CommandGenerator {
+	return func(ctx *Command) {
+		ctx.Detail = usage
+	}
+}
+
+func Opts(opts ...string) CommandGenerator {
+	return func(ctx *Command) {
+		ctx.Opts = opts
+	}
+}
+
+func Precs(precs ...string) CommandGenerator {
+	return func(ctx *Command) {
+		ctx.Precedent = precs
+	}
+}
+
+func Handler(hnd func(args []string, tokens Tokens, cmds, all Commands) int) CommandGenerator {
+	return func(ctx *Command) {
+		ctx.Handler = hnd
+	}
+}
+
+// Group Item Generators
 
 func File(name string, g ...RowGenerator) CatGenerator {
 	G := RowGenerators(g)

@@ -185,7 +185,7 @@ var commands = Commands{
 		(must start with '.', '\', '/' or '~')
 	<create> runs the wallet create prompt`,
 		opts{"datadir", "create"},
-		precedent{"help", "ctl"},
+		precedent{"help"},
 		Shell,
 	},
 	TEST: {

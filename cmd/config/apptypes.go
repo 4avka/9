@@ -2,15 +2,17 @@ package config
 
 import (
 	"encoding/json"
+	"regexp"
 	"time"
 
 	"git.parallelcoin.io/dev/9/cmd/nine"
 )
 
 type App struct {
-	Name    string
-	Version func() string
-	Cats    Cats
+	Name     string
+	Version  func() string
+	Cats     Cats
+	Commands Commands
 }
 
 type Line struct {
@@ -162,4 +164,39 @@ func (r *RowGenerators) RunAll(row *Row) {
 	for _, x := range *r {
 		x(row)
 	}
+}
+
+// Token is a struct that ties together CLI invocation to the Command it
+// relates to
+type Token struct {
+	Value string
+	Cmd   Command
+}
+type Tokens map[string]Token
+
+type Optional []string
+type Precedent []string
+
+type CommandHandler func(args []string, tokens Tokens, cmds, all Commands) int
+
+type Command struct {
+	Name      string
+	Pattern   string
+	RE        *regexp.Regexp
+	Short     string
+	Detail    string
+	Opts      Optional
+	Precedent Precedent
+	Handler   CommandHandler
+}
+type CommandGenerator func(ctx *Command)
+type CommandGenerators []CommandGenerator
+type Commands map[string]*Command
+
+func (r *CommandGenerators) RunAll() *Command {
+	c := &Command{}
+	for _, x := range *r {
+		x(c)
+	}
+	return c
 }
