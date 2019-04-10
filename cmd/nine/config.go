@@ -63,7 +63,6 @@ type Config struct {
 	AddCheckpoints           *[]string
 	DisableCheckpoints       *bool
 	DbType                   *string
-	EnableProfile            *bool
 	Profile                  *int
 	CPUProfile               *string
 	Upnp                     *bool

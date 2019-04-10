@@ -37,7 +37,7 @@ func Main(serverChan chan<- *server) (err error) {
 	// Show version at startup.
 	log <- cl.Info{"version", Version()}
 	// Enable http profiling server if requested.
-	if *Cfg.EnableProfile {
+	if Cfg.Profile != nil {
 		log <- cl.Dbg("profiling requested")
 		go func() {
 			listenAddr :=
