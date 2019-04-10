@@ -29,6 +29,24 @@ func Version(ver string) AppGenerator {
 	}
 }
 
+func Tagline(ver string) AppGenerator {
+	return func(ctx *App) {
+		ctx.Tagline = ver
+	}
+}
+
+func About(ver string) AppGenerator {
+	return func(ctx *App) {
+		ctx.About = ver
+	}
+}
+
+func DefaultRunner(fn func(ctx *App) int) AppGenerator {
+	return func(ctx *App) {
+		ctx.Default = fn
+	}
+}
+
 func Group(name string, g ...CatGenerator) AppGenerator {
 	G := CatGenerators(g)
 	return func(ctx *App) {

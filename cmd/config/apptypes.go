@@ -10,7 +10,10 @@ import (
 
 type App struct {
 	Name     string
+	Tagline  string
+	About    string
 	Version  func() string
+	Default  func(ctx *App) int
 	Cats     Cats
 	Commands Commands
 }
