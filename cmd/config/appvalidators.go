@@ -41,10 +41,12 @@ func GenAddr(name string, port int) func(r *Row, in interface{}) bool {
 		}
 		if r != nil {
 			if r.Value != nil {
-				*r.Value.(*string) = *s
+				*r.Value = *s
 			} else {
-				r.Value = s
+				r.Value = new(interface{})
+				*r.Value = *s
 			}
+			r.String = *s
 		}
 		return true
 	}
@@ -84,14 +86,16 @@ func GenAddrs(name string, port int) func(r *Row, in interface{}) bool {
 		if ss != nil {
 			if r != nil {
 				if r.Value != nil {
-					*r.Value.(*[]string) = *ss
+					*r.Value = *ss
 				} else {
-					r.Value = ss
+					r.Value = new(interface{})
+					*r.Value = *ss
 				}
+				r.String = fmt.Sprint(*ss)
 			}
 			return true
 		}
-		return false
+		return true
 	}
 }
 
@@ -131,8 +135,14 @@ var Valid = struct {
 				ss = ""
 			}
 			if r != nil {
-				r.Value = &ss
+				if r.Value != nil {
+					*r.Value = ss
+				} else {
+					*r.Value = ss
+				}
+				r.String = fmt.Sprint(ss)
 			}
+			r.String = fmt.Sprint(ss)
 			return true
 		}
 		return false
@@ -157,10 +167,12 @@ var Valid = struct {
 				ss = ""
 			}
 			if r != nil {
+				r.String = fmt.Sprint(ss)
 				if r.Value != nil {
-					*r.Value.(*string) = ss
+					*r.Value = ss
 				} else {
-					r.Value = &ss
+					r.Value = new(interface{})
+					*r.Value = ss
 				}
 			}
 			return true
@@ -197,24 +209,39 @@ var Valid = struct {
 		}
 		if r != nil {
 			if r.Value != nil {
-				*r.Value.(*int) = ii
+				*r.Value = ii
 			} else {
-				r.Value = &ii
+				r.Value = new(interface{})
+				*r.Value = &ii
 			}
+			r.String = fmt.Sprint(ii)
 		}
-		return false
+		return true
 	},
 	Bool: func(r *Row, in interface{}) bool {
-		var s string
+		var sb string
 		var b bool
-		isString := false
 		switch I := in.(type) {
 		case string:
-			s = I
-			isString = true
+			sb = I
+			if strings.ToUpper(sb) == "TRUE" {
+				b = true
+				goto boolout
+			}
+			if strings.ToUpper(sb) == "FALSE" {
+				b = false
+				goto boolout
+			}
 		case *string:
-			s = *I
-			isString = true
+			sb = *I
+			if strings.ToUpper(sb) == "TRUE" {
+				b = true
+				goto boolout
+			}
+			if strings.ToUpper(sb) == "FALSE" {
+				b = false
+				goto boolout
+			}
 		case bool:
 			b = I
 		case *bool:
@@ -222,23 +249,14 @@ var Valid = struct {
 		default:
 			return false
 		}
-		if isString {
-			if strings.ToUpper(s) == "TRUE" {
-				b = true
-				goto boolout
-			}
-			if strings.ToUpper(s) == "FALSE" {
-				b = false
-				goto boolout
-			}
-			return false
-		}
 	boolout:
 		if r != nil {
+			r.String = fmt.Sprint(b)
 			if r.Value != nil {
-				*r.Value.(*bool) = b
+				*r.Value = b
 			} else {
-				r.Value = &b
+				r.Value = new(interface{})
+				*r.Value = b
 			}
 		}
 		return true
@@ -269,10 +287,12 @@ var Valid = struct {
 			ii = n
 		}
 		if r != nil {
+			r.String = fmt.Sprint(ii)
 			if r.Value != nil {
-				*r.Value.(*int) = ii
+				*r.Value = ii
 			} else {
-				r.Value = &ii
+				r.Value = new(interface{})
+				*r.Value = &ii
 			}
 		}
 		return true
@@ -293,10 +313,12 @@ var Valid = struct {
 		}
 		if r != nil {
 			if r.Value != nil {
-				*r.Value.(*string) = s
+				*r.Value = s
 			} else {
-				r.Value = &s
+				r.Value = new(interface{})
+				*r.Value = &s
 			}
+			r.String = fmt.Sprint(s)
 		}
 		return true
 	},
@@ -334,10 +356,12 @@ var Valid = struct {
 		}
 		if r != nil {
 			if r.Value != nil {
-				*r.Value.(*[]string) = ss
+				*r.Value = ss
 			} else {
-				r.Value = ss
+				r.Value = new(interface{})
+				*r.Value = &ss
 			}
+			r.String = fmt.Sprint(ss)
 		}
 		return true
 	},
@@ -351,29 +375,31 @@ var Valid = struct {
 		default:
 			return false
 		}
-		var o *string
+		var o string
 		options := getAlgoOptions()
 		for _, x := range options {
 			if s == x {
-				o = &s
+				o = s
 			}
 		}
-		if o == nil {
+		if o == "" {
 			rnd := "random"
-			o = &rnd
+			o = rnd
 		}
 		if r != nil {
+			r.String = fmt.Sprint(o)
 			if r.Value != nil {
-				*r.Value.(*string) = *o
+				*r.Value = o
 			} else {
-				r.Value = o
+				r.Value = new(interface{})
+				*r.Value = o
 			}
 		}
 		return true
 	},
 	Float: func(r *Row, in interface{}) bool {
 		var s string
-		var f *float64
+		var f float64
 		isString := false
 		switch I := in.(type) {
 		case string:
@@ -383,9 +409,9 @@ var Valid = struct {
 			s = *I
 			isString = true
 		case float64:
-			f = &I
-		case *float64:
 			f = I
+		case *float64:
+			f = *I
 		default:
 			return false
 		}
@@ -394,21 +420,22 @@ var Valid = struct {
 			if e != nil {
 				return false
 			}
-			f = &ff
+			f = ff
 		}
-		_ = s
 		if r != nil {
 			if r.Value != nil {
-				*r.Value.(*float64) = *f
+				*r.Value = f
 			} else {
-				r.Value = f
+				r.Value = new(interface{})
+				*r.Value = f
 			}
+			r.String = fmt.Sprint(f)
 		}
 		return true
 	},
 	Duration: func(r *Row, in interface{}) bool {
 		var s string
-		var t *time.Duration
+		var t time.Duration
 		isString := false
 		switch I := in.(type) {
 		case string:
@@ -418,9 +445,9 @@ var Valid = struct {
 			s = *I
 			isString = true
 		case time.Duration:
-			t = &I
-		case *time.Duration:
 			t = I
+		case *time.Duration:
+			t = *I
 		default:
 			return false
 		}
@@ -429,64 +456,70 @@ var Valid = struct {
 			if e != nil {
 				return false
 			}
-			t = &dd
+			t = dd
 		}
 		if r != nil {
+			r.String = fmt.Sprint(t)
 			if r.Value != nil {
-				*r.Value.(*time.Duration) = *t
+				*r.Value = t
 			} else {
-				r.Value = t
+				r.Value = new(interface{})
+				*r.Value = t
 			}
 		}
 		return true
 	},
 	Net: func(r *Row, in interface{}) bool {
-		var s *string
+		var sn string
 		switch I := in.(type) {
 		case string:
-			s = &I
+			sn = I
 		case *string:
-			s = I
+			sn = *I
 		default:
 			return false
 		}
 		found := false
 		for _, x := range Networks {
-			if x == *s {
+			if x == sn {
 				found = true
 				*nine.ActiveNetParams = *NetParams[x]
 			}
 		}
 		if r != nil && found {
+			r.String = fmt.Sprint(sn)
 			if r.Value != nil {
-				*r.Value.(*string) = *s
+				*r.Value = sn
 			} else {
-				r.Value = s
+				r.Value = new(interface{})
+				*r.Value = sn
 			}
 		}
 		return found
 	},
 	Level: func(r *Row, in interface{}) bool {
-		var s string
+		var sl string
 		switch I := in.(type) {
 		case string:
-			s = I
+			sl = I
 		case *string:
-			s = *I
+			sl = *I
 		default:
 			return false
 		}
 		found := false
 		for x := range cl.Levels {
-			if x == s {
+			if x == sl {
 				found = true
 			}
 		}
 		if r != nil && found {
+			r.String = fmt.Sprint(sl)
 			if r.Value != nil {
-				*r.Value.(*string) = s
+				*r.Value = sl
 			} else {
-				r.Value = &s
+				r.Value = new(interface{})
+				*r.Value = sl
 			}
 		}
 		return found

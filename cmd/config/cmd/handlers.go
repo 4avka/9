@@ -32,6 +32,7 @@ func getCommands(cmds config.Commands) (s []string) {
 	for i := range cmds {
 		s = append(s, i)
 	}
+	sort.Strings(s)
 	return
 }
 
@@ -39,6 +40,7 @@ func getTokens(cmds config.Tokens) (s []string) {
 	for _, x := range cmds {
 		s = append(s, x.Value)
 	}
+	sort.Strings(s)
 	return
 }
 
@@ -85,7 +87,6 @@ func Help(args []string, tokens config.Tokens, app *config.App) int {
 }
 
 func Conf(args []string, tokens config.Tokens, app *config.App) int {
-	fmt.Println("running Conf")
 	var r int
 	for r = 2; r == 2; {
 		r = RunConf(args, tokens, app)

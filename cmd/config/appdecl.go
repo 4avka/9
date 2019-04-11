@@ -103,13 +103,23 @@ func Handler(hnd func(args []string, tokens Tokens, app *App) int) CommandGenera
 
 // Group Item Generators
 
+func newRow() *Row {
+	return &Row{
+		Value:   new(interface{}),
+		Default: new(interface{}),
+		Min:     new(interface{}),
+		Max:     new(interface{}),
+	}
+}
+
 func File(name string, g ...RowGenerator) CatGenerator {
 	G := RowGenerators(g)
 	return func(ctx *Cat) {
-		c := &Row{}
+		c := newRow()
 		c.Init = func(cc *Row) {
 			cc.Name = name
 			cc.Validate = Valid.File
+			cc.Value = new(interface{})
 			cc.Get = func() interface{} {
 				return cc.Value
 			}
@@ -130,6 +140,7 @@ func Dir(name string, g ...RowGenerator) CatGenerator {
 		c.Init = func(cc *Row) {
 			cc.Name = name
 			cc.Validate = Valid.Dir
+			cc.Value = new(interface{})
 			cc.Get = func() interface{} {
 				return cc.Value
 			}
@@ -150,6 +161,7 @@ func Port(name string, g ...RowGenerator) CatGenerator {
 		c.Init = func(cc *Row) {
 			cc.Name = name
 			cc.Validate = Valid.Port
+			cc.Value = new(interface{})
 			cc.Get = func() interface{} {
 				return cc.Value
 			}
@@ -163,7 +175,8 @@ func Port(name string, g ...RowGenerator) CatGenerator {
 	}
 }
 
-func boolRow(name string, enabled bool, g RowGenerators) CatGenerator {
+func Enable(name string, g ...RowGenerator) CatGenerator {
+	G := RowGenerators(g)
 	return func(ctx *Cat) {
 		c := &Row{}
 		c.Init = func(cc *Row) {
@@ -172,25 +185,38 @@ func boolRow(name string, enabled bool, g RowGenerators) CatGenerator {
 				return cc.Value
 			}
 			cc.Validate = Valid.Bool
-			cc.Value = &enabled
+			cc.Value = new(interface{})
+			*cc.Value = false
 			cc.Put = func(in interface{}) bool {
 				return cc.Validate(cc, in)
 			}
-			g.RunAll(cc)
+			G.RunAll(cc)
 		}
 		c.Init(c)
 		(*ctx)[name] = *c
 	}
 }
 
-func Enable(name string, g ...RowGenerator) CatGenerator {
-	G := RowGenerators(g)
-	return boolRow(name, false, G)
-}
-
 func Enabled(name string, g ...RowGenerator) CatGenerator {
 	G := RowGenerators(g)
-	return boolRow(name, true, G)
+	return func(ctx *Cat) {
+		c := &Row{}
+		c.Init = func(cc *Row) {
+			cc.Name = name
+			cc.Get = func() interface{} {
+				return cc.Value
+			}
+			cc.Validate = Valid.Bool
+			cc.Value = new(interface{})
+			*cc.Value = true
+			cc.Put = func(in interface{}) bool {
+				return cc.Validate(cc, in)
+			}
+			G.RunAll(cc)
+		}
+		c.Init(c)
+		(*ctx)[name] = *c
+	}
 }
 
 func Int(name string, g ...RowGenerator) CatGenerator {
@@ -203,6 +229,7 @@ func Int(name string, g ...RowGenerator) CatGenerator {
 				return cc.Value
 			}
 			cc.Validate = Valid.Int
+			cc.Value = new(interface{})
 			cc.Put = func(in interface{}) bool {
 				return cc.Validate(cc, in)
 			}
@@ -223,6 +250,7 @@ func Tag(name string, g ...RowGenerator) CatGenerator {
 				return cc.Value
 			}
 			cc.Validate = Valid.Tag
+			cc.Value = new(interface{})
 			cc.Put = func(in interface{}) bool {
 				return cc.Validate(cc, in)
 			}
@@ -243,6 +271,7 @@ func Tags(name string, g ...RowGenerator) CatGenerator {
 				return cc.Value
 			}
 			cc.Validate = Valid.Tags
+			cc.Value = new(interface{})
 			cc.Put = func(in interface{}) bool {
 				return cc.Validate(cc, in)
 			}
@@ -304,6 +333,7 @@ func Level(g ...RowGenerator) CatGenerator {
 				return cc.Value
 			}
 			cc.Validate = Valid.Level
+			cc.Value = new(interface{})
 			cc.Put = func(in interface{}) bool {
 				return cc.Validate(cc, in)
 			}
@@ -324,6 +354,7 @@ func Algo(name string, g ...RowGenerator) CatGenerator {
 				return cc.Value
 			}
 			cc.Validate = Valid.Algo
+			cc.Value = new(interface{})
 			cc.Put = func(in interface{}) bool {
 				return cc.Validate(cc, in)
 			}
@@ -344,6 +375,7 @@ func Float(name string, g ...RowGenerator) CatGenerator {
 				return cc.Value
 			}
 			cc.Validate = Valid.Float
+			cc.Value = new(interface{})
 			cc.Put = func(in interface{}) bool {
 				return cc.Validate(cc, in)
 			}
@@ -364,6 +396,7 @@ func Duration(name string, g ...RowGenerator) CatGenerator {
 				return cc.Value
 			}
 			cc.Validate = Valid.Duration
+			cc.Value = new(interface{})
 			cc.Put = func(in interface{}) bool {
 				return cc.Validate(cc, in)
 			}
@@ -384,6 +417,7 @@ func Net(name string, g ...RowGenerator) CatGenerator {
 				return cc.Value
 			}
 			cc.Validate = Valid.Net
+			cc.Value = new(interface{})
 			cc.Put = func(in interface{}) bool {
 				return cc.Validate(cc, in)
 			}
@@ -405,53 +439,49 @@ func Usage(usage string) RowGenerator {
 
 // Default sets the default value for a config item
 func Default(in interface{}) RowGenerator {
-	var ii interface{}
 	return func(ctx *Row) {
+		var iii interface{}
+		ctx.Default = &iii
 		switch I := in.(type) {
 		case string:
-			ii = &I
-			ctx.Default = I
+			*ctx.Default = I
+			ctx.Validate(ctx, I)
 		case []string:
-			ii = &I
-			ctx.Default = I
+			*ctx.Default = I
+			ctx.Validate(ctx, I)
 		case int:
-			ii = &I
-			ctx.Default = I
+			*ctx.Default = I
+			ctx.Validate(ctx, I)
 		case float64:
-			ii = &I
-			ctx.Default = I
+			*ctx.Default = I
+			ctx.Validate(ctx, I)
 		case bool:
-			ii = &I
-			ctx.Default = I
+			*ctx.Default = I
+			ctx.Validate(ctx, I)
 		case time.Duration:
-			ii = &I
-			ctx.Default = I
+			*ctx.Default = I
+			ctx.Validate(ctx, I)
 		case *string:
-			ii = I
-			ctx.Default = *I
+			*ctx.Default = I
+			ctx.Validate(ctx, I)
 		case *[]string:
-			ii = I
-			ctx.Default = *I
+			*ctx.Default = I
+			ctx.Validate(ctx, I)
 		case *int:
-			ii = I
-			ctx.Default = *I
+			*ctx.Default = I
+			ctx.Validate(ctx, I)
 		case *float64:
-			ii = I
-			ctx.Default = *I
+			*ctx.Default = I
+			ctx.Validate(ctx, I)
 		case *bool:
-			ii = I
-			ctx.Default = *I
+			*ctx.Default = I
+			ctx.Validate(ctx, I)
 		case *time.Duration:
-			ii = I
-			ctx.Default = *I
+			*ctx.Default = I
+			ctx.Validate(ctx, I)
 		default:
 			fmt.Println("type not found", ctx.Name, reflect.TypeOf(in))
 			return
-		}
-		if !ctx.Validate(ctx, ii) {
-			fmt.Println(ctx.Name, "fail validate", reflect.TypeOf(ii), ii)
-		} else {
-			ctx.Default = &ii
 		}
 	}
 }
@@ -459,7 +489,8 @@ func Default(in interface{}) RowGenerator {
 // Min attaches to the validator a test that enforces a minimum
 func Min(min int) RowGenerator {
 	return func(ctx *Row) {
-		ctx.Min = &min
+		ctx.Min = new(interface{})
+		*ctx.Min = min
 		v := ctx.Validate
 		ctx.Validate = func(r *Row, in interface{}) bool {
 			n := min
@@ -481,8 +512,9 @@ func Min(min int) RowGenerator {
 // Max attaches to the validator a test that enforces a maximum
 func Max(max int) RowGenerator {
 	return func(ctx *Row) {
+		ctx.Max = new(interface{})
 		v := ctx.Validate
-		ctx.Max = &max
+		*ctx.Max = &max
 		ctx.Validate = func(r *Row, in interface{}) bool {
 			n := max
 			switch I := in.(type) {
@@ -527,6 +559,7 @@ func RandomString(n int) RowGenerator {
 		}
 
 		sb := string(b)
-		ctx.Value = &sb
+		ctx.Value = new(interface{})
+		*ctx.Value = sb
 	}
 }

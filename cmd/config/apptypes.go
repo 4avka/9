@@ -58,7 +58,7 @@ func (r *App) UnmarshalJSON(data []byte) error {
 	for i, x := range out {
 		for j, y := range x {
 			R := r.Cats[i][j]
-			R.Put(y.Value)
+			R.Put(&y.Value)
 		}
 	}
 	return nil
@@ -78,65 +78,142 @@ type Cats map[string]Cat
 
 // Str returns the pointer to a value in the category map
 func (r *Cats) Str(cat, item string) (out *string) {
-	C := *r
-	if C[cat][item].Value != nil {
-		return C[cat][item].Value.(*string)
+	if r == nil {
+		return
+	} else if C, ok := (*r)[cat]; !ok {
+		return
+	} else if cc, ok := C[item]; !ok {
+		return
+	} else if cc.Value == nil {
+		return
+	} else {
+		CC := *cc.Value
+		if ci, ok := CC.(string); !ok {
+			return
+		} else {
+			return &ci
+		}
 	}
-	return
 }
 
 // Tags returns the pointer to a value in the category map
 func (r *Cats) Tags(cat, item string) (out *[]string) {
-	C := *r
-	if C[cat][item].Value != nil {
-		return C[cat][item].Value.(*[]string)
+	if r == nil {
+		return
+	} else if C, ok := (*r)[cat]; !ok {
+		return
+	} else if cc, ok := C[item]; !ok {
+		return
+	} else if cc.Value == nil {
+		return
+	} else {
+		CC := *cc.Value
+		if ci, ok := CC.([]string); !ok {
+			return
+		} else {
+			return &ci
+		}
 	}
-	return
 }
 
 // Map returns the pointer to a value in the category map
 func (r *Cats) Map(cat, item string) (out *nine.Mapstringstring) {
-	C := *r
-	if C[cat][item].Value != nil {
-		return C[cat][item].Value.(*nine.Mapstringstring)
+	if r == nil {
+		return
+	} else if C, ok := (*r)[cat]; !ok {
+		return
+	} else if cc, ok := C[item]; !ok {
+		return
+	} else if cc.Value == nil {
+		return
+	} else {
+		CC := *cc.Value
+		if ci, ok := CC.(nine.Mapstringstring); !ok {
+			return
+		} else {
+			return &ci
+		}
 	}
-	return
 }
 
 // Int returns the pointer to a value in the category map
 func (r *Cats) Int(cat, item string) (out *int) {
-	C := *r
-	if C[cat][item].Value != nil {
-		return C[cat][item].Value.(*int)
+	if r == nil {
+		return
+	} else if C, ok := (*r)[cat]; !ok {
+		return
+	} else if cc, ok := C[item]; !ok {
+		return
+	} else if cc.Value == nil {
+		return
+	} else {
+		CC := *cc.Value
+		if ci, ok := CC.(int); !ok {
+			return
+		} else {
+			return &ci
+		}
 	}
-	return
 }
 
 // Bool returns the pointer to a value in the category map
 func (r *Cats) Bool(cat, item string) (out *bool) {
-	C := *r
-	if C[cat][item].Value != nil {
-		return C[cat][item].Value.(*bool)
+	if r == nil {
+		return
+	} else if C, ok := (*r)[cat]; !ok {
+		return
+	} else if cc, ok := C[item]; !ok {
+		return
+	} else if cc.Value == nil {
+		return
+	} else {
+		CC := *cc.Value
+		if ci, ok := CC.(bool); !ok {
+			return
+		} else {
+			return &ci
+		}
 	}
-	return
 }
 
 // Float returns the pointer to a value in the category map
 func (r *Cats) Float(cat, item string) (out *float64) {
-	C := *r
-	if C[cat][item].Value != nil {
-		return C[cat][item].Value.(*float64)
+	if r == nil {
+		return
+	} else if C, ok := (*r)[cat]; !ok {
+		return
+	} else if cc, ok := C[item]; !ok {
+		return
+	} else if cc.Value == nil {
+		return
+	} else {
+		CC := *cc.Value
+		if ci, ok := CC.(float64); !ok {
+			return
+		} else {
+			return &ci
+		}
 	}
-	return
 }
 
 // Duration returns the pointer to a value in the category map
 func (r *Cats) Duration(cat, item string) (out *time.Duration) {
-	C := *r
-	if C[cat][item].Value != nil {
-		return C[cat][item].Value.(*time.Duration)
+	if r == nil {
+		return
+	} else if C, ok := (*r)[cat]; !ok {
+		return
+	} else if cc, ok := C[item]; !ok {
+		return
+	} else if cc.Value == nil {
+		return
+	} else {
+		CC := *cc.Value
+		if ci, ok := CC.(time.Duration); !ok {
+			return
+		} else {
+			return &ci
+		}
 	}
-	return
 }
 
 type Cat map[string]Row
@@ -152,14 +229,15 @@ func (r *CatGenerators) RunAll(cat Cat) {
 
 type Row struct {
 	Name     string
-	Value    interface{}
-	Default  interface{}
-	Min      interface{}
-	Max      interface{}
+	Value    *interface{}
+	Default  *interface{}
+	Min      *interface{}
+	Max      *interface{}
 	Init     func(*Row)
 	Get      func() interface{}
 	Put      func(interface{}) bool
 	Validate func(*Row, interface{}) bool
+	String   string
 	Usage    string
 }
 type RowGenerator func(ctx *Row)
@@ -228,8 +306,8 @@ func (r *Cats) GetSortedKeys() (out []string) {
 	sort.Strings(out)
 	return
 }
-func (r *Cat) GetSortedKeys() (out []string) {
-	for i := range *r {
+func (r Cat) GetSortedKeys() (out []string) {
+	for i := range r {
 		out = append(out, i)
 	}
 	sort.Strings(out)

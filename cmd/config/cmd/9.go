@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	. "git.parallelcoin.io/dev/9/cmd/config"
 	"git.parallelcoin.io/dev/9/cmd/node"
 	"git.parallelcoin.io/dev/9/cmd/node/mempool"
@@ -330,7 +332,7 @@ func NineApp() *App {
 				Usage("how many ban units triggers a ban"),
 			),
 			Duration("banduration",
-				Default(node.DefaultBanDuration),
+				Default(24*time.Hour),
 				Usage("how long a ban lasts"),
 			),
 			Enable("disableban",

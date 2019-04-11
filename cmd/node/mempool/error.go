@@ -20,7 +20,7 @@ type RuleError struct {
 func (e RuleError) Error() string {
 
 	if e.Err == nil {
-		return "<nil>"
+		return ""
 	}
 	return e.Err.Error()
 }
