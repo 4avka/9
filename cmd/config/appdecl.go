@@ -187,6 +187,8 @@ func Enable(name string, g ...RowGenerator) CatGenerator {
 			cc.Validate = Valid.Bool
 			cc.Value = new(interface{})
 			*cc.Value = false
+			cc.Default = new(interface{})
+			*cc.Default = false
 			cc.Put = func(in interface{}) bool {
 				return cc.Validate(cc, in)
 			}
@@ -209,6 +211,8 @@ func Enabled(name string, g ...RowGenerator) CatGenerator {
 			cc.Validate = Valid.Bool
 			cc.Value = new(interface{})
 			*cc.Value = true
+			cc.Default = new(interface{})
+			*cc.Default = true
 			cc.Put = func(in interface{}) bool {
 				return cc.Validate(cc, in)
 			}

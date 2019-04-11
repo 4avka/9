@@ -14,8 +14,30 @@ const BACK = "back"
 func RunConf(args []string, tokens config.Tokens, app *config.App) int {
 	const menutitle = ">>> ⓟarallelcoin configuration CLI"
 	// fmt.Println("ⓟarallelcoin configuration CLI")
-	root := tview.NewTreeNode("parallelcoin interactive CLI").
-		SetSelectable(false)
+
+	// newPrimitive := func(text string) tview.Primitive {
+	// 	return tview.NewTextView().
+	// 		SetTextAlign(tview.AlignCenter).
+	// 		SetText(text)
+	// }
+
+	treeview := tview.NewTreeView().SetGraphicsColor(tcell.ColorGreen).SetAlign(false)
+	// treeview.SetGraphicsColor(tcell.ColorDimGray).
+	treeview.SetBorder(false).SetBorderPadding(1, 0, 3, 3)
+	treeroot := tview.NewTreeNode("9").
+		SetSelectable(false).SetIndent(1)
+	inputter := tview.NewInputField().
+		SetTitle("select an item and press enter to edit. Esc to quit").
+		SetBorderPadding(1, 1, 1, 1).
+		SetBorder(true).SetTitleColor(tcell.ColorGreen).SetTitleAlign(tview.AlignCenter)
+	// infopane := tview.NewTextView()
+	// SetBorder(true)
+	root := tview.NewGrid().
+		SetRows(60, 40).
+		AddItem(treeview, 0, 0, 1, 1, 1, 1, true).
+		// AddItem(infopane, 1, 0, 1, 1, 1, 1, true).
+		AddItem(inputter, 1, 0, 1, 1, 1, 1, true)
+	// root.SetBorder(true).SetBorderPadding(1, 1, 1, 1)
 	tapp := tview.NewApplication()
 	tapp.SetInputCapture(
 		func(event *tcell.EventKey) *tcell.EventKey {
@@ -25,7 +47,10 @@ func RunConf(args []string, tokens config.Tokens, app *config.App) int {
 			}
 			return event
 		})
-	treeview := tview.NewTreeView().SetRoot(root).SetCurrentNode(root)
+	// root.SetBorderPadding(1, 1, 3, 3)
+	// root.SetTitleAlign(tview.AlignLeft).SetTitle(menutitle)
+	treeview.SetRoot(treeroot).SetCurrentNode(treeroot)
+	// SetBorderAttributes(tcell.AttrNone)
 	runbranch := tview.NewTreeNode("run a server")
 	runbranch.SetReference(root).
 		SetSelectable(true).
@@ -40,7 +65,7 @@ func RunConf(args []string, tokens config.Tokens, app *config.App) int {
 		AddChild(tview.NewTreeNode("node")).
 		AddChild(tview.NewTreeNode("wallet")).
 		AddChild(tview.NewTreeNode("shell"))
-	root.AddChild(runbranch.SetReference(root))
+	treeroot.AddChild(runbranch.SetReference(treeroot))
 
 	configbase := tview.NewTreeNode("configuration")
 	configbase.SetSelectable(true).
@@ -67,7 +92,7 @@ func RunConf(args []string, tokens config.Tokens, app *config.App) int {
 			// 	V = fmt.Sprint(":", j)
 			// }
 
-			tnj := tview.NewTreeNode(j + " [ " + V + " ] [gray]" + app.Cats[x][j].Usage).
+			tnj := tview.NewTreeNode(j + " [darkgreen][[-] [lightblue]" + V + "[-] [darkgreen]][-] [gray]" + app.Cats[x][j].Usage).
 				SetReference(configbase).
 				SetSelectable(true).
 				SetExpanded(false)
@@ -78,10 +103,10 @@ func RunConf(args []string, tokens config.Tokens, app *config.App) int {
 		}
 		configbase.AddChild(tn)
 	}
-	root.AddChild(
+	treeroot.AddChild(
 		configbase.SetReference(root).SetSelectable(true),
 	)
-	root.AddChild(
+	treeroot.AddChild(
 		tview.NewTreeNode("exit").
 			SetReference(root).
 			SetSelectable(true).
@@ -91,7 +116,7 @@ func RunConf(args []string, tokens config.Tokens, app *config.App) int {
 			),
 	)
 
-	if e := tapp.SetRoot(treeview, true).Run(); e != nil {
+	if e := tapp.SetRoot(root, true).Run(); e != nil {
 		panic(e)
 	}
 
