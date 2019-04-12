@@ -90,7 +90,7 @@ func (app *App) ParseCLI(args []string) (cmd *Command, tokens Tokens) {
 	tokens = make(Tokens)
 	for _, x := range args[1:] {
 		for i, y := range app.Commands {
-			if y.RE.Match([]byte(x)) {
+			if y.RE.MatchString(x) {
 				if _, ok := commandsFound[i]; ok {
 					// TODO change token to struct{val,command}
 					tokens[i] = Token{x, *y}
