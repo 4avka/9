@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"git.parallelcoin.io/dev/9/cmd/config"
 	"github.com/davecgh/go-spew/spew"
@@ -32,22 +33,43 @@ func RunConf(args []string, tokens config.Tokens, app *config.App) int {
 	treeroot.SetIndent(1)
 	input := tview.NewInputField()
 	// input.SetChangedFunc(func() {tapp.Draw()})
-	input.SetTitle("arrow keys to select item, enter to open/close, and enter to edit an item")
-	input.SetBorder(true).SetBorderColor(tcell.ColorBlack).
-		SetTitleColor(tcell.ColorGreen).
-		SetTitleAlign(tview.AlignLeft).
-		SetBorderPadding(0, 0, 1, 1)
-	input.SetLabel("> ")
+	// input.SetTitle("arrow keys to select item, enter to open/close, and enter to edit an item")
+	// input.
+	// SetBorder(true).
+	// SetBorderColor(tcell.ColorBlack).
+	// 	SetTitleColor(tcell.ColorGreen).
+	// 	SetTitleAlign(tview.AlignLeft).
+	// 	SetBorderPadding(0, 0, 0, 0)
 
 	root := tview.NewFlex().
 		SetDirection(tview.FlexRow).
 		AddItem(treeview, 0, 1, true).
-		AddItem(input, 3, 1, true)
-	tapp.SetInputCapture(
+		AddItem(input, 1, 1, true)
+	treeview.SetInputCapture(
 		func(event *tcell.EventKey) *tcell.EventKey {
 			// input.SetText(fmt.Sprint(event.Rune()))
 			if event.Key() == 27 {
 				tapp.Stop()
+			}
+			return event
+		})
+	input.SetInputCapture(
+		func(event *tcell.EventKey) *tcell.EventKey {
+			// input.SetText(fmt.Sprint(event.Rune()))
+			if event.Key() == 27 {
+				input.SetText("")
+				input.SetLabel("")
+				tapp.SetFocus(treeview)
+			}
+			if event.Key() == 13 {
+				input.SetText("saving")
+				tapp.SetFocus(treeview)
+				go func() {
+					time.Sleep(time.Second * 1)
+					input.SetText("")
+					input.SetLabel("")
+					tapp.ForceDraw()
+				}()
 			}
 			return event
 		})
@@ -103,6 +125,7 @@ func RunConf(args []string, tokens config.Tokens, app *config.App) int {
 			tnj.SetSelectedFunc(func() {
 				tnj.SetExpanded(!tnj.IsExpanded())
 				input.SetText(V)
+				input.SetLabel("> ")
 				tapp.SetFocus(input)
 			})
 			tn.AddChild(tnj)
