@@ -8,7 +8,7 @@ import (
 	"git.parallelcoin.io/dev/9/cmd/node/mempool"
 )
 
-func NineApp() *App {
+var NineApp = func() *App {
 	return NewApp("9",
 		Version("v1.9.9"),
 		Tagline("all in one everything for parallelcoin"),

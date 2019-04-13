@@ -12,7 +12,7 @@ import (
 const BACK = "back"
 
 func RunConf(args []string, tokens config.Tokens, app *config.App) int {
-	const menutitle = ">>> ⓟarallelcoin configuration CLI"
+	const menutitle = "[ ⓟarallelcoin configuration CLI ]"
 	// fmt.Println("ⓟarallelcoin configuration CLI")
 
 	// newPrimitive := func(text string) tview.Primitive {
@@ -21,27 +21,31 @@ func RunConf(args []string, tokens config.Tokens, app *config.App) int {
 	// 		SetText(text)
 	// }
 
-	treeview := tview.NewTreeView().SetGraphicsColor(tcell.ColorGreen).SetAlign(false)
-	// treeview.SetGraphicsColor(tcell.ColorDimGray).
-	treeview.SetBorder(false).SetBorderPadding(1, 0, 3, 3)
-	treeroot := tview.NewTreeNode("9").
-		SetSelectable(false).SetIndent(1)
-	inputter := tview.NewInputField().
-		SetTitle("select an item and press enter to edit. Esc to quit").
-		SetBorderPadding(1, 1, 1, 1).
-		SetBorder(true).SetTitleColor(tcell.ColorGreen).SetTitleAlign(tview.AlignCenter)
-	// infopane := tview.NewTextView()
-	// SetBorder(true)
-	root := tview.NewGrid().
-		SetRows(60, 40).
-		AddItem(treeview, 0, 0, 1, 1, 1, 1, true).
-		// AddItem(infopane, 1, 0, 1, 1, 1, 1, true).
-		AddItem(inputter, 1, 0, 1, 1, 1, 1, true)
-	// root.SetBorder(true).SetBorderPadding(1, 1, 1, 1)
 	tapp := tview.NewApplication()
+	treeview := tview.NewTreeView()
+	treeview.SetBorder(true).SetBorderColor(tcell.ColorBlack)
+	treeview.SetGraphics(false).SetTitleColor(tcell.ColorGreen)
+	treeview.SetTitle(menutitle).SetTitleAlign(tview.AlignLeft)
+	treeroot := tview.NewTreeNode("")
+	// treeroot.SetColor(tcell.ColorGreen)
+	treeroot.SetSelectable(false)
+	treeroot.SetIndent(1)
+	input := tview.NewInputField()
+	// input.SetChangedFunc(func() {tapp.Draw()})
+	input.SetTitle("arrow keys to select item, enter to open/close, and enter to edit an item")
+	input.SetBorder(true).SetBorderColor(tcell.ColorBlack).
+		SetTitleColor(tcell.ColorGreen).
+		SetTitleAlign(tview.AlignLeft).
+		SetBorderPadding(0, 0, 1, 1)
+	input.SetLabel("> ")
+
+	root := tview.NewFlex().
+		SetDirection(tview.FlexRow).
+		AddItem(treeview, 0, 1, true).
+		AddItem(input, 3, 1, true)
 	tapp.SetInputCapture(
 		func(event *tcell.EventKey) *tcell.EventKey {
-			// root.SetText(fmt.Sprint(event.Key()))
+			// input.SetText(fmt.Sprint(event.Rune()))
 			if event.Key() == 27 {
 				tapp.Stop()
 			}
@@ -92,12 +96,14 @@ func RunConf(args []string, tokens config.Tokens, app *config.App) int {
 			// 	V = fmt.Sprint(":", j)
 			// }
 
-			tnj := tview.NewTreeNode(j + " [darkgreen][[-] [lightblue]" + V + "[-] [darkgreen]][-] [gray]" + app.Cats[x][j].Usage).
+			tnj := tview.NewTreeNode("" + j + " [ " + V + " ] " + app.Cats[x][j].Usage).
 				SetReference(configbase).
 				SetSelectable(true).
 				SetExpanded(false)
 			tnj.SetSelectedFunc(func() {
 				tnj.SetExpanded(!tnj.IsExpanded())
+				input.SetText(V)
+				tapp.SetFocus(input)
 			})
 			tn.AddChild(tnj)
 		}
