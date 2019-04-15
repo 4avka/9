@@ -27,6 +27,13 @@ var Levels = map[string]int{
 	"trace": _trace,
 }
 
+func GetLevelOpts() (s []string) {
+	for i := range Levels {
+		s = append(s, i)
+	}
+	return s
+}
+
 // Color turns on and off colouring of error type tag
 var Color = true
 

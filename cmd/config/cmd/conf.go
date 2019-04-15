@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"git.parallelcoin.io/dev/9/cmd/config"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
 )
@@ -15,87 +14,44 @@ const BACK = "back"
 
 func RunConf(args []string, tokens config.Tokens, app *config.App) int {
 	const menutitle = "ⓟ 9 parallelcoin configuration CLI"
-	// fmt.Println("ⓟarallelcoin configuration CLI")
-
-	// newPrimitive := func(text string) tview.Primitive {
-	// 	return tview.NewTextView().
-	// 		SetTextAlign(tview.AlignCenter).
-	// 		SetText(text)
-	// }
 
 	tapp := tview.NewApplication()
-	treeview := tview.NewTreeView()
-	// treeview.SetBorder(true).SetBorderColor(tcell.ColorBlack)
-	treeview.SetGraphics(true).SetGraphicsColor(tcell.ColorDarkGreen)
-	treeview.SetBorderPadding(0, 1, 1, 1)
-	// treeview.SetTitle(menutitle).SetTitleAlign(tview.AlignLeft)
-	treeroot := tview.NewTreeNode("9")
-	treeroot.SetSelectable(false)
-	treeroot.SetIndent(1)
-	// treeroot.SetColor(tcell.ColorRed)
-	input := tview.NewInputField()
-	input.SetFieldBackgroundColor(tcell.ColorDarkGreen).SetFieldTextColor(tcell.ColorBlack)
-	input.SetLabelColor(tcell.ColorBlack).Box.SetBackgroundColor(tcell.ColorGreen)
-	// input.SetChangedFunc(func() {tapp.Draw()})
-	// input.SetTitle("arrow keys to select item, enter to open/close, and enter to edit an item")
-	// input.
-	// SetBorder(true).
-	// SetBorderColor(tcell.ColorBlack).
-	// 	SetTitleColor(tcell.ColorDarkGreen).
-	// 	SetTitleAlign(tview.AlignLeft).
-	// 	SetBorderPadding(0, 0, 0, 0)
 
+	// titlebar tells the user what app they are using
 	titlebar := tview.NewTextView()
-	titlebar.Box.SetBackgroundColor(tcell.ColorDarkGreen)
-	titlebar.SetTextColor(tcell.ColorWhite)
-	titlebar.SetText(menutitle)
+	titlebar.SetTextColor(tcell.ColorWhite).
+		SetText(menutitle).
+		Box.SetBackgroundColor(tcell.ColorDarkGreen)
 
-	root := tview.NewFlex().
-		SetDirection(tview.FlexRow).
-		AddItem(titlebar, 1, 1, false).
-		AddItem(treeview, 0, 1, true)
+	// a treeview is used to render the options as they are hierarchically
+	// structured
+	treeview := tview.NewTreeView()
+	treeview.SetGraphics(true).
+		SetGraphicsColor(tcell.ColorDarkGreen).
+		SetBorderPadding(0, 1, 1, 1)
 	treeview.SetInputCapture(
 		func(event *tcell.EventKey) *tcell.EventKey {
-			// input.SetText(fmt.Sprint(event.Rune()))
 			if event.Key() == 27 {
 				tapp.Stop()
 			}
 			return event
 		})
 	treeview.Box.SetBackgroundColor(tcell.ColorBlack)
-	input.SetInputCapture(
-		func(event *tcell.EventKey) *tcell.EventKey {
-			// input.SetText(fmt.Sprint(event.Rune()))
-			if event.Key() == 27 {
-				// input.SetText("")
-				// input.SetLabel("")
-				root.RemoveItem(input)
-				tapp.SetFocus(treeview)
-				treeview.SetBorderPadding(0, 1, 1, 1)
-			}
-			if event.Key() == 13 {
-				treeview.SetBorderPadding(0, 0, 1, 1)
-				currentlabel := input.GetLabel()
-				currenttext := input.GetText()
-				input.SetFieldBackgroundColor(tcell.ColorYellow)
-				input.SetFieldTextColor(tcell.ColorBlack)
-				input.SetText("saving key " + currentlabel + currenttext)
-				input.SetLabel("")
-				tapp.ForceDraw()
-				time.Sleep(time.Second * 1)
-				input.SetFieldBackgroundColor(tcell.ColorDarkGreen)
-				input.SetLabel("")
-				root.RemoveItem(input)
-				treeview.SetBorderPadding(0, 1, 1, 1)
-				tapp.SetFocus(treeview)
-				tapp.ForceDraw()
-			}
-			return event
-		})
-	// root.SetBorderPadding(1, 1, 3, 3)
-	// root.SetTitleAlign(tview.AlignLeft).SetTitle(menutitle)
+
+	// flexbox contains all the page items, titlebar and tree
+	root := tview.NewFlex().
+		SetDirection(tview.FlexRow).
+		AddItem(titlebar, 1, 1, false).
+		AddItem(treeview, 0, 1, true)
+
+	// treeroot is the root of the treeview node tree
+	treeroot := tview.NewTreeNode("9")
+	treeroot.SetSelectable(false).
+		SetIndent(1)
+	// add node as root of treeview
 	treeview.SetRoot(treeroot).SetCurrentNode(treeroot)
-	// SetBorderAttributes(tcell.AttrNone)
+
+	// first menu is for launching servers
 	runbranch := tview.NewTreeNode("run a server")
 	runbranch.SetReference(root).
 		SetSelectable(true).
@@ -110,14 +66,51 @@ func RunConf(args []string, tokens config.Tokens, app *config.App) int {
 		AddChild(tview.NewTreeNode("node")).
 		AddChild(tview.NewTreeNode("wallet")).
 		AddChild(tview.NewTreeNode("shell"))
-	treeroot.AddChild(runbranch.SetReference(treeroot))
+	// input field is attached to the bottom when text (string/number) input is
+	// required
+	input := tview.NewInputField()
+	input.SetFieldBackgroundColor(tcell.ColorDarkGreen).
+		SetFieldTextColor(tcell.ColorBlack).
+		SetLabelColor(tcell.ColorBlack).
+		Box.SetBackgroundColor(tcell.ColorGreen)
+	input.SetInputCapture(
+		func(event *tcell.EventKey) *tcell.EventKey {
+			if event.Key() == 27 {
+				root.RemoveItem(input)
+				tapp.SetFocus(treeview)
+				treeview.SetBorderPadding(0, 1, 1, 1)
+			}
+			if event.Key() == 13 {
+				currenttext := input.GetText()
+				currentlabel := input.GetLabel()
+				treeview.SetBorderPadding(0, 0, 1, 1)
+				input.SetFieldBackgroundColor(tcell.ColorYellow).
+					SetFieldTextColor(tcell.ColorBlack).
+					SetText("saving key " + currentlabel + currenttext).
+					SetLabel("")
+				tapp.ForceDraw()
+				time.Sleep(time.Second * 1)
+				input.SetFieldBackgroundColor(tcell.ColorDarkGreen).
+					SetLabel("")
+				root.RemoveItem(input)
+				treeview.SetBorderPadding(0, 1, 1, 1)
+				tapp.SetFocus(treeview).
+					ForceDraw()
+			}
+			return event
+		})
 
+	treeroot.AddChild(runbranch.SetReference(treeroot))
+	// configbase is the configuration item tree, structured to follow the
+	// two level tree containing config items
 	configbase := tview.NewTreeNode("configuration")
 	configbase.SetSelectable(true).
 		SetSelectedFunc(func() {
+			// This toggles the branch to open or close
 			configbase.SetExpanded(!configbase.IsExpanded())
 		}).
 		SetExpanded(false)
+	// first get the keys of the first level of the tree
 	for _, x := range app.Cats.GetSortedKeys() {
 		tn := tview.NewTreeNode(x).
 			SetReference(configbase).
@@ -126,20 +119,25 @@ func RunConf(args []string, tokens config.Tokens, app *config.App) int {
 		tn.SetSelectedFunc(func() {
 			tn.SetExpanded(!tn.IsExpanded())
 			if tn.IsExpanded() {
+				// This makes sure the user sees the group they unfold
+				// first it jumps to the last child
 				treeview.SetCurrentNode(tn.GetChildren()[len(tn.GetChildren())-1])
 				tapp.ForceDraw()
+				// then back to the parent node
 				treeview.SetCurrentNode(tn)
 				tapp.ForceDraw()
 			}
 		})
+		// we want it to be neat, so here we compute max width for the tag label
+		// and value fields.
 		maxlen := 0
 		maxvaluelen := 0
+		// first get the max length of the keys for this section
 		for _, j := range app.Cats[x].GetSortedKeys() {
 			if len(j) > maxlen {
 				maxlen = len(j)
 			}
-		}
-		for _, j := range app.Cats[x].GetSortedKeys() {
+			// get the max length of the values in each
 			if yv := app.Cats[x][j].Value; yv != nil {
 				valtext := fmt.Sprint(*yv)
 				if len(valtext) > 0 {
@@ -149,17 +147,18 @@ func RunConf(args []string, tokens config.Tokens, app *config.App) int {
 				}
 			}
 		}
+		// This loop is separately run because we need the pad length for all of
+		// the keys and values before we start constructing them
 		for _, j := range app.Cats[x].GetSortedKeys() {
+			// TODO: types for multi-bool-options
 			V, X := "", j
-			if yv := app.Cats[x][j].Value; yv != nil {
+			acxj := app.Cats[x][j]
+			if yv := acxj.Value; yv != nil {
 				if *yv != nil {
 					V = fmt.Sprint(*yv)
 				}
 			}
 
-			// else {
-			// 	V = fmt.Sprint(":", j)
-			// }
 			padlen := maxlen - len(j)
 			keytext := j + strings.Repeat(" ", padlen)
 			padusagelen := maxvaluelen + 1 - len(V)
@@ -170,34 +169,133 @@ func RunConf(args []string, tokens config.Tokens, app *config.App) int {
 			if len(valuetext) > 24 {
 				valuetext = valuetext[:24]
 			}
-			tnj := tview.NewTreeNode("[:] " + keytext + " [darkgreen:black] " + valuetext + " [darkgray:] " + app.Cats[x][j].Usage + "[:]").
-				SetReference(configbase).
+			tnj := tview.NewTreeNode(
+				"[:] " + keytext + " [white:darkgreen] " +
+					valuetext + " [darkgray:black] " + app.Cats[x][j].Usage + "[:]")
+			tnj.SetReference(configbase).
 				SetSelectable(true).
-				SetExpanded(false)
-			tnj.SetSelectedFunc(func() {
-				tnj.SetExpanded(!tnj.IsExpanded())
-				if tn.IsExpanded() {
-					treeview.SetBorderPadding(0, 0, 1, 1)
-					root.AddItem(input, 1, 1, false)
-					input.SetText(V)
-					input.Box.SetBackgroundColor(tcell.ColorDarkGreen)
-					input.SetLabelColor(tcell.ColorWhite)
-					input.SetLabel("'" + X + "' ")
-					input.SetFieldBackgroundColor(tcell.ColorBlack)
-					input.SetFieldTextColor(tcell.ColorWhite)
-					tapp.SetFocus(input)
-				} else {
-					root.RemoveItem(input)
-					tapp.SetFocus(treeview)
-				}
-			})
+				SetExpanded(false).
+				SetSelectedFunc(func() {
+					tnj.SetExpanded(!tnj.IsExpanded())
+					treeview.SetCurrentNode(tnj)
+					if tn.IsExpanded() {
+						switch acxj.Type {
+						case "string":
+							treeview.SetBorderPadding(0, 0, 1, 1)
+							root.AddItem(input, 1, 1, false)
+							input.SetText(V).
+								SetLabelColor(tcell.ColorWhite).
+								SetLabel(acxj.Type + "'" + X + "' ").
+								SetFieldBackgroundColor(tcell.ColorBlack).
+								SetFieldTextColor(tcell.ColorWhite).
+								Box.SetBackgroundColor(tcell.ColorDarkGreen)
+							tapp.SetFocus(input)
+						case "bool":
+							tnj.ClearChildren()
+							tt := tview.NewTreeNode("true")
+							ff := tview.NewTreeNode("false")
+							tnj.AddChild(
+								tt,
+							).AddChild(
+								ff,
+							)
+
+							vv, ok := (*acxj.Value).(bool)
+							if ok {
+								if vv {
+									tt.SetColor(tcell.ColorGreen)
+									ff.SetColor(tcell.ColorWhite)
+									// treeview.SetCurrentNode(tt)
+								} else {
+									tt.SetColor(tcell.ColorWhite)
+									ff.SetColor(tcell.ColorGreen)
+									// treeview.SetCurrentNode(ff)
+								}
+							} else {
+								dd, ok := (*acxj.Default).(bool)
+								if ok {
+									if dd {
+										treeview.SetCurrentNode(tt)
+									} else {
+										treeview.SetCurrentNode(ff)
+									}
+								}
+							}
+							// This makes sure the user sees the group they unfold
+							// first it jumps to the last child
+							treeview.SetCurrentNode(
+								tnj.GetChildren()[len(tnj.GetChildren())-1])
+							tapp.ForceDraw()
+							// then back to the parent node
+							treeview.SetCurrentNode(tnj)
+							tapp.ForceDraw()
+
+						case "options":
+							tnj.ClearChildren()
+							opts := make(map[string]*tview.TreeNode)
+							current := (*acxj.Value).(string)
+							for _, x := range acxj.Opts {
+								opts[x] = tview.NewTreeNode(x)
+								if x == current {
+									opts[x].SetColor(tcell.ColorGreen)
+								} else {
+									opts[x].SetColor(tcell.ColorWhite)
+								}
+								tnj.AddChild(opts[x])
+							}
+							// This makes sure the user sees the group they unfold
+							// first it jumps to the last child
+							treeview.SetCurrentNode(
+								tnj.GetChildren()[len(tnj.GetChildren())-1])
+							tapp.ForceDraw()
+							// then back to the parent node
+							treeview.SetCurrentNode(tnj)
+							tapp.ForceDraw()
+
+							// vv, ok := (*acxj.Value).(bool)
+							// if ok {
+							// 	if vv {
+							// 		treeview.SetCurrentNode(tt)
+							// 	} else {
+							// 		treeview.SetCurrentNode(ff)
+							// 	}
+							// } else {
+							// 	dd, ok := (*acxj.Default).(bool)
+							// 	if ok {
+							// 		if dd {
+							// 			treeview.SetCurrentNode(tt)
+							// 		} else {
+							// 			treeview.SetCurrentNode(ff)
+							// 		}
+							// 	}
+							// }
+						}
+					} else {
+						switch acxj.Type {
+						case "string":
+							root.RemoveItem(input)
+							tapp.SetFocus(treeview)
+							tnj.SetExpanded(false)
+						case "bool":
+							tnj.ClearChildren()
+							// treeview.SetCurrentNode(tnj)
+							// tnj.SetExpanded(false)
+						case "options":
+							tnj.ClearChildren()
+							// treeview.SetCurrentNode(tnj)
+							// tnj.SetExpanded(false)
+						}
+					}
+				})
 			tn.AddChild(tnj)
 		}
 		configbase.AddChild(tn)
 	}
+	// attach the constructed configuration tree to the main tree
 	treeroot.AddChild(
 		configbase.SetReference(root).SetSelectable(true),
 	)
+	// attach an exit option
 	treeroot.AddChild(
 		tview.NewTreeNode("exit").
 			SetReference(root).
@@ -212,7 +310,7 @@ func RunConf(args []string, tokens config.Tokens, app *config.App) int {
 		panic(e)
 	}
 
-	spew.Dump(app.Cats)
+	// spew.Dump(app.Cats)
 
 	return 0
 }

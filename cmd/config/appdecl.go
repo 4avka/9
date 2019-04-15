@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"regexp"
 	"time"
+
+	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
 
 func NewApp(name string, g ...AppGenerator) (out *App) {
@@ -118,6 +120,7 @@ func File(name string, g ...RowGenerator) CatGenerator {
 		c := newRow()
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Type = "string"
 			cc.Validate = Valid.File
 			cc.Value = new(interface{})
 			cc.Get = func() interface{} {
@@ -139,6 +142,7 @@ func Dir(name string, g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Type = "string"
 			cc.Validate = Valid.Dir
 			cc.Value = new(interface{})
 			cc.Get = func() interface{} {
@@ -160,6 +164,7 @@ func Port(name string, g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Type = "int"
 			cc.Validate = Valid.Port
 			cc.Value = new(interface{})
 			cc.Get = func() interface{} {
@@ -181,6 +186,7 @@ func Enable(name string, g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Type = "bool"
 			cc.Get = func() interface{} {
 				return cc.Value
 			}
@@ -205,6 +211,7 @@ func Enabled(name string, g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Type = "bool"
 			cc.Get = func() interface{} {
 				return cc.Value
 			}
@@ -229,6 +236,7 @@ func Int(name string, g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Type = "int"
 			cc.Get = func() interface{} {
 				return cc.Value
 			}
@@ -250,6 +258,7 @@ func Tag(name string, g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Type = "string"
 			cc.Get = func() interface{} {
 				return cc.Value
 			}
@@ -271,6 +280,7 @@ func Tags(name string, g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Type = "stringslice"
 			cc.Get = func() interface{} {
 				return cc.Value
 			}
@@ -292,6 +302,7 @@ func Addr(name string, defPort int, g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Type = "string"
 			cc.Get = func() interface{} {
 				return cc.Value
 			}
@@ -312,6 +323,7 @@ func Addrs(name string, defPort int, g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Type = "stringslice"
 			cc.Get = func() interface{} {
 				return cc.Value
 			}
@@ -333,6 +345,8 @@ func Level(g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = lvl
+			cc.Type = "options"
+			cc.Opts = cl.GetLevelOpts()
 			cc.Get = func() interface{} {
 				return cc.Value
 			}
@@ -354,6 +368,8 @@ func Algo(name string, g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Type = "options"
+			cc.Opts = getAlgoOptions()
 			cc.Get = func() interface{} {
 				return cc.Value
 			}
@@ -375,6 +391,7 @@ func Float(name string, g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Type = "float"
 			cc.Get = func() interface{} {
 				return cc.Value
 			}
@@ -396,6 +413,7 @@ func Duration(name string, g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Type = "duration"
 			cc.Get = func() interface{} {
 				return cc.Value
 			}
@@ -417,6 +435,8 @@ func Net(name string, g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
+			cc.Type = "options"
+			cc.Opts = Networks
 			cc.Get = func() interface{} {
 				return cc.Value
 			}
