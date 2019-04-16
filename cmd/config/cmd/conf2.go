@@ -49,31 +49,33 @@ var runConf = func(args []string, tokens config.Tokens, app *config.App) int {
 
 	// runbranch is the menu for running servers
 	runbranch = func() (out *tview.TreeNode) {
-		out = tview.NewTreeNode("run a server")
+		out = tview.NewTreeNode("🚦run a server")
 		out.SetReference(root).
 			SetSelectable(true).
 			SetSelectedFunc(func() {
 				out.SetExpanded(!out.IsExpanded())
 			}).
 			SetExpanded(false).
-			AddChild(tview.NewTreeNode("node")).
-			AddChild(tview.NewTreeNode("wallet")).
-			AddChild(tview.NewTreeNode("shell"))
+			AddChild(tview.NewTreeNode("🌱node")).
+			AddChild(tview.NewTreeNode("💵wallet")).
+			AddChild(tview.NewTreeNode("🐚shell"))
 		return
 	}()
 
-	// configBranch is the configuration item tree, structured to follow the
-	// two level tree containing config items
-	configBranch = func() (out *tview.TreeNode) {
-		out = tview.NewTreeNode("configuration")
-		out.SetSelectable(true).
-			SetSelectedFunc(func() {
-				// This toggles the branch to open or close
-				out.SetExpanded(!out.IsExpanded())
-			}).
-			SetExpanded(false)
-		return
-	}()
+	// // configBranch is the configuration item tree, structured to follow the
+	// // two level tree containing config items
+	// configBranch = func() (out *tview.TreeNode) {
+	// 	out = tview.NewTreeNode("configuration")
+	// 	out.SetSelectable(true).
+	// 		SetSelectedFunc(func() {
+	// 			// This toggles the branch to open or close
+	// 			out.SetExpanded(!out.IsExpanded())
+	// 		}).
+	// 		SetExpanded(false)
+	// 	return
+	// }()
+
+	configBranch = app.Cats.GetCatTree(tapp, treeview)
 
 	// treeroot is the root object that contains nothing except tree nodes
 	treeroot = func() (out *tview.TreeNode) {
@@ -129,64 +131,104 @@ var runConf = func(args []string, tokens config.Tokens, app *config.App) int {
 		return
 	}()
 
-	// This function can be used for any opener to push the view to the bottom
-	// of the new branch and then return to the parent node so the user sees
-	// when they have activated an item
-	openjump := func(node *tview.TreeNode) {
-		node.SetExpanded(!node.IsExpanded())
-		if node.IsExpanded() {
-			// This makes sure the user sees the group they unfold
-			// first it jumps to the last child
-			treeview.SetCurrentNode(
-				node.GetChildren()[len(node.GetChildren())-1])
-			tapp.ForceDraw()
-			// then back to the parent node
-			treeview.SetCurrentNode(node)
-			tapp.ForceDraw()
-		}
-	}
+	// // This function can be used for any opener to push the view to the bottom
+	// // of the new branch and then return to the parent node so the user sees
+	// // when they have activated an item
+	// openjump := func(node *tview.TreeNode) {
+	// 	node.SetExpanded(!node.IsExpanded())
+	// 	if node.IsExpanded() {
+	// 		// This makes sure the user sees the group they unfold
+	// 		// first it jumps to the last child
+	// 		treeview.SetCurrentNode(
+	// 			node.GetChildren()[len(node.GetChildren())-1])
+	// 		tapp.ForceDraw()
+	// 		// then back to the parent node
+	// 		treeview.SetCurrentNode(node)
+	// 		tapp.ForceDraw()
+	// 	}
+	// }
 
-	// now we assemble the first level of the configuration categories
-	catkeys := app.Cats.GetSortedKeys()
+	// // now we assemble the first level of the configuration categories
+	// catkeys := app.Cats.GetSortedKeys()
 
-	// next the map of items in each category
-	var itemkeys [][]string
-	for _, x := range catkeys {
-		itemkeys = append(itemkeys, app.Cats[x].GetSortedKeys())
-	}
+	// // next the map of items in each category
+	// var itemkeys [][]string
+	// for _, x := range catkeys {
+	// 	itemkeys = append(itemkeys, app.Cats[x].GetSortedKeys())
+	// }
 
-	nodemap := make(map[string]map[string]*tview.TreeNode)
-	catNodes := func() (out []*tview.TreeNode) {
-		out = make([]*tview.TreeNode, len(catkeys))
-		// first attach new nodes from the categories
-		for i, x := range catkeys {
-			out[i] = tview.NewTreeNode(x).
-				SetReference(configBranch).
-				SetSelectable(true).
-				SetExpanded(false)
-			outi := out[i]
-			outi.SetSelectedFunc(func() { openjump(outi) })
-			nodemap[x] = make(map[string]*tview.TreeNode)
-		}
-		// items per category are indexed by same order, and attached to the
-		// nodes thusly. We constructed one and two dimensional string slice
-		// encoding this order in the indexes of each
-		for i, x := range itemkeys {
-			for _, y := range x {
-				nodemap[catkeys[i]][y] = tview.NewTreeNode(y).
-					SetReference(out[i]).
-					SetSelectable(true).
-					SetExpanded(false)
-				out[i].AddChild(nodemap[catkeys[i]][y])
-			}
-		}
-		return
-	}()
+	// nodemap := make(map[string]map[string]*tview.TreeNode)
 
-	// attach category nodes to tree
-	for _, x := range catNodes {
-		configBranch.AddChild(x)
-	}
+	// // generates current text for a given item in the category map
+	// getItemText := func(cat, item string) (out string) {
+	// 	// TODO: need to get all items in category for tag&value padlength
+	// 	return item
+	// }
+
+	// // attach the various edit methods to each item
+	// getEditor := func(cat, item string) (out []*tview.TreeNode) {
+	// 	for i, x := range nodemap {
+	// 		for j := range x {
+	// 			acij := app.Cats[i][j]
+	// 			fmt.Println(acij.Type)
+	// 			switch acij.Type {
+	// 			case "int":
+	// 			case "float":
+	// 			case "duration":
+	// 			case "string":
+	// 			case "stringslice":
+	// 			case "options":
+	// 			case "bool":
+	// 				// y.AddChild(
+	// 				// 	tview.NewTreeNode("true"),
+	// 				// ).
+	// 				// 	AddChild(
+	// 				// 		tview.NewTreeNode("false"),
+	// 				// 	)
+	// 				// // true/false
+	// 			default:
+	// 			}
+	// 		}
+	// 	}
+	// 	return
+	// }
+
+	// catNodes := func() (out []*tview.TreeNode) {
+	// 	out = make([]*tview.TreeNode, len(catkeys))
+	// 	// first attach new nodes from the categories
+	// 	for i, x := range catkeys {
+	// 		out[i] = tview.NewTreeNode(x).
+	// 			SetReference(configBranch).
+	// 			SetSelectable(true).
+	// 			SetExpanded(false)
+	// 		outi := out[i]
+	// 		outi.SetSelectedFunc(func() { openjump(outi) })
+	// 		nodemap[x] = make(map[string]*tview.TreeNode)
+	// 	}
+	// 	// items per category are indexed by same order, and attached to the
+	// 	// nodes thusly. We constructed one and two dimensional string slice
+	// 	// encoding this order in the indexes of each
+	// 	for i, x := range itemkeys {
+	// 		for _, y := range x {
+	// 			nodemap[catkeys[i]][y] =
+	// 				tview.NewTreeNode(getItemText(catkeys[i], y)).
+	// 					SetReference(out[i]).
+	// 					SetSelectable(true).
+	// 					SetExpanded(false)
+	// 			editors := getEditor(catkeys[i], y)
+	// 			for _, z := range editors {
+	// 				nodemap[catkeys[i]][y].AddChild(z)
+	// 			}
+	// 			out[i].AddChild(nodemap[catkeys[i]][y])
+	// 		}
+	// 	}
+	// 	return
+	// }()
+
+	// // attach category nodes to tree
+	// for _, x := range catNodes {
+	// 	configBranch.AddChild(x)
+	// }
 
 	if e := tapp.SetRoot(root, true).Run(); e != nil {
 		panic(e)
@@ -195,7 +237,7 @@ var runConf = func(args []string, tokens config.Tokens, app *config.App) int {
 	// spew.Config.MaxDepth = 3
 	// spew.Dump(nodemap)
 
-	_, _ = catkeys, itemkeys
-	_ = catNodes
+	// _, _ = catkeys, itemkeys
+	// _ = catNodes
 	return 0
 }
