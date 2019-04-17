@@ -212,6 +212,49 @@ type Row struct {
 	String   string
 	Usage    string
 }
+
+func (r *Row) Bool() bool {
+	if *r.Value == nil {
+		return false
+	}
+	return (*r.Value).(bool)
+}
+
+func (r *Row) Int() int {
+	if *r.Value == nil {
+		return -1
+	}
+	return (*r.Value).(int)
+}
+
+func (r *Row) Float() float64 {
+	if *r.Value == nil {
+		return -1.0
+	}
+	return (*r.Value).(float64)
+}
+
+func (r *Row) Duration() time.Duration {
+	if *r.Value == nil {
+		return 0
+	}
+	return (*r.Value).(time.Duration)
+}
+
+func (r *Row) Tag() string {
+	if *r.Value == nil {
+		return ""
+	}
+	return (*r.Value).(string)
+}
+
+func (r *Row) Tags() []string {
+	if *r.Value == nil {
+		return nil
+	}
+	return (*r.Value).([]string)
+}
+
 type RowGenerator func(ctx *Row)
 type RowGenerators []RowGenerator
 
