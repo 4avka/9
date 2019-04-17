@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -32,8 +33,20 @@ func GenAddr(name string, port int) func(r *Row, in interface{}) bool {
 			s = &I
 		case *string:
 			s = I
+		case nil:
+			r.Value = nil
+			return true
 		default:
 			return false
+		}
+		if s == nil {
+			r.Value = nil
+			return true
+		}
+		if *s == "" {
+			s = nil
+			r.Value = nil
+			return true
 		}
 		_, _, err := net.SplitHostPort(*s)
 		if err != nil {
@@ -105,6 +118,7 @@ func getAlgoOptions() (options []string) {
 		options = append(options, x)
 	}
 	options = append(options, modernd)
+	sort.Strings(options)
 	return
 }
 

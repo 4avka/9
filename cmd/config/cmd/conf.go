@@ -129,7 +129,7 @@ func RunConf(args []string, tokens config.Tokens, app *config.App) int {
 			}
 		})
 		// we want it to be neat, so here we compute max width for the tag label
-		// and value fields.
+		// fields.
 		maxlen := 0
 		maxvaluelen := 0
 		// first get the max length of the keys for this section

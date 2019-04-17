@@ -164,7 +164,7 @@ func Port(name string, g ...RowGenerator) CatGenerator {
 		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
-			cc.Type = "int"
+			cc.Type = "port"
 			cc.Validate = Valid.Port
 			cc.Value = new(interface{})
 			cc.Get = func() interface{} {
