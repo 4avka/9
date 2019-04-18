@@ -1,42 +1,60 @@
 package config
 
 import (
-	"fmt"
 	"strings"
-	"time"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/rivo/tview"
 )
 
-type rowText struct {
+type RowText struct {
 	Row      Row
 	Cat      string
 	NodeText string
 }
-type rowTexts []rowText
+type RowTexts []RowText
+
+type CatTreeContext struct {
+	Parent   *tview.TreeNode
+	App      *tview.Application
+	TreeView *tview.TreeView
+}
+
+type CTGenContext struct {
+	CatTreeContext
+	RowText
+}
+
+func (c *CatTreeContext) SetParent(p *tview.TreeNode) *CatTreeContext {
+	c.Parent = p
+	return c
+}
+
+// This function can be used for any opener to push the view to the bottom
+// of the new branch and then return to the parent node so the user sees
+// when they have activated an item
+func openjump(c *CatTreeContext) {
+	c.Parent.SetExpanded(!c.Parent.IsExpanded())
+	if c.Parent.IsExpanded() {
+		// This makes sure the user sees the group they unfold
+		// first it jumps to the last child
+		ii := len(c.Parent.GetChildren()) - 1
+		if ii > 0 {
+			c.TreeView.SetCurrentNode(
+				c.Parent.GetChildren()[len(c.Parent.GetChildren())-1])
+			c.App.ForceDraw()
+		}
+		// then back to the parent node
+		c.TreeView.SetCurrentNode(c.Parent)
+		c.App.ForceDraw()
+	}
+}
 
 func (c *Cats) GetCatTree(ta *tview.Application, tv *tview.TreeView) (out *tview.TreeNode) {
 	C := *c
-
-	// This function can be used for any opener to push the view to the bottom
-	// of the new branch and then return to the parent node so the user sees
-	// when they have activated an item
-	openjump := func(node *tview.TreeNode) {
-		node.SetExpanded(!node.IsExpanded())
-		if node.IsExpanded() {
-			// This makes sure the user sees the group they unfold
-			// first it jumps to the last child
-			ii := len(node.GetChildren()) - 1
-			if ii > 0 {
-				tv.SetCurrentNode(
-					node.GetChildren()[len(node.GetChildren())-1])
-				ta.ForceDraw()
-			}
-			// then back to the parent node
-			tv.SetCurrentNode(node)
-			ta.ForceDraw()
-		}
+	ctx := &CatTreeContext{
+		App:      ta,
+		TreeView: tv,
 	}
 
 	// The root is configuration
@@ -44,13 +62,13 @@ func (c *Cats) GetCatTree(ta *tview.Application, tv *tview.TreeView) (out *tview
 
 	cats := c.GetSortedKeys()
 
-	var items []rowTexts
+	var items []RowTexts
 
 	for _, x := range cats {
 		cx := C[x]
-		var it rowTexts
+		var it RowTexts
 		for _, y := range cx.GetSortedKeys() {
-			it = append(it, rowText{
+			it = append(it, RowText{
 				Row: cx[y],
 				Cat: x,
 			})
@@ -61,121 +79,36 @@ func (c *Cats) GetCatTree(ta *tview.Application, tv *tview.TreeView) (out *tview
 		}
 		items = append(items, it)
 	}
-
 	for i := range items {
 		co := tview.NewTreeNode("📁 " + cats[i])
 		co.SetSelectedFunc(func() {
-			openjump(co)
+			openjump(ctx.SetParent(co))
 		}).Collapse()
-		for _, x := range items[i] {
+		for _, xx := range items[i] {
+			x := xx
 			io := tview.NewTreeNode(x.NodeText)
+			ctx = ctx.SetParent(io)
 			switch x.Row.Type {
 			case "bool":
-				if x.Row.Bool() {
-					io.AddChild(tview.NewTreeNode("✅true"))
-					io.AddChild(tview.NewTreeNode("  false"))
-				} else {
-					io.AddChild(tview.NewTreeNode("  true"))
-					io.AddChild(tview.NewTreeNode("✅false"))
-				}
-				def := "false"
-				if (*x.Row.Default).(bool) {
-					def = "true"
-				}
-				io.AddChild(tview.NewTreeNode("set default (" + def + ")"))
+				GenBool(ctx, &x)
 			case "port":
-				if x.Row.Value != nil {
-					io.AddChild(tview.NewTreeNode("<unset>"))
-				} else {
-					io.AddChild(tview.NewTreeNode(fmt.Sprint(x.Row.Int())))
-					io.AddChild(tview.NewTreeNode("clear"))
-				}
-				if x.Row.Default != nil {
-					if p, ok := (*x.Row.Default).(int); ok {
-						io.AddChild(tview.NewTreeNode("set default (" + fmt.Sprint(p) + ")"))
-					} else {
-						io.AddChild(tview.NewTreeNode("<unset>"))
-					}
-				}
+				GenPort(ctx, &x)
 			case "int":
-				io.AddChild(tview.NewTreeNode(fmt.Sprint(x.Row.Int())))
-				if x.Row.Default != nil {
-					if p, ok := (*x.Row.Default).(int); ok {
-						io.AddChild(tview.NewTreeNode("set default (" + fmt.Sprint(p) + ")"))
-					} else {
-						io.AddChild(tview.NewTreeNode("<unset>"))
-					}
-				}
+				GenInt(ctx, &x)
 			case "float":
-				io.AddChild(tview.NewTreeNode(fmt.Sprint(x.Row.Float())))
-				if x.Row.Default != nil {
-					if p, ok := (*x.Row.Default).(float64); ok {
-						io.AddChild(tview.NewTreeNode("set default (" + fmt.Sprint(p) + ")"))
-					} else {
-						io.AddChild(tview.NewTreeNode("<unset>"))
-					}
-				}
+				GenFloat(ctx, &x)
 			case "duration":
-				io.AddChild(tview.NewTreeNode(fmt.Sprint(x.Row.Duration())))
-				if x.Row.Default != nil {
-					if p, ok := (*x.Row.Default).(time.Duration); ok {
-						io.AddChild(tview.NewTreeNode("set default (" + fmt.Sprint(p) + ")"))
-					}
-				}
+				GenDuration(ctx, &x)
 			case "string":
-				if x.Row.Value != nil {
-					io.AddChild(tview.NewTreeNode(fmt.Sprint(*x.Row.Value)))
-					if *x.Row.Value != nil {
-						io.AddChild(tview.NewTreeNode("clear"))
-					}
-				} else {
-					io.AddChild(tview.NewTreeNode("<unset>"))
-				}
-				if x.Row.Default != nil {
-					if p, ok := (*x.Row.Default).(string); ok {
-						io.AddChild(tview.NewTreeNode("set default (" + fmt.Sprint(p) + ")"))
-					}
-				}
+				GenString(ctx, &x)
 			case "stringslice":
-				if x.Row.Value != nil {
-					switch ss := (*x.Row.Value).(type) {
-					case []string:
-						for _, x := range ss {
-							if len(x) > 0 {
-								sss := tview.NewTreeNode(x).
-									AddChild(tview.NewTreeNode("edit")).
-									AddChild(tview.NewTreeNode("delete"))
-								sss.SetSelectedFunc(func() {
-									openjump(sss)
-								}).Collapse()
-								io.AddChild(sss)
-							}
-						}
-					default:
-					}
-				}
-				io.AddChild(tview.NewTreeNode("add new"))
+				GenStringSlice(ctx, &x)
 			case "options":
-				val := x.Row.Tag()
-				for _, x := range x.Row.Opts {
-					var itemtext string
-					if x == val {
-						itemtext = "✅"
-					} else {
-						itemtext = "  "
-					}
-					itemtext += x
-					io.AddChild(tview.NewTreeNode(itemtext))
-				}
-				if x.Row.Default != nil {
-					if p, ok := (*x.Row.Default).(string); ok {
-						io.AddChild(tview.NewTreeNode("set default (" + fmt.Sprint(p) + ")"))
-					}
-				}
+				GenOptions(ctx, &x)
 			default:
 			}
 			io.SetSelectedFunc(func() {
-				openjump(io)
+				openjump(ctx.SetParent(io))
 			}).Collapse()
 			co.AddChild(io)
 		}
@@ -187,7 +120,7 @@ func (c *Cats) GetCatTree(ta *tview.Application, tv *tview.TreeView) (out *tview
 	return
 }
 
-func (r rowTexts) GenRowTexts() (out []string) {
+func (r RowTexts) GenRowTexts() (out []string) {
 	maxNameLen := 0
 	// maxValueLen := 0
 	for _, x := range r {
@@ -208,13 +141,13 @@ func (r rowTexts) GenRowTexts() (out []string) {
 // category. they are collected first because their layout depends on the
 // maximum width text in each set of tag and value
 // var cats []*tview.TreeNode
-// var itemtexts []rowTexts
+// var itemtexts []RowTexts
 // for _, cat := range c.GetSortedKeys() {
 // 	catmap := (*c)[cat]
 // 	ct := tview.NewTreeNode("📁" + cat).Collapse()
 // 	ct.SetSelectedFunc(func() { openjump(ct) })
 // 	cats = append(cats, ct)
-// 	itemtexts = append(itemtexts, rowTexts{})
+// 	itemtexts = append(itemtexts, RowTexts{})
 // 	for _, item := range catmap.GetSortedKeys() {
 // 		row := catmap[item]
 // 		// _, _, _, _ = cat, catmap, item, row
@@ -346,7 +279,7 @@ func (r rowTexts) GenRowTexts() (out []string) {
 // }
 // out.SetSelectedFunc(func() { openjump(out) }).CollapseAll()
 
-// func (r Row) GetRowText() (out rowText) {
+// func (r Row) GetRowText() (out RowText) {
 // 	out.Name = r.Name
 // 	if r.Value != nil {
 // 		out.Value = fmt.Sprint(*r.Value)
