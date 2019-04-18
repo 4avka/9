@@ -105,19 +105,10 @@ func Handler(hnd func(args []string, tokens Tokens, app *App) int) CommandGenera
 
 // Group Item Generators
 
-func newRow() *Row {
-	return &Row{
-		Value:   new(interface{}),
-		Default: new(interface{}),
-		Min:     new(interface{}),
-		Max:     new(interface{}),
-	}
-}
-
 func File(name string, g ...RowGenerator) CatGenerator {
 	G := RowGenerators(g)
 	return func(ctx *Cat) {
-		c := newRow()
+		c := &Row{}
 		c.Init = func(cc *Row) {
 			cc.Name = name
 			cc.Type = "string"

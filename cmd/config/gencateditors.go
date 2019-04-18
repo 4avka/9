@@ -92,21 +92,49 @@ func GenDuration(c *CatTreeContext, rt *RowText) {
 }
 
 func GenString(c *CatTreeContext, rt *RowText) {
-	if rt.Row.Value != nil {
-		c.Parent.AddChild(
-			tview.NewTreeNode(
-				"'" + fmt.Sprint(*rt.Row.Value) + "'"))
-		if *rt.Row.Value != nil {
-			c.Parent.AddChild(tview.NewTreeNode("clear"))
-		}
-	} else {
-		c.Parent.AddChild(tview.NewTreeNode("<unset>"))
+	istring := func() string {
+		return "'" + fmt.Sprint(*rt.Row.Value) + "'"
 	}
+	var p string
+	var ok bool
+	// var defiface interface{}
 	if rt.Row.Default != nil {
-		if p, ok := (*rt.Row.Default).(string); ok {
-			c.Parent.AddChild(tview.NewTreeNode("set default (" + fmt.Sprint(p) + ")"))
+		if p, ok = (*rt.Row.Default).(string); ok {
+			// 		defiface = p
 		}
 	}
+	iclear := tview.NewTreeNode("clear")
+	var gen func(ctc *CatTreeContext, rtx *RowText)
+	gen = func(ctc *CatTreeContext, rtx *RowText) {
+		if rtx.Row.Value != nil {
+			titem := tview.NewTreeNode(istring())
+			ctc.Parent.AddChild(titem)
+			if *rtx.Row.Value != nil {
+				ctc.Parent.AddChild(iclear)
+			}
+		} else {
+			ctc.Parent.AddChild(tview.NewTreeNode("<unset>"))
+		}
+		if rtx.Row.Default != nil {
+			dn := tview.NewTreeNode("set default (" + fmt.Sprint(p) + ")")
+			ctc.Parent.AddChild(dn)
+			dn.SetSelectedFunc(func() {
+				*rt.Row.Value = (*rt.Row.Default).(string)
+				c.Parent.ClearChildren()
+				gen(c, rt)
+				children := c.Parent.GetChildren()
+				ll := len(children) - 1
+				c.TreeView.SetCurrentNode(children[ll])
+			})
+		}
+	}
+	gen(c, rt)
+	iclear.SetSelectedFunc(func() {
+		c.Parent.ClearChildren()
+		*rt.Row.Value = nil
+		gen(c, rt)
+		c.TreeView.SetCurrentNode(c.Parent.GetChildren()[0])
+	})
 }
 
 func GenStringSlice(c *CatTreeContext, rt *RowText) {
@@ -176,11 +204,5 @@ func GenOptions(c *CatTreeContext, rt *RowText) {
 		x.SetSelectedFunc(func() {
 			handler(rt.Row.Opts[i])
 		})
-	}
-
-	if rt.Row.Default != nil {
-		if p, ok := (*rt.Row.Default).(string); ok {
-			c.Parent.AddChild(tview.NewTreeNode("set default (" + fmt.Sprint(p) + ")"))
-		}
 	}
 }
