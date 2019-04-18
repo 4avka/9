@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/rivo/tview"
@@ -17,8 +18,29 @@ type rowTexts []rowText
 
 func (c *Cats) GetCatTree(ta *tview.Application, tv *tview.TreeView) (out *tview.TreeNode) {
 	C := *c
+
+	// This function can be used for any opener to push the view to the bottom
+	// of the new branch and then return to the parent node so the user sees
+	// when they have activated an item
+	openjump := func(node *tview.TreeNode) {
+		node.SetExpanded(!node.IsExpanded())
+		if node.IsExpanded() {
+			// This makes sure the user sees the group they unfold
+			// first it jumps to the last child
+			ii := len(node.GetChildren()) - 1
+			if ii > 0 {
+				tv.SetCurrentNode(
+					node.GetChildren()[len(node.GetChildren())-1])
+				ta.ForceDraw()
+			}
+			// then back to the parent node
+			tv.SetCurrentNode(node)
+			ta.ForceDraw()
+		}
+	}
+
 	// The root is configuration
-	out = tview.NewTreeNode("📁configuration") //.Collapse()
+	out = tview.NewTreeNode("📁 configuration") //.Collapse()
 
 	cats := c.GetSortedKeys()
 
@@ -41,7 +63,10 @@ func (c *Cats) GetCatTree(ta *tview.Application, tv *tview.TreeView) (out *tview
 	}
 
 	for i := range items {
-		co := tview.NewTreeNode("📁" + cats[i])
+		co := tview.NewTreeNode("📁 " + cats[i])
+		co.SetSelectedFunc(func() {
+			openjump(co)
+		}).Collapse()
 		for _, x := range items[i] {
 			io := tview.NewTreeNode(x.NodeText)
 			switch x.Row.Type {
@@ -91,28 +116,67 @@ func (c *Cats) GetCatTree(ta *tview.Application, tv *tview.TreeView) (out *tview
 					}
 				}
 			case "duration":
-				//
+				io.AddChild(tview.NewTreeNode(fmt.Sprint(x.Row.Duration())))
+				if x.Row.Default != nil {
+					if p, ok := (*x.Row.Default).(time.Duration); ok {
+						io.AddChild(tview.NewTreeNode("set default (" + fmt.Sprint(p) + ")"))
+					}
+				}
 			case "string":
 				if x.Row.Value != nil {
 					io.AddChild(tview.NewTreeNode(fmt.Sprint(*x.Row.Value)))
+					if *x.Row.Value != nil {
+						io.AddChild(tview.NewTreeNode("clear"))
+					}
 				} else {
 					io.AddChild(tview.NewTreeNode("<unset>"))
 				}
-				// if x.Row.Value == nil || *x.Row.Value != nil {
-				// } else {
-				// 	io.AddChild(tview.NewTreeNode(x.Row.Tag()))
-				// }
-				// if x.Row.Default != nil {
-				// 	if p, ok := (*x.Row.Default).(int); ok {
-				// 		io.AddChild(tview.NewTreeNode("set default (" + fmt.Sprint(p) + ")"))
-				// 	}
-				// }
+				if x.Row.Default != nil {
+					if p, ok := (*x.Row.Default).(string); ok {
+						io.AddChild(tview.NewTreeNode("set default (" + fmt.Sprint(p) + ")"))
+					}
+				}
 			case "stringslice":
-				//
+				if x.Row.Value != nil {
+					switch ss := (*x.Row.Value).(type) {
+					case []string:
+						for _, x := range ss {
+							if len(x) > 0 {
+								sss := tview.NewTreeNode(x).
+									AddChild(tview.NewTreeNode("edit")).
+									AddChild(tview.NewTreeNode("delete"))
+								sss.SetSelectedFunc(func() {
+									openjump(sss)
+								}).Collapse()
+								io.AddChild(sss)
+							}
+						}
+					default:
+					}
+				}
+				io.AddChild(tview.NewTreeNode("add new"))
 			case "options":
-				//
+				val := x.Row.Tag()
+				for _, x := range x.Row.Opts {
+					var itemtext string
+					if x == val {
+						itemtext = "✅"
+					} else {
+						itemtext = "  "
+					}
+					itemtext += x
+					io.AddChild(tview.NewTreeNode(itemtext))
+				}
+				if x.Row.Default != nil {
+					if p, ok := (*x.Row.Default).(string); ok {
+						io.AddChild(tview.NewTreeNode("set default (" + fmt.Sprint(p) + ")"))
+					}
+				}
 			default:
 			}
+			io.SetSelectedFunc(func() {
+				openjump(io)
+			}).Collapse()
 			co.AddChild(io)
 		}
 		out.AddChild(co)
@@ -132,7 +196,7 @@ func (r rowTexts) GenRowTexts() (out []string) {
 		}
 	}
 	for i, x := range r {
-		padlen := maxNameLen - len(x.Row.Name)
+		padlen := maxNameLen - len(x.Row.Name) + 1
 		pad := strings.Repeat(" ", padlen+1)
 		out = append(out, x.Row.Name+pad)
 		out[i] += x.Row.Usage
@@ -140,25 +204,6 @@ func (r rowTexts) GenRowTexts() (out []string) {
 	return
 }
 
-// This function can be used for any opener to push the view to the bottom
-// of the new branch and then return to the parent node so the user sees
-// when they have activated an item
-// openjump := func(node *tview.TreeNode) {
-// 	node.SetExpanded(!node.IsExpanded())
-// 	if node.IsExpanded() {
-// 		// This makes sure the user sees the group they unfold
-// 		// first it jumps to the last child
-// 		ii := len(node.GetChildren()) - 1
-// 		if ii > 0 {
-// 			tv.SetCurrentNode(
-// 				node.GetChildren()[len(node.GetChildren())-1])
-// 			ta.ForceDraw()
-// 		}
-// 		// then back to the parent node
-// 		tv.SetCurrentNode(node)
-// 		ta.ForceDraw()
-// 	}
-// }
 // under root is the categories. gather the texts for each item in each
 // category. they are collected first because their layout depends on the
 // maximum width text in each set of tag and value
