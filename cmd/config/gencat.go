@@ -11,6 +11,8 @@ type RowText struct {
 	Row      Row
 	Cat      string
 	NodeText string
+	GetInput func(root *tview.Flex, treeview *tview.TreeView,
+		tapp *tview.Application) func() (out *tview.InputField)
 }
 type RowTexts []RowText
 
@@ -18,6 +20,7 @@ type CatTreeContext struct {
 	Parent   *tview.TreeNode
 	App      *tview.Application
 	TreeView *tview.TreeView
+	Root     *tview.Flex
 }
 
 type CTGenContext struct {
@@ -50,11 +53,12 @@ func openjump(c *CatTreeContext) {
 	}
 }
 
-func (c *Cats) GetCatTree(ta *tview.Application, tv *tview.TreeView) (out *tview.TreeNode) {
+func (c *Cats) GetCatTree(ta *tview.Application, tv *tview.TreeView, root *tview.Flex) (out *tview.TreeNode) {
 	C := *c
 	ctx := &CatTreeContext{
 		App:      ta,
 		TreeView: tv,
+		Root:     root,
 	}
 
 	// The root is configuration

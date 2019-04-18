@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	"git.parallelcoin.io/dev/9/cmd/config"
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
@@ -14,7 +12,6 @@ var runConf = func(args []string, tokens config.Tokens, app *config.App) int {
 	// pre-declare everything so we can decide the order to put things
 	var titlebar *tview.TextView
 	var runbranch, configBranch, treeroot *tview.TreeNode
-	var input *tview.InputField
 	var treeview *tview.TreeView
 	var root *tview.Flex
 	var tapp *tview.Application
@@ -37,8 +34,17 @@ var runConf = func(args []string, tokens config.Tokens, app *config.App) int {
 	// treeview is the tree used to navigate the options
 	treeview = func() (out *tview.TreeView) {
 		out = tview.NewTreeView()
+		out.SetBorderPadding(0, 1, 1, 1)
+		out.SetInputCapture(
+			func(event *tcell.EventKey) *tcell.EventKey {
+				if event.Key() == 27 {
+					tapp.Stop()
+				}
+				return event
+			})
 		return
 	}()
+	treeview.SetBorderPadding(0, 0, 1, 1)
 
 	// root is the canvas (the whole current terminal view)
 	root = func() (out *tview.Flex) {
@@ -75,7 +81,7 @@ var runConf = func(args []string, tokens config.Tokens, app *config.App) int {
 	// 	return
 	// }()
 
-	configBranch = app.Cats.GetCatTree(tapp, treeview)
+	configBranch = app.Cats.GetCatTree(tapp, treeview, root)
 
 	// treeroot is the root object that contains nothing except tree nodes
 	treeroot = func() (out *tview.TreeNode) {
@@ -91,153 +97,9 @@ var runConf = func(args []string, tokens config.Tokens, app *config.App) int {
 	root.AddItem(titlebar, 1, 1, false).
 		AddItem(treeview, 0, 1, true)
 
-	inputCapture := func(e *tcell.EventKey) *tcell.EventKey {
-		switch {
-		case e.Key() == 27:
-			// if user presses escape, switch back to the treeview
-			root.RemoveItem(input)
-			treeview.SetBorderPadding(0, 1, 1, 1)
-			tapp.SetFocus(treeview)
-		case e.Key() == 13:
-			// if the user presses enter, trigger validate and save
-			currenttext := input.GetText()
-			currentlabel := input.GetLabel()
-			treeview.SetBorderPadding(0, 0, 1, 1)
-			input.SetFieldBackgroundColor(tcell.ColorYellow).
-				SetFieldTextColor(tcell.ColorBlack).
-				SetText("saving key " + currentlabel + currenttext).
-				SetLabel("")
-			tapp.ForceDraw()
-			time.Sleep(time.Second * 1)
-			input.SetFieldBackgroundColor(tcell.ColorDarkGreen).
-				SetLabel("")
-			root.RemoveItem(input)
-			treeview.SetBorderPadding(0, 1, 1, 1)
-			tapp.SetFocus(treeview).
-				ForceDraw()
-		}
-		return e
-	}
-
-	// input field is a field that appears at the bottom of the screen when
-	// a string or number is being edited
-	input = func() (out *tview.InputField) {
-		out = tview.NewInputField()
-		out.SetFieldBackgroundColor(tcell.ColorDarkGreen).
-			SetFieldTextColor(tcell.ColorBlack).
-			SetLabelColor(tcell.ColorBlack).
-			Box.SetBackgroundColor(tcell.ColorGreen)
-		out.SetInputCapture(inputCapture)
-		return
-	}()
-
-	// // This function can be used for any opener to push the view to the bottom
-	// // of the new branch and then return to the parent node so the user sees
-	// // when they have activated an item
-	// openjump := func(node *tview.TreeNode) {
-	// 	node.SetExpanded(!node.IsExpanded())
-	// 	if node.IsExpanded() {
-	// 		// This makes sure the user sees the group they unfold
-	// 		// first it jumps to the last child
-	// 		treeview.SetCurrentNode(
-	// 			node.GetChildren()[len(node.GetChildren())-1])
-	// 		tapp.ForceDraw()
-	// 		// then back to the parent node
-	// 		treeview.SetCurrentNode(node)
-	// 		tapp.ForceDraw()
-	// 	}
-	// }
-
-	// // now we assemble the first level of the configuration categories
-	// catkeys := app.Cats.GetSortedKeys()
-
-	// // next the map of items in each category
-	// var itemkeys [][]string
-	// for _, x := range catkeys {
-	// 	itemkeys = append(itemkeys, app.Cats[x].GetSortedKeys())
-	// }
-
-	// nodemap := make(map[string]map[string]*tview.TreeNode)
-
-	// // generates current text for a given item in the category map
-	// getItemText := func(cat, item string) (out string) {
-	// 	// TODO: need to get all items in category for tag&value padlength
-	// 	return item
-	// }
-
-	// // attach the various edit methods to each item
-	// getEditor := func(cat, item string) (out []*tview.TreeNode) {
-	// 	for i, x := range nodemap {
-	// 		for j := range x {
-	// 			acij := app.Cats[i][j]
-	// 			fmt.Println(acij.Type)
-	// 			switch acij.Type {
-	// 			case "int":
-	// 			case "float":
-	// 			case "duration":
-	// 			case "string":
-	// 			case "stringslice":
-	// 			case "options":
-	// 			case "bool":
-	// 				// y.AddChild(
-	// 				// 	tview.NewTreeNode("true"),
-	// 				// ).
-	// 				// 	AddChild(
-	// 				// 		tview.NewTreeNode("false"),
-	// 				// 	)
-	// 				// // true/false
-	// 			default:
-	// 			}
-	// 		}
-	// 	}
-	// 	return
-	// }
-
-	// catNodes := func() (out []*tview.TreeNode) {
-	// 	out = make([]*tview.TreeNode, len(catkeys))
-	// 	// first attach new nodes from the categories
-	// 	for i, x := range catkeys {
-	// 		out[i] = tview.NewTreeNode(x).
-	// 			SetReference(configBranch).
-	// 			SetSelectable(true).
-	// 			SetExpanded(false)
-	// 		outi := out[i]
-	// 		outi.SetSelectedFunc(func() { openjump(outi) })
-	// 		nodemap[x] = make(map[string]*tview.TreeNode)
-	// 	}
-	// 	// items per category are indexed by same order, and attached to the
-	// 	// nodes thusly. We constructed one and two dimensional string slice
-	// 	// encoding this order in the indexes of each
-	// 	for i, x := range itemkeys {
-	// 		for _, y := range x {
-	// 			nodemap[catkeys[i]][y] =
-	// 				tview.NewTreeNode(getItemText(catkeys[i], y)).
-	// 					SetReference(out[i]).
-	// 					SetSelectable(true).
-	// 					SetExpanded(false)
-	// 			editors := getEditor(catkeys[i], y)
-	// 			for _, z := range editors {
-	// 				nodemap[catkeys[i]][y].AddChild(z)
-	// 			}
-	// 			out[i].AddChild(nodemap[catkeys[i]][y])
-	// 		}
-	// 	}
-	// 	return
-	// }()
-
-	// // attach category nodes to tree
-	// for _, x := range catNodes {
-	// 	configBranch.AddChild(x)
-	// }
-
 	if e := tapp.SetRoot(root, true).Run(); e != nil {
 		panic(e)
 	}
 
-	// spew.Config.MaxDepth = 3
-	// spew.Dump(nodemap)
-
-	// _, _ = catkeys, itemkeys
-	// _ = catNodes
 	return 0
 }

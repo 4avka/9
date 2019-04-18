@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
 )
 
@@ -108,9 +109,25 @@ func GenString(c *CatTreeContext, rt *RowText) {
 	gen = func(ctc *CatTreeContext, rtx *RowText) {
 		if rtx.Row.Value != nil {
 			titem := tview.NewTreeNode(istring())
+			titem.SetSelectedFunc(func() {
+				ifunc := GetStringInputFunc(ctc.Root, ctc.TreeView, ctc.App)()
+				ifunc.SetText(rtx.Row.Tag()).
+					SetLabelColor(tcell.ColorWhite).
+					SetLabel(rtx.Row.Type + "'" + rtx.Row.Name + "' ").
+					SetFieldBackgroundColor(tcell.ColorBlack).
+					SetFieldTextColor(tcell.ColorWhite).
+					Box.SetBackgroundColor(tcell.ColorDarkGreen)
+				ctc.Root.AddItem(ifunc, 1, 0, false)
+				ctc.App.SetFocus(ifunc)
+			})
 			ctc.Parent.AddChild(titem)
 			if *rtx.Row.Value != nil {
-				ctc.Parent.AddChild(iclear)
+				ctc.Parent.AddChild(iclear.SetSelectedFunc(func() {
+					ctc.Parent.ClearChildren()
+					*rtx.Row.Value = nil
+					gen(ctc, rtx)
+					ctc.TreeView.SetCurrentNode(ctc.Parent.GetChildren()[0])
+				}))
 			}
 		} else {
 			ctc.Parent.AddChild(tview.NewTreeNode("<unset>"))
@@ -119,22 +136,16 @@ func GenString(c *CatTreeContext, rt *RowText) {
 			dn := tview.NewTreeNode("set default (" + fmt.Sprint(p) + ")")
 			ctc.Parent.AddChild(dn)
 			dn.SetSelectedFunc(func() {
-				*rt.Row.Value = (*rt.Row.Default).(string)
+				*rtx.Row.Value = (*rtx.Row.Default).(string)
 				c.Parent.ClearChildren()
-				gen(c, rt)
-				children := c.Parent.GetChildren()
+				gen(ctc, rtx)
+				children := ctc.Parent.GetChildren()
 				ll := len(children) - 1
-				c.TreeView.SetCurrentNode(children[ll])
+				ctc.TreeView.SetCurrentNode(children[ll])
 			})
 		}
 	}
 	gen(c, rt)
-	iclear.SetSelectedFunc(func() {
-		c.Parent.ClearChildren()
-		*rt.Row.Value = nil
-		gen(c, rt)
-		c.TreeView.SetCurrentNode(c.Parent.GetChildren()[0])
-	})
 }
 
 func GenStringSlice(c *CatTreeContext, rt *RowText) {
@@ -204,5 +215,46 @@ func GenOptions(c *CatTreeContext, rt *RowText) {
 		x.SetSelectedFunc(func() {
 			handler(rt.Row.Opts[i])
 		})
+	}
+}
+
+func GetStringInputFunc(root *tview.Flex, treeview *tview.TreeView,
+	tapp *tview.Application) func() (out *tview.InputField) {
+	// input field is a field that appears at the bottom of the screen when
+	// a string or number is being edited
+	return func() (out *tview.InputField) {
+		out = tview.NewInputField()
+		out.SetFieldBackgroundColor(tcell.ColorDarkGreen).
+			SetFieldTextColor(tcell.ColorBlack).
+			SetLabelColor(tcell.ColorBlack).
+			Box.SetBackgroundColor(tcell.ColorGreen)
+		out.SetInputCapture(func(e *tcell.EventKey) *tcell.EventKey {
+			switch {
+			case e.Key() == 27:
+				// if user presses escape, switch back to the treeview
+				root.RemoveItem(out)
+				treeview.SetBorderPadding(0, 1, 1, 1)
+				tapp.SetFocus(treeview)
+			case e.Key() == 13:
+				// if the user presses enter, trigger validate and save
+				currenttext := out.GetText()
+				currentlabel := out.GetLabel()
+				treeview.SetBorderPadding(0, 0, 1, 1)
+				out.SetFieldBackgroundColor(tcell.ColorYellow).
+					SetFieldTextColor(tcell.ColorBlack).
+					SetText("saving key " + currentlabel + currenttext).
+					SetLabel("")
+				tapp.ForceDraw()
+				time.Sleep(time.Second * 1)
+				out.SetFieldBackgroundColor(tcell.ColorDarkGreen).
+					SetLabel("")
+				root.RemoveItem(out)
+				treeview.SetBorderPadding(0, 0, 1, 1)
+				tapp.SetFocus(treeview).
+					ForceDraw()
+			}
+			return e
+		})
+		return
 	}
 }
