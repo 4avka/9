@@ -34,18 +34,18 @@ func GenAddr(name string, port int) func(r *Row, in interface{}) bool {
 		case *string:
 			s = I
 		case nil:
-			r.Value = nil
+			r.Value.Put(nil)
 			return true
 		default:
 			return false
 		}
 		if s == nil {
-			r.Value = nil
+			r.Value.Put(nil)
 			return true
 		}
 		if *s == "" {
 			s = nil
-			r.Value = nil
+			r.Value.Put(nil)
 			return true
 		}
 		_, _, err := net.SplitHostPort(*s)
@@ -53,12 +53,7 @@ func GenAddr(name string, port int) func(r *Row, in interface{}) bool {
 			*s = net.JoinHostPort(*s, fmt.Sprint(port))
 		}
 		if r != nil {
-			if r.Value != nil {
-				*r.Value = *s
-			} else {
-				r.Value = new(interface{})
-				*r.Value = *s
-			}
+			r.Value = r.Value.Put(*s)
 			r.String = *s
 		}
 		return true
@@ -98,15 +93,9 @@ func GenAddrs(name string, port int) func(r *Row, in interface{}) bool {
 		}
 		if ss != nil {
 			if r != nil {
-				if r.Value != nil {
-					*r.Value = *ss
-				} else {
-					r.Value = new(interface{})
-					*r.Value = *ss
-				}
-				r.String = fmt.Sprint(*ss)
+				r.Value = r.Value.Put(ss)
 			}
-			return true
+			r.String = fmt.Sprint(*ss)
 		}
 		return true
 	}
@@ -145,18 +134,10 @@ var Valid = struct {
 				s = filepath.Join(DataDir, s)
 			}
 			ss := CleanAndExpandPath(s)
-			if ss == "." {
-				ss = ""
-			}
-			if r != nil {
-				if r.Value != nil {
-					*r.Value = ss
-				} else {
-					*r.Value = ss
-				}
+			if r != nil && ss != "." {
+				r.Value = r.Value.Put(ss)
 				r.String = fmt.Sprint(ss)
 			}
-			r.String = fmt.Sprint(ss)
 			return true
 		}
 		return false
@@ -182,12 +163,7 @@ var Valid = struct {
 			}
 			if r != nil {
 				r.String = fmt.Sprint(ss)
-				if r.Value != nil {
-					*r.Value = ss
-				} else {
-					r.Value = new(interface{})
-					*r.Value = ss
-				}
+				r.Value = r.Value.Put(ss)
 			}
 			return true
 		}
@@ -222,12 +198,7 @@ var Valid = struct {
 			return false
 		}
 		if r != nil {
-			if r.Value != nil {
-				*r.Value = ii
-			} else {
-				r.Value = new(interface{})
-				*r.Value = &ii
-			}
+			r.Value = r.Value.Put(ii)
 			r.String = fmt.Sprint(ii)
 		}
 		return true
@@ -266,12 +237,7 @@ var Valid = struct {
 	boolout:
 		if r != nil {
 			r.String = fmt.Sprint(b)
-			if r.Value != nil {
-				*r.Value = b
-			} else {
-				r.Value = new(interface{})
-				*r.Value = b
-			}
+			r.Value = r.Value.Put(b)
 		}
 		return true
 	},
@@ -302,12 +268,7 @@ var Valid = struct {
 		}
 		if r != nil {
 			r.String = fmt.Sprint(ii)
-			if r.Value != nil {
-				*r.Value = ii
-			} else {
-				r.Value = new(interface{})
-				*r.Value = &ii
-			}
+			r.Value = r.Value.Put(ii)
 		}
 		return true
 	},
@@ -326,12 +287,7 @@ var Valid = struct {
 			return false
 		}
 		if r != nil {
-			if r.Value != nil {
-				*r.Value = s
-			} else {
-				r.Value = new(interface{})
-				*r.Value = &s
-			}
+			r.Value = r.Value.Put(s)
 			r.String = fmt.Sprint(s)
 		}
 		return true
@@ -369,12 +325,7 @@ var Valid = struct {
 			ss = ssss
 		}
 		if r != nil {
-			if r.Value != nil {
-				*r.Value = ss
-			} else {
-				r.Value = new(interface{})
-				*r.Value = &ss
-			}
+			r.Value = r.Value.Put(ss)
 			r.String = fmt.Sprint(ss)
 		}
 		return true
@@ -402,12 +353,7 @@ var Valid = struct {
 		}
 		if r != nil {
 			r.String = fmt.Sprint(o)
-			if r.Value != nil {
-				*r.Value = o
-			} else {
-				r.Value = new(interface{})
-				*r.Value = o
-			}
+			r.Value = r.Value.Put(o)
 		}
 		return true
 	},
@@ -437,12 +383,7 @@ var Valid = struct {
 			f = ff
 		}
 		if r != nil {
-			if r.Value != nil {
-				*r.Value = f
-			} else {
-				r.Value = new(interface{})
-				*r.Value = f
-			}
+			r.Value = r.Value.Put(f)
 			r.String = fmt.Sprint(f)
 		}
 		return true
@@ -474,12 +415,7 @@ var Valid = struct {
 		}
 		if r != nil {
 			r.String = fmt.Sprint(t)
-			if r.Value != nil {
-				*r.Value = t
-			} else {
-				r.Value = new(interface{})
-				*r.Value = t
-			}
+			r.Value = r.Value.Put(t)
 		}
 		return true
 	},
@@ -502,12 +438,7 @@ var Valid = struct {
 		}
 		if r != nil && found {
 			r.String = fmt.Sprint(sn)
-			if r.Value != nil {
-				*r.Value = sn
-			} else {
-				r.Value = new(interface{})
-				*r.Value = sn
-			}
+			r.Value = r.Value.Put(sn)
 		}
 		return found
 	},
@@ -529,12 +460,7 @@ var Valid = struct {
 		}
 		if r != nil && found {
 			r.String = fmt.Sprint(sl)
-			if r.Value != nil {
-				*r.Value = sl
-			} else {
-				r.Value = new(interface{})
-				*r.Value = sl
-			}
+			r.Value = r.Value.Put(sl)
 		}
 		return found
 	},

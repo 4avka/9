@@ -8,7 +8,7 @@ import (
 )
 
 type RowText struct {
-	Row      Row
+	Row
 	Cat      string
 	NodeText string
 	GetInput func(root *tview.Flex, treeview *tview.TreeView,
@@ -91,24 +91,25 @@ func (c *Cats) GetCatTree(ta *tview.Application, tv *tview.TreeView, root *tview
 		for _, xx := range items[i] {
 			x := xx
 			io := tview.NewTreeNode(x.NodeText)
+			io.SetReference(x)
 			ctx = ctx.SetParent(io)
 			switch x.Row.Type {
 			case "bool":
-				GenBool(ctx, &x)
+				GenBool(ctx)
 			case "port":
-				GenPort(ctx, &x)
+				GenPort(ctx)
 			case "int":
-				GenInt(ctx, &x)
+				GenInt(ctx)
 			case "float":
-				GenFloat(ctx, &x)
+				GenFloat(ctx)
 			case "duration":
-				GenDuration(ctx, &x)
+				GenDuration(ctx)
 			case "string":
-				GenString(ctx, &x)
+				GenString(ctx)
 			case "stringslice":
-				GenStringSlice(ctx, &x)
+				GenStringSlice(ctx)
 			case "options":
-				GenOptions(ctx, &x)
+				GenOptions(ctx)
 			default:
 			}
 			io.SetSelectedFunc(func() {

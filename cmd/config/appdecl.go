@@ -113,12 +113,17 @@ func File(name string, g ...RowGenerator) CatGenerator {
 			cc.Name = name
 			cc.Type = "string"
 			cc.Validate = Valid.File
-			cc.Value = new(interface{})
+			cc.Value = NewIface()
 			cc.Get = func() interface{} {
-				return cc.Value
+				return cc.Value.Get()
 			}
 			cc.Put = func(in interface{}) bool {
-				return cc.Validate(cc, in)
+				valid := cc.Validate(cc, in)
+				if valid {
+					cc.Value = cc.Value.Put(in)
+					return true
+				}
+				return false
 			}
 			G.RunAll(cc)
 		}
@@ -135,12 +140,17 @@ func Dir(name string, g ...RowGenerator) CatGenerator {
 			cc.Name = name
 			cc.Type = "string"
 			cc.Validate = Valid.Dir
-			cc.Value = new(interface{})
+			cc.Value = NewIface()
 			cc.Get = func() interface{} {
-				return cc.Value
+				return cc.Value.Get()
 			}
 			cc.Put = func(in interface{}) bool {
-				return cc.Validate(cc, in)
+				valid := cc.Validate(cc, in)
+				if valid {
+					cc.Value = cc.Value.Put(in)
+					return true
+				}
+				return false
 			}
 			G.RunAll(cc)
 		}
@@ -157,12 +167,17 @@ func Port(name string, g ...RowGenerator) CatGenerator {
 			cc.Name = name
 			cc.Type = "port"
 			cc.Validate = Valid.Port
-			cc.Value = new(interface{})
+			cc.Value = NewIface()
 			cc.Get = func() interface{} {
-				return cc.Value
+				return cc.Value.Get()
 			}
 			cc.Put = func(in interface{}) bool {
-				return cc.Validate(cc, in)
+				valid := cc.Validate(cc, in)
+				if valid {
+					cc.Value = cc.Value.Put(in)
+					return true
+				}
+				return false
 			}
 			G.RunAll(cc)
 		}
@@ -179,15 +194,18 @@ func Enable(name string, g ...RowGenerator) CatGenerator {
 			cc.Name = name
 			cc.Type = "bool"
 			cc.Get = func() interface{} {
-				return cc.Value
+				return cc.Value.Get()
 			}
 			cc.Validate = Valid.Bool
-			cc.Value = new(interface{})
-			*cc.Value = false
-			cc.Default = new(interface{})
-			*cc.Default = false
+			cc.Value = NewIface().Put(false)
+			cc.Default = NewIface().Put(false)
 			cc.Put = func(in interface{}) bool {
-				return cc.Validate(cc, in)
+				valid := cc.Validate(cc, in)
+				if valid {
+					cc.Value = cc.Value.Put(in)
+					return true
+				}
+				return false
 			}
 			G.RunAll(cc)
 		}
@@ -204,15 +222,18 @@ func Enabled(name string, g ...RowGenerator) CatGenerator {
 			cc.Name = name
 			cc.Type = "bool"
 			cc.Get = func() interface{} {
-				return cc.Value
+				return cc.Value.Get()
 			}
 			cc.Validate = Valid.Bool
-			cc.Value = new(interface{})
-			*cc.Value = true
-			cc.Default = new(interface{})
-			*cc.Default = true
+			cc.Value = NewIface().Put(false)
+			cc.Default = NewIface().Put(false)
 			cc.Put = func(in interface{}) bool {
-				return cc.Validate(cc, in)
+				valid := cc.Validate(cc, in)
+				if valid {
+					cc.Value = cc.Value.Put(in)
+					return true
+				}
+				return false
 			}
 			G.RunAll(cc)
 		}
@@ -229,12 +250,17 @@ func Int(name string, g ...RowGenerator) CatGenerator {
 			cc.Name = name
 			cc.Type = "int"
 			cc.Get = func() interface{} {
-				return cc.Value
+				return cc.Value.Get()
 			}
 			cc.Validate = Valid.Int
-			cc.Value = new(interface{})
+			cc.Value = NewIface()
 			cc.Put = func(in interface{}) bool {
-				return cc.Validate(cc, in)
+				valid := cc.Validate(cc, in)
+				if valid {
+					cc.Value = cc.Value.Put(in)
+					return true
+				}
+				return false
 			}
 			G.RunAll(cc)
 		}
@@ -251,12 +277,16 @@ func Tag(name string, g ...RowGenerator) CatGenerator {
 			cc.Name = name
 			cc.Type = "string"
 			cc.Get = func() interface{} {
-				return cc.Value
+				return cc.Value.Get()
 			}
 			cc.Validate = Valid.Tag
-			cc.Value = new(interface{})
+			cc.Value = NewIface()
 			cc.Put = func(in interface{}) bool {
-				return cc.Validate(cc, in)
+				if cc.Validate(cc, in) {
+					cc.Value = cc.Value.Put(in)
+					return true
+				}
+				return false
 			}
 			G.RunAll(cc)
 		}
@@ -273,12 +303,17 @@ func Tags(name string, g ...RowGenerator) CatGenerator {
 			cc.Name = name
 			cc.Type = "stringslice"
 			cc.Get = func() interface{} {
-				return cc.Value
+				return cc.Value.Get()
 			}
 			cc.Validate = Valid.Tags
-			cc.Value = new(interface{})
+			cc.Value = NewIface()
 			cc.Put = func(in interface{}) bool {
-				return cc.Validate(cc, in)
+				valid := cc.Validate(cc, in)
+				if valid {
+					cc.Value = cc.Value.Put(in)
+					return true
+				}
+				return false
 			}
 			G.RunAll(cc)
 		}
@@ -295,11 +330,16 @@ func Addr(name string, defPort int, g ...RowGenerator) CatGenerator {
 			cc.Name = name
 			cc.Type = "string"
 			cc.Get = func() interface{} {
-				return cc.Value
+				return cc.Value.Get()
 			}
 			cc.Validate = GenAddr(name, defPort)
 			cc.Put = func(in interface{}) bool {
-				return cc.Validate(cc, in)
+				valid := cc.Validate(cc, in)
+				if valid {
+					cc.Value = cc.Value.Put(in)
+					return true
+				}
+				return false
 			}
 			G.RunAll(cc)
 		}
@@ -316,11 +356,15 @@ func Addrs(name string, defPort int, g ...RowGenerator) CatGenerator {
 			cc.Name = name
 			cc.Type = "stringslice"
 			cc.Get = func() interface{} {
-				return cc.Value
+				return cc.Value.Get()
 			}
 			cc.Validate = GenAddrs(name, defPort)
 			cc.Put = func(in interface{}) bool {
-				return cc.Validate(cc, in)
+				valid := cc.Validate(cc, in)
+				if valid {
+					cc.Value = cc.Value.Put(in)
+				}
+				return valid
 			}
 			G.RunAll(cc)
 		}
@@ -339,12 +383,16 @@ func Level(g ...RowGenerator) CatGenerator {
 			cc.Type = "options"
 			cc.Opts = cl.GetLevelOpts()
 			cc.Get = func() interface{} {
-				return cc.Value
+				return cc.Value.Get()
 			}
 			cc.Validate = Valid.Level
-			cc.Value = new(interface{})
+			cc.Value = NewIface()
 			cc.Put = func(in interface{}) bool {
-				return cc.Validate(cc, in)
+				valid := cc.Validate(cc, in)
+				if valid {
+					cc.Value = cc.Value.Put(in)
+				}
+				return valid
 			}
 			G.RunAll(cc)
 		}
@@ -362,12 +410,16 @@ func Algo(name string, g ...RowGenerator) CatGenerator {
 			cc.Type = "options"
 			cc.Opts = getAlgoOptions()
 			cc.Get = func() interface{} {
-				return cc.Value
+				return cc.Value.Get()
 			}
 			cc.Validate = Valid.Algo
-			cc.Value = new(interface{})
+			cc.Value = NewIface()
 			cc.Put = func(in interface{}) bool {
-				return cc.Validate(cc, in)
+				valid := cc.Validate(cc, in)
+				if valid {
+					cc.Value = cc.Value.Put(in)
+				}
+				return valid
 			}
 			G.RunAll(cc)
 		}
@@ -384,12 +436,16 @@ func Float(name string, g ...RowGenerator) CatGenerator {
 			cc.Name = name
 			cc.Type = "float"
 			cc.Get = func() interface{} {
-				return cc.Value
+				return cc.Value.Get()
 			}
 			cc.Validate = Valid.Float
-			cc.Value = new(interface{})
+			cc.Value = NewIface()
 			cc.Put = func(in interface{}) bool {
-				return cc.Validate(cc, in)
+				valid := cc.Validate(cc, in)
+				if valid {
+					cc.Value = cc.Value.Put(in)
+				}
+				return valid
 			}
 			G.RunAll(cc)
 		}
@@ -406,12 +462,16 @@ func Duration(name string, g ...RowGenerator) CatGenerator {
 			cc.Name = name
 			cc.Type = "duration"
 			cc.Get = func() interface{} {
-				return cc.Value
+				return cc.Value.Get()
 			}
 			cc.Validate = Valid.Duration
-			cc.Value = new(interface{})
+			cc.Value = NewIface()
 			cc.Put = func(in interface{}) bool {
-				return cc.Validate(cc, in)
+				valid := cc.Validate(cc, in)
+				if valid {
+					cc.Value = cc.Value.Put(in)
+				}
+				return valid
 			}
 			G.RunAll(cc)
 		}
@@ -429,12 +489,16 @@ func Net(name string, g ...RowGenerator) CatGenerator {
 			cc.Type = "options"
 			cc.Opts = Networks
 			cc.Get = func() interface{} {
-				return cc.Value
+				return cc.Value.Get()
 			}
 			cc.Validate = Valid.Net
-			cc.Value = new(interface{})
+			cc.Value = NewIface()
 			cc.Put = func(in interface{}) bool {
-				return cc.Validate(cc, in)
+				valid := cc.Validate(cc, in)
+				if valid {
+					cc.Value = cc.Value.Put(in)
+				}
+				return valid
 			}
 			G.RunAll(cc)
 		}
@@ -455,45 +519,56 @@ func Usage(usage string) RowGenerator {
 // Default sets the default value for a config item
 func Default(in interface{}) RowGenerator {
 	return func(ctx *Row) {
-		var iii interface{}
-		ctx.Default = &iii
+		ctx.Default = NewIface()
 		switch I := in.(type) {
 		case string:
-			*ctx.Default = I
-			ctx.Validate(ctx, I)
+			if ctx.Validate(ctx, I) {
+				ctx.Default.Put(I)
+			}
 		case []string:
-			*ctx.Default = I
-			ctx.Validate(ctx, I)
+			if ctx.Validate(ctx, I) {
+				ctx.Default.Put(I)
+			}
 		case int:
-			*ctx.Default = I
-			ctx.Validate(ctx, I)
+			if ctx.Validate(ctx, I) {
+				ctx.Default.Put(I)
+			}
 		case float64:
-			*ctx.Default = I
-			ctx.Validate(ctx, I)
+			if ctx.Validate(ctx, I) {
+				ctx.Default.Put(I)
+			}
 		case bool:
-			*ctx.Default = I
-			ctx.Validate(ctx, I)
+			if ctx.Validate(ctx, I) {
+				ctx.Default.Put(I)
+			}
 		case time.Duration:
-			*ctx.Default = I
-			ctx.Validate(ctx, I)
+			if ctx.Validate(ctx, I) {
+				ctx.Default.Put(I)
+			}
 		case *string:
-			*ctx.Default = I
-			ctx.Validate(ctx, I)
+			if ctx.Validate(ctx, I) {
+				ctx.Default.Put(I)
+			}
 		case *[]string:
-			*ctx.Default = I
-			ctx.Validate(ctx, I)
+			if ctx.Validate(ctx, I) {
+				ctx.Default.Put(I)
+			}
 		case *int:
-			*ctx.Default = I
-			ctx.Validate(ctx, I)
+			if ctx.Validate(ctx, I) {
+				ctx.Default.Put(I)
+			}
 		case *float64:
-			*ctx.Default = I
-			ctx.Validate(ctx, I)
+			if ctx.Validate(ctx, I) {
+				ctx.Default.Put(I)
+			}
 		case *bool:
-			*ctx.Default = I
-			ctx.Validate(ctx, I)
+			if ctx.Validate(ctx, I) {
+				ctx.Default.Put(I)
+			}
 		case *time.Duration:
-			*ctx.Default = I
-			ctx.Validate(ctx, I)
+			if ctx.Validate(ctx, I) {
+				ctx.Default.Put(I)
+			}
 		default:
 			fmt.Println("type not found", ctx.Name, reflect.TypeOf(in))
 			return
@@ -504,8 +579,8 @@ func Default(in interface{}) RowGenerator {
 // Min attaches to the validator a test that enforces a minimum
 func Min(min int) RowGenerator {
 	return func(ctx *Row) {
-		ctx.Min = new(interface{})
-		*ctx.Min = min
+		ctx.Min = NewIface()
+		ctx.Min.Put(min)
 		v := ctx.Validate
 		ctx.Validate = func(r *Row, in interface{}) bool {
 			n := min
@@ -527,9 +602,9 @@ func Min(min int) RowGenerator {
 // Max attaches to the validator a test that enforces a maximum
 func Max(max int) RowGenerator {
 	return func(ctx *Row) {
-		ctx.Max = new(interface{})
+		ctx.Max = NewIface()
 		v := ctx.Validate
-		*ctx.Max = &max
+		ctx.Max.Put(max)
 		ctx.Validate = func(r *Row, in interface{}) bool {
 			n := max
 			switch I := in.(type) {
@@ -574,7 +649,6 @@ func RandomString(n int) RowGenerator {
 		}
 
 		sb := string(b)
-		ctx.Value = new(interface{})
-		*ctx.Value = sb
+		ctx.Value = NewIface().Put(sb)
 	}
 }

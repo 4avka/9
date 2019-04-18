@@ -154,7 +154,7 @@ func RunConf(args []string, tokens config.Tokens, app *config.App) int {
 			V, X := "", j
 			acxj := app.Cats[x][j]
 			if yv := acxj.Value; yv != nil {
-				if *yv != nil {
+				if yv.Get() != nil {
 					V = fmt.Sprint(*yv)
 				}
 			}
@@ -200,7 +200,7 @@ func RunConf(args []string, tokens config.Tokens, app *config.App) int {
 								ff,
 							)
 
-							vv, ok := (*acxj.Value).(bool)
+							vv, ok := acxj.Value.Get().(bool)
 							if ok {
 								if vv {
 									tt.SetColor(tcell.ColorGreen)
@@ -212,7 +212,7 @@ func RunConf(args []string, tokens config.Tokens, app *config.App) int {
 									// treeview.SetCurrentNode(ff)
 								}
 							} else {
-								dd, ok := (*acxj.Default).(bool)
+								dd, ok := acxj.Default.Get().(bool)
 								if ok {
 									if dd {
 										treeview.SetCurrentNode(tt)
@@ -233,7 +233,7 @@ func RunConf(args []string, tokens config.Tokens, app *config.App) int {
 						case "options":
 							tnj.ClearChildren()
 							opts := make(map[string]*tview.TreeNode)
-							current := (*acxj.Value).(string)
+							current := acxj.Value.Get().(string)
 							for _, x := range acxj.Opts {
 								opts[x] = tview.NewTreeNode(x)
 								if x == current {
@@ -252,7 +252,7 @@ func RunConf(args []string, tokens config.Tokens, app *config.App) int {
 							treeview.SetCurrentNode(tnj)
 							tapp.ForceDraw()
 
-							// vv, ok := (*acxj.Value).(bool)
+							// vv, ok := acxj.Value.Get().(bool)
 							// if ok {
 							// 	if vv {
 							// 		treeview.SetCurrentNode(tt)
@@ -260,7 +260,7 @@ func RunConf(args []string, tokens config.Tokens, app *config.App) int {
 							// 		treeview.SetCurrentNode(ff)
 							// 	}
 							// } else {
-							// 	dd, ok := (*acxj.Default).(bool)
+							// 	dd, ok := acxj.Default.Get().(bool)
 							// 	if ok {
 							// 		if dd {
 							// 			treeview.SetCurrentNode(tt)

@@ -84,7 +84,8 @@ func (r *Cats) getValue(cat, item string) (out *interface{}) {
 	} else if cc, ok := C[item]; !ok {
 		return
 	} else {
-		return cc.Value
+		o := cc.Value.Get()
+		return &o
 	}
 }
 
@@ -197,14 +198,43 @@ func (r *CatGenerators) RunAll(cat Cat) {
 	return
 }
 
+type Iface struct {
+	Data *interface{}
+}
+
+func NewIface() *Iface {
+	return &Iface{Data: new(interface{})}
+}
+
+func (i *Iface) Get() interface{} {
+	if i == nil {
+		return nil
+	}
+	if i.Data == nil {
+		return nil
+	}
+	return *i.Data
+}
+
+func (i *Iface) Put(in interface{}) *Iface {
+	if i == nil {
+		i = NewIface()
+	}
+	if i.Data == nil {
+		i.Data = new(interface{})
+	}
+	*i.Data = in
+	return i
+}
+
 type Row struct {
 	Name     string
 	Type     string
 	Opts     []string
-	Value    *interface{}
-	Default  *interface{}
-	Min      *interface{}
-	Max      *interface{}
+	Value    *Iface
+	Default  *Iface
+	Min      *Iface
+	Max      *Iface
 	Init     func(*Row)
 	Get      func() interface{}
 	Put      func(interface{}) bool
@@ -214,45 +244,27 @@ type Row struct {
 }
 
 func (r *Row) Bool() bool {
-	if *r.Value == nil {
-		return false
-	}
-	return (*r.Value).(bool)
+	return r.Value.Get().(bool)
 }
 
 func (r *Row) Int() int {
-	if *r.Value == nil {
-		return -1
-	}
-	return (*r.Value).(int)
+	return r.Value.Get().(int)
 }
 
 func (r *Row) Float() float64 {
-	if *r.Value == nil {
-		return -1.0
-	}
-	return (*r.Value).(float64)
+	return r.Value.Get().(float64)
 }
 
 func (r *Row) Duration() time.Duration {
-	if *r.Value == nil {
-		return 0
-	}
-	return (*r.Value).(time.Duration)
+	return r.Value.Get().(time.Duration)
 }
 
 func (r *Row) Tag() string {
-	if *r.Value == nil {
-		return ""
-	}
-	return (*r.Value).(string)
+	return r.Value.Get().(string)
 }
 
 func (r *Row) Tags() []string {
-	if *r.Value == nil {
-		return nil
-	}
-	return (*r.Value).([]string)
+	return r.Value.Get().([]string)
 }
 
 type RowGenerator func(ctx *Row)

@@ -10,17 +10,20 @@ import (
 
 const checkmark = "✅"
 const space = "  "
+const tDEFAULT = "(default)"
 
-func GenBool(c *CatTreeContext, rt *RowText) {
+func GenBool(c *CatTreeContext) {
+	row0 := c.Parent.GetReference().(RowText)
+	row := &row0
 	var ntrue, nfalse *tview.TreeNode
-	def := (*rt.Row.Default).(bool)
-	tdef, fdef := "", " (default)"
+	def := row.Default.Get().(bool)
+	tdef, fdef := "", " "+tDEFAULT
 	if def {
 		tdef, fdef = fdef, tdef
 	}
 	handler := func(t, f *tview.TreeNode) {
-		*rt.Row.Value = !rt.Row.Bool()
-		if rt.Row.Bool() {
+		row.Put(!row.Bool())
+		if row.Bool() {
 			t.SetText(checkmark + "true" + tdef)
 			f.SetText(space + "false" + fdef)
 		} else {
@@ -31,7 +34,7 @@ func GenBool(c *CatTreeContext, rt *RowText) {
 	}
 	var ts, fs string
 	fs, ts = "✅", "  "
-	if rt.Row.Bool() {
+	if row.Bool() {
 		ts, fs = fs, ts
 	}
 	ntrue = tview.NewTreeNode(ts + "true" + tdef).
@@ -45,15 +48,17 @@ func GenBool(c *CatTreeContext, rt *RowText) {
 	c.Parent.AddChild(ntrue).AddChild(nfalse)
 }
 
-func GenPort(c *CatTreeContext, rt *RowText) {
-	if rt.Row.Value != nil {
+func GenPort(c *CatTreeContext) {
+	row0 := c.Parent.GetReference().(RowText)
+	row := &row0
+	if row.Value != nil {
 		c.Parent.AddChild(tview.NewTreeNode("<unset>"))
 	} else {
-		c.Parent.AddChild(tview.NewTreeNode(fmt.Sprint(rt.Row.Int())))
+		c.Parent.AddChild(tview.NewTreeNode(fmt.Sprint(row.Int())))
 		c.Parent.AddChild(tview.NewTreeNode("clear"))
 	}
-	if rt.Row.Default != nil {
-		if p, ok := (*rt.Row.Default).(int); ok {
+	if row.Default != nil {
+		if p, ok := row.Default.Get().(int); ok {
 			c.Parent.AddChild(tview.NewTreeNode("set default (" + fmt.Sprint(p) + ")"))
 		} else {
 			c.Parent.AddChild(tview.NewTreeNode("<unset>"))
@@ -61,10 +66,12 @@ func GenPort(c *CatTreeContext, rt *RowText) {
 	}
 }
 
-func GenInt(c *CatTreeContext, rt *RowText) {
-	c.Parent.AddChild(tview.NewTreeNode(fmt.Sprint(rt.Row.Int())))
-	if rt.Row.Default != nil {
-		if p, ok := (*rt.Row.Default).(int); ok {
+func GenInt(c *CatTreeContext) {
+	row0 := c.Parent.GetReference().(RowText)
+	row := &row0
+	c.Parent.AddChild(tview.NewTreeNode(fmt.Sprint(row.Int())))
+	if row.Default != nil {
+		if p, ok := row.Default.Get().(int); ok {
 			c.Parent.AddChild(tview.NewTreeNode("set default (" + fmt.Sprint(p) + ")"))
 		} else {
 			c.Parent.AddChild(tview.NewTreeNode("<unset>"))
@@ -72,10 +79,12 @@ func GenInt(c *CatTreeContext, rt *RowText) {
 	}
 }
 
-func GenFloat(c *CatTreeContext, rt *RowText) {
-	c.Parent.AddChild(tview.NewTreeNode(fmt.Sprint(rt.Row.Float())))
-	if rt.Row.Default != nil {
-		if p, ok := (*rt.Row.Default).(float64); ok {
+func GenFloat(c *CatTreeContext) {
+	row0 := c.Parent.GetReference().(RowText)
+	row := &row0
+	c.Parent.AddChild(tview.NewTreeNode(fmt.Sprint(row.Float())))
+	if row.Default != nil {
+		if p, ok := row.Default.Get().(float64); ok {
 			c.Parent.AddChild(tview.NewTreeNode("set default (" + fmt.Sprint(p) + ")"))
 		} else {
 			c.Parent.AddChild(tview.NewTreeNode("<unset>"))
@@ -83,79 +92,55 @@ func GenFloat(c *CatTreeContext, rt *RowText) {
 	}
 }
 
-func GenDuration(c *CatTreeContext, rt *RowText) {
-	c.Parent.AddChild(tview.NewTreeNode(fmt.Sprint(rt.Row.Duration())))
-	if rt.Row.Default != nil {
-		if p, ok := (*rt.Row.Default).(time.Duration); ok {
+func GenDuration(c *CatTreeContext) {
+	row0 := c.Parent.GetReference().(RowText)
+	row := &row0
+	c.Parent.AddChild(tview.NewTreeNode(fmt.Sprint(row.Duration())))
+	if row.Default != nil {
+		if p, ok := row.Default.Get().(time.Duration); ok {
 			c.Parent.AddChild(tview.NewTreeNode("set default (" + fmt.Sprint(p) + ")"))
 		}
 	}
 }
 
-func GenString(c *CatTreeContext, rt *RowText) {
+func GenString(c *CatTreeContext) {
+	row0 := c.Parent.GetReference().(RowText)
+	row := &row0
 	istring := func() string {
-		return "'" + fmt.Sprint(*rt.Row.Value) + "'"
+		return "'" + fmt.Sprint(row.Value.Get()) + "'"
 	}
 	var p string
 	var ok bool
-	// var defiface interface{}
-	if rt.Row.Default != nil {
-		if p, ok = (*rt.Row.Default).(string); ok {
-			// 		defiface = p
+	if row.Default.Get() != nil {
+		if p, ok = row.Default.Get().(string); ok {
 		}
 	}
 	var iclear *tview.TreeNode
 	var gen func(ctc *CatTreeContext, rtx *RowText)
 	gen = func(ctc *CatTreeContext, rtx *RowText) {
 		iclear = tview.NewTreeNode("clear")
-		if rtx.Row.Value != nil {
+		if rtx.Row.Value.Get() != nil {
 			titem := tview.NewTreeNode(istring())
-			titem.SetSelectedFunc(func() {
-				ifunc :=
-					GetStringInputFunc(ctc.Root, ctc.TreeView, ctc.App,
-						rtx, titem, ctc, gen)()
-				ifunc.SetText(rtx.Row.Tag()).
-					SetLabelColor(tcell.ColorWhite).
-					SetLabel(rtx.Row.Type + "'" + rtx.Row.Name + "' ").
-					SetFieldBackgroundColor(tcell.ColorBlack).
-					SetFieldTextColor(tcell.ColorWhite).
-					Box.SetBackgroundColor(tcell.ColorDarkGreen)
-				ctc.Root.AddItem(ifunc, 1, 0, false)
-				ctc.App.SetFocus(ifunc)
-			})
 			ctc.Parent.AddChild(titem)
-			if *rtx.Row.Value != nil {
-				ctc.Parent.AddChild(iclear.SetSelectedFunc(func() {
-					ctc.Parent.ClearChildren()
-					*rtx.Row.Value = nil
-					gen(ctc, rtx)
-					ctc.TreeView.SetCurrentNode(ctc.Parent.GetChildren()[0])
-				}))
+			if rtx.Row.Value.Get() != nil {
+				ctc.Parent.AddChild(iclear)
 			}
 		} else {
 			ctc.Parent.AddChild(tview.NewTreeNode("<unset>"))
 		}
-		if rtx.Row.Default != nil {
+		if rtx.Row.Default.Get() != nil {
 			dn := tview.NewTreeNode("set default (" + fmt.Sprint(p) + ")")
 			ctc.Parent.AddChild(dn)
-			dn.SetSelectedFunc(func() {
-				if !rtx.Row.Put((*rtx.Row.Default).(string)) {
-					panic("default is invalid")
-				}
-				c.Parent.ClearChildren()
-				gen(ctc, rtx)
-				children := ctc.Parent.GetChildren()
-				ll := len(children) - 1
-				ctc.TreeView.SetCurrentNode(children[ll])
-			})
 		}
 	}
-	gen(c, rt)
+	gen(c, row)
 }
 
-func GenStringSlice(c *CatTreeContext, rt *RowText) {
-	if rt.Row.Value != nil {
-		switch ss := (*rt.Row.Value).(type) {
+func GenStringSlice(c *CatTreeContext) {
+	row0 := c.Parent.GetReference().(RowText)
+	row := &row0
+	if row.Value != nil {
+		switch ss := row.Value.Get().(type) {
 		case []string:
 			for _, x := range ss {
 				if len(x) > 0 {
@@ -174,15 +159,17 @@ func GenStringSlice(c *CatTreeContext, rt *RowText) {
 	c.Parent.AddChild(tview.NewTreeNode("add new"))
 }
 
-func GenOptions(c *CatTreeContext, rt *RowText) {
-	val := rt.Row.Tag()
+func GenOptions(c *CatTreeContext) {
+	row0 := c.Parent.GetReference().(RowText)
+	row := &row0
+	val := row.Tag()
 
 	var ok bool
 	var def string
 	var topts []*tview.TreeNode
-	if def, ok = (*rt.Row.Default).(string); ok {
+	if def, ok = row.Default.Get().(string); ok {
 	}
-	for _, x := range rt.Row.Opts {
+	for _, x := range row.Opts {
 		var itemtext string
 		if x == val {
 			itemtext = checkmark
@@ -191,15 +178,15 @@ func GenOptions(c *CatTreeContext, rt *RowText) {
 		}
 		itemtext += x
 		if x == def {
-			itemtext += " (default)"
+			itemtext += " " + tDEFAULT
 		}
 		cc := tview.NewTreeNode(itemtext)
 		topts = append(topts, cc)
 		c.Parent.AddChild(cc)
 	}
 	handler := func(opt string) {
-		*rt.Row.Value = opt
-		for i, x := range rt.Row.Opts {
+		row.Value = row.Value.Put(opt)
+		for i, x := range row.Opts {
 			var itemtext string
 			if x == opt {
 				itemtext = checkmark
@@ -208,7 +195,7 @@ func GenOptions(c *CatTreeContext, rt *RowText) {
 			}
 			itemtext += x
 			if x == def {
-				itemtext += " (default)"
+				itemtext += " " + tDEFAULT
 			}
 			topts[i].SetText(itemtext)
 		}
@@ -218,7 +205,7 @@ func GenOptions(c *CatTreeContext, rt *RowText) {
 		x := xx
 		i := ii
 		x.SetSelectedFunc(func() {
-			handler(rt.Row.Opts[i])
+			handler(row.Opts[i])
 		})
 	}
 }
@@ -257,7 +244,7 @@ func GetStringInputFunc(
 					SetText("saving key " + currentlabel + currenttext).
 					SetLabel("")
 				tapp.ForceDraw()
-				validated := rt.Row.Put(currenttext)
+				validated := rt.Put(currenttext)
 				if !validated {
 					out.SetFieldBackgroundColor(tcell.ColorRed).
 						SetFieldTextColor(tcell.ColorBlack).
