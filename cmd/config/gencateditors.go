@@ -104,13 +104,16 @@ func GenString(c *CatTreeContext, rt *RowText) {
 			// 		defiface = p
 		}
 	}
-	iclear := tview.NewTreeNode("clear")
+	var iclear *tview.TreeNode
 	var gen func(ctc *CatTreeContext, rtx *RowText)
 	gen = func(ctc *CatTreeContext, rtx *RowText) {
+		iclear = tview.NewTreeNode("clear")
 		if rtx.Row.Value != nil {
 			titem := tview.NewTreeNode(istring())
 			titem.SetSelectedFunc(func() {
-				ifunc := GetStringInputFunc(ctc.Root, ctc.TreeView, ctc.App)()
+				ifunc :=
+					GetStringInputFunc(ctc.Root, ctc.TreeView, ctc.App,
+						rtx, titem, ctc, gen)()
 				ifunc.SetText(rtx.Row.Tag()).
 					SetLabelColor(tcell.ColorWhite).
 					SetLabel(rtx.Row.Type + "'" + rtx.Row.Name + "' ").
@@ -136,7 +139,9 @@ func GenString(c *CatTreeContext, rt *RowText) {
 			dn := tview.NewTreeNode("set default (" + fmt.Sprint(p) + ")")
 			ctc.Parent.AddChild(dn)
 			dn.SetSelectedFunc(func() {
-				*rtx.Row.Value = (*rtx.Row.Default).(string)
+				if !rtx.Row.Put((*rtx.Row.Default).(string)) {
+					panic("default is invalid")
+				}
 				c.Parent.ClearChildren()
 				gen(ctc, rtx)
 				children := ctc.Parent.GetChildren()
@@ -218,8 +223,15 @@ func GenOptions(c *CatTreeContext, rt *RowText) {
 	}
 }
 
-func GetStringInputFunc(root *tview.Flex, treeview *tview.TreeView,
-	tapp *tview.Application) func() (out *tview.InputField) {
+func GetStringInputFunc(
+	root *tview.Flex,
+	treeview *tview.TreeView,
+	tapp *tview.Application,
+	rt *RowText,
+	vnode *tview.TreeNode,
+	ctc *CatTreeContext,
+	gen func(ctc *CatTreeContext, rtx *RowText),
+) func() (out *tview.InputField) {
 	// input field is a field that appears at the bottom of the screen when
 	// a string or number is being edited
 	return func() (out *tview.InputField) {
@@ -245,13 +257,24 @@ func GetStringInputFunc(root *tview.Flex, treeview *tview.TreeView,
 					SetText("saving key " + currentlabel + currenttext).
 					SetLabel("")
 				tapp.ForceDraw()
-				time.Sleep(time.Second * 1)
-				out.SetFieldBackgroundColor(tcell.ColorDarkGreen).
-					SetLabel("")
-				root.RemoveItem(out)
-				treeview.SetBorderPadding(0, 0, 1, 1)
-				tapp.SetFocus(treeview).
-					ForceDraw()
+				validated := rt.Row.Put(currenttext)
+				if !validated {
+					out.SetFieldBackgroundColor(tcell.ColorRed).
+						SetFieldTextColor(tcell.ColorBlack).
+						// SetText("saving key " + currentlabel + currenttext).
+						SetLabel(currentlabel + "error: invalid")
+				} else {
+					ctc.Parent.ClearChildren()
+					gen(ctc, rt)
+					treeview.SetCurrentNode(ctc.Parent.GetChildren()[0])
+					time.Sleep(time.Second * 1)
+					out.SetFieldBackgroundColor(tcell.ColorDarkGreen).
+						SetLabel("")
+					root.RemoveItem(out)
+					treeview.SetBorderPadding(0, 0, 1, 1)
+					tapp.SetFocus(treeview).
+						ForceDraw()
+				}
 			}
 			return e
 		})
