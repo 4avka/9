@@ -43,7 +43,7 @@ var runConf = func(args []string, tokens config.Tokens, app *config.App) int {
 	rootmenu := tview.NewGrid()
 	rootmenu.SetColumns(19, -1)
 	catsmenu := tview.NewGrid()
-	catsmenu.SetColumns(14, -1)
+	catsmenu.SetColumns(12, -1)
 
 	roottable := tview.NewTable()
 	catstable := tview.NewTable()
@@ -73,6 +73,8 @@ var runConf = func(args []string, tokens config.Tokens, app *config.App) int {
 			rootmenu.AddItem(filler, 0, 1, 1, 1, 1, 1, false)
 			tapp.SetFocus(catstable)
 			catstable.SetBackgroundColor(tcell.ColorDarkGreen)
+			roottable.SetSelectedStyle(tcell.ColorWhite, tcell.ColorDarkGreen, tcell.AttrDim)
+			catstable.SetSelectedStyle(tcell.ColorBlack, tcell.ColorWhite, tcell.AttrBold)
 		}
 	})
 	catsmenu.AddItem(roottable, 0, 0, 1, 1, 1, 1, false)
@@ -87,6 +89,8 @@ var runConf = func(args []string, tokens config.Tokens, app *config.App) int {
 			tapp.Stop()
 		case 2:
 			catstable.SetBackgroundColor(tcell.ColorBlack)
+			catstable.SetSelectedStyle(tcell.ColorWhite, tcell.ColorDarkGreen, tcell.AttrDim)
+			roottable.SetSelectedStyle(tcell.ColorBlack, tcell.ColorWhite, tcell.AttrBold)
 			rootmenu.RemoveItem(filler)
 			rootmenu.AddItem(catsmenu, 0, 1, 1, 1, 1, 1, false)
 			roottable.SetBackgroundColor(tcell.ColorDarkGreen)
