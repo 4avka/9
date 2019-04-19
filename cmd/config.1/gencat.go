@@ -42,9 +42,9 @@ func openjump(c *CatTreeContext) {
 		// This makes sure the user sees the group they unfold
 		// first it jumps to the last child
 		ii := len(c.Parent.GetChildren()) - 1
-		if ii > 0 {
+		if ii >= 0 {
 			c.TreeView.SetCurrentNode(
-				c.Parent.GetChildren()[len(c.Parent.GetChildren())-1])
+				c.Parent.GetChildren()[ii])
 			c.App.ForceDraw()
 		}
 		// then back to the parent node
@@ -117,7 +117,9 @@ func (c *Cats) GetCatTree(ta *tview.Application, tv *tview.TreeView, root *tview
 			}).Collapse()
 			co.AddChild(io)
 		}
-		out.AddChild(co)
+		out.AddChild(co.SetSelectedFunc(func() {
+			openjump(ctx.SetParent(co))
+		}).Collapse())
 	}
 
 	spew.Dump(items)

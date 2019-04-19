@@ -69,14 +69,27 @@ func GenPort(c *CatTreeContext) {
 func GenInt(c *CatTreeContext) {
 	row0 := c.Parent.GetReference().(RowText)
 	row := &row0
-	c.Parent.AddChild(tview.NewTreeNode(fmt.Sprint(row.Int())))
+	it := tview.NewTreeNode("")
+	it.SetText(fmt.Sprint(row.Int()))
+	c.Parent.AddChild(it)
 	if row.Default != nil {
 		if p, ok := row.Default.Get().(int); ok {
-			c.Parent.AddChild(tview.NewTreeNode("set default (" + fmt.Sprint(p) + ")"))
+			defopt := tview.NewTreeNode(
+				"set default (" + fmt.Sprint(p) + ")").
+				SetSelectedFunc(func() {
+					row.Value.Put(row.Default.Get())
+					it.SetText(fmt.Sprint(row.Int()))
+					c.App.ForceDraw()
+				})
+			c.Parent.AddChild(defopt)
 		} else {
 			c.Parent.AddChild(tview.NewTreeNode("<unset>"))
 		}
 	}
+	it.SetSelectedFunc(func() {
+		it.SetText(fmt.Sprint(c.App.GetFocus().GetRect()))
+		c.App.ForceDraw()
+	})
 }
 
 func GenFloat(c *CatTreeContext) {
@@ -147,16 +160,20 @@ func GenStringSlice(c *CatTreeContext) {
 					sss := tview.NewTreeNode(x).
 						AddChild(tview.NewTreeNode("edit")).
 						AddChild(tview.NewTreeNode("delete"))
-					sss.SetSelectedFunc(func() {
-						openjump(c.SetParent(sss))
-					}).Collapse()
-					c.Parent.AddChild(sss)
+					c.Parent.AddChild(sss.
+						SetSelectedFunc(func() {
+							openjump(c.SetParent(sss))
+						}).Collapse())
 				}
 			}
 		default:
 		}
 	}
-	c.Parent.AddChild(tview.NewTreeNode("add new"))
+	an := tview.NewTreeNode("add new")
+	c.Parent.AddChild(an)
+	an.SetSelectedFunc(func() {
+		openjump(c.SetParent(an))
+	}).Collapse()
 }
 
 func GenOptions(c *CatTreeContext) {
