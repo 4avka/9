@@ -8,14 +8,15 @@ import (
 	"github.com/rivo/tview"
 )
 
+// pre-declare everything so we can decide the order to put things
+var tapp *tview.Application
+var root *tview.Flex
+var titlebar *tview.TextView
+var rootgrid, catsgrid *tview.Grid
+
+const menutitle = "ⓟ 9 parallelcoin configuration CLI"
+
 var runConf = func(args []string, tokens config.Tokens, app *config.App) int {
-	const menutitle = "ⓟ 9 parallelcoin configuration CLI"
-
-	// pre-declare everything so we can decide the order to put things
-	var titlebar *tview.TextView
-	var root *tview.Flex
-	var tapp *tview.Application
-
 	// tapp pulls everything together to create the configuration interface
 	tapp = tview.NewApplication()
 
@@ -31,112 +32,190 @@ var runConf = func(args []string, tokens config.Tokens, app *config.App) int {
 
 	root.AddItem(titlebar, 1, 1, false)
 
-	rootmenu := tview.NewGrid()
-	rootmenu.SetColumns(19, -1)
-	catsmenu := tview.NewGrid()
-	catsmenu.SetColumns(11, -1)
+	rootgrid = tview.NewGrid()
+	rootgridwidth := 17
+	rootgrid.SetColumns(rootgridwidth, -1)
+	catsgrid = tview.NewGrid()
+	catsgrid.SetColumns(catstablewidth, -1)
 
 	roottable := tview.NewTable()
-	filler := tview.NewBox()
+	blackbox := tview.NewBox()
+	// .SetBorder(true)
 
-	// catsmenu.AddItem(catstable, 0, 0, 1, 1, 1, 1, false)
 	roottable.SetBackgroundColor(tcell.ColorDarkGreen)
 	roottable.SetBorders(false)
-	roottable.SetCellSimple(0, 0, "<                ")
+	roottable.SetCellSimple(0, 0, "<               ")
 	roottable.SetCellSimple(1, 0, "  run a server  >")
 	roottable.SetCellSimple(2, 0, "  configuration >")
-
+	roottable.SetSelectedStyle(tcell.ColorBlack, tcell.ColorWhite, tcell.AttrNone)
 	roottable.SetSelectable(true, true)
 	roottable.GetCell(0, 0)
-	catstable := GetCatsTable(app)
 
-	runmenu := GetRunMenu()
-	// runmenu.SetColumns(11, -1)
+	catstable := GetCatsTable(app)
+	catstable.SetSelectable(true, true)
+	catstable.SetSelectedStyle(tcell.ColorWhite, tcell.ColorBlack, tcell.AttrDim)
+
+	runtable := GetRuntable()
+	runtable.SetSelectedStyle(tcell.ColorWhite, tcell.ColorBlack, tcell.AttrDim)
+	runtable.SetSelectable(true, true)
 
 	roottable.SetSelectedFunc(func(y, x int) {
 		switch y {
 		case 0:
 			tapp.Stop()
 		case 1:
-			roottable.SetSelectable(false, false)
-			runmenu.SetSelectable(true, true)
-			runmenu.SetBackgroundColor(tcell.ColorDarkGreen)
+			runtable.SetBackgroundColor(tcell.ColorDarkGreen)
+			runtable.SetSelectedStyle(tcell.ColorBlack, tcell.ColorWhite, tcell.AttrNone)
+			for i := runtable.GetRowCount(); i >= 0; i-- {
+				runtable.GetCell(i, 0).SetTextColor(tcell.ColorWhite)
+			}
+
+			for i := roottable.GetRowCount(); i >= 0; i-- {
+				roottable.GetCell(i, 0).SetTextColor(tcell.ColorWhite)
+			}
+			for i := roottable.GetRowCount(); i >= 0; i-- {
+				rtbl := roottable.GetCell(i, 0)
+				y, _ := roottable.GetSelection()
+				if i != y {
+					// SetTextColor(tcell.ColorBlack).
+					rtbl.SetAttributes(tcell.AttrDim)
+				}
+			}
 			roottable.SetBackgroundColor(tcell.ColorBlack)
-			tapp.SetFocus(runmenu)
+			roottable.SetSelectedStyle(tcell.ColorBlack, tcell.ColorDarkGreen, tcell.AttrDim&tcell.AttrBold)
+
+			tapp.SetFocus(runtable)
 		case 2:
-			roottable.SetSelectable(false, false)
-			catstable.SetSelectable(true, true)
-			roottable.SetBackgroundColor(tcell.ColorBlack)
 			catstable.SetBackgroundColor(tcell.ColorDarkGreen)
+			catstable.SetSelectedStyle(tcell.ColorBlack, tcell.ColorWhite, tcell.AttrNone)
+			for i := catstable.GetRowCount(); i >= 0; i-- {
+				catstable.GetCell(i, 0).SetTextColor(tcell.ColorWhite)
+			}
+			catstable.SetSelectedStyle(tcell.ColorBlack, tcell.ColorWhite, tcell.AttrDim)
+
+			for i := roottable.GetRowCount(); i >= 0; i-- {
+				roottable.GetCell(i, 0).SetTextColor(tcell.ColorWhite)
+			}
+			for i := roottable.GetRowCount(); i >= 0; i-- {
+				rtbl := roottable.GetCell(i, 0)
+				y, _ := roottable.GetSelection()
+				if i != y {
+					// SetTextColor(tcell.ColorBlack).
+					rtbl.SetAttributes(tcell.AttrDim)
+				}
+			}
+			roottable.SetSelectedStyle(tcell.ColorBlack, tcell.ColorDarkGreen, tcell.AttrDim&tcell.AttrBold)
+			roottable.SetBackgroundColor(tcell.ColorBlack)
+
 			tapp.SetFocus(catstable)
 		}
 	})
 
-	runmenu.SetSelectedFunc(func(y, x int) {
+	roottable.SetSelectionChangedFunc(func(y, x int) {
 		switch y {
 		case 0:
-			rootmenu.RemoveItem(filler)
-			// rootmenu.RemoveItem(catstable)
-			// rootmenu.RemoveItem(runmenu)
-			rootmenu.AddItem(filler, 0, 1, 1, 1, 1, 1, false)
-			rootmenu.SetColumns(17, 13, -1)
-			roottable.SetSelectable(true, true)
-			runmenu.SetBackgroundColor(tcell.ColorBlack)
-			runmenu.SetSelectable(false, false)
+			rootgrid.RemoveItem(blackbox)
+			rootgrid.RemoveItem(catstable)
+			rootgrid.RemoveItem(runtable)
+			rootgrid.AddItem(blackbox, 0, 1, 1, 1, 1, 1, false)
+			rootgrid.SetColumns(rootgridwidth, -1)
+
+			catstable.SetSelectedStyle(tcell.ColorWhite, tcell.ColorBlack, tcell.AttrDim)
+
+			runtable.SetSelectedStyle(tcell.ColorWhite, tcell.ColorBlack, tcell.AttrDim)
+			roottable.SetSelectedStyle(tcell.ColorOrange, tcell.ColorBlack, tcell.AttrBlink)
+			roottable.GetCell(0, 0).SetText("< exit")
+			// tapp.ForceDraw()
+		case 1:
+			rootgrid.RemoveItem(blackbox)
+			rootgrid.RemoveItem(catstable)
+			rootgrid.AddItem(runtable, 0, 1, 1, 1, 1, 1, true)
+			rootgrid.AddItem(blackbox, 0, 2, 1, 1, 1, 1, false)
+			rootgrid.SetColumns(rootgridwidth, runtablewidth, -1)
+
+			roottable.SetSelectedStyle(tcell.ColorBlack, tcell.ColorWhite, tcell.AttrNone)
+			for i := runtable.GetRowCount(); i >= 0; i-- {
+				runtable.GetCell(i, 0).SetTextColor(tcell.ColorDarkGreen)
+			}
+			runtable.SetSelectedStyle(tcell.ColorDarkGreen, tcell.ColorBlack, tcell.AttrDim)
+			roottable.GetCell(0, 0).SetText("<")
+		case 2:
+			rootgrid.RemoveItem(blackbox)
+			rootgrid.RemoveItem(runtable)
+			rootgrid.AddItem(catstable, 0, 1, 1, 1, 1, 1, true)
+			rootgrid.AddItem(blackbox, 0, 2, 1, 1, 1, 1, false)
+			rootgrid.SetColumns(rootgridwidth, catstablewidth, -1)
+
+			roottable.SetSelectedStyle(tcell.ColorBlack, tcell.ColorWhite, tcell.AttrNone)
+			for i := catstable.GetRowCount(); i >= 0; i-- {
+				catstable.GetCell(i, 0).SetTextColor(tcell.ColorDarkGreen)
+			}
+			catstable.SetSelectedStyle(tcell.ColorDarkGreen, tcell.ColorBlack, tcell.AttrDim)
+			roottable.GetCell(0, 0).SetText("<")
+		}
+	})
+
+	runtable.SetSelectedFunc(func(y, x int) {
+		switch y {
+		case 0:
+			// rootgrid.RemoveItem(blackbox)
+			rootgrid.SetColumns(rootgridwidth, runtablewidth, -1)
+			// rootgrid.AddItem(blackbox, 0, 2, 1, 1, 1, 1, false)
+
+			runtable.SetBackgroundColor(tcell.ColorBlack)
+			runtable.SetSelectedStyle(tcell.ColorWhite, tcell.ColorBlack, tcell.AttrDim)
+			for i := runtable.GetRowCount(); i >= 0; i-- {
+				runtable.GetCell(i, 0).SetTextColor(tcell.ColorDarkGreen)
+			}
+			runtable.SetSelectedStyle(tcell.ColorDarkGreen, tcell.ColorBlack, tcell.AttrDim)
+
+			for i := roottable.GetRowCount(); i >= 0; i-- {
+				roottable.GetCell(i, 0).SetTextColor(tcell.ColorWhite).SetAttributes(tcell.AttrNone)
+			}
+			roottable.GetCell(0, 0).SetText("<")
 			roottable.SetBackgroundColor(tcell.ColorDarkGreen)
-			rootmenu.AddItem(filler, 0, 2, 1, 1, 1, 1, false)
+			roottable.SetSelectedStyle(tcell.ColorBlack, tcell.ColorWhite, tcell.AttrNone)
+
 			tapp.SetFocus(roottable)
 		}
+	})
+
+	runtable.SetSelectionChangedFunc(func(y, x int) {
 	})
 
 	catstable.SetSelectedFunc(func(y, x int) {
 		switch y {
 		case 0:
-			rootmenu.RemoveItem(filler)
-			// rootmenu.RemoveItem(catstable)
-			// rootmenu.RemoveItem(runmenu)
-			rootmenu.AddItem(filler, 0, 1, 1, 1, 1, 1, false)
-			rootmenu.SetColumns(17, 10, -1)
-			roottable.SetSelectable(true, true)
+			// rootgrid.RemoveItem(blackbox)
+			rootgrid.SetColumns(rootgridwidth, catstablewidth, -1)
+			// rootgrid.AddItem(blackbox, 0, 2, 1, 1, 1, 1, false)
+
 			catstable.SetBackgroundColor(tcell.ColorBlack)
-			catstable.SetSelectable(false, false)
+			catstable.SetSelectedStyle(tcell.ColorWhite, tcell.ColorBlack, tcell.AttrDim)
+			for i := catstable.GetRowCount(); i >= 0; i-- {
+				catstable.GetCell(i, 0).SetTextColor(tcell.ColorDarkGreen)
+			}
+			catstable.SetSelectedStyle(tcell.ColorDarkGreen, tcell.ColorBlack, tcell.AttrDim)
+
+			for i := roottable.GetRowCount(); i >= 0; i-- {
+				roottable.GetCell(i, 0).SetTextColor(tcell.ColorWhite).SetAttributes(tcell.AttrNone)
+			}
+			roottable.GetCell(0, 0).SetText("<")
 			roottable.SetBackgroundColor(tcell.ColorDarkGreen)
-			rootmenu.AddItem(filler, 0, 2, 1, 1, 1, 1, false)
+			roottable.SetSelectedStyle(tcell.ColorBlack, tcell.ColorWhite, tcell.AttrNone)
+
 			tapp.SetFocus(roottable)
 		}
 	})
 
-	roottable.SetSelectionChangedFunc(func(y, x int) {
-		// titlebar.SetText(fmt.Sprint("y", y, " x", x))
-		switch y {
-		case 1:
-			rootmenu.RemoveItem(filler)
-			rootmenu.RemoveItem(catstable)
-			rootmenu.AddItem(runmenu, 0, 1, 1, 1, 1, 1, true)
-			rootmenu.AddItem(filler, 0, 2, 1, 1, 1, 1, false)
-			rootmenu.SetColumns(17, 13, -1)
-		case 2:
-			rootmenu.RemoveItem(filler)
-			rootmenu.RemoveItem(runmenu)
-			rootmenu.AddItem(catstable, 0, 1, 1, 1, 1, 1, true)
-			rootmenu.AddItem(filler, 0, 2, 1, 1, 1, 1, false)
-			rootmenu.SetColumns(17, 10, -1)
-		default:
-			rootmenu.RemoveItem(filler)
-			rootmenu.RemoveItem(catstable)
-			rootmenu.RemoveItem(runmenu)
-			rootmenu.AddItem(filler, 0, 1, 1, 1, 1, 1, false)
-			rootmenu.SetColumns(17, -1)
-			// tapp.ForceDraw()
-		}
+	catstable.SetSelectionChangedFunc(func(y, x int) {
 	})
 
-	rootmenu.AddItem(roottable, 0, 0, 1, 1, 1, 1, true)
-	// rootmenu.AddItem(runmenu, 0, 1, 1, 1, 1, 1, true)
-	rootmenu.AddItem(filler, 0, 1, 1, 1, 1, 1, false)
-	rootmenu.SetColumns(17, -1)
+	rootgrid.AddItem(roottable, 0, 0, 1, 1, 1, 1, true)
+	rootgrid.AddItem(blackbox, 0, 1, 1, 1, 1, 1, false)
+	rootgrid.SetColumns(rootgridwidth, -1)
 
-	root.AddItem(rootmenu, 0, 1, true)
+	root.AddItem(rootgrid, 0, 1, true)
 
 	if e := tapp.SetRoot(root, true).Run(); e != nil {
 		panic(e)
@@ -145,26 +224,30 @@ var runConf = func(args []string, tokens config.Tokens, app *config.App) int {
 	return 0
 }
 
+var catstablewidth int
+
 func GetCatsTable(app *config.App) *tview.Table {
 	catstable := tview.NewTable()
 	catstable.SetBorders(false)
 	sortedkeys := app.Cats.GetSortedKeys()
-	padlen := 0
 	for _, x := range sortedkeys {
-		if padlen < len(x) {
-			padlen = len(x)
+		if catstablewidth < len(x) {
+			catstablewidth = len(x)
 		}
 	}
 	catstable.SetCellSimple(0, 0, "< ")
 	for i, x := range sortedkeys {
-		pad := strings.Repeat(" ", padlen-len(x))
+		pad := strings.Repeat(" ", catstablewidth-len(x))
 		catstable.SetCellSimple(i+1, 0, "  "+x+pad+" >")
 	}
-	catstable.SetSelectable(false, false)
+	catstablewidth += 4
+	catstable.SetSelectedStyle(tcell.ColorWhite, tcell.ColorDarkGreen, tcell.AttrDim)
 	return catstable
 }
 
-func GetRunMenu() (out *tview.Table) {
+var runtablewidth = 13
+
+func GetRuntable() (out *tview.Table) {
 	out = tview.NewTable()
 	out.SetBorders(false)
 	out.SetSelectable(false, false)
