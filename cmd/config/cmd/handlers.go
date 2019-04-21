@@ -90,7 +90,7 @@ func Conf(args []string, tokens config.Tokens, app *config.App) int {
 	var r int
 	for r = 2; r == 2; {
 		// r = RunConf(args, tokens, app)
-		r = runConf(args, tokens, app)
+		r = Run(args, tokens, app)
 	}
 	return r
 }
