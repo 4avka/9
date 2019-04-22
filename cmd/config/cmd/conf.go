@@ -42,6 +42,7 @@ func Run(args []string, tokens config.Tokens, app *config.App) int {
 
 	coverbox := tview.NewTextView()
 	coverbox.SetBorder(false).SetBackgroundColor(BackgroundColor())
+	coverbox.SetBorderPadding(1, 1, 1, 1)
 
 	roottable, roottablewidth := genMenu("launch", "configure")
 	activateTable(roottable)
@@ -94,6 +95,16 @@ func Run(args []string, tokens config.Tokens, app *config.App) int {
 	})
 
 	launchtable.SetSelectionChangedFunc(func(y, x int) {
+		switch y {
+		case 0:
+			coverbox.SetText("")
+		case 1:
+			coverbox.SetText("run a full peer to peer parallelcoin node")
+		case 2:
+			coverbox.SetText("\nrun a wallet server (requires a full node)")
+		case 3:
+			coverbox.SetText("\n\nrun a combined wallet/full node")
+		}
 	})
 	launchtable.SetSelectedFunc(func(y, x int) {
 		switch y {
@@ -105,6 +116,8 @@ func Run(args []string, tokens config.Tokens, app *config.App) int {
 	})
 
 	catstable.SetSelectionChangedFunc(func(y, x int) {
+		// TODO: render prelit category list, attach parameterised generators
+		// that activate each item's page
 	})
 	catstable.SetSelectedFunc(func(y, x int) {
 		switch y {
