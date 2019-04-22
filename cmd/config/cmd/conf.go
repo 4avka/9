@@ -115,16 +115,41 @@ func Run(args []string, tokens config.Tokens, app *config.App) int {
 		}
 	})
 
+	var cattable *tview.Table
+	var cattablewidth int
+
 	catstable.SetSelectionChangedFunc(func(y, x int) {
-		// TODO: render prelit category list, attach parameterised generators
-		// that activate each item's page
+		menuflex.
+			RemoveItem(coverbox).
+			RemoveItem(cattable)
+		if y == 0 {
+			menuflex.
+				AddItem(coverbox, 0, 1, true)
+			return
+		}
+		cat := app.Cats.GetSortedKeys()[y-1]
+		cattable, cattablewidth = genMenu(app.Cats[cat].GetSortedKeys()...)
+		prelightTable(cattable)
+		cattable.SetSelectedFunc(func(y, x int) {
+			if y == 0 {
+				activatedTable(roottable)
+				prelightTable(cattable)
+				activateTable(catstable)
+				tapp.SetFocus(catstable)
+			}
+		})
+		menuflex.AddItem(cattable, cattablewidth, 1, false)
 	})
 	catstable.SetSelectedFunc(func(y, x int) {
-		switch y {
-		case 0:
+		if y == 0 {
 			prelightTable(catstable)
 			activateTable(roottable)
 			tapp.SetFocus(roottable)
+		} else {
+			prelightTable(roottable)
+			activatedTable(catstable)
+			activateTable(cattable)
+			tapp.SetFocus(cattable)
 		}
 	})
 
@@ -156,10 +181,10 @@ func genMenu(items ...string) (table *tview.Table, menuwidth int) {
 	table.SetCell(0, 0, tview.NewTableCell("<"))
 	for i, x := range items {
 		pad := strings.Repeat(" ", menuwidth-len(x))
-		table.SetCell(i+1, 0, tview.NewTableCell("  "+pad+x+" > "))
+		table.SetCell(i+1, 0, tview.NewTableCell("  "+pad+x))
 	}
 	t, l, _, h := table.Box.GetRect()
-	menuwidth += 5
+	menuwidth += 3
 	table.Box.SetRect(t, l, menuwidth, h)
 	return
 }
@@ -198,7 +223,7 @@ func prelightTable(table *tview.Table) {
 			SetAttributes(tcell.AttrDim).
 			SetTextColor(MainColor()).
 			SetBackgroundColor(PrelightColor())
-		table.SetSelectedStyle(MainColor(), PrelightColor(), tcell.AttrDim)
+		table.SetSelectedStyle(PrelightColor(), DimColor(), tcell.AttrDim&tcell.AttrBold)
 		table.Box.SetBackgroundColor(PrelightColor())
 	}
 }
