@@ -138,6 +138,8 @@ func Run(args []string, tokens config.Tokens, app *config.App) int {
 				tapp.SetFocus(catstable)
 			}
 		})
+		cattable.SetSelectionChangedFunc(func(y, x int) {
+		})
 		menuflex.AddItem(cattable, cattablewidth, 1, false)
 	})
 	catstable.SetSelectedFunc(func(y, x int) {
@@ -181,10 +183,10 @@ func genMenu(items ...string) (table *tview.Table, menuwidth int) {
 	table.SetCell(0, 0, tview.NewTableCell("<"))
 	for i, x := range items {
 		pad := strings.Repeat(" ", menuwidth-len(x))
-		table.SetCell(i+1, 0, tview.NewTableCell("  "+pad+x))
+		table.SetCell(i+1, 0, tview.NewTableCell(" "+pad+x))
 	}
 	t, l, _, h := table.Box.GetRect()
-	menuwidth += 3
+	menuwidth += 2
 	table.Box.SetRect(t, l, menuwidth, h)
 	return
 }
@@ -197,7 +199,7 @@ func activateTable(table *tview.Table) {
 			SetAttributes(tcell.AttrNone).
 			SetTextColor(TextColor()).
 			SetBackgroundColor(MainColor())
-		table.SetSelectedStyle(BackgroundColor(), TextColor(), tcell.AttrNone)
+		table.SetSelectedStyle(MainColor(), TextColor(), tcell.AttrBold)
 		table.Box.SetBackgroundColor(MainColor())
 	}
 }
@@ -220,10 +222,10 @@ func prelightTable(table *tview.Table) {
 	rowcount := table.GetRowCount()
 	for i := 0; i < rowcount; i++ {
 		table.GetCell(i, 0).
-			SetAttributes(tcell.AttrDim).
-			SetTextColor(MainColor()).
+			// SetAttributes(tcell.AttrDim).
+			SetTextColor(DimColor()).
 			SetBackgroundColor(PrelightColor())
-		table.SetSelectedStyle(PrelightColor(), DimColor(), tcell.AttrDim&tcell.AttrBold)
+		table.SetSelectedStyle(PrelightColor(), DimColor(), tcell.AttrBold)
 		table.Box.SetBackgroundColor(PrelightColor())
 	}
 }
