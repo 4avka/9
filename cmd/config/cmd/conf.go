@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 
 	"git.parallelcoin.io/dev/9/cmd/config"
@@ -118,6 +119,8 @@ func Run(args []string, tokens config.Tokens, app *config.App) int {
 	var cattable *tview.Table
 	var cattablewidth int
 
+	var activepage *tview.Flex
+
 	catstable.SetSelectionChangedFunc(func(y, x int) {
 		menuflex.
 			RemoveItem(coverbox).
@@ -139,8 +142,20 @@ func Run(args []string, tokens config.Tokens, app *config.App) int {
 			}
 		})
 		cattable.SetSelectionChangedFunc(func(y, x int) {
+			menuflex.
+				RemoveItem(coverbox).
+				RemoveItem(activepage)
+			if y == 0 {
+				menuflex.AddItem(coverbox, 0, 1, false)
+			} else {
+				itemname := app.Cats[cat].GetSortedKeys()[y-1]
+				activepage =
+					genPage(cat, itemname, app)
+				menuflex.AddItem(activepage, 0, 1, true)
+			}
 		})
-		menuflex.AddItem(cattable, cattablewidth, 1, false)
+		menuflex.AddItem(cattable, cattablewidth, 1, false).
+			AddItem(coverbox, 0, 1, true)
 	})
 	catstable.SetSelectedFunc(func(y, x int) {
 		if y == 0 {
@@ -166,6 +181,57 @@ func Run(args []string, tokens config.Tokens, app *config.App) int {
 	}
 
 	return 0
+}
+
+func genPage(cat, item string, app *config.App) (out *tview.Flex) {
+	out = tview.NewFlex().SetDirection(tview.FlexRow)
+	out.SetBorderPadding(1, 1, 1, 1)
+	out.SetBackgroundColor(PrelightColor())
+	// out.SetBorder(true)
+	titleblock := tview.NewTextView()
+	// titleblock.SetBorder(true)
+	titleblock.SetBorderPadding(0, 0, 1, 1)
+	titleblock.SetWordWrap(true)
+	titleblock.SetBackgroundColor(PrelightColor())
+	titleblock.SetTextColor(MainColor())
+	titleblock.SetText(
+		fmt.Sprintf("%s:%s", strings.ToUpper(cat), strings.ToUpper(item)))
+	infoblock := tview.NewTextView()
+	// infoblock.SetBorder(true)
+	infoblock.SetWordWrap(true)
+	infoblock.SetBorderPadding(0, 0, 1, 1)
+	infoblock.SetBackgroundColor(PrelightColor())
+	infoblock.SetTextColor(MainColor())
+	def := app.Cats[cat][item].Default
+	defstring := ""
+	if def != nil {
+		defstring = fmt.Sprintf("\n\ndefault value: %v", def.Get())
+	} else {
+		defstring = "\n\nthis value has no default"
+	}
+	infoblock.SetText(
+		fmt.Sprintf(
+			"%v%s",
+			app.Cats[cat][item].Usage, defstring,
+		))
+	out.AddItem(titleblock, 2, 0, false)
+	out.AddItem(infoblock, 5, 0, false)
+	row := app.Cats[cat][item]
+	switch row.Type {
+	case "string", "int", "float", "duration", "port":
+		iteminput := tview.NewInputField()
+		iteminput.SetBackgroundColor(MainColor())
+		iteminput.SetFieldTextColor(PrelightColor())
+		iteminput.SetFieldBackgroundColor(MainColor())
+		iteminput.SetBorderPadding(1, 1, 1, 1)
+		val := app.Cats[cat][item].Value
+		if val != nil {
+			iteminput.SetText(fmt.Sprint(val.Get()))
+		}
+		out.AddItem(iteminput, 3, 0, false)
+	}
+	out.AddItem(tview.NewTextView().SetBackgroundColor(PrelightColor()), 0, 1, false)
+	return
 }
 
 func getMaxWidth(ss []string) (maxwidth int) {
