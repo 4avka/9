@@ -134,11 +134,24 @@ func Run(args []string, tokens config.Tokens, app *config.App) int {
 		cattable, cattablewidth = genMenu(app.Cats[cat].GetSortedKeys()...)
 		prelightTable(cattable)
 		cattable.SetSelectedFunc(func(y, x int) {
+			menuflex.
+				RemoveItem(activepage).
+				RemoveItem(coverbox)
 			if y == 0 {
 				activatedTable(roottable)
 				prelightTable(cattable)
 				activateTable(catstable)
+				menuflex.
+					AddItem(coverbox, 0, 1, true)
 				tapp.SetFocus(catstable)
+			} else {
+				lastTable(roottable)
+				prelightTable(catstable)
+				activatedTable(cattable)
+				itemname := app.Cats[cat].GetSortedKeys()[y-1]
+				activepage = genPage(cat, itemname, true, app)
+				menuflex.AddItem(activepage, 0, 1, true)
+				tapp.SetFocus(activepage)
 			}
 		})
 		cattable.SetSelectionChangedFunc(func(y, x int) {
@@ -150,11 +163,12 @@ func Run(args []string, tokens config.Tokens, app *config.App) int {
 			} else {
 				itemname := app.Cats[cat].GetSortedKeys()[y-1]
 				activepage =
-					genPage(cat, itemname, app)
+					genPage(cat, itemname, false, app)
 				menuflex.AddItem(activepage, 0, 1, true)
 			}
 		})
-		menuflex.AddItem(cattable, cattablewidth, 1, false).
+		menuflex.
+			AddItem(cattable, cattablewidth, 1, false).
 			AddItem(coverbox, 0, 1, true)
 	})
 	catstable.SetSelectedFunc(func(y, x int) {
@@ -183,54 +197,74 @@ func Run(args []string, tokens config.Tokens, app *config.App) int {
 	return 0
 }
 
-func genPage(cat, item string, app *config.App) (out *tview.Flex) {
+var iteminput = tview.NewInputField()
+var toggle = tview.NewDropDown()
+
+func genPage(cat, item string, active bool, app *config.App) (out *tview.Flex) {
+	var darkness, lightness tcell.Color
+	if active {
+		darkness = MainColor()
+		lightness = TextColor()
+	} else {
+		darkness = PrelightColor()
+		lightness = MainColor()
+	}
+
 	out = tview.NewFlex().SetDirection(tview.FlexRow)
 	out.SetBorderPadding(1, 1, 1, 1)
-	out.SetBackgroundColor(PrelightColor())
+	out.SetBackgroundColor(darkness)
 	// out.SetBorder(true)
-	titleblock := tview.NewTextView()
-	// titleblock.SetBorder(true)
-	titleblock.SetBorderPadding(0, 0, 1, 1)
-	titleblock.SetWordWrap(true)
-	titleblock.SetBackgroundColor(PrelightColor())
-	titleblock.SetTextColor(MainColor())
-	titleblock.SetText(
-		fmt.Sprintf("%s:%s", strings.ToUpper(cat), strings.ToUpper(item)))
 	infoblock := tview.NewTextView()
 	// infoblock.SetBorder(true)
 	infoblock.SetWordWrap(true)
-	infoblock.SetBorderPadding(0, 0, 1, 1)
-	infoblock.SetBackgroundColor(PrelightColor())
-	infoblock.SetTextColor(MainColor())
+	infoblock.SetBorderPadding(1, 0, 1, 1)
+	infoblock.SetBackgroundColor(darkness)
+	infoblock.SetTextColor(lightness)
 	def := app.Cats[cat][item].Default
 	defstring := ""
 	if def != nil {
-		defstring = fmt.Sprintf("\n\ndefault value: %v", def.Get())
+		defstring = fmt.Sprintf("default value: %v", def.Get())
 	} else {
-		defstring = "\n\nthis value has no default"
+		defstring = "this value has no default"
 	}
-	infoblock.SetText(
-		fmt.Sprintf(
-			"%v%s",
-			app.Cats[cat][item].Usage, defstring,
-		))
-	out.AddItem(titleblock, 2, 0, false)
-	out.AddItem(infoblock, 5, 0, false)
-	row := app.Cats[cat][item]
-	switch row.Type {
+	infostring := fmt.Sprintf(
+		"%v\n\n%s",
+		app.Cats[cat][item].Usage, defstring,
+	)
+	infoblock.SetText(infostring)
+	switch app.Cats[cat][item].Type {
 	case "string", "int", "float", "duration", "port":
-		iteminput := tview.NewInputField()
-		iteminput.SetBackgroundColor(MainColor())
-		iteminput.SetFieldTextColor(PrelightColor())
-		iteminput.SetFieldBackgroundColor(MainColor())
+		iteminput.SetBackgroundColor(lightness)
+		iteminput.SetFieldTextColor(darkness)
+		iteminput.SetFieldBackgroundColor(lightness)
 		iteminput.SetBorderPadding(1, 1, 1, 1)
+		// iteminput.SetBorder(true)
 		val := app.Cats[cat][item].Value
 		if val != nil {
 			iteminput.SetText(fmt.Sprint(val.Get()))
 		}
-		out.AddItem(iteminput, 3, 0, false)
+		out.AddItem(iteminput, 3, 0, true)
+	case "bool":
+		def := app.Cats[cat][item].Default.Get().(bool)
+		if def {
+			toggle.SetOptions([]string{"false", "true (default)"}, func(string, int) {})
+		} else {
+			toggle.SetOptions([]string{"false (default)", "true"}, func(string, int) {})
+		}
+		curropt := 0
+		curr := app.Cats[cat][item]
+		if curr.Bool() {
+			curropt = 1
+		}
+		toggle.SetCurrentOption(curropt)
+		toggle.SetBackgroundColor(lightness)
+		toggle.SetFieldTextColor(darkness)
+		toggle.SetFieldBackgroundColor(lightness)
+		toggle.SetBorderPadding(1, 1, 1, 1)
+		toggle.SetPrefixTextColor(darkness)
+		out.AddItem(toggle, 3, 0, true)
 	}
-	out.AddItem(tview.NewTextView().SetBackgroundColor(PrelightColor()), 0, 1, false)
+	out.AddItem(infoblock, 0, 1, false)
 	return
 }
 
@@ -293,5 +327,18 @@ func prelightTable(table *tview.Table) {
 			SetBackgroundColor(PrelightColor())
 		table.SetSelectedStyle(PrelightColor(), DimColor(), tcell.AttrBold)
 		table.Box.SetBackgroundColor(PrelightColor())
+	}
+}
+
+// This sets a menu to preview (when it is active but not selected yet)
+func lastTable(table *tview.Table) {
+	rowcount := table.GetRowCount()
+	for i := 0; i < rowcount; i++ {
+		table.GetCell(i, 0).
+			// SetAttributes(tcell.AttrDim).
+			SetTextColor(PrelightColor()).
+			SetBackgroundColor(BackgroundColor())
+		table.SetSelectedStyle(BackgroundColor(), PrelightColor(), tcell.AttrBold)
+		table.Box.SetBackgroundColor(BackgroundColor())
 	}
 }
