@@ -157,12 +157,12 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 	var cat, itemname string
 
 	catstable.SetSelectionChangedFunc(func(y, x int) {
+		itemname = ""
 		menuflex.
 			RemoveItem(activepage).
 			RemoveItem(coverbox).
 			RemoveItem(cattable)
 		if y == 0 {
-			itemname = ""
 			cat = strings.TrimSpace(catstable.GetCell(y, x).Text)
 			menuflex.
 				AddItem(coverbox, 0, 1, true)
