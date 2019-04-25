@@ -37,6 +37,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 
 	var activepage *tview.Flex
 	var inputhandler func(event *tcell.EventKey) *tcell.EventKey
+	var cat, itemname string
 	// tapp pulls everything together to create the configuration interface
 	tapp := tview.NewApplication()
 
@@ -82,11 +83,18 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 				AddItem(coverbox, 0, 1, true)
 		case 2:
 			menuflex.
-				AddItem(catstable, catstablewidth, 1, true).
-				AddItem(coverbox, 0, 1, true)
+				AddItem(catstable, catstablewidth, 1, true)
+			if cattable != nil {
+				menuflex.AddItem(cattable, cattablewidth, 1, true)
+			}
+			menuflex.AddItem(coverbox, 0, 1, true)
 		}
 	})
 	roottable.SetSelectedFunc(func(y, x int) {
+		menuflex.RemoveItem(coverbox)
+		if cattable != nil {
+			menuflex.RemoveItem(cattable)
+		}
 		switch y {
 		case 0:
 			tapp.Stop()
@@ -98,6 +106,10 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 		case 2:
 			activatedTable(roottable)
 			activateTable(catstable)
+			if cattable != nil {
+				menuflex.AddItem(cattable, cattablewidth, 0, false)
+				prelightTable(cattable)
+			}
 			tapp.SetFocus(catstable)
 		}
 	})
@@ -154,8 +166,6 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 		return event
 	})
 
-	var cat, itemname string
-
 	catstable.SetSelectionChangedFunc(func(y, x int) {
 		itemname = ""
 		menuflex.
@@ -187,7 +197,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 				prelightTable(catstable)
 				activatedTable(cattable)
 				itemname = app.Cats[cat].GetSortedKeys()[y-1]
-				inputhandler := func(event *tcell.EventKey) *tcell.EventKey {
+				inputhandler = func(event *tcell.EventKey) *tcell.EventKey {
 					switch event.Key() {
 					case 13:
 						// pressed enter
@@ -276,6 +286,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			// pressed enter
 		case 27:
 			// pressed escape
+			// itemname = ""
 			lastTable(cattable)
 			prelightTable(catstable)
 			activateTable(roottable)
