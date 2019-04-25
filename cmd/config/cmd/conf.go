@@ -31,7 +31,12 @@ func BackgroundColor() tcell.Color {
 	return tcell.NewRGBColor(16, 16, 16)
 }
 
-func Run(args []string, tokens config.Tokens, app *config.App) int {
+func Run(_ []string, _ config.Tokens, app *config.App) int {
+	var cattable *tview.Table
+	var cattablewidth int
+
+	var activepage *tview.Flex
+	var inputhandler func(event *tcell.EventKey) *tcell.EventKey
 	// tapp pulls everything together to create the configuration interface
 	tapp := tview.NewApplication()
 
@@ -61,16 +66,17 @@ func Run(args []string, tokens config.Tokens, app *config.App) int {
 	menuflex.Box.SetBackgroundColor(BackgroundColor())
 
 	roottable.SetSelectionChangedFunc(func(y, x int) {
+		coverbox.SetText("")
 		menuflex.
 			RemoveItem(coverbox).
 			RemoveItem(launchtable).
-			RemoveItem(catstable)
+			RemoveItem(catstable).
+			RemoveItem(cattable)
 		switch y {
 		case 0:
 			menuflex.
 				AddItem(coverbox, 0, 1, true)
 		case 1:
-			prelightTable(launchtable)
 			menuflex.
 				AddItem(launchtable, launchtablewidth, 1, true).
 				AddItem(coverbox, 0, 1, true)
@@ -87,6 +93,7 @@ func Run(args []string, tokens config.Tokens, app *config.App) int {
 		case 1:
 			activatedTable(roottable)
 			activateTable(launchtable)
+			coverbox.SetTextColor(TextColor())
 			tapp.SetFocus(launchtable)
 		case 2:
 			activatedTable(roottable)
@@ -94,10 +101,23 @@ func Run(args []string, tokens config.Tokens, app *config.App) int {
 			tapp.SetFocus(catstable)
 		}
 	})
+	roottable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch event.Key() {
+		case 13:
+			// titlebar.SetText("enter")
+			// pressed enter
+		case 27:
+			// titlebar.SetText("ESCAPE")
+			// pressed escape
+			tapp.Stop()
+		}
+		return event
+	})
 
 	launchtable.SetSelectionChangedFunc(func(y, x int) {
 		switch y {
 		case 0:
+			menuflex.RemoveItem(cattable).RemoveItem(catstable)
 			coverbox.SetText("")
 		case 1:
 			coverbox.SetText("run a full peer to peer parallelcoin node")
@@ -113,24 +133,42 @@ func Run(args []string, tokens config.Tokens, app *config.App) int {
 			prelightTable(launchtable)
 			activateTable(roottable)
 			tapp.SetFocus(roottable)
+		case 1:
+		case 2:
+		case 3:
 		}
 	})
+	launchtable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch event.Key() {
+		case 13:
+			// titlebar.SetText("enter")
+			// pressed enter
+		case 27:
+			// titlebar.SetText("ESCAPE")
+			// pressed escape
+			prelightTable(launchtable)
+			activateTable(roottable)
+			coverbox.SetTextColor(PrelightColor()) // SetAttributes(tcell.AttrDim)
+			tapp.SetFocus(roottable)
+		}
+		return event
+	})
 
-	var cattable *tview.Table
-	var cattablewidth int
-
-	var activepage *tview.Flex
+	var cat, itemname string
 
 	catstable.SetSelectionChangedFunc(func(y, x int) {
 		menuflex.
+			RemoveItem(activepage).
 			RemoveItem(coverbox).
 			RemoveItem(cattable)
 		if y == 0 {
+			itemname = ""
+			cat = strings.TrimSpace(catstable.GetCell(y, x).Text)
 			menuflex.
 				AddItem(coverbox, 0, 1, true)
 			return
 		}
-		cat := app.Cats.GetSortedKeys()[y-1]
+		cat = app.Cats.GetSortedKeys()[y-1]
 		cattable, cattablewidth = genMenu(app.Cats[cat].GetSortedKeys()...)
 		prelightTable(cattable)
 		cattable.SetSelectedFunc(func(y, x int) {
@@ -148,8 +186,27 @@ func Run(args []string, tokens config.Tokens, app *config.App) int {
 				lastTable(roottable)
 				prelightTable(catstable)
 				activatedTable(cattable)
-				itemname := app.Cats[cat].GetSortedKeys()[y-1]
-				activepage = genPage(cat, itemname, true, app)
+				itemname = app.Cats[cat].GetSortedKeys()[y-1]
+				inputhandler := func(event *tcell.EventKey) *tcell.EventKey {
+					switch event.Key() {
+					case 13:
+						// pressed enter
+					case 27:
+						// pressed escape
+						menuflex.
+							RemoveItem(coverbox).
+							RemoveItem(activepage)
+						itemname = app.Cats[cat].GetSortedKeys()[y-1]
+						activepage = genPage(cat, itemname, false, app, inputhandler)
+						menuflex.AddItem(activepage, 0, 1, true)
+						prelightTable(roottable)
+						activatedTable(catstable)
+						activateTable(cattable)
+						tapp.SetFocus(cattable)
+					}
+					return event
+				}
+				activepage = genPage(cat, itemname, true, app, inputhandler)
 				menuflex.AddItem(activepage, 0, 1, true)
 				tapp.SetFocus(activepage)
 			}
@@ -161,29 +218,71 @@ func Run(args []string, tokens config.Tokens, app *config.App) int {
 			if y == 0 {
 				menuflex.AddItem(coverbox, 0, 1, false)
 			} else {
-				itemname := app.Cats[cat].GetSortedKeys()[y-1]
-				activepage =
-					genPage(cat, itemname, false, app)
+				itemname = app.Cats[cat].GetSortedKeys()[y-1]
+				activepage = genPage(cat, itemname, false, app, nil)
 				menuflex.AddItem(activepage, 0, 1, true)
 			}
+		})
+		cattable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+			switch event.Key() {
+			case 13:
+				// pressed enter
+			case 27:
+				// pressed escape
+				menuflex.
+					RemoveItem(activepage).
+					RemoveItem(coverbox)
+				activatedTable(roottable)
+				prelightTable(cattable)
+				activateTable(catstable)
+				menuflex.
+					AddItem(coverbox, 0, 1, true)
+				tapp.SetFocus(catstable)
+			}
+			return event
 		})
 		menuflex.
 			AddItem(cattable, cattablewidth, 1, false).
 			AddItem(coverbox, 0, 1, true)
 	})
 	catstable.SetSelectedFunc(func(y, x int) {
+		menuflex.
+			RemoveItem(coverbox).
+			RemoveItem(activepage)
 		if y == 0 {
+			itemname = ""
 			prelightTable(catstable)
 			activateTable(roottable)
+			coverbox.SetText("")
+			menuflex.
+				AddItem(coverbox, 0, 1, true)
 			tapp.SetFocus(roottable)
 		} else {
+			// itemname = strings.TrimSpace(catstable.GetCell(y, x).Text)
 			prelightTable(roottable)
 			activatedTable(catstable)
 			activateTable(cattable)
+			if !(cat == "" || itemname == "") {
+				activepage = genPage(cat, itemname, false, app, nil)
+				menuflex.RemoveItem(coverbox)
+				menuflex.AddItem(activepage, 0, 1, true)
+			}
 			tapp.SetFocus(cattable)
 		}
 	})
-
+	catstable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch event.Key() {
+		case 13:
+			// pressed enter
+		case 27:
+			// pressed escape
+			lastTable(cattable)
+			prelightTable(catstable)
+			activateTable(roottable)
+			tapp.SetFocus(roottable)
+		}
+		return event
+	})
 	// root is the canvas (the whole current terminal view)
 	root := tview.NewFlex().
 		SetDirection(tview.FlexRow).
@@ -197,10 +296,11 @@ func Run(args []string, tokens config.Tokens, app *config.App) int {
 	return 0
 }
 
-var iteminput = tview.NewInputField()
-var toggle = tview.NewDropDown()
+var iteminput tview.InputField
+var toggle tview.Table
 
-func genPage(cat, item string, active bool, app *config.App) (out *tview.Flex) {
+func genPage(cat, item string, active bool, app *config.App,
+	editoreventhandler func(event *tcell.EventKey) *tcell.EventKey) (out *tview.Flex) {
 	var darkness, lightness tcell.Color
 	if active {
 		darkness = MainColor()
@@ -211,21 +311,28 @@ func genPage(cat, item string, active bool, app *config.App) (out *tview.Flex) {
 	}
 
 	out = tview.NewFlex().SetDirection(tview.FlexRow)
-	out.SetBorderPadding(1, 1, 1, 1)
-	out.SetBackgroundColor(darkness)
-	// out.SetBorder(true)
+	heading := tview.NewTextView().
+		SetText(fmt.Sprintf("%s.%s (type %s)", cat, item, app.Cats[cat][item].Type))
+	heading.
+		SetTextColor(lightness).
+		SetBackgroundColor(darkness).
+		SetBorderPadding(0, 0, 1, 1)
+	out.
+		SetBorderPadding(1, 1, 1, 1).
+		SetBackgroundColor(darkness)
+	out.AddItem(heading, 2, 0, false)
 	infoblock := tview.NewTextView()
-	// infoblock.SetBorder(true)
-	infoblock.SetWordWrap(true)
-	infoblock.SetBorderPadding(1, 0, 1, 1)
-	infoblock.SetBackgroundColor(darkness)
-	infoblock.SetTextColor(lightness)
+	infoblock.
+		SetWordWrap(true).
+		SetTextColor(lightness).
+		SetBorderPadding(1, 0, 1, 1).
+		SetBackgroundColor(darkness)
 	def := app.Cats[cat][item].Default
 	defstring := ""
 	if def != nil {
 		defstring = fmt.Sprintf("default value: %v", def.Get())
 	} else {
-		defstring = "this value has no default"
+		defstring = "" //"this value has no default"
 	}
 	infostring := fmt.Sprintf(
 		"%v\n\n%s",
@@ -234,35 +341,74 @@ func genPage(cat, item string, active bool, app *config.App) (out *tview.Flex) {
 	infoblock.SetText(infostring)
 	switch app.Cats[cat][item].Type {
 	case "string", "int", "float", "duration", "port":
-		iteminput.SetBackgroundColor(lightness)
-		iteminput.SetFieldTextColor(darkness)
-		iteminput.SetFieldBackgroundColor(lightness)
-		iteminput.SetBorderPadding(1, 1, 1, 1)
-		// iteminput.SetBorder(true)
+		var iteminput = tview.NewInputField()
+		iteminput.
+			SetFieldTextColor(darkness).
+			SetFieldBackgroundColor(lightness).
+			SetBackgroundColor(lightness).
+			SetBorderPadding(1, 1, 1, 1)
 		val := app.Cats[cat][item].Value
 		if val != nil {
-			iteminput.SetText(fmt.Sprint(val.Get()))
+			vv := val.Get()
+			if vv != nil {
+				iteminput.SetText(fmt.Sprint(vv))
+			}
 		}
+		iteminput.SetInputCapture(editoreventhandler)
 		out.AddItem(iteminput, 3, 0, true)
 	case "bool":
+		var toggle = tview.NewTable()
+		toggle.SetBorderPadding(1, 1, 1, 1)
+		// toggle.SetBorder(true).SetBorderColor(lightness)
+		toggle.SetBackgroundColor(lightness)
 		def := app.Cats[cat][item].Default.Get().(bool)
 		if def {
-			toggle.SetOptions([]string{"false", "true (default)"}, func(string, int) {})
+			toggle.
+				SetCell(0, 0, tview.NewTableCell("false").SetTextColor(darkness)).
+				SetCell(1, 0, tview.NewTableCell("true (default)").SetTextColor(darkness))
 		} else {
-			toggle.SetOptions([]string{"false (default)", "true"}, func(string, int) {})
+			toggle.
+				SetCell(0, 0, tview.NewTableCell("false (default)").SetTextColor(darkness)).
+				SetCell(1, 0, tview.NewTableCell("true").SetTextColor(darkness))
 		}
 		curropt := 0
 		curr := app.Cats[cat][item]
 		if curr.Bool() {
 			curropt = 1
 		}
-		toggle.SetCurrentOption(curropt)
+		toggle.
+			SetSelectable(true, true).
+			Select(curropt, 0).
+			SetSelectedStyle(lightness, darkness, tcell.AttrNone)
 		toggle.SetBackgroundColor(lightness)
-		toggle.SetFieldTextColor(darkness)
-		toggle.SetFieldBackgroundColor(lightness)
+		toggle.SetInputCapture(editoreventhandler)
+		out.AddItem(toggle, 4, 0, true)
+	case "options":
+		var toggle = tview.NewTable()
+		// toggle.SetBorder(true).SetBorderColor(lightness)
 		toggle.SetBorderPadding(1, 1, 1, 1)
-		toggle.SetPrefixTextColor(darkness)
-		out.AddItem(toggle, 3, 0, true)
+		def := app.Cats[cat][item].Default.Get().(string)
+		curr := app.Cats[cat][item].Value.Get().(string)
+		curropt := 0
+		for i, x := range app.Cats[cat][item].Opts {
+			itemtext := x
+			if x == def {
+				itemtext += " (default)"
+			}
+			if x == curr {
+				curropt = i
+			}
+			toggle.
+				SetCell(i, 0, tview.NewTableCell(itemtext).
+					SetTextColor(darkness).SetBackgroundColor(lightness))
+		}
+		toggle.
+			SetSelectable(true, true).
+			Select(curropt, 0).
+			SetSelectedStyle(lightness, darkness, tcell.AttrNone)
+		toggle.SetBackgroundColor(lightness)
+		toggle.SetInputCapture(editoreventhandler)
+		out.AddItem(toggle, len(app.Cats[cat][item].Opts)+2, 0, true)
 	}
 	out.AddItem(infoblock, 0, 1, false)
 	return
@@ -322,7 +468,7 @@ func prelightTable(table *tview.Table) {
 	rowcount := table.GetRowCount()
 	for i := 0; i < rowcount; i++ {
 		table.GetCell(i, 0).
-			// SetAttributes(tcell.AttrDim).
+			SetAttributes(tcell.AttrNone).
 			SetTextColor(DimColor()).
 			SetBackgroundColor(PrelightColor())
 		table.SetSelectedStyle(PrelightColor(), DimColor(), tcell.AttrBold)
@@ -330,12 +476,12 @@ func prelightTable(table *tview.Table) {
 	}
 }
 
-// This sets a menu to preview (when it is active but not selected yet)
+// This is just for the one case of the root table with the editor active
 func lastTable(table *tview.Table) {
 	rowcount := table.GetRowCount()
 	for i := 0; i < rowcount; i++ {
 		table.GetCell(i, 0).
-			// SetAttributes(tcell.AttrDim).
+			SetAttributes(tcell.AttrNone).
 			SetTextColor(PrelightColor()).
 			SetBackgroundColor(BackgroundColor())
 		table.SetSelectedStyle(BackgroundColor(), PrelightColor(), tcell.AttrBold)
