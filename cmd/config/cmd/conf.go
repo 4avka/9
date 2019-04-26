@@ -456,12 +456,15 @@ func genPage(cat, item string, active bool, app *config.App,
 			}
 		}
 		slice.
+			SetCell(len(slicevalue), 0, tview.NewTableCell("add new").
+				SetTextColor(darkness).SetBackgroundColor(lightness))
+		slice.
 			SetSelectable(true, true).
 			Select(curropt, 0).
 			SetSelectedStyle(lightness, darkness, tcell.AttrNone)
 		slice.SetBackgroundColor(lightness)
 		slice.SetInputCapture(editoreventhandler)
-		out.AddItem(slice, len(slicevalue)+2, 0, true)
+		out.AddItem(slice, len(slicevalue)+3, 0, true)
 
 	}
 	out.AddItem(infoblock, 0, 1, false)
