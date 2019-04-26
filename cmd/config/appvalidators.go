@@ -64,7 +64,7 @@ func GenAddr(name string, port int) func(r *Row, in interface{}) bool {
 func GenAddrs(name string, port int) func(r *Row, in interface{}) bool {
 	return func(r *Row, in interface{}) bool {
 		var s string
-		ss := &[]string{}
+		ss := []string{}
 		isString := false
 		switch I := in.(type) {
 		case string:
@@ -74,9 +74,9 @@ func GenAddrs(name string, port int) func(r *Row, in interface{}) bool {
 			s = *I
 			isString = true
 		case []string:
-			ss = &I
-		case *[]string:
 			ss = I
+		case *[]string:
+			ss = *I
 		default:
 			return false
 		}
@@ -87,7 +87,7 @@ func GenAddrs(name string, port int) func(r *Row, in interface{}) bool {
 			}
 			for _, x := range sss {
 				if len(x) > 0 {
-					*ss = append(*ss, x)
+					ss = append(ss, x)
 				}
 			}
 		}
@@ -95,7 +95,7 @@ func GenAddrs(name string, port int) func(r *Row, in interface{}) bool {
 			if r != nil {
 				r.Value = r.Value.Put(ss)
 			}
-			r.String = fmt.Sprint(*ss)
+			r.String = fmt.Sprint(ss)
 		}
 		return true
 	}

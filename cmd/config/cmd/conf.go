@@ -31,6 +31,9 @@ func BackgroundColor() tcell.Color {
 	return tcell.NewRGBColor(16, 16, 16)
 }
 
+var iteminput *tview.InputField
+var toggle *tview.Table
+
 func Run(_ []string, _ config.Tokens, app *config.App) int {
 	var cattable *tview.Table
 	var cattablewidth int
@@ -38,6 +41,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 	var activepage *tview.Flex
 	var inputhandler func(event *tcell.EventKey) *tcell.EventKey
 	var cat, itemname string
+
 	// tapp pulls everything together to create the configuration interface
 	tapp := tview.NewApplication()
 
@@ -307,9 +311,6 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 	return 0
 }
 
-var iteminput tview.InputField
-var toggle tview.Table
-
 func genPage(cat, item string, active bool, app *config.App,
 	editoreventhandler func(event *tcell.EventKey) *tcell.EventKey) (out *tview.Flex) {
 	var darkness, lightness tcell.Color
@@ -352,7 +353,7 @@ func genPage(cat, item string, active bool, app *config.App,
 	infoblock.SetText(infostring)
 	switch app.Cats[cat][item].Type {
 	case "string", "int", "float", "duration", "port":
-		var iteminput = tview.NewInputField()
+		iteminput = tview.NewInputField()
 		iteminput.
 			SetFieldTextColor(darkness).
 			SetFieldBackgroundColor(lightness).
@@ -368,7 +369,7 @@ func genPage(cat, item string, active bool, app *config.App,
 		iteminput.SetInputCapture(editoreventhandler)
 		out.AddItem(iteminput, 3, 0, true)
 	case "bool":
-		var toggle = tview.NewTable()
+		toggle = tview.NewTable()
 		toggle.SetBorderPadding(1, 1, 1, 1)
 		// toggle.SetBorder(true).SetBorderColor(lightness)
 		toggle.SetBackgroundColor(lightness)
@@ -396,7 +397,6 @@ func genPage(cat, item string, active bool, app *config.App,
 		out.AddItem(toggle, 4, 0, true)
 	case "options":
 		var toggle = tview.NewTable()
-		// toggle.SetBorder(true).SetBorderColor(lightness)
 		toggle.SetBorderPadding(1, 1, 1, 1)
 		def := app.Cats[cat][item].Default.Get().(string)
 		curr := app.Cats[cat][item].Value.Get().(string)
@@ -420,6 +420,49 @@ func genPage(cat, item string, active bool, app *config.App,
 		toggle.SetBackgroundColor(lightness)
 		toggle.SetInputCapture(editoreventhandler)
 		out.AddItem(toggle, len(app.Cats[cat][item].Opts)+2, 0, true)
+	case "stringslice":
+		var slice = tview.NewTable()
+		slice.SetBorderPadding(1, 1, 1, 1)
+		var def string
+		defIface := app.Cats[cat][item].Default.Get()
+		switch defIface.(type) {
+		case string:
+			def = app.Cats[cat][item].Default.Get().(string)
+		case nil:
+		default:
+		}
+		var curr string
+		currIface := app.Cats[cat][item].Value.Get()
+		switch dd := currIface.(type) {
+		case string:
+			curr = dd
+		case nil:
+		default:
+		}
+		curropt := 0
+		slicevalue, ok := app.Cats[cat][item].Get().([]string)
+		if ok {
+			for i, x := range slicevalue {
+				itemtext := x
+				if x == def {
+					itemtext += " (default)"
+				}
+				if x == curr {
+					curropt = i
+				}
+				slice.
+					SetCell(i, 0, tview.NewTableCell(itemtext).
+						SetTextColor(darkness).SetBackgroundColor(lightness))
+			}
+		}
+		slice.
+			SetSelectable(true, true).
+			Select(curropt, 0).
+			SetSelectedStyle(lightness, darkness, tcell.AttrNone)
+		slice.SetBackgroundColor(lightness)
+		slice.SetInputCapture(editoreventhandler)
+		out.AddItem(slice, len(slicevalue)+2, 0, true)
+
 	}
 	out.AddItem(infoblock, 0, 1, false)
 	return
