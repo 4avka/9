@@ -252,7 +252,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 							out.AddItem(infoblock, 0, 1, false)
 							return
 						} else {
-							rw.Put(s)
+							rw.Value.Put(s)
 							out.RemoveItem(snackbar)
 						}
 					}
@@ -365,6 +365,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			})
 			out.AddItem(toggle, len(app.Cats[cat][item].Opts)+2, 0, true)
 		case "stringslice":
+			// rw := app.Cats[cat][item]
 			var slice = tview.NewTable()
 			slice.SetBorderPadding(1, 1, 1, 1)
 			var def string
@@ -403,12 +404,30 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 				SetCell(len(slicevalue), 0, tview.NewTableCell("add new").
 					SetTextColor(darkness).SetBackgroundColor(lightness))
 			slice.
+				SetCell(len(slicevalue)+1, 0, tview.NewTableCell("back").
+					SetTextColor(darkness).SetBackgroundColor(lightness))
+			slice.SetSelectedFunc(func(y, x int) {
+				if y == len(slicevalue)+1 {
+					menuflex.
+						RemoveItem(coverbox).
+						RemoveItem(activepage)
+					// rw.Put(app.Cats[cat][item].Opts[y])
+					itemname = item
+					activepage = genPage(cat, itemname, false, app, inputhandler)
+					menuflex.AddItem(activepage, 0, 1, true)
+					prelightTable(roottable)
+					activatedTable(catstable)
+					activateTable(cattable)
+					tapp.SetFocus(cattable)
+				}
+			})
+			slice.
 				SetSelectable(true, true).
 				Select(curropt, 0).
 				SetSelectedStyle(lightness, darkness, tcell.AttrNone)
 			slice.SetBackgroundColor(lightness)
 			slice.SetInputCapture(editoreventhandler)
-			out.AddItem(slice, len(slicevalue)+3, 0, true)
+			out.AddItem(slice, len(slicevalue)+4, 0, true)
 
 		}
 		out.AddItem(infoblock, 0, 1, false)

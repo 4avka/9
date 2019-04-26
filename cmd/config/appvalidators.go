@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"git.parallelcoin.io/dev/9/pkg/util"
 	"net"
 	"path/filepath"
 	"sort"
@@ -15,7 +16,7 @@ import (
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
 
-var DataDir string
+var DataDir string = filepath.Dir(util.AppDataDir("9", false))
 var Networks = []string{"mainnet", "testnet", "simnet", "regtestnet"}
 var NetParams = map[string]*nine.Params{
 	"mainnet":    &nine.MainNetParams,
@@ -135,53 +136,52 @@ var Valid = struct {
 	Level func(*Row, interface{}) bool
 }{
 	File: func(r *Row, in interface{}) bool {
-		var s string
+		var s *string
 		switch I := in.(type) {
 		case string:
-			s = I
+			s = &I
 		case *string:
-			s = *I
+			s = I
 		default:
 			return false
 		}
-		if len(s) > 0 {
-			if !strings.HasPrefix(s, "/") && !strings.HasPrefix(s, ".") &&
-				isWindows() {
-				s = filepath.Join(DataDir, s)
-			}
-			ss := CleanAndExpandPath(s)
-			if r != nil && ss != "." {
-				r.Value = r.Value.Put(ss)
+		if len(*s) > 0 {
+			ss := CleanAndExpandPath(*s)
+			if r != nil {
 				r.String = fmt.Sprint(ss)
+				if r.Value == nil {
+					r.Value = NewIface()
+				}
+				r.Value.Put(ss)
+				return true
+			} else {
+				return false
 			}
-			return true
 		}
 		return false
 	},
 	Dir: func(r *Row, in interface{}) bool {
-		var s string
+		var s *string
 		switch I := in.(type) {
 		case string:
-			s = I
+			s = &I
 		case *string:
-			s = *I
+			s = I
 		default:
 			return false
 		}
-		if len(s) > 0 {
-			if !strings.HasPrefix(s, "/") && !strings.HasPrefix(s, ".") &&
-				isWindows() {
-				s = filepath.Join(DataDir, s)
-			}
-			ss := CleanAndExpandPath(s)
-			if ss == "." {
-				ss = ""
-			}
+		if len(*s) > 0 {
+			ss := CleanAndExpandPath(*s)
 			if r != nil {
 				r.String = fmt.Sprint(ss)
-				r.Value = r.Value.Put(ss)
+				if r.Value == nil {
+					r.Value = NewIface()
+				}
+				r.Value.Put(ss)
+				return true
+			} else {
+				return false
 			}
-			return true
 		}
 		return false
 	},

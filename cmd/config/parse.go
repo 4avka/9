@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"git.parallelcoin.io/dev/9/pkg/util"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -22,11 +23,13 @@ func (app *App) Parse(args []string) int {
 		datadir = dd.Value
 		*app.Config.DataDir = datadir
 	} else {
-		// *app.Config.DataDir = app.Cats.Str("app", "datadir")
+		//= app.Cats.Str("app", "datadir")
+		*app.Config.DataDir = util.AppDataDir("9", false)
 		datadir = *app.Config.DataDir
+		DataDir = datadir
 	}
 	// set AppDataDir for running as node
-	fmt.Println("cmd.Name", cmd.Name)
+	// fmt.Println("cmd.Name", cmd.Name)
 	aa := CleanAndExpandPath(filepath.Join(*app.Config.DataDir, cmd.Name))
 	app.Config.AppDataDir, app.Config.LogDir = &aa, &aa
 

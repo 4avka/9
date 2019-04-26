@@ -44,16 +44,16 @@ func FileExists(filePath string) bool {
 // CleanAndExpandPath expands environment variables and leading ~ in the passed path, cleans the result, and returns it.
 func CleanAndExpandPath(path string) string {
 	// Expand initial ~ to OS specific home directory.
+	homeDir := filepath.Dir(util.AppDataDir("9", false))
 	if strings.HasPrefix(path, "~") {
-		homeDir := filepath.Dir(util.AppDataDir("pod", false))
 		path = strings.Replace(path, "~", homeDir, 1)
 	}
 	// NOTE: The os.ExpandEnv doesn't work with Windows-style %VARIABLE%, but they variables can still be expanded via POSIX-style $VARIABLE.
 	path = filepath.Clean(os.ExpandEnv(path))
-	if !strings.HasPrefix(path, "/") && !strings.HasPrefix(path, ".") &&
-		runtime.GOOS != "windows" {
+	if !strings.HasPrefix(path, "/") && !strings.HasPrefix(path, "./") &&
+		!strings.HasPrefix(path, "\\") {
 		// explicitly prefix is this must be a relative path
-		path = "./" + path
+		path = filepath.Join(homeDir, path)
 	}
 	return path
 }

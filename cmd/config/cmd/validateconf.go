@@ -25,7 +25,8 @@ func setAppDataDir(app *config.App, name string) {
 			if app.Config.AppDataDir == nil {
 				// set AppDataDir for running as node
 				*app.Config.AppDataDir =
-					config.CleanAndExpandPath(filepath.Join(*app.Config.DataDir, name))
+					config.CleanAndExpandPath(
+						filepath.Join(*app.Config.DataDir, name))
 			}
 			if app.Config.LogDir == nil {
 				*app.Config.LogDir = *app.Config.AppDataDir
