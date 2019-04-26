@@ -273,7 +273,6 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			rw := app.Cats[cat][item]
 			toggle = tview.NewTable()
 			toggle.SetBorderPadding(1, 1, 1, 1)
-			// toggle.SetBorder(true).SetBorderColor(lightness)
 			toggle.SetBackgroundColor(lightness)
 			def := app.Cats[cat][item].Default.Get().(bool)
 			if def {
@@ -293,13 +292,6 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			toggle.
 				SetSelectable(true, true).
 				Select(curropt, 0)
-			// if active {
-			// 	toggle.
-			// 		SetSelectedStyle(lightness, darkness, tcell.AttrNone)
-			// } else {
-			// 	toggle.
-			// 		SetSelectedStyle(darkness, lightness, tcell.AttrNone)
-			// }
 			toggle.SetBackgroundColor(lightness)
 			toggle.SetInputCapture(editoreventhandler)
 			toggle.SetSelectedFunc(func(y, x int) {
@@ -353,13 +345,6 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			toggle.
 				SetSelectable(true, true).
 				Select(curropt, 0)
-			// if active {
-			// 	toggle.
-			// 		SetSelectedStyle(lightness, darkness, tcell.AttrNone)
-			// } else {
-			// 	toggle.
-			// 		SetSelectedStyle(darkness, lightness, tcell.AttrNone)
-			// }
 			toggle.SetBackgroundColor(lightness)
 			toggle.SetInputCapture(editoreventhandler)
 			toggle.SetSelectedFunc(func(y, x int) {
@@ -429,14 +414,72 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 				SetCell(len(slicevalue)+1, 0, tview.NewTableCell("").
 					SetTextColor(darkness).SetBackgroundColor(lightness).
 					SetSelectable(false))
+			input := tview.NewInputField()
+			snackbar := tview.NewTextView()
+			inputDone := func(key tcell.Key) {
+				rw := app.Cats[cat][item]
+				rwv, ok := rw.Value.Get().([]string)
+				if !ok { // rwv = []string{}
+				}
+				if key == tcell.KeyEnter || key == tcell.KeyTab {
+					s := input.GetText()
+					if len(s) < 1 {
+						// rw.Value.Put(nil)
+					} else {
+						ssss := append(rwv, s)
+						if !rw.Validate(&rw, &ssss) {
+							snackbar.SetBackgroundColor(tcell.ColorOrange)
+							snackbar.SetTextColor(tcell.ColorRed)
+							snackbar.SetText("input is not valid for this field")
+							out.RemoveItem(infoblock).RemoveItem(snackbar)
+							out.AddItem(snackbar, 1, 1, false)
+							out.AddItem(infoblock, 0, 1, false)
+							return
+						} else {
+							rw.Value.Put(ssss)
+							out.RemoveItem(snackbar)
+						}
+					}
+
+					itemname = item
+					inputhandler = func(event *tcell.EventKey) *tcell.EventKey {
+						switch event.Key() {
+						case 13:
+							// pressed enter
+						case 27:
+							// pressed escape
+							menuflex.
+								RemoveItem(coverbox).
+								RemoveItem(activepage)
+							// itemname = item
+							activepage = genPage(cat, itemname, false, app, inputhandler)
+							menuflex.AddItem(activepage, 0, 1, true)
+							prelightTable(roottable)
+							activatedTable(catstable)
+							activateTable(cattable)
+							tapp.SetFocus(cattable)
+						}
+						return event
+					}
+
+					menuflex.
+						RemoveItem(coverbox).
+						RemoveItem(activepage)
+					itemname = item
+					activepage = genPage(cat, itemname, true, app, inputhandler)
+					menuflex.AddItem(activepage, 0, 1, true)
+					lastTable(roottable)
+					prelightTable(catstable)
+					activatedTable(cattable)
+					tapp.SetFocus(activepage)
+				}
+			}
 			slice.SetSelectedFunc(func(y, x int) {
 				switch {
 				// create new
 				case y == len(slicevalue):
 					// pop up the new item editor
 					out.RemoveItem(infoblock)
-					input := tview.NewInputField()
-					snackbar := tview.NewTextView()
 					input.SetBackgroundColor(lightness)
 					input.SetLabel("new> ")
 					input.SetLabelColor(darkness)
@@ -456,64 +499,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 						}
 						return event
 					})
-					input.SetDoneFunc(func(key tcell.Key) {
-						rw := app.Cats[cat][item]
-						rwv, ok := rw.Value.Get().([]string)
-						if !ok { // rwv = []string{}
-						}
-						if key == tcell.KeyEnter || key == tcell.KeyTab {
-							s := input.GetText()
-							if len(s) < 1 {
-								// rw.Value.Put(nil)
-							} else {
-								ssss := append(rwv, s)
-								if !rw.Validate(&rw, &ssss) {
-									snackbar.SetBackgroundColor(tcell.ColorOrange)
-									snackbar.SetTextColor(tcell.ColorRed)
-									snackbar.SetText("input is not valid for this field")
-									out.RemoveItem(infoblock).RemoveItem(snackbar)
-									out.AddItem(snackbar, 1, 1, false)
-									out.AddItem(infoblock, 0, 1, false)
-									return
-								} else {
-									rw.Value.Put(ssss)
-									out.RemoveItem(snackbar)
-								}
-							}
-
-							itemname = item
-							inputhandler = func(event *tcell.EventKey) *tcell.EventKey {
-								switch event.Key() {
-								case 13:
-									// pressed enter
-								case 27:
-									// pressed escape
-									menuflex.
-										RemoveItem(coverbox).
-										RemoveItem(activepage)
-									itemname = app.Cats[cat].GetSortedKeys()[y-1]
-									activepage = genPage(cat, itemname, false, app, inputhandler)
-									menuflex.AddItem(activepage, 0, 1, true)
-									prelightTable(roottable)
-									activatedTable(catstable)
-									activateTable(cattable)
-									tapp.SetFocus(cattable)
-								}
-								return event
-							}
-
-							menuflex.
-								RemoveItem(coverbox).
-								RemoveItem(activepage)
-							itemname = item
-							activepage = genPage(cat, itemname, true, app, inputhandler)
-							menuflex.AddItem(activepage, 0, 1, true)
-							lastTable(roottable)
-							prelightTable(catstable)
-							activatedTable(cattable)
-							tapp.SetFocus(activepage)
-						}
-					})
+					input.SetDoneFunc(inputDone)
 					out.AddItem(input, 1, 0, true).
 						AddItem(infoblock, 0, 1, false)
 					tapp.SetFocus(input)
@@ -523,7 +509,6 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 					menuflex.
 						RemoveItem(coverbox).
 						RemoveItem(activepage)
-					// rw.Put(app.Cats[cat][item].Opts[y])
 					itemname = item
 					activepage = genPage(cat, itemname, false, app, inputhandler)
 					menuflex.AddItem(activepage, 0, 1, true)
@@ -532,11 +517,11 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 					activateTable(cattable)
 					tapp.SetFocus(cattable)
 				default:
+					rw := app.Cats[cat][item]
+					rwv, ok := rw.Value.Get().([]string)
 					// column 0 is delete column 1 is edit
 					// TODO: consolidate editor code from above with this
 					if x == 0 {
-						rw := app.Cats[cat][item]
-						rwv, ok := rw.Value.Get().([]string)
 						if ok {
 							rwv = append(rwv[:y], rwv[y+1:]...)
 							rw.Value.Put(rwv)
@@ -551,19 +536,40 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 							activatedTable(cattable)
 							tapp.SetFocus(activepage)
 						}
+					} else {
+						// pop up the item editor
+						out.RemoveItem(infoblock)
+						input.SetBackgroundColor(lightness)
+						input.SetLabel("edit> ")
+						input.SetLabelColor(darkness)
+						input.SetText(rwv[y])
+						input.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+							if event.Key() == 27 {
+								menuflex.
+									RemoveItem(coverbox).
+									RemoveItem(activepage)
+								itemname = item
+								activepage = genPage(cat, itemname, true, app, inputhandler)
+								menuflex.AddItem(activepage, 0, 1, true)
+								lastTable(roottable)
+								prelightTable(catstable)
+								activatedTable(cattable)
+								tapp.SetFocus(activepage)
+								return &tcell.EventKey{}
+							}
+							return event
+						})
+						input.SetDoneFunc(inputDone)
+						out.AddItem(input, 1, 0, true).
+							AddItem(infoblock, 0, 1, false)
+						tapp.SetFocus(input)
+
 					}
 				}
 			})
 			slice.
 				SetSelectable(true, true).
 				Select(curropt, 1)
-			// if active {
-			// 	slice.
-			// 		SetSelectedStyle(lightness, darkness, tcell.AttrNone)
-			// } else {
-			// 	slice.
-			// 		SetSelectedStyle(darkness, lightness, tcell.AttrNone)
-			// }
 			slice.SetBackgroundColor(lightness)
 			slice.SetInputCapture(editoreventhandler)
 			slice.Select(len(slicevalue), 1)
