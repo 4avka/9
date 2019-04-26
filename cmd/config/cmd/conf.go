@@ -292,8 +292,14 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			}
 			toggle.
 				SetSelectable(true, true).
-				Select(curropt, 0).
-				SetSelectedStyle(lightness, darkness, tcell.AttrNone)
+				Select(curropt, 0)
+			// if active {
+			// 	toggle.
+			// 		SetSelectedStyle(lightness, darkness, tcell.AttrNone)
+			// } else {
+			// 	toggle.
+			// 		SetSelectedStyle(darkness, lightness, tcell.AttrNone)
+			// }
 			toggle.SetBackgroundColor(lightness)
 			toggle.SetInputCapture(editoreventhandler)
 			toggle.SetSelectedFunc(func(y, x int) {
@@ -346,8 +352,14 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			}
 			toggle.
 				SetSelectable(true, true).
-				Select(curropt, 0).
-				SetSelectedStyle(lightness, darkness, tcell.AttrNone)
+				Select(curropt, 0)
+			// if active {
+			// 	toggle.
+			// 		SetSelectedStyle(lightness, darkness, tcell.AttrNone)
+			// } else {
+			// 	toggle.
+			// 		SetSelectedStyle(darkness, lightness, tcell.AttrNone)
+			// }
 			toggle.SetBackgroundColor(lightness)
 			toggle.SetInputCapture(editoreventhandler)
 			toggle.SetSelectedFunc(func(y, x int) {
@@ -396,18 +408,118 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 						curropt = i
 					}
 					slice.
-						SetCell(i, 0, tview.NewTableCell(itemtext).
+						SetCell(i, 0, tview.NewTableCell("⌦").
+							SetTextColor(darkness).SetBackgroundColor(lightness))
+					slice.
+						SetCell(i, 1, tview.NewTableCell(itemtext).
 							SetTextColor(darkness).SetBackgroundColor(lightness))
 				}
 			}
 			slice.
-				SetCell(len(slicevalue), 0, tview.NewTableCell("add new").
+				SetCell(len(slicevalue), 1, tview.NewTableCell("add new").
 					SetTextColor(darkness).SetBackgroundColor(lightness))
 			slice.
-				SetCell(len(slicevalue)+1, 0, tview.NewTableCell("back").
+				SetCell(len(slicevalue), 0, tview.NewTableCell("").
+					SetTextColor(darkness).SetBackgroundColor(lightness).
+					SetSelectable(false))
+			slice.
+				SetCell(len(slicevalue)+1, 1, tview.NewTableCell("back").
 					SetTextColor(darkness).SetBackgroundColor(lightness))
+			slice.
+				SetCell(len(slicevalue)+1, 0, tview.NewTableCell("").
+					SetTextColor(darkness).SetBackgroundColor(lightness).
+					SetSelectable(false))
 			slice.SetSelectedFunc(func(y, x int) {
-				if y == len(slicevalue)+1 {
+				switch {
+				// create new
+				case y == len(slicevalue):
+					// pop up the new item editor
+					out.RemoveItem(infoblock)
+					input := tview.NewInputField()
+					snackbar := tview.NewTextView()
+					input.SetBackgroundColor(lightness)
+					input.SetLabel("new> ")
+					input.SetLabelColor(darkness)
+					input.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+						if event.Key() == 27 {
+							menuflex.
+								RemoveItem(coverbox).
+								RemoveItem(activepage)
+							itemname = item
+							activepage = genPage(cat, itemname, true, app, inputhandler)
+							menuflex.AddItem(activepage, 0, 1, true)
+							lastTable(roottable)
+							prelightTable(catstable)
+							activatedTable(cattable)
+							tapp.SetFocus(activepage)
+							return &tcell.EventKey{}
+						}
+						return event
+					})
+					input.SetDoneFunc(func(key tcell.Key) {
+						rw := app.Cats[cat][item]
+						rwv, ok := rw.Value.Get().([]string)
+						if !ok { // rwv = []string{}
+						}
+						if key == tcell.KeyEnter || key == tcell.KeyTab {
+							s := input.GetText()
+							if len(s) < 1 {
+								// rw.Value.Put(nil)
+							} else {
+								ssss := append(rwv, s)
+								if !rw.Validate(&rw, &ssss) {
+									snackbar.SetBackgroundColor(tcell.ColorOrange)
+									snackbar.SetTextColor(tcell.ColorRed)
+									snackbar.SetText("input is not valid for this field")
+									out.RemoveItem(infoblock).RemoveItem(snackbar)
+									out.AddItem(snackbar, 1, 1, false)
+									out.AddItem(infoblock, 0, 1, false)
+									return
+								} else {
+									rw.Value.Put(ssss)
+									out.RemoveItem(snackbar)
+								}
+							}
+
+							itemname = item
+							inputhandler = func(event *tcell.EventKey) *tcell.EventKey {
+								switch event.Key() {
+								case 13:
+									// pressed enter
+								case 27:
+									// pressed escape
+									menuflex.
+										RemoveItem(coverbox).
+										RemoveItem(activepage)
+									itemname = app.Cats[cat].GetSortedKeys()[y-1]
+									activepage = genPage(cat, itemname, false, app, inputhandler)
+									menuflex.AddItem(activepage, 0, 1, true)
+									prelightTable(roottable)
+									activatedTable(catstable)
+									activateTable(cattable)
+									tapp.SetFocus(cattable)
+								}
+								return event
+							}
+
+							menuflex.
+								RemoveItem(coverbox).
+								RemoveItem(activepage)
+							itemname = item
+							activepage = genPage(cat, itemname, true, app, inputhandler)
+							menuflex.AddItem(activepage, 0, 1, true)
+							lastTable(roottable)
+							prelightTable(catstable)
+							activatedTable(cattable)
+							tapp.SetFocus(activepage)
+						}
+					})
+					out.AddItem(input, 1, 0, true).
+						AddItem(infoblock, 0, 1, false)
+					tapp.SetFocus(input)
+
+				// back
+				case y == len(slicevalue)+1:
 					menuflex.
 						RemoveItem(coverbox).
 						RemoveItem(activepage)
@@ -419,18 +531,46 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 					activatedTable(catstable)
 					activateTable(cattable)
 					tapp.SetFocus(cattable)
+				default:
+					// column 0 is delete column 1 is edit
+					// TODO: consolidate editor code from above with this
+					if x == 0 {
+						rw := app.Cats[cat][item]
+						rwv, ok := rw.Value.Get().([]string)
+						if ok {
+							rwv = append(rwv[:y], rwv[y+1:]...)
+							rw.Value.Put(rwv)
+							menuflex.
+								RemoveItem(coverbox).
+								RemoveItem(activepage)
+							itemname = item
+							activepage = genPage(cat, itemname, true, app, inputhandler)
+							menuflex.AddItem(activepage, 0, 1, true)
+							lastTable(roottable)
+							prelightTable(catstable)
+							activatedTable(cattable)
+							tapp.SetFocus(activepage)
+						}
+					}
 				}
 			})
 			slice.
 				SetSelectable(true, true).
-				Select(curropt, 0).
-				SetSelectedStyle(lightness, darkness, tcell.AttrNone)
+				Select(curropt, 1)
+			// if active {
+			// 	slice.
+			// 		SetSelectedStyle(lightness, darkness, tcell.AttrNone)
+			// } else {
+			// 	slice.
+			// 		SetSelectedStyle(darkness, lightness, tcell.AttrNone)
+			// }
 			slice.SetBackgroundColor(lightness)
 			slice.SetInputCapture(editoreventhandler)
+			slice.Select(len(slicevalue), 1)
 			out.AddItem(slice, len(slicevalue)+4, 0, true)
-
 		}
 		out.AddItem(infoblock, 0, 1, false)
+
 		return
 	}
 	catstable.SetSelectionChangedFunc(func(y, x int) {
@@ -485,6 +625,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 				}
 				activepage = genPage(cat, itemname, true, app, inputhandler)
 				menuflex.AddItem(activepage, 0, 1, true)
+
 				tapp.SetFocus(activepage)
 			}
 		})
