@@ -226,7 +226,7 @@ func Enabled(name string, g ...RowGenerator) CatGenerator {
 				return cc.Value.Get()
 			}
 			cc.Validate = Valid.Bool
-			cc.Value = NewIface().Put(false)
+			cc.Value = NewIface().Put(true)
 			cc.Default = NewIface().Put(false)
 			cc.Put = func(in interface{}) bool {
 				valid := cc.Validate(cc, in)

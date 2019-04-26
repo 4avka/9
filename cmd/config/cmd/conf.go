@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"git.parallelcoin.io/dev/9/cmd/config"
@@ -330,6 +331,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			def := app.Cats[cat][item].Default.Get().(string)
 			curr := app.Cats[cat][item].Value.Get().(string)
 			curropt := 0
+			sort.Strings(app.Cats[cat][item].Opts)
 			for i, x := range app.Cats[cat][item].Opts {
 				itemtext := x
 				if x == def {

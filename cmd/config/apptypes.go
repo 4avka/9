@@ -58,7 +58,12 @@ func (r *App) UnmarshalJSON(data []byte) error {
 	for i, x := range out {
 		for j, y := range x {
 			R := r.Cats[i][j]
-			R.Put(&y.Value)
+			yv := &y.Value
+			if R.Put == nil {
+				R.Value.Put(yv)
+			} else {
+				R.Put(yv)
+			}
 		}
 	}
 	return nil
