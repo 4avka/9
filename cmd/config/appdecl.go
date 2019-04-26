@@ -343,6 +343,9 @@ func Addr(name string, defPort int, g ...RowGenerator) CatGenerator {
 				}
 				return false
 			}
+			cc.Usage = fmt.Sprintf(
+				"\n\nNOTE: port must be between 1025-65535, port %d will be assumed if no port is given",
+				defPort)
 			G.RunAll(cc)
 		}
 		c.Init(c)
@@ -515,7 +518,7 @@ func Net(name string, g ...RowGenerator) CatGenerator {
 // Usage populates the usage field for information about a config item
 func Usage(usage string) RowGenerator {
 	return func(ctx *Row) {
-		ctx.Usage = usage
+		ctx.Usage = usage + " " + ctx.Usage
 	}
 }
 

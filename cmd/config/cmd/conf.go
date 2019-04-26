@@ -243,7 +243,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 					if len(s) < 1 {
 						rw.Value.Put(nil)
 					} else {
-						if !rw.Validate(&rw, s) {
+						if !rw.Validate(&rw, &s) {
 							snackbar.SetBackgroundColor(tcell.ColorOrange)
 							snackbar.SetTextColor(tcell.ColorRed)
 							snackbar.SetText("input is not valid for this field")

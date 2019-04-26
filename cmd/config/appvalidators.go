@@ -48,9 +48,25 @@ func GenAddr(name string, port int) func(r *Row, in interface{}) bool {
 			r.Value.Put(nil)
 			return true
 		}
-		_, _, err := net.SplitHostPort(*s)
+		h, p, err := net.SplitHostPort(*s)
 		if err != nil {
 			*s = net.JoinHostPort(*s, fmt.Sprint(port))
+		} else {
+			n, e := strconv.Atoi(p)
+			if e == nil {
+				if n < 1025 || n > 65535 {
+					return false
+				}
+			} else {
+				return false
+				// p = ""
+			}
+			if p == "" {
+				p = fmt.Sprint(port)
+				*s = net.JoinHostPort(h, p)
+			} else {
+				*s = net.JoinHostPort(h, p)
+			}
 		}
 		if r != nil {
 			r.Value = r.Value.Put(*s)
