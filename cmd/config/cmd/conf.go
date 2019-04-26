@@ -261,7 +261,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 						RemoveItem(activepage)
 					itemname = item
 					activepage = genPage(cat, itemname, false, app, inputhandler,
-						len(rw.Value.Get().([]string))-1)
+						len(rw.Value.Get().(string))-1)
 					menuflex.AddItem(activepage, 0, 1, true)
 					prelightTable(roottable)
 					activatedTable(catstable)
@@ -477,7 +477,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 						lastTable(roottable)
 						prelightTable(catstable)
 						activatedTable(cattable)
-						// slice.Select(idx, 1)
+						slice.Select(idx, 1)
 						tapp.SetFocus(activepage)
 					}
 				}
@@ -550,14 +550,16 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 						input.SetBackgroundColor(lightness)
 						input.SetLabel("edit> ")
 						input.SetLabelColor(darkness)
-						input.SetText(rwv[y])
+						if len(rwv) >= y {
+							input.SetText(rwv[y])
+						}
 						input.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 							if event.Key() == 27 {
 								menuflex.
 									RemoveItem(coverbox).
 									RemoveItem(activepage)
 								itemname = item
-								activepage = genPage(cat, itemname, true, app, inputhandler, y)
+								activepage = genPage(cat, itemname, true, app, inputhandler, len(rwv))
 								menuflex.AddItem(activepage, 0, 1, true)
 								lastTable(roottable)
 								prelightTable(catstable)
@@ -580,7 +582,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 				Select(curropt, 1)
 			slice.SetBackgroundColor(lightness)
 			slice.SetInputCapture(editoreventhandler)
-			slice.Select(idx, 1)
+			slice.Select(len(slicevalue), 1)
 			out.AddItem(slice, len(slicevalue)+4, 0, true)
 		}
 		out.AddItem(infoblock, 0, 1, false)
@@ -637,7 +639,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 					}
 					return event
 				}
-				activepage = genPage(cat, itemname, true, app, inputhandler, y)
+				activepage = genPage(cat, itemname, true, app, inputhandler, y-1)
 				menuflex.AddItem(activepage, 0, 1, true)
 
 				tapp.SetFocus(activepage)
