@@ -80,39 +80,42 @@ func GenAddr(name string, port int) func(r *Row, in interface{}) bool {
 // GenAddrs returns a validator with a set default port assumed if one is not present
 func GenAddrs(name string, port int) func(r *Row, in interface{}) bool {
 	return func(r *Row, in interface{}) bool {
-		var s string
-		ss := []string{}
-		isString := false
+		var s *string
+		existing, ok := r.Value.Get().([]string)
+		if !ok {
+			existing = []string{}
+		}
 		switch I := in.(type) {
 		case string:
-			s = I
-			isString = true
+			s = &I
 		case *string:
-			s = *I
-			isString = true
-		case []string:
-			ss = I
-		case *[]string:
-			ss = *I
+			s = I
 		default:
 			return false
 		}
-		if isString {
-			sss := strings.Split(s, " ")
-			if len(sss) < 1 {
+		h, p, e := net.SplitHostPort(*s)
+		if e != nil {
+			*s = net.JoinHostPort(*s, fmt.Sprint(port))
+		} else {
+			n, e := strconv.Atoi(p)
+			if e == nil {
+				if n < 1025 || n > 65535 {
+					return false
+				}
+			} else {
 				return false
 			}
-			for _, x := range sss {
-				if len(x) > 0 {
-					ss = append(ss, x)
-				}
+			if p == "" {
+				p = fmt.Sprint(port)
+				*s = net.JoinHostPort(h, p)
+			} else {
+				*s = net.JoinHostPort(h, p)
 			}
 		}
-		if ss != nil {
-			if r != nil {
-				r.Value = r.Value.Put(ss)
-			}
-			r.String = fmt.Sprint(ss)
+		newaddrs := append(existing, *s)
+		if r != nil {
+			r.Value = r.Value.Put(newaddrs)
+			r.String = fmt.Sprint(newaddrs)
 		}
 		return true
 	}

@@ -376,9 +376,9 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			}
 			var curr string
 			currIface := app.Cats[cat][item].Value.Get()
-			switch dd := currIface.(type) {
+			switch currIface.(type) {
 			case string:
-				curr = dd
+				curr = currIface.(string)
 			case nil:
 			default:
 			}
@@ -419,7 +419,8 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			snackbar := tview.NewTextView()
 			inputDoneGen := func(idx int) func(key tcell.Key) {
 				return func(key tcell.Key) {
-					rw := app.Cats[cat][item]
+					rrr := app.Cats[cat][item]
+					rw := &rrr
 					rwv, ok := rw.Value.Get().([]string)
 					if !ok { // rwv = []string{}
 					}
@@ -428,12 +429,14 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 						if len(s) < 1 {
 							// rw.Value.Put(nil)
 						} else {
+							rw.Validate(rw, &s)
 							if idx >= len(rwv) {
 								rwv = append(rwv, s)
 							} else {
 								rwv[idx] = s
 							}
-							if !rw.Validate(&rw, &rwv) {
+							rw.Value.Put(rwv)
+							if !rw.Validate(rw, s) {
 								snackbar.SetBackgroundColor(tcell.ColorOrange)
 								snackbar.SetTextColor(tcell.ColorRed)
 								snackbar.SetText("input is not valid for this field")
@@ -442,6 +445,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 								out.AddItem(infoblock, 0, 1, false)
 								return
 							} else {
+								rw.Validate(rw, s)
 								rw.Value.Put(rwv)
 								out.RemoveItem(snackbar)
 							}
@@ -480,6 +484,20 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 						slice.Select(idx, 1)
 						tapp.SetFocus(activepage)
 					}
+					if key == tcell.KeyEsc {
+						menuflex.
+							RemoveItem(coverbox).
+							RemoveItem(activepage)
+						itemname = item
+						activepage = genPage(cat, itemname, true, app, inputhandler, len(rwv))
+						menuflex.AddItem(activepage, 0, 1, true)
+						lastTable(roottable)
+						prelightTable(catstable)
+						activatedTable(cattable)
+						tapp.SetFocus(activepage)
+						// return event //&tcell.EventKey{}
+					}
+
 				}
 			}
 			slice.SetSelectedFunc(func(y, x int) {
@@ -503,7 +521,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 							prelightTable(catstable)
 							activatedTable(cattable)
 							tapp.SetFocus(activepage)
-							return &tcell.EventKey{}
+							// return event // &tcell.EventKey{}
 						}
 						return event
 					})
@@ -524,6 +542,8 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 					activatedTable(catstable)
 					activateTable(cattable)
 					tapp.SetFocus(cattable)
+
+					//existing
 				default:
 					rw := app.Cats[cat][item]
 					rwv, ok := rw.Value.Get().([]string)
@@ -553,22 +573,22 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 						if len(rwv) >= y {
 							input.SetText(rwv[y])
 						}
-						input.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-							if event.Key() == 27 {
-								menuflex.
-									RemoveItem(coverbox).
-									RemoveItem(activepage)
-								itemname = item
-								activepage = genPage(cat, itemname, true, app, inputhandler, len(rwv))
-								menuflex.AddItem(activepage, 0, 1, true)
-								lastTable(roottable)
-								prelightTable(catstable)
-								activatedTable(cattable)
-								tapp.SetFocus(activepage)
-								return &tcell.EventKey{}
-							}
-							return event
-						})
+						// input.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+						// 	if event.Key() == 27 {
+						// 		menuflex.
+						// 			RemoveItem(coverbox).
+						// 			RemoveItem(activepage)
+						// 		itemname = item
+						// 		activepage = genPage(cat, itemname, true, app, inputhandler, len(rwv))
+						// 		menuflex.AddItem(activepage, 0, 1, true)
+						// 		lastTable(roottable)
+						// 		prelightTable(catstable)
+						// 		activatedTable(cattable)
+						// 		tapp.SetFocus(activepage)
+						// 		return event //&tcell.EventKey{}
+						// 	}
+						// 	return event
+						// })
 						input.SetDoneFunc(inputDoneGen(y))
 						out.AddItem(input, 1, 0, true).
 							AddItem(infoblock, 0, 1, false)
@@ -639,7 +659,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 					}
 					return event
 				}
-				activepage = genPage(cat, itemname, true, app, inputhandler, y-1)
+				activepage = genPage(cat, itemname, true, app, inputhandler, 0)
 				menuflex.AddItem(activepage, 0, 1, true)
 
 				tapp.SetFocus(activepage)
