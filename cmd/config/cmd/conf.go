@@ -260,8 +260,8 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 						RemoveItem(coverbox).
 						RemoveItem(activepage)
 					itemname = item
-					activepage = genPage(cat, itemname, false, app, inputhandler,
-						len(rw.Value.Get().(string))-1)
+					activepage = genPage(cat, itemname, false, app,
+						inputhandler, 0)
 					menuflex.AddItem(activepage, 0, 1, true)
 					prelightTable(roottable)
 					activatedTable(catstable)
