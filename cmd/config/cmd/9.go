@@ -202,7 +202,7 @@ var NineApp = func() *App {
 				Usage("where logs are written, defaults to the appdatadir if unset"),
 			),
 			Port("profile",
-				Usage("http profiling on specified port"),
+				Usage("http profiling on specified port (1025-65535"),
 			),
 			Enable("upnp",
 				Usage("enable port forwarding via UPNP"),

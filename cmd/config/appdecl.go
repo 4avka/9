@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"reflect"
 	"regexp"
+	"strconv"
 	"time"
 
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
@@ -583,6 +584,7 @@ func Min(min int) RowGenerator {
 	return func(ctx *Row) {
 		ctx.Min = ctx.Min.Put(min)
 		v := ctx.Validate
+		var e error
 		ctx.Validate = func(r *Row, in interface{}) bool {
 			n := min
 			switch I := in.(type) {
@@ -590,9 +592,20 @@ func Min(min int) RowGenerator {
 				n = I
 			case *int:
 				n = *I
+			case string:
+				n, e = strconv.Atoi(I)
+				if e != nil {
+					return false
+				}
+			case *string:
+				n, e = strconv.Atoi(*I)
+				if e != nil {
+					return false
+				}
 			}
 			if n < min {
-				in = min
+				return false
+				// in = min
 			}
 			// none of the above will affect if this wasn't an int
 			return v(r, in)
@@ -605,6 +618,7 @@ func Max(max int) RowGenerator {
 	return func(ctx *Row) {
 		ctx.Max = ctx.Max.Put(max)
 		v := ctx.Validate
+		var e error
 		ctx.Validate = func(r *Row, in interface{}) bool {
 			n := max
 			switch I := in.(type) {
@@ -612,9 +626,20 @@ func Max(max int) RowGenerator {
 				n = I
 			case *int:
 				n = *I
+			case string:
+				n, e = strconv.Atoi(I)
+				if e != nil {
+					return false
+				}
+			case *string:
+				n, e = strconv.Atoi(*I)
+				if e != nil {
+					return false
+				}
 			}
 			if n > max {
-				in = max
+				return false
+				// in = max
 			}
 			// none of the above will affect if this wasn't an int
 			return v(r, in)

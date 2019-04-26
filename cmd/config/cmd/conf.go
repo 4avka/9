@@ -169,7 +169,249 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 		}
 		return event
 	})
+	var genPage func(cat, item string, active bool, app *config.App,
+		editoreventhandler func(event *tcell.EventKey) *tcell.EventKey) (out *tview.Flex)
+	genPage = func(cat, item string, active bool, app *config.App,
+		editoreventhandler func(event *tcell.EventKey) *tcell.EventKey) (out *tview.Flex) {
+		var darkness, lightness tcell.Color
+		if active {
+			darkness = MainColor()
+			lightness = TextColor()
+		} else {
+			darkness = PrelightColor()
+			lightness = MainColor()
+		}
 
+		out = tview.NewFlex().SetDirection(tview.FlexRow)
+		heading := tview.NewTextView().
+			SetText(fmt.Sprintf("%s.%s", cat, item))
+		heading.
+			SetTextColor(lightness).
+			SetBackgroundColor(darkness).
+			SetBorderPadding(0, 0, 1, 1)
+		out.
+			SetBorderPadding(1, 1, 1, 1).
+			SetBackgroundColor(darkness)
+		out.AddItem(heading, 2, 0, false)
+		infoblock := tview.NewTextView()
+		infoblock.
+			SetWordWrap(true).
+			SetTextColor(lightness).
+			SetBorderPadding(1, 0, 1, 1).
+			SetBackgroundColor(darkness)
+		def := app.Cats[cat][item].Default
+		defstring := ""
+		if def != nil {
+			defstring = fmt.Sprintf("default value: %v", def.Get())
+		} else {
+			defstring = "" //"this value has no default"
+		}
+		infostring := fmt.Sprintf(
+			"%v\n\n%s",
+			app.Cats[cat][item].Usage, defstring,
+		)
+		if min, ok := app.Cats[cat][item].Min.Get().(int); ok {
+			infostring += fmt.Sprint("\nminimum value: ", min)
+		}
+		if max, ok := app.Cats[cat][item].Max.Get().(int); ok {
+			infostring += fmt.Sprint("\nmaximum value: ", max)
+		}
+
+		infoblock.SetText(infostring)
+		switch app.Cats[cat][item].Type {
+		case "string", "int", "float", "duration", "port":
+			iteminput = tview.NewInputField()
+			iteminput.
+				SetFieldTextColor(darkness).
+				SetFieldBackgroundColor(lightness).
+				SetBackgroundColor(lightness).
+				SetBorderPadding(1, 1, 1, 1)
+			val := app.Cats[cat][item].Value
+			if val != nil {
+				vv := val.Get()
+				if vv != nil {
+					iteminput.SetText(fmt.Sprint(vv))
+				}
+			}
+			iteminput.SetInputCapture(editoreventhandler)
+			snackbar := tview.NewTextView()
+			iteminput.SetDoneFunc(func(key tcell.Key) {
+				if key == tcell.KeyEnter || key == tcell.KeyTab {
+					s := iteminput.GetText()
+					rw := app.Cats[cat][item]
+					if len(s) < 1 {
+						rw.Value.Put(nil)
+					} else {
+						if !rw.Validate(&rw, s) {
+							snackbar.SetBackgroundColor(tcell.ColorOrange)
+							snackbar.SetTextColor(tcell.ColorRed)
+							snackbar.SetText("input is not valid for this field")
+							out.RemoveItem(infoblock).RemoveItem(snackbar)
+							out.AddItem(snackbar, 1, 1, false)
+							out.AddItem(infoblock, 0, 1, false)
+							return
+						} else {
+							rw.Put(s)
+							out.RemoveItem(snackbar)
+						}
+					}
+					menuflex.
+						RemoveItem(coverbox).
+						RemoveItem(activepage)
+					itemname = item
+					activepage = genPage(cat, itemname, false, app, inputhandler)
+					menuflex.AddItem(activepage, 0, 1, true)
+					prelightTable(roottable)
+					activatedTable(catstable)
+					activateTable(cattable)
+					tapp.SetFocus(cattable)
+				}
+			})
+			out.AddItem(iteminput, 3, 0, true)
+		case "bool":
+			rw := app.Cats[cat][item]
+			toggle = tview.NewTable()
+			toggle.SetBorderPadding(1, 1, 1, 1)
+			// toggle.SetBorder(true).SetBorderColor(lightness)
+			toggle.SetBackgroundColor(lightness)
+			def := app.Cats[cat][item].Default.Get().(bool)
+			if def {
+				toggle.
+					SetCell(0, 0, tview.NewTableCell("false").SetTextColor(darkness)).
+					SetCell(1, 0, tview.NewTableCell("true (default)").SetTextColor(darkness))
+			} else {
+				toggle.
+					SetCell(0, 0, tview.NewTableCell("false (default)").SetTextColor(darkness)).
+					SetCell(1, 0, tview.NewTableCell("true").SetTextColor(darkness))
+			}
+			curropt := 0
+			curr := app.Cats[cat][item]
+			if curr.Bool() {
+				curropt = 1
+			}
+			toggle.
+				SetSelectable(true, true).
+				Select(curropt, 0).
+				SetSelectedStyle(lightness, darkness, tcell.AttrNone)
+			toggle.SetBackgroundColor(lightness)
+			toggle.SetInputCapture(editoreventhandler)
+			toggle.SetSelectedFunc(func(y, x int) {
+				menuflex.
+					RemoveItem(coverbox).
+					RemoveItem(activepage)
+				switch y {
+				case 0:
+					rw.Put(false)
+					itemname = item
+					activepage = genPage(cat, itemname, false, app, inputhandler)
+					menuflex.AddItem(activepage, 0, 1, true)
+					prelightTable(roottable)
+					activatedTable(catstable)
+					activateTable(cattable)
+					tapp.SetFocus(cattable)
+				case 1:
+					rw.Put(true)
+					itemname = item
+					activepage = genPage(cat, itemname, false, app, inputhandler)
+					menuflex.AddItem(activepage, 0, 1, true)
+					prelightTable(roottable)
+					activatedTable(catstable)
+					activateTable(cattable)
+					tapp.SetFocus(cattable)
+
+				default:
+				}
+			})
+			out.AddItem(toggle, 4, 0, true)
+		case "options":
+			rw := app.Cats[cat][item]
+			var toggle = tview.NewTable()
+			toggle.SetBorderPadding(1, 1, 1, 1)
+			def := app.Cats[cat][item].Default.Get().(string)
+			curr := app.Cats[cat][item].Value.Get().(string)
+			curropt := 0
+			for i, x := range app.Cats[cat][item].Opts {
+				itemtext := x
+				if x == def {
+					itemtext += " (default)"
+				}
+				if x == curr {
+					curropt = i
+				}
+				toggle.
+					SetCell(i, 0, tview.NewTableCell(itemtext).
+						SetTextColor(darkness).SetBackgroundColor(lightness))
+			}
+			toggle.
+				SetSelectable(true, true).
+				Select(curropt, 0).
+				SetSelectedStyle(lightness, darkness, tcell.AttrNone)
+			toggle.SetBackgroundColor(lightness)
+			toggle.SetInputCapture(editoreventhandler)
+			toggle.SetSelectedFunc(func(y, x int) {
+				menuflex.
+					RemoveItem(coverbox).
+					RemoveItem(activepage)
+				rw.Put(app.Cats[cat][item].Opts[y])
+				itemname = item
+				activepage = genPage(cat, itemname, false, app, inputhandler)
+				menuflex.AddItem(activepage, 0, 1, true)
+				prelightTable(roottable)
+				activatedTable(catstable)
+				activateTable(cattable)
+				tapp.SetFocus(cattable)
+			})
+			out.AddItem(toggle, len(app.Cats[cat][item].Opts)+2, 0, true)
+		case "stringslice":
+			var slice = tview.NewTable()
+			slice.SetBorderPadding(1, 1, 1, 1)
+			var def string
+			defIface := app.Cats[cat][item].Default.Get()
+			switch defIface.(type) {
+			case string:
+				def = app.Cats[cat][item].Default.Get().(string)
+			case nil:
+			default:
+			}
+			var curr string
+			currIface := app.Cats[cat][item].Value.Get()
+			switch dd := currIface.(type) {
+			case string:
+				curr = dd
+			case nil:
+			default:
+			}
+			curropt := 0
+			slicevalue, ok := app.Cats[cat][item].Get().([]string)
+			if ok {
+				for i, x := range slicevalue {
+					itemtext := x
+					if x == def {
+						itemtext += " (default)"
+					}
+					if x == curr {
+						curropt = i
+					}
+					slice.
+						SetCell(i, 0, tview.NewTableCell(itemtext).
+							SetTextColor(darkness).SetBackgroundColor(lightness))
+				}
+			}
+			slice.
+				SetCell(len(slicevalue), 0, tview.NewTableCell("add new").
+					SetTextColor(darkness).SetBackgroundColor(lightness))
+			slice.
+				SetSelectable(true, true).
+				Select(curropt, 0).
+				SetSelectedStyle(lightness, darkness, tcell.AttrNone)
+			slice.SetBackgroundColor(lightness)
+			slice.SetInputCapture(editoreventhandler)
+			out.AddItem(slice, len(slicevalue)+3, 0, true)
+
+		}
+		out.AddItem(infoblock, 0, 1, false)
+		return
+	}
 	catstable.SetSelectionChangedFunc(func(y, x int) {
 		itemname = ""
 		menuflex.
@@ -309,166 +551,6 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 	}
 
 	return 0
-}
-
-func genPage(cat, item string, active bool, app *config.App,
-	editoreventhandler func(event *tcell.EventKey) *tcell.EventKey) (out *tview.Flex) {
-	var darkness, lightness tcell.Color
-	if active {
-		darkness = MainColor()
-		lightness = TextColor()
-	} else {
-		darkness = PrelightColor()
-		lightness = MainColor()
-	}
-
-	out = tview.NewFlex().SetDirection(tview.FlexRow)
-	heading := tview.NewTextView().
-		SetText(fmt.Sprintf("%s.%s (type %s)", cat, item, app.Cats[cat][item].Type))
-	heading.
-		SetTextColor(lightness).
-		SetBackgroundColor(darkness).
-		SetBorderPadding(0, 0, 1, 1)
-	out.
-		SetBorderPadding(1, 1, 1, 1).
-		SetBackgroundColor(darkness)
-	out.AddItem(heading, 2, 0, false)
-	infoblock := tview.NewTextView()
-	infoblock.
-		SetWordWrap(true).
-		SetTextColor(lightness).
-		SetBorderPadding(1, 0, 1, 1).
-		SetBackgroundColor(darkness)
-	def := app.Cats[cat][item].Default
-	defstring := ""
-	if def != nil {
-		defstring = fmt.Sprintf("default value: %v", def.Get())
-	} else {
-		defstring = "" //"this value has no default"
-	}
-	infostring := fmt.Sprintf(
-		"%v\n\n%s",
-		app.Cats[cat][item].Usage, defstring,
-	)
-	infoblock.SetText(infostring)
-	switch app.Cats[cat][item].Type {
-	case "string", "int", "float", "duration", "port":
-		iteminput = tview.NewInputField()
-		iteminput.
-			SetFieldTextColor(darkness).
-			SetFieldBackgroundColor(lightness).
-			SetBackgroundColor(lightness).
-			SetBorderPadding(1, 1, 1, 1)
-		val := app.Cats[cat][item].Value
-		if val != nil {
-			vv := val.Get()
-			if vv != nil {
-				iteminput.SetText(fmt.Sprint(vv))
-			}
-		}
-		iteminput.SetInputCapture(editoreventhandler)
-		out.AddItem(iteminput, 3, 0, true)
-	case "bool":
-		toggle = tview.NewTable()
-		toggle.SetBorderPadding(1, 1, 1, 1)
-		// toggle.SetBorder(true).SetBorderColor(lightness)
-		toggle.SetBackgroundColor(lightness)
-		def := app.Cats[cat][item].Default.Get().(bool)
-		if def {
-			toggle.
-				SetCell(0, 0, tview.NewTableCell("false").SetTextColor(darkness)).
-				SetCell(1, 0, tview.NewTableCell("true (default)").SetTextColor(darkness))
-		} else {
-			toggle.
-				SetCell(0, 0, tview.NewTableCell("false (default)").SetTextColor(darkness)).
-				SetCell(1, 0, tview.NewTableCell("true").SetTextColor(darkness))
-		}
-		curropt := 0
-		curr := app.Cats[cat][item]
-		if curr.Bool() {
-			curropt = 1
-		}
-		toggle.
-			SetSelectable(true, true).
-			Select(curropt, 0).
-			SetSelectedStyle(lightness, darkness, tcell.AttrNone)
-		toggle.SetBackgroundColor(lightness)
-		toggle.SetInputCapture(editoreventhandler)
-		out.AddItem(toggle, 4, 0, true)
-	case "options":
-		var toggle = tview.NewTable()
-		toggle.SetBorderPadding(1, 1, 1, 1)
-		def := app.Cats[cat][item].Default.Get().(string)
-		curr := app.Cats[cat][item].Value.Get().(string)
-		curropt := 0
-		for i, x := range app.Cats[cat][item].Opts {
-			itemtext := x
-			if x == def {
-				itemtext += " (default)"
-			}
-			if x == curr {
-				curropt = i
-			}
-			toggle.
-				SetCell(i, 0, tview.NewTableCell(itemtext).
-					SetTextColor(darkness).SetBackgroundColor(lightness))
-		}
-		toggle.
-			SetSelectable(true, true).
-			Select(curropt, 0).
-			SetSelectedStyle(lightness, darkness, tcell.AttrNone)
-		toggle.SetBackgroundColor(lightness)
-		toggle.SetInputCapture(editoreventhandler)
-		out.AddItem(toggle, len(app.Cats[cat][item].Opts)+2, 0, true)
-	case "stringslice":
-		var slice = tview.NewTable()
-		slice.SetBorderPadding(1, 1, 1, 1)
-		var def string
-		defIface := app.Cats[cat][item].Default.Get()
-		switch defIface.(type) {
-		case string:
-			def = app.Cats[cat][item].Default.Get().(string)
-		case nil:
-		default:
-		}
-		var curr string
-		currIface := app.Cats[cat][item].Value.Get()
-		switch dd := currIface.(type) {
-		case string:
-			curr = dd
-		case nil:
-		default:
-		}
-		curropt := 0
-		slicevalue, ok := app.Cats[cat][item].Get().([]string)
-		if ok {
-			for i, x := range slicevalue {
-				itemtext := x
-				if x == def {
-					itemtext += " (default)"
-				}
-				if x == curr {
-					curropt = i
-				}
-				slice.
-					SetCell(i, 0, tview.NewTableCell(itemtext).
-						SetTextColor(darkness).SetBackgroundColor(lightness))
-			}
-		}
-		slice.
-			SetCell(len(slicevalue), 0, tview.NewTableCell("add new").
-				SetTextColor(darkness).SetBackgroundColor(lightness))
-		slice.
-			SetSelectable(true, true).
-			Select(curropt, 0).
-			SetSelectedStyle(lightness, darkness, tcell.AttrNone)
-		slice.SetBackgroundColor(lightness)
-		slice.SetInputCapture(editoreventhandler)
-		out.AddItem(slice, len(slicevalue)+3, 0, true)
-
-	}
-	out.AddItem(infoblock, 0, 1, false)
-	return
 }
 
 func getMaxWidth(ss []string) (maxwidth int) {
