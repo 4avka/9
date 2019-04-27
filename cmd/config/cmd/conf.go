@@ -196,6 +196,27 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 
 	var genPage func(cat, item string, active bool, app *config.App,
 		editoreventhandler func(event *tcell.EventKey) *tcell.EventKey, idx int) (out *tview.Flex)
+
+	inputhandler = func(event *tcell.EventKey) *tcell.EventKey {
+		switch event.Key() {
+		case 13:
+			// pressed enter
+		case 27:
+			// pressed escape
+			menuflex.
+				RemoveItem(coverbox).
+				RemoveItem(activepage)
+			// itemname = item
+			activepage = genPage(cat, itemname, false, app, inputhandler, 0)
+			menuflex.AddItem(activepage, 0, 1, true)
+			prelightTable(roottable)
+			activatedTable(catstable)
+			activateTable(cattable)
+			tapp.SetFocus(cattable)
+		}
+		return event
+	}
+
 	genPage = func(cat, item string, active bool, app *config.App,
 		editoreventhandler func(event *tcell.EventKey) *tcell.EventKey, idx int) (out *tview.Flex) {
 		var darkness, lightness tcell.Color
@@ -241,7 +262,9 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 		if max, ok := app.Cats[cat][item].Max.Get().(int); ok {
 			infostring += fmt.Sprint("\nmaximum value: ", max)
 		}
-
+		infostring =
+			"<esc> to cancel <ctrl-u> to clear <ctrl-z> to reset to default\n\n" +
+				infostring
 		infoblock.SetText(infostring)
 		itemtype := app.Cats[cat][item].Type
 		switch itemtype {
@@ -256,17 +279,71 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			val := app.Cats[cat][item].Value
 			if val != nil {
 				vv := val.Get()
+				outstring := ""
 				if vv != nil {
-					iteminput.SetText(fmt.Sprint(vv))
+					switch ov := vv.(type) {
+					case int:
+						outstring = fmt.Sprintf("%8d", ov)
+					case float64:
+						switch itemtype {
+						case "float":
+							outstring = fmt.Sprintf("%0.8f", ov)
+						case "int", "port":
+							outint := int(ov)
+							outstring = fmt.Sprintf("%8d", outint)
+						case "duration":
+							outdur := time.Duration(int(ov))
+							outstring = fmt.Sprintf("%v", outdur)
+						}
+					case time.Duration:
+						outstring = fmt.Sprintf("%v", ov)
+					default:
+						outstring = fmt.Sprint(ov)
+					}
+					iteminput.SetText(strings.TrimSpace(outstring))
 				}
 			}
-			iteminput.SetInputCapture(editoreventhandler)
+			var canceller func(rw *config.Row) func(event *tcell.EventKey) *tcell.EventKey
+			canceller = func(rw *config.Row) func(event *tcell.EventKey) *tcell.EventKey {
+				return func(event *tcell.EventKey) *tcell.EventKey {
+					switch {
+					case event.Key() == tcell.KeyCtrlU:
+						switch itemtype {
+						case "int":
+							rw.Value.Put(0)
+						case "float":
+							rw.Value.Put(0.0)
+						case "duration":
+							rw.Value.Put(0 * time.Second)
+						default:
+							rw.Value.Put(nil)
+						}
+					case event.Key() == tcell.KeyCtrlZ:
+						rw.Value.Put(rw.Default.Get())
+					default:
+						return editoreventhandler(event)
+					}
+					menuflex.
+						RemoveItem(coverbox).
+						RemoveItem(activepage)
+					itemname = item
+					activepage = genPage(cat, itemname, false, app, canceller(rw), 0)
+					menuflex.AddItem(activepage, 0, 1, true)
+					prelightTable(roottable)
+					activatedTable(catstable)
+					activateTable(cattable)
+					tapp.SetFocus(cattable)
+					saveConfig()
+					return event
+				}
+			}
+			iteminput.SetInputCapture(canceller(app.Cats[cat][item]))
 			snackbar := tview.NewTextView()
 			iteminput.SetDoneFunc(func(key tcell.Key) {
+				rrr := app.Cats[cat][item]
+				rw := rrr
 				if key == tcell.KeyEnter || key == tcell.KeyTab {
 					s := iteminput.GetText()
-					rrr := app.Cats[cat][item]
-					rw := &rrr
 					if s == "" {
 						switch itemtype {
 						case "int":
@@ -461,7 +538,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			inputDoneGen := func(idx int) func(key tcell.Key) {
 				return func(key tcell.Key) {
 					rrr := app.Cats[cat][item]
-					rw := &rrr
+					rw := rrr
 					rwv, ok := rw.Value.Get().([]string)
 					if !ok { // rwv = []string{}
 					}
@@ -493,26 +570,26 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 							}
 						}
 
-						itemname = item
-						inputhandler = func(event *tcell.EventKey) *tcell.EventKey {
-							switch event.Key() {
-							case 13:
-								// pressed enter
-							case 27:
-								// pressed escape
-								menuflex.
-									RemoveItem(coverbox).
-									RemoveItem(activepage)
-								// itemname = item
-								activepage = genPage(cat, itemname, false, app, inputhandler, idx)
-								menuflex.AddItem(activepage, 0, 1, true)
-								prelightTable(roottable)
-								activatedTable(catstable)
-								activateTable(cattable)
-								tapp.SetFocus(cattable)
-							}
-							return event
-						}
+						// itemname = item
+						// inputhandler = func(event *tcell.EventKey) *tcell.EventKey {
+						// 	switch event.Key() {
+						// 	case 13:
+						// 		// pressed enter
+						// 	case 27:
+						// 		// pressed escape
+						// 		menuflex.
+						// 			RemoveItem(coverbox).
+						// 			RemoveItem(activepage)
+						// 		// itemname = item
+						// 		activepage = genPage(cat, itemname, false, app, inputhandler, idx)
+						// 		menuflex.AddItem(activepage, 0, 1, true)
+						// 		prelightTable(roottable)
+						// 		activatedTable(catstable)
+						// 		activateTable(cattable)
+						// 		tapp.SetFocus(cattable)
+						// 	}
+						// 	return event
+						// }
 
 						menuflex.
 							RemoveItem(coverbox).
@@ -686,25 +763,25 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 				prelightTable(catstable)
 				activatedTable(cattable)
 				itemname = app.Cats[cat].GetSortedKeys()[y-1]
-				inputhandler = func(event *tcell.EventKey) *tcell.EventKey {
-					switch event.Key() {
-					case 13:
-						// pressed enter
-					case 27:
-						// pressed escape
-						menuflex.
-							RemoveItem(coverbox).
-							RemoveItem(activepage)
-						itemname = app.Cats[cat].GetSortedKeys()[y-1]
-						activepage = genPage(cat, itemname, false, app, inputhandler, y)
-						menuflex.AddItem(activepage, 0, 1, true)
-						prelightTable(roottable)
-						activatedTable(catstable)
-						activateTable(cattable)
-						tapp.SetFocus(cattable)
-					}
-					return event
-				}
+				// inputhandler = func(event *tcell.EventKey) *tcell.EventKey {
+				// 	switch event.Key() {
+				// 	case 13:
+				// 		// pressed enter
+				// 	case 27:
+				// 		// pressed escape
+				// 		menuflex.
+				// 			RemoveItem(coverbox).
+				// 			RemoveItem(activepage)
+				// 		itemname = app.Cats[cat].GetSortedKeys()[y-1]
+				// 		activepage = genPage(cat, itemname, false, app, inputhandler, y)
+				// 		menuflex.AddItem(activepage, 0, 1, true)
+				// 		prelightTable(roottable)
+				// 		activatedTable(catstable)
+				// 		activateTable(cattable)
+				// 		tapp.SetFocus(cattable)
+				// 	}
+				// 	return event
+				// }
 				activepage = genPage(cat, itemname, true, app, inputhandler, 0)
 				menuflex.AddItem(activepage, 0, 1, true)
 

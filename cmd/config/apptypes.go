@@ -2,7 +2,10 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/davecgh/go-spew/spew"
+	"os"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"time"
@@ -19,6 +22,32 @@ type App struct {
 	Cats     Cats
 	Commands Commands
 	Config   *nine.Config
+}
+
+func (app *App) SaveConfig() {
+	if app == nil {
+		return
+	}
+	datadir, ok := app.Cats["app"]["datadir"].Value.Get().(string)
+	if !ok {
+		return
+	}
+	configFile := CleanAndExpandPath(filepath.Join(
+		datadir, "config"), "")
+	if EnsureDir(configFile) {
+	}
+	fh, err := os.Create(configFile)
+	if err != nil {
+		panic(err)
+	}
+	j, e := json.MarshalIndent(app, "", "\t")
+	if e != nil {
+		panic(e)
+	}
+	_, err = fmt.Fprint(fh, string(j))
+	if err != nil {
+		panic(err)
+	}
 }
 
 type Line struct {
@@ -58,18 +87,34 @@ func (r *App) UnmarshalJSON(data []byte) error {
 	if e != nil {
 		return e
 	}
+	spew.Dump(out)
 	for i, x := range out {
 		for j, y := range x {
 			R := r.Cats[i][j]
-			// yv := &y.Value
-			// if R.Put == nil {
-			R.Value.Put(y.Value)
-			// } else {
-			// 	R.Put(yv)
-			// }
+			if y.Value != nil {
+				switch R.Type {
+				case "int", "port":
+					y.Value = int(y.Value.(float64))
+				case "duration":
+					y.Value = time.Duration(int(y.Value.(float64)))
+				case "stringslice":
+					rt, ok := y.Value.([]string)
+					ro := []string{}
+					if ok {
+						for _, z := range rt {
+							R.Validate(R, z)
+							ro = append(ro, z)
+						}
+						R.Value.Put(ro)
+					}
+					break
+				case "float":
+				}
+			}
+			R.Validate(R, y.Value)
+			// R.Value.Put(y.Value)
 		}
 	}
-	spew.Dump(out)
 	return nil
 }
 
@@ -196,7 +241,7 @@ func (r *Cats) Duration(cat, item string) (out *time.Duration) {
 	}
 }
 
-type Cat map[string]Row
+type Cat map[string]*Row
 type CatGenerator func(ctx *Cat)
 type CatGenerators []CatGenerator
 
@@ -250,6 +295,7 @@ type Row struct {
 	Validate func(*Row, interface{}) bool
 	String   string
 	Usage    string
+	App      *App
 }
 
 func (r *Row) Bool() bool {

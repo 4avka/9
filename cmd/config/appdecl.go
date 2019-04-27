@@ -19,6 +19,12 @@ func NewApp(name string, g ...AppGenerator) (out *App) {
 		Commands: make(Commands),
 	}
 	gen.RunAll(out)
+	// set ref to App in each Row
+	for _, x := range out.Cats {
+		for _, y := range x {
+			y.App = out
+		}
+	}
 	return
 }
 
@@ -129,8 +135,8 @@ func File(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		c.Init(c)
-		(*ctx)[name] = *c
+		// c.Init(c)
+		(*ctx)[name] = c
 	}
 }
 
@@ -157,8 +163,8 @@ func Dir(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		c.Init(c)
-		(*ctx)[name] = *c
+		// c.Init(c)
+		(*ctx)[name] = c
 	}
 }
 
@@ -184,8 +190,8 @@ func Port(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		c.Init(c)
-		(*ctx)[name] = *c
+		// c.Init(c)
+		(*ctx)[name] = c
 	}
 }
 
@@ -212,8 +218,8 @@ func Enable(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		c.Init(c)
-		(*ctx)[name] = *c
+		// c.Init(c)
+		(*ctx)[name] = c
 	}
 }
 
@@ -240,8 +246,8 @@ func Enabled(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		c.Init(c)
-		(*ctx)[name] = *c
+		// c.Init(c)
+		(*ctx)[name] = c
 	}
 }
 
@@ -267,8 +273,8 @@ func Int(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		c.Init(c)
-		(*ctx)[name] = *c
+		// c.Init(c)
+		(*ctx)[name] = c
 	}
 }
 
@@ -293,8 +299,8 @@ func Tag(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		c.Init(c)
-		(*ctx)[name] = *c
+		// c.Init(c)
+		(*ctx)[name] = c
 	}
 }
 
@@ -320,8 +326,8 @@ func Tags(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		c.Init(c)
-		(*ctx)[name] = *c
+		// c.Init(c)
+		(*ctx)[name] = c
 	}
 }
 
@@ -350,8 +356,8 @@ func Addr(name string, defPort int, g ...RowGenerator) CatGenerator {
 				defPort)
 			G.RunAll(cc)
 		}
-		c.Init(c)
-		(*ctx)[name] = *c
+		// c.Init(c)
+		(*ctx)[name] = c
 	}
 }
 
@@ -376,8 +382,8 @@ func Addrs(name string, defPort int, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		c.Init(c)
-		(*ctx)[name] = *c
+		// c.Init(c)
+		(*ctx)[name] = c
 	}
 }
 
@@ -404,8 +410,8 @@ func Level(g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		c.Init(c)
-		(*ctx)[lvl] = *c
+		// c.Init(c)
+		(*ctx)[lvl] = c
 	}
 }
 
@@ -431,8 +437,8 @@ func Algo(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		c.Init(c)
-		(*ctx)[name] = *c
+		// c.Init(c)
+		(*ctx)[name] = c
 	}
 }
 
@@ -457,8 +463,8 @@ func Float(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		c.Init(c)
-		(*ctx)[name] = *c
+		// c.Init(c)
+		(*ctx)[name] = c
 	}
 }
 
@@ -483,8 +489,8 @@ func Duration(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		c.Init(c)
-		(*ctx)[name] = *c
+		// c.Init(c)
+		(*ctx)[name] = c
 	}
 }
 
@@ -510,8 +516,8 @@ func Net(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		c.Init(c)
-		(*ctx)[name] = *c
+		// c.Init(c)
+		(*ctx)[name] = c
 	}
 }
 

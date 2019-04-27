@@ -11,7 +11,7 @@ import (
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
 
-var datadir *string
+var datadir *string = new(string)
 
 func (app *App) Parse(args []string) int {
 	app.Config = MakeConfig(app)
@@ -28,7 +28,7 @@ func (app *App) Parse(args []string) int {
 		*datadir = filepath.Join(pwd, *datadir)
 		dd.Value = *datadir
 		fmt.Println("datadir set", dd.Value, datadir)
-		app.Cats["app"]["datadir"].Put(*datadir)
+		app.Cats["app"]["datadir"].Value.Put(*datadir)
 		DataDir = *datadir
 	} else {
 		fmt.Println("datadir default")
@@ -37,18 +37,26 @@ func (app *App) Parse(args []string) int {
 		datadir = &ddd
 		DataDir = *datadir
 	}
+	// now we can initialise the App
+	for i, x := range app.Cats {
+		for j := range x {
+			temp := app.Cats[i][j]
+			temp.App = app
+			app.Cats[i][j] = temp
+		}
+	}
+	for i, x := range app.Cats {
+		for j := range x {
+			app.Cats[i][j].Init(app.Cats[i][j])
+		}
+	}
 	// set AppDataDir for running as node
 	// fmt.Println("cmd.Name", cmd.Name)
 	aa := CleanAndExpandPath(filepath.Join(
-		*app.Config.DataDir, cmd.Name), *datadir)
+		*datadir,
+		cmd.Name),
+		*datadir)
 	app.Config.AppDataDir, app.Config.LogDir = &aa, &aa
-
-	*app.Config.RPCCert = CleanAndExpandPath(filepath.Join(
-		*datadir, *app.Config.RPCCert), *datadir)
-	*app.Config.RPCKey = CleanAndExpandPath(filepath.Join(
-		*datadir, *app.Config.RPCKey), *datadir)
-	*app.Config.CAFile = CleanAndExpandPath(filepath.Join(
-		*datadir, *app.Config.CAFile), *datadir)
 
 	configFile := CleanAndExpandPath(filepath.Join(
 		*datadir, "config"), *datadir)

@@ -5,6 +5,7 @@ import (
 	"git.parallelcoin.io/dev/9/pkg/util"
 	"net"
 	"path/filepath"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -72,6 +73,7 @@ func GenAddr(name string, port int) func(r *Row, in interface{}) bool {
 		if r != nil {
 			r.Value = r.Value.Put(*s)
 			r.String = *s
+			r.App.SaveConfig()
 		}
 		return true
 	}
@@ -80,42 +82,69 @@ func GenAddr(name string, port int) func(r *Row, in interface{}) bool {
 // GenAddrs returns a validator with a set default port assumed if one is not present
 func GenAddrs(name string, port int) func(r *Row, in interface{}) bool {
 	return func(r *Row, in interface{}) bool {
-		var s *string
+		var s []string
 		existing, ok := r.Value.Get().([]string)
 		if !ok {
 			existing = []string{}
 		}
 		switch I := in.(type) {
 		case string:
-			s = &I
+			s = append(s, I)
 		case *string:
+			s = append(s, *I)
+		case []string:
 			s = I
+		case *[]string:
+			s = *I
+		case []interface{}:
+			for _, x := range I {
+				so, ok := x.(string)
+				if ok {
+					s = append(s, so)
+				}
+			}
+		case nil:
 		default:
+			fmt.Println(name, port, "invalid type", in, reflect.TypeOf(in))
 			return false
 		}
-		h, p, e := net.SplitHostPort(*s)
-		if e != nil {
-			*s = net.JoinHostPort(*s, fmt.Sprint(port))
-		} else {
-			n, e := strconv.Atoi(p)
-			if e == nil {
-				if n < 1025 || n > 65535 {
+		for _, sse := range s {
+			h, p, e := net.SplitHostPort(sse)
+			if e != nil {
+				sse = net.JoinHostPort(sse, fmt.Sprint(port))
+			} else {
+				n, e := strconv.Atoi(p)
+				if e == nil {
+					if n < 1025 || n > 65535 {
+						fmt.Println(name, port, "port out of range")
+						return false
+					}
+				} else {
+					fmt.Println(name, port, "port not an integer")
 					return false
 				}
-			} else {
-				return false
+				if p == "" {
+					p = fmt.Sprint(port)
+					sse = net.JoinHostPort(h, p)
+				} else {
+					sse = net.JoinHostPort(h, p)
+				}
 			}
-			if p == "" {
-				p = fmt.Sprint(port)
-				*s = net.JoinHostPort(h, p)
-			} else {
-				*s = net.JoinHostPort(h, p)
-			}
+			existing = append(existing, sse)
 		}
-		newaddrs := append(existing, *s)
 		if r != nil {
-			r.Value = r.Value.Put(newaddrs)
-			r.String = fmt.Sprint(newaddrs)
+			// eliminate duplicates
+			tmpMap := make(map[string]struct{})
+			for _, x := range existing {
+				tmpMap[x] = struct{}{}
+			}
+			existing = []string{}
+			for i := range tmpMap {
+				existing = append(existing, i)
+			}
+			r.Value = r.Value.Put(existing)
+			r.String = fmt.Sprint(existing)
+			r.App.SaveConfig()
 		}
 		return true
 	}
@@ -160,6 +189,7 @@ var Valid = struct {
 					r.Value = NewIface()
 				}
 				r.Value.Put(ss)
+				r.App.SaveConfig()
 				return true
 			} else {
 				return false
@@ -189,6 +219,7 @@ var Valid = struct {
 					r.Value = NewIface()
 				}
 				r.Value.Put(ss)
+				r.App.SaveConfig()
 				return true
 			} else {
 				return false
@@ -227,6 +258,7 @@ var Valid = struct {
 		if r != nil {
 			r.Value = r.Value.Put(ii)
 			r.String = fmt.Sprint(ii)
+			r.App.SaveConfig()
 		}
 		return true
 	},
@@ -265,6 +297,7 @@ var Valid = struct {
 		if r != nil {
 			r.String = fmt.Sprint(b)
 			r.Value = r.Value.Put(b)
+			r.App.SaveConfig()
 		}
 		return true
 	},
@@ -296,6 +329,7 @@ var Valid = struct {
 		if r != nil {
 			r.String = fmt.Sprint(ii)
 			r.Value = r.Value.Put(ii)
+			r.App.SaveConfig()
 		}
 		return true
 	},
@@ -316,6 +350,7 @@ var Valid = struct {
 		if r != nil {
 			r.Value = r.Value.Put(s)
 			r.String = fmt.Sprint(s)
+			r.App.SaveConfig()
 		}
 		return true
 	},
@@ -354,6 +389,7 @@ var Valid = struct {
 		if r != nil {
 			r.Value = r.Value.Put(ss)
 			r.String = fmt.Sprint(ss)
+			r.App.SaveConfig()
 		}
 		return true
 	},
@@ -381,6 +417,7 @@ var Valid = struct {
 		if r != nil {
 			r.String = fmt.Sprint(o)
 			r.Value = r.Value.Put(o)
+			r.App.SaveConfig()
 		}
 		return true
 	},
@@ -412,6 +449,7 @@ var Valid = struct {
 		if r != nil {
 			r.Value = r.Value.Put(f)
 			r.String = fmt.Sprint(f)
+			r.App.SaveConfig()
 		}
 		return true
 	},
@@ -443,6 +481,7 @@ var Valid = struct {
 		if r != nil {
 			r.String = fmt.Sprint(t)
 			r.Value = r.Value.Put(t)
+			r.App.SaveConfig()
 		}
 		return true
 	},
@@ -466,6 +505,7 @@ var Valid = struct {
 		if r != nil && found {
 			r.String = fmt.Sprint(sn)
 			r.Value = r.Value.Put(sn)
+			r.App.SaveConfig()
 		}
 		return found
 	},
@@ -488,6 +528,7 @@ var Valid = struct {
 		if r != nil && found {
 			r.String = fmt.Sprint(sl)
 			r.Value = r.Value.Put(sl)
+			r.App.SaveConfig()
 		}
 		return found
 	},
