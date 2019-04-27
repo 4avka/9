@@ -46,20 +46,20 @@ func CleanAndExpandPath(path, datadir string) string {
 	// Expand initial ~ to OS specific home directory.
 	homeDir := filepath.Dir(util.AppDataDir("9", false))
 	if strings.HasPrefix(path, "~") {
-		path = strings.Replace(path, "~", homeDir, 1)
+		return strings.Replace(path, "~", homeDir, 1)
+
 	}
-	// NOTE: The os.ExpandEnv doesn't work with Windows-style %VARIABLE%, but they variables can still be expanded via POSIX-style $VARIABLE.
-	path = filepath.Clean(os.ExpandEnv(path))
 	if strings.HasPrefix(path, "./") {
 		// explicitly prefix is this must be a relative path
 		pwd, _ := os.Getwd()
-		path = filepath.Join(pwd, path)
-	} else if strings.HasPrefix(path, "/") || strings.HasPrefix(path, "\\") {
-	} else {
+		return filepath.Join(pwd, path)
+	} else if !strings.HasPrefix(path, "/") && !strings.HasPrefix(path, "\\") {
 		if path != datadir {
-			path = filepath.Join(datadir, path)
+			return filepath.Join(datadir, path)
 		}
 	}
+	// NOTE: The os.ExpandEnv doesn't work with Windows-style %VARIABLE%, but they variables can still be expanded via POSIX-style $VARIABLE.
+	path = filepath.Clean(os.ExpandEnv(path))
 	return path
 }
 

@@ -1,11 +1,10 @@
-package main
+package config
 
 import (
-	"git.parallelcoin.io/dev/9/cmd/config"
 	"git.parallelcoin.io/dev/9/cmd/nine"
 )
 
-func MakeConfig(c *config.App) (out *nine.Config) {
+func MakeConfig(c *App) (out *nine.Config) {
 	C := c.Cats
 	var configFile string
 	var tn, sn, rn bool

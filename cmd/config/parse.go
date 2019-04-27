@@ -14,6 +14,8 @@ import (
 var datadir *string
 
 func (app *App) Parse(args []string) int {
+	app.Config = MakeConfig(app)
+
 	// parse commandline
 	cmd, tokens := app.ParseCLI(args)
 	if cmd == nil {
@@ -68,17 +70,20 @@ func (app *App) Parse(args []string) int {
 		if err != nil {
 			panic(err)
 		}
-
-	} else {
-		conf, err := ioutil.ReadFile(configFile)
-		if err != nil {
-			panic(err)
-		}
-		e := json.Unmarshal(conf, app)
-		if e != nil {
-			panic(e)
-		}
 	}
+	fmt.Println("reading config", configFile)
+	conf, err := ioutil.ReadFile(configFile)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("unmarshalling config")
+	e := json.Unmarshal(conf, app)
+	if e != nil {
+		panic(e)
+	}
+	// app.Config = MakeConfig(app)
+	// spew.Dump(app)
+
 	if app.Config.LogLevel != nil {
 		// fmt.Println("setting debug level to", *app.Config.LogLevel)
 		cl.Register.SetAllLevels(*app.Config.LogLevel)

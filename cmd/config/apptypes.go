@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"github.com/davecgh/go-spew/spew"
 	"regexp"
 	"sort"
 	"time"
@@ -60,14 +61,15 @@ func (r *App) UnmarshalJSON(data []byte) error {
 	for i, x := range out {
 		for j, y := range x {
 			R := r.Cats[i][j]
-			yv := &y.Value
-			if R.Put == nil {
-				R.Value.Put(yv)
-			} else {
-				R.Put(yv)
-			}
+			// yv := &y.Value
+			// if R.Put == nil {
+			R.Value.Put(y.Value)
+			// } else {
+			// 	R.Put(yv)
+			// }
 		}
 	}
+	spew.Dump(out)
 	return nil
 }
 
