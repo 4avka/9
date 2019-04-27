@@ -104,6 +104,7 @@ func GenAddrs(name string, port int) func(r *Row, in interface{}) bool {
 				}
 			}
 		case nil:
+			return false
 		default:
 			fmt.Println(name, port, "invalid type", in, reflect.TypeOf(in))
 			return false
@@ -125,10 +126,8 @@ func GenAddrs(name string, port int) func(r *Row, in interface{}) bool {
 				}
 				if p == "" {
 					p = fmt.Sprint(port)
-					sse = net.JoinHostPort(h, p)
-				} else {
-					sse = net.JoinHostPort(h, p)
 				}
+				sse = net.JoinHostPort(h, p)
 			}
 			existing = append(existing, sse)
 		}
@@ -142,6 +141,7 @@ func GenAddrs(name string, port int) func(r *Row, in interface{}) bool {
 			for i := range tmpMap {
 				existing = append(existing, i)
 			}
+			sort.Strings(existing)
 			r.Value = r.Value.Put(existing)
 			r.String = fmt.Sprint(existing)
 			r.App.SaveConfig()
@@ -355,40 +355,49 @@ var Valid = struct {
 		return true
 	},
 	Tags: func(r *Row, in interface{}) bool {
-		var s string
-		var ss []string
-		isString := false
+		var s []string
+		existing, ok := r.Value.Get().([]string)
+		if !ok {
+			existing = []string{}
+		}
 		switch I := in.(type) {
 		case string:
-			s = I
-			isString = true
+			s = append(s, I)
 		case *string:
-			s = *I
-			isString = true
+			s = append(s, *I)
 		case []string:
-			ss = I
+			s = I
 		case *[]string:
-			ss = *I
-		default:
-			return false
-		}
-		if isString {
-			s = strings.TrimSpace(s)
-			sss := strings.Split(s, " ")
-			var ssss []string
-			for _, x := range sss {
-				if len(x) > 0 {
-					ssss = append(ssss, x)
+			s = *I
+		case []interface{}:
+			for _, x := range I {
+				so, ok := x.(string)
+				if ok {
+					s = append(s, so)
 				}
 			}
-			if len(ssss) < 1 {
-				return false
-			}
-			ss = ssss
+		case nil:
+			return false
+		default:
+			fmt.Println("invalid type", in, reflect.TypeOf(in))
+			return false
+		}
+		for _, sse := range s {
+			existing = append(existing, sse)
 		}
 		if r != nil {
-			r.Value = r.Value.Put(ss)
-			r.String = fmt.Sprint(ss)
+			// eliminate duplicates
+			tmpMap := make(map[string]struct{})
+			for _, x := range existing {
+				tmpMap[x] = struct{}{}
+			}
+			existing = []string{}
+			for i := range tmpMap {
+				existing = append(existing, i)
+			}
+			sort.Strings(existing)
+			r.Value = r.Value.Put(existing)
+			r.String = fmt.Sprint(existing)
 			r.App.SaveConfig()
 		}
 		return true

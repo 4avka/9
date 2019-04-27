@@ -57,10 +57,14 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 	titlebar.Box.SetBackgroundColor(MainColor())
 
 	coverbox := tview.NewTextView()
-	coverbox.SetBorder(false).SetBackgroundColor(BackgroundColor())
-	coverbox.SetBorderPadding(1, 1, 1, 1)
+	coverbox.
+		SetTextColor(TextColor())
+	coverbox.Box.
+		SetBorder(false).
+		SetBackgroundColor(BackgroundColor())
+	coverbox.SetBorderPadding(1, 1, 2, 2)
 
-	roottable, roottablewidth := genMenu("launch", "configure")
+	roottable, roottablewidth := genMenu("launch", "configure", "reinitialize")
 	activateTable(roottable)
 
 	launchtable, launchtablewidth := genMenu("node", "wallet", "shell")
@@ -75,17 +79,23 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 		AddItem(coverbox, 0, 1, false)
 	menuflex.Box.SetBackgroundColor(BackgroundColor())
 
+	var leftExitActive bool
+	var confirm *tview.Flex
 	roottable.SetSelectionChangedFunc(func(y, x int) {
-		coverbox.SetText("")
+		leftExitActive = false
+		coverbox.SetText(
+			"\n" +
+				"" +
+				"",
+		)
 		menuflex.
 			RemoveItem(coverbox).
 			RemoveItem(launchtable).
 			RemoveItem(catstable).
-			RemoveItem(cattable)
+			RemoveItem(cattable).
+			RemoveItem(confirm)
 		switch y {
 		case 0:
-			menuflex.
-				AddItem(coverbox, 0, 1, true)
 		case 1:
 			menuflex.
 				AddItem(launchtable, launchtablewidth, 1, true).
@@ -94,11 +104,66 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			menuflex.
 				AddItem(catstable, catstablewidth, 1, true)
 			if cattable != nil {
+				lastTable(cattable)
 				menuflex.AddItem(cattable, cattablewidth, 1, true)
 			}
 			menuflex.AddItem(coverbox, 0, 1, true)
+		case 3:
 		}
 	})
+	var factoryResetFunc = func() {
+		confirm = tview.NewFlex()
+		confirm.SetDirection(tview.FlexRow)
+		confirm.SetBorderPadding(1, 1, 2, 2)
+		resettext := tview.NewTextView()
+		resettext.SetText("all custom configurations will be lost, are you sure?")
+		resettext.SetBorderPadding(1, 1, 2, 2)
+		resettext.SetWordWrap(true)
+		resettext.SetTextAlign(tview.AlignCenter)
+		resettext.Box.SetBackgroundColor(MainColor())
+		resetform := tview.NewForm()
+		resetform.Box.SetBackgroundColor(MainColor())
+		resetform.SetButtonsAlign(tview.AlignCenter)
+		resetform.SetButtonBackgroundColor(MainColor())
+		resetform.SetButtonTextColor(TextColor())
+		eventcap := func(event *tcell.EventKey) *tcell.EventKey {
+			switch {
+			case event.Key() == tcell.KeyRight:
+				tapp.SetFocus(resetform.GetButton(1))
+			case event.Key() == tcell.KeyLeft:
+				tapp.SetFocus(resetform.GetButton(0))
+			case event.Key() == tcell.KeyEsc:
+				menuflex.RemoveItem(confirm)
+				tapp.SetFocus(roottable)
+			}
+			return event
+		}
+		resetform.AddButton("cancel", func() {
+			menuflex.RemoveItem(confirm)
+			tapp.SetFocus(roottable)
+		})
+		resetform.AddButton("reset to factory settings", func() {
+			for _, x := range app.Cats {
+				for _, z := range x {
+					z.Init(z)
+				}
+			}
+			resettext.SetText("CONFIRMED\n\nfactory reset completed")
+			confirm.RemoveItem(resetform)
+			// resetform.RemoveButton(1)
+			tapp.ForceDraw()
+			time.Sleep(5 * time.Second / 2)
+			menuflex.RemoveItem(confirm)
+			tapp.SetFocus(roottable)
+		})
+		resetform.SetInputCapture(eventcap)
+		resetform.GetButton(0).SetInputCapture(eventcap)
+		resetform.GetButton(1).SetInputCapture(eventcap)
+		confirm.AddItem(resettext, 5, 0, false)
+		confirm.AddItem(resetform, 3, 0, true)
+		menuflex.AddItem(confirm, 0, 1, true)
+		tapp.SetFocus(confirm)
+	}
 	roottable.SetSelectedFunc(func(y, x int) {
 		menuflex.RemoveItem(coverbox)
 		if cattable != nil {
@@ -120,17 +185,49 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 				prelightTable(cattable)
 			}
 			tapp.SetFocus(catstable)
+		case 3:
+			factoryResetFunc()
 		}
 	})
 	roottable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		roottable.GetCell(0, 0).SetText("<")
+		menuflex.
+			RemoveItem(cattable).
+			RemoveItem(coverbox)
 		switch event.Key() {
+		case tcell.KeyRight:
+			leftExitActive = false
+			y, _ := roottable.GetSelection()
+			switch y {
+			case 1:
+				activatedTable(roottable)
+				activateTable(launchtable)
+				coverbox.SetTextColor(TextColor())
+				tapp.SetFocus(launchtable)
+			case 2:
+				activatedTable(roottable)
+				activateTable(catstable)
+				if cattable != nil {
+					menuflex.AddItem(cattable, cattablewidth, 0, false)
+					prelightTable(cattable)
+				}
+				tapp.SetFocus(catstable)
+			case 3:
+				factoryResetFunc()
+			}
+		case tcell.KeyLeft, tcell.KeyEsc:
+			y, _ := roottable.GetSelection()
+			if y == 0 {
+				if !leftExitActive {
+					roottable.GetCell(0, 0).SetText("< exit")
+					leftExitActive = true
+				} else {
+					tapp.Stop()
+				}
+			}
 		case 13:
 			// titlebar.SetText("enter")
 			// pressed enter
-		case 27:
-			// titlebar.SetText("ESCAPE")
-			// pressed escape
-			tapp.Stop()
 		}
 		return event
 	})
@@ -161,6 +258,10 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 	})
 	launchtable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
+		case tcell.KeyLeft:
+			prelightTable(launchtable)
+			activateTable(roottable)
+			tapp.SetFocus(roottable)
 		case 13:
 			// titlebar.SetText("enter")
 			// pressed enter
@@ -176,21 +277,24 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 	})
 
 	saveConfig := func() {
-		configFile := config.CleanAndExpandPath(filepath.Join(
-			app.Cats["app"]["datadir"].Get().(string), "config"), "")
-		if config.EnsureDir(configFile) {
-		}
-		fh, err := os.Create(configFile)
-		if err != nil {
-			panic(err)
-		}
-		j, e := json.MarshalIndent(app, "", "\t")
-		if e != nil {
-			panic(e)
-		}
-		_, err = fmt.Fprint(fh, string(j))
-		if err != nil {
-			panic(err)
+		ddir, ok := app.Cats["app"]["datadir"].Get().(string)
+		if ok {
+			configFile := config.CleanAndExpandPath(filepath.Join(
+				ddir, "config"), "")
+			if config.EnsureDir(configFile) {
+			}
+			fh, err := os.Create(configFile)
+			if err != nil {
+				panic(err)
+			}
+			j, e := json.MarshalIndent(app, "", "\t")
+			if e != nil {
+				panic(e)
+			}
+			_, err = fmt.Fprint(fh, string(j))
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
 
@@ -219,6 +323,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 
 	genPage = func(cat, item string, active bool, app *config.App,
 		editoreventhandler func(event *tcell.EventKey) *tcell.EventKey, idx int) (out *tview.Flex) {
+		currow := app.Cats[cat][item]
 		var darkness, lightness tcell.Color
 		if active {
 			darkness = MainColor()
@@ -227,7 +332,6 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			darkness = PrelightColor()
 			lightness = MainColor()
 		}
-
 		out = tview.NewFlex().SetDirection(tview.FlexRow)
 		heading := tview.NewTextView().
 			SetText(fmt.Sprintf("%s.%s", cat, item))
@@ -245,7 +349,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			SetTextColor(lightness).
 			SetBorderPadding(1, 0, 1, 1).
 			SetBackgroundColor(darkness)
-		def := app.Cats[cat][item].Default
+		def := currow.Default
 		defstring := ""
 		if def != nil {
 			defstring = fmt.Sprintf("default value: %v", def.Get())
@@ -254,19 +358,30 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 		}
 		infostring := fmt.Sprintf(
 			"%v\n\n%s",
-			app.Cats[cat][item].Usage, defstring,
+			currow.Usage, defstring,
 		)
-		if min, ok := app.Cats[cat][item].Min.Get().(int); ok {
+		if min, ok := currow.Min.Get().(int); ok {
 			infostring += fmt.Sprint("\nminimum value: ", min)
 		}
-		if max, ok := app.Cats[cat][item].Max.Get().(int); ok {
+		if max, ok := currow.Max.Get().(int); ok {
 			infostring += fmt.Sprint("\nmaximum value: ", max)
 		}
+		itemtype := currow.Type
 		infostring =
-			"<esc> to cancel <ctrl-u> to clear <ctrl-z> to reset to default\n\n" +
-				infostring
+			"<esc>     to cancel\n\n" + infostring
+		switch currow.Type {
+		case "int", "float", "duration":
+			infostring =
+				"<ctrl-z>  to reset to default\n" +
+					infostring
+		case "string", "port":
+			infostring =
+				"<ctrl-u>  to clear\n" +
+					"<ctrl-z>  to reset to default\n" +
+					infostring
+		default:
+		}
 		infoblock.SetText(infostring)
-		itemtype := app.Cats[cat][item].Type
 		switch itemtype {
 		case "string", "int", "float", "duration", "port":
 
@@ -276,7 +391,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 				SetFieldBackgroundColor(lightness).
 				SetBackgroundColor(lightness).
 				SetBorderPadding(1, 1, 1, 1)
-			val := app.Cats[cat][item].Value
+			val := currow.Value
 			if val != nil {
 				vv := val.Get()
 				outstring := ""
@@ -287,7 +402,12 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 					case float64:
 						switch itemtype {
 						case "float":
-							outstring = fmt.Sprintf("%0.8f", ov)
+							os := fmt.Sprintf("%0f", ov)
+							os = strings.TrimRight(os, "0")
+							if strings.HasSuffix(os, ".") {
+								os += "0"
+							}
+							outstring = os
 						case "int", "port":
 							outint := int(ov)
 							outstring = fmt.Sprintf("%8d", outint)
@@ -310,11 +430,11 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 					case event.Key() == tcell.KeyCtrlU:
 						switch itemtype {
 						case "int":
-							rw.Value.Put(0)
+							rw.Value.Put(rw.Default.Get())
 						case "float":
-							rw.Value.Put(0.0)
+							rw.Value.Put(rw.Default.Get())
 						case "duration":
-							rw.Value.Put(0 * time.Second)
+							rw.Value.Put(rw.Default.Get())
 						default:
 							rw.Value.Put(nil)
 						}
@@ -337,10 +457,10 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 					return event
 				}
 			}
-			iteminput.SetInputCapture(canceller(app.Cats[cat][item]))
+			iteminput.SetInputCapture(canceller(currow))
 			snackbar := tview.NewTextView()
 			iteminput.SetDoneFunc(func(key tcell.Key) {
-				rrr := app.Cats[cat][item]
+				rrr := currow
 				rw := rrr
 				if key == tcell.KeyEnter || key == tcell.KeyTab {
 					s := iteminput.GetText()
@@ -387,11 +507,11 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			})
 			out.AddItem(iteminput, 3, 0, true)
 		case "bool":
-			rw := app.Cats[cat][item]
+			rw := currow
 			toggle = tview.NewTable()
-			toggle.SetBorderPadding(1, 1, 1, 1)
+			toggle.SetBorderPadding(1, 1, 2, 2)
 			toggle.SetBackgroundColor(lightness)
-			def := app.Cats[cat][item].Default.Get().(bool)
+			def := currow.Default.Get().(bool)
 			if def {
 				toggle.
 					SetCell(0, 0, tview.NewTableCell("false").SetTextColor(darkness)).
@@ -402,7 +522,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 					SetCell(1, 0, tview.NewTableCell("true").SetTextColor(darkness))
 			}
 			curropt := 0
-			curr := app.Cats[cat][item]
+			curr := currow
 			if curr.Bool() {
 				curropt = 1
 			}
@@ -441,14 +561,14 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			})
 			out.AddItem(toggle, 4, 0, true)
 		case "options":
-			rw := app.Cats[cat][item]
+			rw := currow
 			var toggle = tview.NewTable()
 			toggle.SetBorderPadding(1, 1, 1, 1)
-			def := app.Cats[cat][item].Default.Get().(string)
-			curr := app.Cats[cat][item].Value.Get().(string)
+			def := currow.Default.Get().(string)
+			curr := currow.Value.Get().(string)
 			curropt := 0
-			sort.Strings(app.Cats[cat][item].Opts)
-			for i, x := range app.Cats[cat][item].Opts {
+			sort.Strings(currow.Opts)
+			for i, x := range currow.Opts {
 				itemtext := x
 				if x == def {
 					itemtext += " (default)"
@@ -469,7 +589,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 				menuflex.
 					RemoveItem(coverbox).
 					RemoveItem(activepage)
-				rw.Put(app.Cats[cat][item].Opts[y])
+				rw.Put(currow.Opts[y])
 				saveConfig()
 				itemname = item
 				activepage = genPage(cat, itemname, false, app, inputhandler, y)
@@ -479,21 +599,20 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 				activateTable(cattable)
 				tapp.SetFocus(cattable)
 			})
-			out.AddItem(toggle, len(app.Cats[cat][item].Opts)+2, 0, true)
+			out.AddItem(toggle, len(currow.Opts)+2, 0, true)
 		case "stringslice":
-			// rw := app.Cats[cat][item]
 			var slice = tview.NewTable()
 			slice.SetBorderPadding(1, 1, 1, 1)
 			var def string
-			defIface := app.Cats[cat][item].Default.Get()
+			defIface := currow.Default.Get()
 			switch defIface.(type) {
 			case string:
-				def = app.Cats[cat][item].Default.Get().(string)
+				def = currow.Default.Get().(string)
 			case nil:
 			default:
 			}
 			var curr string
-			currIface := app.Cats[cat][item].Value.Get()
+			currIface := currow.Value.Get()
 			switch currIface.(type) {
 			case string:
 				curr = currIface.(string)
@@ -501,7 +620,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			default:
 			}
 			curropt := 0
-			slicevalue, ok := app.Cats[cat][item].Get().([]string)
+			slicevalue, ok := currow.Get().([]string)
 			if ok {
 				for i, x := range slicevalue {
 					itemtext := x
@@ -527,17 +646,24 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 					SetTextColor(darkness).SetBackgroundColor(lightness).
 					SetSelectable(false))
 			slice.
-				SetCell(len(slicevalue)+1, 1, tview.NewTableCell("back").
+				SetCell(len(slicevalue)+1, 1, tview.NewTableCell("set defaults").
 					SetTextColor(darkness).SetBackgroundColor(lightness))
 			slice.
 				SetCell(len(slicevalue)+1, 0, tview.NewTableCell("").
+					SetTextColor(darkness).SetBackgroundColor(lightness).
+					SetSelectable(false))
+			slice.
+				SetCell(len(slicevalue)+2, 1, tview.NewTableCell("back").
+					SetTextColor(darkness).SetBackgroundColor(lightness))
+			slice.
+				SetCell(len(slicevalue)+2, 0, tview.NewTableCell("").
 					SetTextColor(darkness).SetBackgroundColor(lightness).
 					SetSelectable(false))
 			input := tview.NewInputField()
 			snackbar := tview.NewTextView()
 			inputDoneGen := func(idx int) func(key tcell.Key) {
 				return func(key tcell.Key) {
-					rrr := app.Cats[cat][item]
+					rrr := currow
 					rw := rrr
 					rwv, ok := rw.Value.Get().([]string)
 					if !ok { // rwv = []string{}
@@ -547,14 +673,14 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 						if len(s) < 1 {
 							// rw.Value.Put(nil)
 						} else {
-							rw.Validate(rw, &s)
-							if idx >= len(rwv) {
-								rwv = append(rwv, s)
+							if rw.Validate(rw, s) {
+								// if idx >= len(rwv) {
+								// 	rwv = append(rwv, s)
+								// } else {
+								// 	rwv[idx] = s
+								// }
+								// rw.Value.Put(rwv)
 							} else {
-								rwv[idx] = s
-							}
-							rw.Value.Put(rwv)
-							if !rw.Validate(rw, s) {
 								snackbar.SetBackgroundColor(tcell.ColorOrange)
 								snackbar.SetTextColor(tcell.ColorRed)
 								snackbar.SetText("input is not valid for this field")
@@ -562,12 +688,9 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 								out.AddItem(snackbar, 1, 1, false)
 								out.AddItem(infoblock, 0, 1, false)
 								return
-							} else {
-								rw.Validate(rw, s)
-								rw.Value.Put(rwv)
-								saveConfig()
-								out.RemoveItem(snackbar)
 							}
+							saveConfig()
+							out.RemoveItem(snackbar)
 						}
 
 						// itemname = item
@@ -649,8 +772,23 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 						AddItem(infoblock, 0, 1, false)
 					tapp.SetFocus(input)
 
-				// back
+				// set default
 				case y == len(slicevalue)+1:
+					currow.Init(currow)
+
+					menuflex.
+						RemoveItem(coverbox).
+						RemoveItem(activepage)
+					itemname = item
+					activepage = genPage(cat, itemname, false, app, inputhandler, y)
+					menuflex.AddItem(activepage, 0, 1, true)
+					prelightTable(roottable)
+					activatedTable(catstable)
+					activateTable(cattable)
+					tapp.SetFocus(cattable)
+
+				// back
+				case y == len(slicevalue)+2:
 					menuflex.
 						RemoveItem(coverbox).
 						RemoveItem(activepage)
@@ -664,7 +802,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 
 					//existing
 				default:
-					rw := app.Cats[cat][item]
+					rw := currow
 					rwv, ok := rw.Value.Get().([]string)
 					// column 0 is delete column 1 is edit
 					// TODO: consolidate editor code from above with this
@@ -696,22 +834,6 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 						if len(rwv) >= y {
 							input.SetText(rwv[y])
 						}
-						// input.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-						// 	if event.Key() == 27 {
-						// 		menuflex.
-						// 			RemoveItem(coverbox).
-						// 			RemoveItem(activepage)
-						// 		itemname = item
-						// 		activepage = genPage(cat, itemname, true, app, inputhandler, len(rwv))
-						// 		menuflex.AddItem(activepage, 0, 1, true)
-						// 		lastTable(roottable)
-						// 		prelightTable(catstable)
-						// 		activatedTable(cattable)
-						// 		tapp.SetFocus(activepage)
-						// 		return event //&tcell.EventKey{}
-						// 	}
-						// 	return event
-						// })
 						input.SetDoneFunc(inputDoneGen(y))
 						out.AddItem(input, 1, 0, true).
 							AddItem(infoblock, 0, 1, false)
@@ -726,7 +848,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			slice.SetBackgroundColor(lightness)
 			slice.SetInputCapture(editoreventhandler)
 			slice.Select(len(slicevalue), 1)
-			out.AddItem(slice, len(slicevalue)+4, 0, true)
+			out.AddItem(slice, len(slicevalue)+5, 0, true)
 		}
 		out.AddItem(infoblock, 0, 1, false)
 
@@ -745,7 +867,14 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			return
 		}
 		cat = app.Cats.GetSortedKeys()[y-1]
-		cattable, cattablewidth = genMenu(app.Cats[cat].GetSortedKeys()...)
+		ckeys := app.Cats[cat].GetSortedKeys()
+		var catkeys []string
+		for _, x := range ckeys {
+			if !(cat == "app" && x == "datadir") {
+				catkeys = append(catkeys, x)
+			}
+		}
+		cattable, cattablewidth = genMenu(catkeys...)
 		prelightTable(cattable)
 		cattable.SetSelectedFunc(func(y, x int) {
 			menuflex.
@@ -762,26 +891,13 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 				lastTable(roottable)
 				prelightTable(catstable)
 				activatedTable(cattable)
-				itemname = app.Cats[cat].GetSortedKeys()[y-1]
-				// inputhandler = func(event *tcell.EventKey) *tcell.EventKey {
-				// 	switch event.Key() {
-				// 	case 13:
-				// 		// pressed enter
-				// 	case 27:
-				// 		// pressed escape
-				// 		menuflex.
-				// 			RemoveItem(coverbox).
-				// 			RemoveItem(activepage)
-				// 		itemname = app.Cats[cat].GetSortedKeys()[y-1]
-				// 		activepage = genPage(cat, itemname, false, app, inputhandler, y)
-				// 		menuflex.AddItem(activepage, 0, 1, true)
-				// 		prelightTable(roottable)
-				// 		activatedTable(catstable)
-				// 		activateTable(cattable)
-				// 		tapp.SetFocus(cattable)
-				// 	}
-				// 	return event
-				// }
+				var catkeys []string
+				for _, x := range app.Cats[cat].GetSortedKeys() {
+					if !(cat == "app" && x == "datadir") {
+						catkeys = append(catkeys, x)
+					}
+				}
+				itemname = catkeys[y-1]
 				activepage = genPage(cat, itemname, true, app, inputhandler, 0)
 				menuflex.AddItem(activepage, 0, 1, true)
 
@@ -795,13 +911,36 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			if y == 0 {
 				menuflex.AddItem(coverbox, 0, 1, false)
 			} else {
-				itemname = app.Cats[cat].GetSortedKeys()[y-1]
+				var catkeys []string
+				for _, x := range app.Cats[cat].GetSortedKeys() {
+					if !(cat == "app" && x == "datadir") {
+						catkeys = append(catkeys, x)
+					}
+				}
+				itemname = catkeys[y-1]
 				activepage = genPage(cat, itemname, false, app, nil, y)
 				menuflex.AddItem(activepage, 0, 1, true)
 			}
 		})
 		cattable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 			switch event.Key() {
+			case tcell.KeyRight:
+				menuflex.
+					RemoveItem(coverbox).
+					RemoveItem(activepage)
+				var catkeys []string
+				curry, _ := cattable.GetSelection()
+				if curry == 0 {
+					break
+				}
+				for _, x := range app.Cats[cat].GetSortedKeys() {
+					if !(cat == "app" && x == "datadir") {
+						catkeys = append(catkeys, x)
+					}
+				}
+				itemname = catkeys[curry-1]
+				activepage = genPage(cat, itemname, false, app, nil, y)
+				menuflex.AddItem(activepage, 0, 1, true)
 			case 13:
 				// pressed enter
 			case 27:
@@ -849,6 +988,18 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 	})
 	catstable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
+		case tcell.KeyLeft:
+			menuflex.
+				RemoveItem(coverbox).
+				RemoveItem(cattable).
+				RemoveItem(activepage)
+			itemname = ""
+			prelightTable(catstable)
+			activateTable(roottable)
+			coverbox.SetText("")
+			menuflex.
+				AddItem(coverbox, 0, 1, true)
+			tapp.SetFocus(roottable)
 		case 13:
 			// pressed enter
 		case 27:
