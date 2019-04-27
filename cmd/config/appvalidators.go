@@ -139,6 +139,10 @@ var Valid = struct {
 	Level func(*Row, interface{}) bool
 }{
 	File: func(r *Row, in interface{}) bool {
+		if datadir == nil {
+			ddb := ""
+			datadir = &ddb
+		}
 		var s *string
 		switch I := in.(type) {
 		case string:
@@ -149,7 +153,7 @@ var Valid = struct {
 			return false
 		}
 		if len(*s) > 0 {
-			ss := CleanAndExpandPath(*s)
+			ss := CleanAndExpandPath(*s, *datadir)
 			if r != nil {
 				r.String = fmt.Sprint(ss)
 				if r.Value == nil {
@@ -164,6 +168,10 @@ var Valid = struct {
 		return false
 	},
 	Dir: func(r *Row, in interface{}) bool {
+		if datadir == nil {
+			ddb := ""
+			datadir = &ddb
+		}
 		var s *string
 		switch I := in.(type) {
 		case string:
@@ -174,7 +182,7 @@ var Valid = struct {
 			return false
 		}
 		if len(*s) > 0 {
-			ss := CleanAndExpandPath(*s)
+			ss := CleanAndExpandPath(*s, *datadir)
 			if r != nil {
 				r.String = fmt.Sprint(ss)
 				if r.Value == nil {

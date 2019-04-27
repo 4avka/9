@@ -23,8 +23,8 @@ type App struct {
 type Line struct {
 	Value   interface{} `json:"value"`
 	Default interface{} `json:"default,omitempty"`
-	Min     interface{} `json:"min,omitempty"`
-	Max     interface{} `json:"max,omitempty"`
+	Min     int         `json:"min,omitempty"`
+	Max     int         `json:"max,omitempty"`
 	Usage   string      `json:"usage"`
 }
 
@@ -37,11 +37,13 @@ func (r *App) MarshalJSON() ([]byte, error) {
 	for i, x := range r.Cats {
 		out[i] = make(CatJSON)
 		for j, y := range x {
+			min, _ := y.Min.Get().(int)
+			max, _ := y.Max.Get().(int)
 			out[i][j] = Line{
-				Value:   y.Value,
-				Default: y.Default,
-				Min:     y.Min,
-				Max:     y.Max,
+				Value:   y.Value.Get(),
+				Default: y.Default.Get(),
+				Min:     min,
+				Max:     max,
 				Usage:   y.Usage,
 			}
 		}

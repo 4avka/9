@@ -121,7 +121,8 @@ func File(name string, g ...RowGenerator) CatGenerator {
 			cc.Put = func(in interface{}) bool {
 				valid := cc.Validate(cc, in)
 				if valid {
-					cc.Value = cc.Value.Put(in)
+					// cc.Value =
+					cc.Value.Put(in)
 					return true
 				}
 				return false
@@ -148,7 +149,8 @@ func Dir(name string, g ...RowGenerator) CatGenerator {
 			cc.Put = func(in interface{}) bool {
 				valid := cc.Validate(cc, in)
 				if valid {
-					cc.Value = cc.Value.Put(in)
+					// cc.Value =
+					cc.Value.Put(in)
 					return true
 				}
 				return false
@@ -575,6 +577,8 @@ func Default(in interface{}) RowGenerator {
 			if ctx.Validate(ctx, I) {
 				ctx.Default.Put(I)
 			}
+		case nil:
+
 		default:
 			fmt.Println("type not found", ctx.Name, reflect.TypeOf(in))
 			return

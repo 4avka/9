@@ -11,6 +11,8 @@ import (
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
 
+var datadir *string
+
 func (app *App) Parse(args []string) int {
 	// parse commandline
 	cmd, tokens := app.ParseCLI(args)
@@ -18,31 +20,41 @@ func (app *App) Parse(args []string) int {
 		cmd = app.Commands["help"]
 	}
 	// get datadir from cli args if given
-	var datadir string
 	if dd, ok := tokens["datadir"]; ok {
-		datadir = dd.Value
-		*app.Config.DataDir = datadir
+		datadir = &dd.Value
+		pwd, _ := os.Getwd()
+		*datadir = filepath.Join(pwd, *datadir)
+		dd.Value = *datadir
+		fmt.Println("datadir set", dd.Value, datadir)
+		app.Cats["app"]["datadir"].Put(*datadir)
+		DataDir = *datadir
 	} else {
-		//= app.Cats.Str("app", "datadir")
-		*app.Config.DataDir = util.AppDataDir("9", false)
-		datadir = *app.Config.DataDir
-		DataDir = datadir
+		fmt.Println("datadir default")
+		ddd := util.AppDataDir("9", false)
+		app.Cats["app"]["datadir"].Put(ddd)
+		datadir = &ddd
+		DataDir = *datadir
 	}
 	// set AppDataDir for running as node
 	// fmt.Println("cmd.Name", cmd.Name)
-	aa := CleanAndExpandPath(filepath.Join(*app.Config.DataDir, cmd.Name))
+	aa := CleanAndExpandPath(filepath.Join(
+		*app.Config.DataDir, cmd.Name), *datadir)
 	app.Config.AppDataDir, app.Config.LogDir = &aa, &aa
 
-	*app.Config.RPCCert = CleanAndExpandPath(filepath.Join(datadir, *app.Config.RPCCert))
-	*app.Config.RPCKey = CleanAndExpandPath(filepath.Join(datadir, *app.Config.RPCKey))
-	*app.Config.CAFile = CleanAndExpandPath(filepath.Join(datadir, *app.Config.CAFile))
+	*app.Config.RPCCert = CleanAndExpandPath(filepath.Join(
+		*datadir, *app.Config.RPCCert), *datadir)
+	*app.Config.RPCKey = CleanAndExpandPath(filepath.Join(
+		*datadir, *app.Config.RPCKey), *datadir)
+	*app.Config.CAFile = CleanAndExpandPath(filepath.Join(
+		*datadir, *app.Config.CAFile), *datadir)
 
-	configFile := CleanAndExpandPath(filepath.Join(datadir, "config"))
+	configFile := CleanAndExpandPath(filepath.Join(
+		*datadir, "config"), *datadir)
 	*app.Config.ConfigFile = configFile
 	if !FileExists(configFile) {
-		fmt.Println("config file not found: creating new one at ", configFile)
+		// fmt.Println("config file not found: creating new one at ", configFile)
 		if EnsureDir(configFile) {
-			fmt.Println("created new directory to store data", datadir)
+			// fmt.Println("created new directory to store data", datadir)
 		}
 		fh, err := os.Create(configFile)
 		if err != nil {
@@ -68,7 +80,7 @@ func (app *App) Parse(args []string) int {
 		}
 	}
 	if app.Config.LogLevel != nil {
-		fmt.Println("setting debug level to", *app.Config.LogLevel)
+		// fmt.Println("setting debug level to", *app.Config.LogLevel)
 		cl.Register.SetAllLevels(*app.Config.LogLevel)
 	}
 	// run as configured
@@ -76,12 +88,12 @@ func (app *App) Parse(args []string) int {
 		args,
 		tokens,
 		app)
-	fmt.Println("finished parse", cmd.Name, cmd.Handler, r)
+	// fmt.Println("finished parse", cmd.Name, cmd.Handler, r)
 	return r
 }
 
 func (app *App) ParseCLI(args []string) (cmd *Command, tokens Tokens) {
-	fmt.Println("args", args)
+	// fmt.Println("args", args)
 	// cmds = make(Commands)
 	cmd = new(Command)
 	// collect set of items in commandline
@@ -107,8 +119,8 @@ func (app *App) ParseCLI(args []string) (cmd *Command, tokens Tokens) {
 			}
 		}
 	}
-	fmt.Println("tokens", tokens)
-	fmt.Println("commandsFound", commandsFound)
+	// fmt.Println("tokens", tokens)
+	// fmt.Println("commandsFound", commandsFound)
 	var withHandlersNames []string
 	withHandlers := make(Commands)
 	for i := range commandsFound {

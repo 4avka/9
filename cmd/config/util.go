@@ -42,7 +42,7 @@ func FileExists(filePath string) bool {
 }
 
 // CleanAndExpandPath expands environment variables and leading ~ in the passed path, cleans the result, and returns it.
-func CleanAndExpandPath(path string) string {
+func CleanAndExpandPath(path, datadir string) string {
 	// Expand initial ~ to OS specific home directory.
 	homeDir := filepath.Dir(util.AppDataDir("9", false))
 	if strings.HasPrefix(path, "~") {
@@ -50,10 +50,15 @@ func CleanAndExpandPath(path string) string {
 	}
 	// NOTE: The os.ExpandEnv doesn't work with Windows-style %VARIABLE%, but they variables can still be expanded via POSIX-style $VARIABLE.
 	path = filepath.Clean(os.ExpandEnv(path))
-	if !strings.HasPrefix(path, "/") && !strings.HasPrefix(path, "./") &&
-		!strings.HasPrefix(path, "\\") {
+	if strings.HasPrefix(path, "./") {
 		// explicitly prefix is this must be a relative path
-		path = filepath.Join(homeDir, path)
+		pwd, _ := os.Getwd()
+		path = filepath.Join(pwd, path)
+	} else if strings.HasPrefix(path, "/") || strings.HasPrefix(path, "\\") {
+	} else {
+		if path != datadir {
+			path = filepath.Join(datadir, path)
+		}
 	}
 	return path
 }

@@ -1,9 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"git.parallelcoin.io/dev/9/cmd/config"
 	"github.com/gdamore/tcell"
@@ -170,6 +174,26 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 		}
 		return event
 	})
+
+	saveConfig := func() {
+		configFile := config.CleanAndExpandPath(filepath.Join(
+			app.Cats["app"]["datadir"].Get().(string), "config"), "")
+		if config.EnsureDir(configFile) {
+		}
+		fh, err := os.Create(configFile)
+		if err != nil {
+			panic(err)
+		}
+		j, e := json.MarshalIndent(app, "", "\t")
+		if e != nil {
+			panic(e)
+		}
+		_, err = fmt.Fprint(fh, string(j))
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	var genPage func(cat, item string, active bool, app *config.App,
 		editoreventhandler func(event *tcell.EventKey) *tcell.EventKey, idx int) (out *tview.Flex)
 	genPage = func(cat, item string, active bool, app *config.App,
@@ -219,8 +243,10 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 		}
 
 		infoblock.SetText(infostring)
-		switch app.Cats[cat][item].Type {
+		itemtype := app.Cats[cat][item].Type
+		switch itemtype {
 		case "string", "int", "float", "duration", "port":
+
 			iteminput = tview.NewInputField()
 			iteminput.
 				SetFieldTextColor(darkness).
@@ -239,11 +265,23 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			iteminput.SetDoneFunc(func(key tcell.Key) {
 				if key == tcell.KeyEnter || key == tcell.KeyTab {
 					s := iteminput.GetText()
-					rw := app.Cats[cat][item]
-					if len(s) < 1 {
-						rw.Value.Put(nil)
+					rrr := app.Cats[cat][item]
+					rw := &rrr
+					if s == "" {
+						switch itemtype {
+						case "int":
+							rw.Value.Put(0)
+						case "float":
+							rw.Value.Put(0.0)
+						case "duration":
+							rw.Value.Put(0 * time.Second)
+						default:
+							rw.Value.Put(nil)
+						}
+						saveConfig()
 					} else {
-						if !rw.Validate(&rw, &s) {
+						isvalid := rw.Validate(rw, &s)
+						if !isvalid {
 							snackbar.SetBackgroundColor(tcell.ColorOrange)
 							snackbar.SetTextColor(tcell.ColorRed)
 							snackbar.SetText("input is not valid for this field")
@@ -252,7 +290,9 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 							out.AddItem(infoblock, 0, 1, false)
 							return
 						} else {
-							rw.Value.Put(s)
+							// rw.Validate(rw, s)
+							// rw.Value.Put(s)
+							saveConfig()
 							out.RemoveItem(snackbar)
 						}
 					}
@@ -260,8 +300,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 						RemoveItem(coverbox).
 						RemoveItem(activepage)
 					itemname = item
-					activepage = genPage(cat, itemname, false, app,
-						inputhandler, 0)
+					activepage = genPage(cat, itemname, false, app, inputhandler, 0)
 					menuflex.AddItem(activepage, 0, 1, true)
 					prelightTable(roottable)
 					activatedTable(catstable)
@@ -321,6 +360,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 
 				default:
 				}
+				saveConfig()
 			})
 			out.AddItem(toggle, 4, 0, true)
 		case "options":
@@ -353,6 +393,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 					RemoveItem(coverbox).
 					RemoveItem(activepage)
 				rw.Put(app.Cats[cat][item].Opts[y])
+				saveConfig()
 				itemname = item
 				activepage = genPage(cat, itemname, false, app, inputhandler, y)
 				menuflex.AddItem(activepage, 0, 1, true)
@@ -447,6 +488,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 							} else {
 								rw.Validate(rw, s)
 								rw.Value.Put(rwv)
+								saveConfig()
 								out.RemoveItem(snackbar)
 							}
 						}
@@ -551,8 +593,10 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 					// TODO: consolidate editor code from above with this
 					if x == 0 {
 						if ok {
+							// deleted := rwv[y]
 							rwv = append(rwv[:y], rwv[y+1:]...)
 							rw.Value.Put(rwv)
+							saveConfig()
 							menuflex.
 								RemoveItem(coverbox).
 								RemoveItem(activepage)
@@ -563,6 +607,8 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 							prelightTable(catstable)
 							activatedTable(cattable)
 							tapp.SetFocus(activepage)
+						} else {
+							// rw.Value.Put([]string{})
 						}
 					} else {
 						// pop up the item editor
@@ -776,6 +822,9 @@ func genMenu(items ...string) (table *tview.Table, menuwidth int) {
 
 // This sets a menu to active attributes
 func activateTable(table *tview.Table) {
+	if table == nil {
+		return
+	}
 	rowcount := table.GetRowCount()
 	for i := 0; i < rowcount; i++ {
 		table.GetCell(i, 0).
@@ -789,6 +838,9 @@ func activateTable(table *tview.Table) {
 
 // This sets a menu to activated (it has a selected item active)
 func activatedTable(table *tview.Table) {
+	if table == nil {
+		return
+	}
 	rowcount := table.GetRowCount()
 	for i := 0; i < rowcount; i++ {
 		table.GetCell(i, 0).
@@ -802,6 +854,9 @@ func activatedTable(table *tview.Table) {
 
 // This sets a menu to preview (when it is active but not selected yet)
 func prelightTable(table *tview.Table) {
+	if table == nil {
+		return
+	}
 	rowcount := table.GetRowCount()
 	for i := 0; i < rowcount; i++ {
 		table.GetCell(i, 0).
@@ -815,6 +870,9 @@ func prelightTable(table *tview.Table) {
 
 // This is just for the one case of the root table with the editor active
 func lastTable(table *tview.Table) {
+	if table == nil {
+		return
+	}
 	rowcount := table.GetRowCount()
 	for i := 0; i < rowcount; i++ {
 		table.GetCell(i, 0).
