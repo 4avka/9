@@ -111,6 +111,15 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 		case 3:
 		}
 	})
+	var resetbutton int
+	var toggleResetButton = func() int {
+		if resetbutton == 0 {
+			resetbutton = 1
+		} else {
+			resetbutton = 0
+		}
+		return resetbutton
+	}
 	var factoryResetFunc = func() {
 		confirm = tview.NewFlex()
 		confirm.SetDirection(tview.FlexRow)
@@ -127,14 +136,18 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 		resetform.SetButtonBackgroundColor(MainColor())
 		resetform.SetButtonTextColor(TextColor())
 		eventcap := func(event *tcell.EventKey) *tcell.EventKey {
-			switch {
-			case event.Key() == tcell.KeyRight:
-				tapp.SetFocus(resetform.GetButton(1))
-			case event.Key() == tcell.KeyLeft:
-				tapp.SetFocus(resetform.GetButton(0))
-			case event.Key() == tcell.KeyEsc:
-				menuflex.RemoveItem(confirm)
+			switch event.Key() {
+			case tcell.KeyTab:
+				tapp.SetFocus(resetform.GetButton(toggleResetButton()))
+			case tcell.KeyRight, tcell.KeyLeft:
+				tapp.SetFocus(resetform.GetButton(toggleResetButton()))
+			case tcell.KeyEsc:
+				resetform.Blur()
+				roottable.Select(3, 0)
 				tapp.SetFocus(roottable)
+				menuflex.RemoveItem(confirm)
+				menuflex.AddItem(coverbox, 0, 1, false)
+				return &tcell.EventKey{}
 			}
 			return event
 		}
@@ -152,7 +165,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			confirm.RemoveItem(resetform)
 			// resetform.RemoveButton(1)
 			tapp.ForceDraw()
-			time.Sleep(5 * time.Second / 2)
+			time.Sleep(time.Second)
 			menuflex.RemoveItem(confirm)
 			tapp.SetFocus(roottable)
 		})
@@ -195,7 +208,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			RemoveItem(cattable).
 			RemoveItem(coverbox)
 		switch event.Key() {
-		case tcell.KeyRight:
+		case tcell.KeyRight, tcell.KeyTab:
 			leftExitActive = false
 			y, _ := roottable.GetSelection()
 			switch y {
@@ -224,10 +237,9 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 				} else {
 					tapp.Stop()
 				}
+			} else {
+				roottable.Select(0, 0)
 			}
-		case 13:
-			// titlebar.SetText("enter")
-			// pressed enter
 		}
 		return event
 	})
@@ -258,16 +270,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 	})
 	launchtable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
-		case tcell.KeyLeft:
-			prelightTable(launchtable)
-			activateTable(roottable)
-			tapp.SetFocus(roottable)
-		case 13:
-			// titlebar.SetText("enter")
-			// pressed enter
-		case 27:
-			// titlebar.SetText("ESCAPE")
-			// pressed escape
+		case tcell.KeyLeft, tcell.KeyEsc:
 			prelightTable(launchtable)
 			activateTable(roottable)
 			coverbox.SetTextColor(PrelightColor()) // SetAttributes(tcell.AttrDim)
@@ -303,20 +306,17 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 
 	inputhandler = func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
-		case 13:
-			// pressed enter
-		case 27:
-			// pressed escape
+		case tcell.KeyEsc:
 			menuflex.
 				RemoveItem(coverbox).
 				RemoveItem(activepage)
-			// itemname = item
 			activepage = genPage(cat, itemname, false, app, inputhandler, 0)
 			menuflex.AddItem(activepage, 0, 1, true)
 			prelightTable(roottable)
 			activatedTable(catstable)
 			activateTable(cattable)
 			tapp.SetFocus(cattable)
+		default:
 		}
 		return event
 	}
@@ -924,26 +924,29 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 		})
 		cattable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 			switch event.Key() {
-			case tcell.KeyRight:
+			case tcell.KeyRight, tcell.KeyTab:
 				menuflex.
-					RemoveItem(coverbox).
-					RemoveItem(activepage)
-				var catkeys []string
-				curry, _ := cattable.GetSelection()
-				if curry == 0 {
+					RemoveItem(activepage).
+					RemoveItem(coverbox)
+				y, _ := cattable.GetSelection()
+				if y == 0 {
 					break
 				}
+				lastTable(roottable)
+				prelightTable(catstable)
+				activatedTable(cattable)
+				var catkeys []string
 				for _, x := range app.Cats[cat].GetSortedKeys() {
 					if !(cat == "app" && x == "datadir") {
 						catkeys = append(catkeys, x)
 					}
 				}
-				itemname = catkeys[curry-1]
-				activepage = genPage(cat, itemname, false, app, nil, y)
+				itemname = catkeys[y-1]
+				activepage = genPage(cat, itemname, true, app, inputhandler, 0)
 				menuflex.AddItem(activepage, 0, 1, true)
-			case 13:
-				// pressed enter
-			case 27:
+
+				tapp.SetFocus(activepage)
+			case tcell.KeyEsc, tcell.KeyLeft:
 				// pressed escape
 				menuflex.
 					RemoveItem(activepage).
@@ -951,8 +954,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 				activatedTable(roottable)
 				prelightTable(cattable)
 				activateTable(catstable)
-				menuflex.
-					AddItem(coverbox, 0, 1, true)
+				menuflex.AddItem(coverbox, 0, 1, true)
 				tapp.SetFocus(catstable)
 			}
 			return event
@@ -988,27 +990,34 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 	})
 	catstable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
-		case tcell.KeyLeft:
+		case tcell.KeyLeft, tcell.KeyEsc:
 			menuflex.
 				RemoveItem(coverbox).
 				RemoveItem(cattable).
 				RemoveItem(activepage)
 			itemname = ""
-			prelightTable(catstable)
-			activateTable(roottable)
 			coverbox.SetText("")
 			menuflex.
 				AddItem(coverbox, 0, 1, true)
-			tapp.SetFocus(roottable)
-		case 13:
-			// pressed enter
-		case 27:
-			// pressed escape
-			// itemname = ""
 			lastTable(cattable)
 			prelightTable(catstable)
 			activateTable(roottable)
 			tapp.SetFocus(roottable)
+		case tcell.KeyRight, tcell.KeyTab:
+			y, _ := catstable.GetSelection()
+			if y == 0 {
+				break
+			}
+			prelightTable(roottable)
+			activatedTable(catstable)
+			activateTable(cattable)
+			if !(cat == "" || itemname == "") {
+				activepage = genPage(cat, itemname, false, app, nil, y)
+				menuflex.RemoveItem(coverbox)
+				menuflex.AddItem(activepage, 0, 1, true)
+			}
+			tapp.SetFocus(
+				cattable)
 		}
 		return event
 	})
