@@ -86,7 +86,7 @@ func Help(args []string, tokens Tokens, cmds, all Commands) int {
 func Conf(args []string, tokens Tokens, cmds, all Commands) int {
 	var r int
 	for r = 2; r == 2; {
-		r = RunConf(args, tokens, cmds, all)
+		// r = RunConf(args, tokens, cmds, all)
 	}
 	return r
 }
