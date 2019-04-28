@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"git.parallelcoin.io/dev/tcell"
-	"git.parallelcoin.io/dev/tview"
+	"git.parallelcoin.io/dev/9/pkg/util/tcell"
+	"git.parallelcoin.io/dev/9/pkg/util/tview"
 )
 
 const menutitle = "ⓟ parallelcoin 9 configuration CLI"
