@@ -38,7 +38,7 @@ func BackgroundColor() tcell.Color {
 var iteminput *tview.InputField
 var toggle *tview.Table
 
-func Run(_ []string, _ Tokens, app *App) int {
+func Run(args []string, tokens Tokens, app *App) int {
 	var cattable *tview.Table
 	var cattablewidth int
 
@@ -274,12 +274,15 @@ func Run(_ []string, _ Tokens, app *App) int {
 		case 1:
 			tapp.Stop()
 			fmt.Println("starting up", launchmenutexts[y-1])
+			app.Commands[launchmenutexts[y-1]].Handler(args, tokens, app)
 		case 2:
 			tapp.Stop()
 			fmt.Println("starting up", launchmenutexts[y-1])
+			app.Commands[launchmenutexts[y-1]].Handler(args, tokens, app)
 		case 3:
 			tapp.Stop()
 			fmt.Println("starting up", launchmenutexts[y-1])
+			app.Commands[launchmenutexts[y-1]].Handler(args, tokens, app)
 		}
 	})
 	launchtable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {

@@ -233,10 +233,11 @@ func rpcClientConnectLoop(legacyRPCServer *legacyrpc.Server, loader *wallet.Load
 // there is no recovery in case the server is not available or if there is an
 // authentication error.  Instead, all requests to the client will simply error.
 func startChainRPC(certs []byte) (*chain.RPCClient, error) {
-	log <- cl.Infof{
-		"attempting RPC client connection to %v, TLS: %s",
-		*cfg.RPCConnect, fmt.Sprint(!*cfg.NoTLS),
-	}
+	// log <- cl.Infof{
+	// 	"attempting RPC client connection to %v, TLS: %s",
+	// 	*cfg.RPCConnect, fmt.Sprint(!*cfg.NoTLS),
+	// }
+	// spew.Dump(cfg)
 	rpcc, err := chain.NewRPCClient(ActiveNet.Params, *cfg.RPCConnect,
 		*cfg.Username, *cfg.Password, certs, !*cfg.NoTLS, 0)
 	if err != nil {

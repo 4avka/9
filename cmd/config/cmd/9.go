@@ -500,7 +500,7 @@ var NineApp = func() *App {
 				Usage("disable automatic opening of the wallet at startup"),
 			),
 			Tag("pass",
-				RandomString(32),
+				// RandomString(32),
 				Usage("password for the non-own transaction data in the wallet"),
 			),
 			Enable("enable",

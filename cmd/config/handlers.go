@@ -117,7 +117,7 @@ func List(args []string, tokens Tokens, app *App) int {
 
 func Ctl(args []string, tokens Tokens, app *App) int {
 	// spew.Dump(app.Cats["app"])
-	cl.Register.SetAllLevels(app.Cats["log"]["level"].Value.Get().(string))
+	cl.Register.SetAllLevels(*app.Config.LogLevel)
 	setAppDataDir(app, "ctl")
 	if j := validateProxyListeners(app); j != 0 {
 		return j
@@ -138,10 +138,10 @@ func Ctl(args []string, tokens Tokens, app *App) int {
 }
 
 func Node(args []string, tokens Tokens, app *App) int {
-	cl.Register.SetAllLevels(*app.Config.LogLevel)
-	setAppDataDir(app, "node")
 	node.StateCfg = app.Config.State
 	node.Cfg = app.Config
+	cl.Register.SetAllLevels(*app.Config.LogLevel)
+	setAppDataDir(app, "node")
 	_ = nine.ActiveNetParams //= activenetparams
 	if validateWhitelists(app) != 0 ||
 		validateProxyListeners(app) != 0 ||

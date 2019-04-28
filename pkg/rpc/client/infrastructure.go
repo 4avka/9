@@ -9,6 +9,7 @@ import (
 	js "encoding/json"
 	"errors"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"io"
 	"io/ioutil"
 	"math"
@@ -1038,24 +1039,16 @@ func (c *Client) Shutdown() {
 
 // start begins processing input and output messages.
 func (c *Client) start() {
-
 	log <- cl.Trace{"starting RPC client", c.config.Host}
-
 	// Start the I/O processing handlers depending on whether the client is in HTTP POST mode or the default websocket mode.
-
 	if c.config.HTTPPostMode {
-
 		c.wg.Add(1)
 		go c.sendPostHandler()
 	} else {
-
 		c.wg.Add(3)
 		go func() {
-
 			if c.ntfnHandlers != nil {
-
 				if c.ntfnHandlers.OnClientConnected != nil {
-
 					c.ntfnHandlers.OnClientConnected()
 				}
 			}
@@ -1208,23 +1201,16 @@ func dial(config *ConnConfig) (*websocket.Conn, error) {
 	wsConn, resp, err := dialer.Dial(url, requestHeader)
 
 	if err != nil {
-
 		if err != websocket.ErrBadHandshake || resp == nil {
-
 			return nil, err
 		}
 		// Detect HTTP authentication error status codes.
-
 		if resp.StatusCode == http.StatusUnauthorized ||
-
 			resp.StatusCode == http.StatusForbidden {
-
 			return nil, ErrInvalidAuth
 		}
 		// The connection was authenticated and the status response was ok, but the websocket handshake still failed, so the endpoint is invalid in some way.
-
 		if resp.StatusCode == http.StatusOK {
-
 			return nil, ErrInvalidEndpoint
 		}
 		// Return the status text from the server if none of the special cases above apply.
@@ -1324,6 +1310,7 @@ func (c *Client) Connect(tries int) error {
 	for i := 0; tries == 0 || i < tries; i++ {
 		log <- cl.Debug{"try", i}
 		var wsConn *websocket.Conn
+		spew.Dump(c.config)
 		wsConn, err = dial(c.config)
 		if err != nil {
 			log <- cl.Error{"dial error", err}

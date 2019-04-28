@@ -208,12 +208,17 @@ func startRPCServers(
 			}
 		}
 	}
-	if *cfg.Username == "" || *cfg.Password == "" {
+	if cfg.Username == nil || cfg.Password == nil {
 		log <- cl.Inf(
 			"legacy RPC server disabled (requires username and password)",
 		)
-	} else if len(*cfg.LegacyRPCListeners) != 0 {
-		listeners := makeListeners([]string{*cfg.WalletServer}, legacyListen)
+	} else if cfg.LegacyRPCListeners != nil {
+		fmt.Println(cfg.WalletServer)
+		wsrv := []string{}
+		if cfg.WalletServer != nil {
+			wsrv = append(wsrv, *cfg.WalletServer)
+		}
+		listeners := makeListeners(wsrv, legacyListen)
 		if len(listeners) == 0 {
 			err := errors.New("failed to create listeners for legacy RPC server")
 			return nil, nil, err

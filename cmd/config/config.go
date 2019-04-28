@@ -90,7 +90,7 @@ func MakeConfig(c *App) (out *nine.Config) {
 		Wallet:                   C.Bool("wallet", "enable"),
 		NoInitialLoad:            C.Bool("wallet", "noinitialload"),
 		WalletPass:               C.Str("wallet", "pass"),
-		WalletServer:             C.Str("rpc", "wallet"),
+		WalletServer:             C.Str("wallet", "server"),
 		CAFile:                   C.Str("tls", "cafile"),
 		OneTimeTLSKey:            C.Bool("tls", "onetime"),
 		ServerTLS:                C.Bool("tls", "server"),

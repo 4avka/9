@@ -2645,13 +2645,17 @@ func handleGetInfo(
 			Difficulty = dScrypt
 		default:
 		}
+		proxy := ""
+		if Cfg.Proxy != nil {
+			proxy = *Cfg.Proxy
+		}
 		ret = &json.InfoChainResult0{
 			Version:           int32(1000000*appMajor + 10000*appMinor + 100*appPatch),
 			ProtocolVersion:   int32(maxProtocolVersion),
 			Blocks:            best.Height,
 			TimeOffset:        int64(s.Cfg.TimeSource.Offset().Seconds()),
 			Connections:       s.Cfg.ConnMgr.ConnectedCount(),
-			Proxy:             *Cfg.Proxy,
+			Proxy:             proxy,
 			PowAlgoID:         fork.GetAlgoID(s.Cfg.Algo, height),
 			PowAlgo:           s.Cfg.Algo,
 			Difficulty:        Difficulty,
