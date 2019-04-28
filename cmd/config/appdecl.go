@@ -589,7 +589,7 @@ func Default(in interface{}) RowGenerator {
 			fmt.Println("type not found", ctx.Name, reflect.TypeOf(in))
 			return
 		}
-		// ctx.Value.Put(nil)
+		ctx.Value.Put(nil)
 	}
 }
 

@@ -39,7 +39,7 @@ func setAppDataDir(app *App, name string) {
 
 func validateWhitelists(app *App) int {
 	// Validate any given whitelisted IP addresses and networks.
-	if len(*app.Config.Whitelists) > 0 {
+	if app.Config.Whitelists != nil {
 		var ip net.IP
 
 		app.Config.State.ActiveWhitelists =
@@ -145,7 +145,8 @@ func validateBlockLimits(app *App) int {
 	// Validate the the minrelaytxfee.
 	// log <- cl.Debug{"checking min relay tx fee"}
 	var err error
-	app.Config.State.ActiveMinRelayTxFee, err = util.NewAmount(*app.Config.MinRelayTxFee)
+	app.Config.State.ActiveMinRelayTxFee, err =
+		util.NewAmount(*app.Config.MinRelayTxFee)
 	if err != nil {
 		str := "%s: invalid minrelaytxfee: %v"
 		err := fmt.Errorf(str, "runNode", err)
@@ -182,13 +183,15 @@ func validateBlockLimits(app *App) int {
 func validateUAComments(app *App) int {
 	// Look for illegal characters in the user agent comments.
 	// log <- cl.Debug{"checking user agent comments"}
-	for _, uaComment := range *app.Config.UserAgentComments {
-		if strings.ContainsAny(uaComment, "/:()") {
-			err := fmt.Errorf("%s: The following characters must not "+
-				"appear in user agent comments: '/', ':', '(', ')'",
-				"runNode")
-			fmt.Fprintln(os.Stderr, err)
-			return 1
+	if app.Config.UserAgentComments != nil {
+		for _, uaComment := range *app.Config.UserAgentComments {
+			if strings.ContainsAny(uaComment, "/:()") {
+				err := fmt.Errorf("%s: The following characters must not "+
+					"appear in user agent comments: '/', ':', '(', ')'",
+					"runNode")
+				fmt.Fprintln(os.Stderr, err)
+				return 1
+			}
 		}
 	}
 	return 0
@@ -197,34 +200,38 @@ func validateUAComments(app *App) int {
 func validateMiner(app *App) int {
 	// Check mining addresses are valid and saved parsed versions.
 	// log <- cl.Debug{"checking mining addresses"}
-	app.Config.State.ActiveMiningAddrs =
-		make([]util.Address, 0, len(*app.Config.MiningAddrs))
-	if len(*app.Config.MiningAddrs) > 0 {
-		for _, strAddr := range *app.Config.MiningAddrs {
-			if len(strAddr) > 1 {
-				addr, err := util.DecodeAddress(strAddr, app.Config.ActiveNetParams.Params)
-				if err != nil {
-					str := "%s: mining address '%s' failed to decode: %v"
-					err := fmt.Errorf(str, "runNode", strAddr, err)
-					fmt.Fprintln(os.Stderr, err)
-					return 1
+	if app.Config.MiningAddrs != nil {
+		app.Config.State.ActiveMiningAddrs =
+			make([]util.Address, 0, len(*app.Config.MiningAddrs))
+		if len(*app.Config.MiningAddrs) > 0 {
+			for _, strAddr := range *app.Config.MiningAddrs {
+				if len(strAddr) > 1 {
+					addr, err := util.DecodeAddress(strAddr, app.Config.ActiveNetParams.Params)
+					if err != nil {
+						str := "%s: mining address '%s' failed to decode: %v"
+						err := fmt.Errorf(str, "runNode", strAddr, err)
+						fmt.Fprintln(os.Stderr, err)
+						return 1
+					}
+					if !addr.IsForNet(app.Config.ActiveNetParams.Params) {
+						str := "%s: mining address '%s' is on the wrong network"
+						err := fmt.Errorf(str, "runNode", strAddr)
+						fmt.Fprintln(os.Stderr, err)
+						return 1
+					}
+					app.Config.State.ActiveMiningAddrs =
+						append(app.Config.State.ActiveMiningAddrs, addr)
+				} else {
+					*app.Config.MiningAddrs = []string{}
 				}
-				if !addr.IsForNet(app.Config.ActiveNetParams.Params) {
-					str := "%s: mining address '%s' is on the wrong network"
-					err := fmt.Errorf(str, "runNode", strAddr)
-					fmt.Fprintln(os.Stderr, err)
-					return 1
-				}
-				app.Config.State.ActiveMiningAddrs =
-					append(app.Config.State.ActiveMiningAddrs, addr)
-			} else {
-				*app.Config.MiningAddrs = []string{}
 			}
 		}
 	}
 	// Ensure there is at least one mining address when the generate flag
 	// is set.
-	if (*app.Config.Generate || len(*app.Config.MinerListener) > 1) && len(*app.Config.MiningAddrs) == 0 {
+	if (*app.Config.Generate ||
+		app.Config.MinerListener != nil) &&
+		app.Config.MiningAddrs != nil {
 		str := "%s: the generate flag is set, but there are no mining addresses specified "
 		err := fmt.Errorf(str, "runNode")
 		fmt.Fprintln(os.Stderr, err)
@@ -240,27 +247,28 @@ func validateCheckpoints(app *App) int {
 	var err error
 	// Check the checkpoints for syntax errors.
 	// log <- cl.Debug{"checking the checkpoints"}
-	app.Config.State.AddedCheckpoints, err =
-		node.ParseCheckpoints(*app.Config.AddCheckpoints)
-	if err != nil {
-		str := "%s: Error parsing checkpoints: %v"
-		err := fmt.Errorf(str, "runNode", err)
-		fmt.Fprintln(os.Stderr, err)
-		return 1
+	if app.Config.AddCheckpoints != nil {
+		app.Config.State.AddedCheckpoints, err =
+			node.ParseCheckpoints(*app.Config.AddCheckpoints)
+		if err != nil {
+			str := "%s: Error parsing checkpoints: %v"
+			err := fmt.Errorf(str, "runNode", err)
+			fmt.Fprintln(os.Stderr, err)
+			return 1
+		}
 	}
 	return 0
 }
 
 func validateDialers(app *App) int {
-	if !*app.Config.Onion && *app.Config.OnionProxy != "" {
-		// log <- cl.Error{"cannot enable tor proxy without an address specified"}
-		return 1
-	}
+	// if !*app.Config.Onion && *app.Config.OnionProxy != "" {
+	// 	// log <- cl.Error{"cannot enable tor proxy without an address specified"}
+	// 	return 1
+	// }
 
 	// Tor stream isolation requires either proxy or onion proxy to be set.
 	if *app.Config.TorIsolation &&
-		*app.Config.Proxy == "" &&
-		*app.Config.OnionProxy == "" {
+		app.Config.Proxy == nil {
 		str := "%s: Tor stream isolation requires either proxy or onionproxy to be set"
 		err := fmt.Errorf(str, "runNode")
 		fmt.Fprintln(os.Stderr, err)
@@ -270,7 +278,7 @@ func validateDialers(app *App) int {
 	// log <- cl.Debug{"setting network dialer and lookup"}
 	app.Config.State.Dial = net.DialTimeout
 	app.Config.State.Lookup = net.LookupIP
-	if *app.Config.Proxy != "" {
+	if app.Config.Proxy != nil {
 		fmt.Println("loading proxy")
 		// log <- cl.Debug{"we are loading a proxy!"}
 		_, _, err := net.SplitHostPort(*app.Config.Proxy)
@@ -280,12 +288,12 @@ func validateDialers(app *App) int {
 			fmt.Fprintln(os.Stderr, err)
 			return 1
 		}
-		// Tor isolation flag means proxy credentials will be overridden unless there is also an onion proxy configured in which case that one will be overridden.
+		// Tor isolation flag means proxy credentials will be overridden unless
+		// there is also an onion proxy configured in which case that one will be overridden.
 		torIsolation := false
 		if *app.Config.TorIsolation &&
-			*app.Config.OnionProxy == "" &&
-			(*app.Config.ProxyUser != "" ||
-				*app.Config.ProxyPass != "") {
+			(app.Config.ProxyUser != nil ||
+				app.Config.ProxyPass != nil) {
 			torIsolation = true
 			// log <- cl.Warn{
 			// "Tor isolation set -- overriding specified proxy user credentials"}
@@ -307,7 +315,7 @@ func validateDialers(app *App) int {
 	}
 	// Setup onion address dial function depending on the specified options. The default is to use the same dial function selected above.  However, when an onion-specific proxy is specified, the onion address dial function is set to use the onion-specific proxy while leaving the normal dial function as selected above.  This allows .onion address traffic to be routed through a different proxy than normal traffic.
 	// log <- cl.Debug{"setting up tor proxy if enabled"}
-	if *app.Config.OnionProxy != "" {
+	if app.Config.OnionProxy != nil {
 		_, _, err := net.SplitHostPort(*app.Config.OnionProxy)
 		if err != nil {
 			str := "%s: Onion proxy address '%s' is invalid: %v"
@@ -351,7 +359,7 @@ func validateDialers(app *App) int {
 
 func validateAddresses(app *App) int {
 	// TODO: simplify this to a boolean and one slice for config fercryinoutloud
-	if len(*app.Config.AddPeers) > 0 && len(*app.Config.ConnectPeers) > 0 {
+	if app.Config.AddPeers != nil && app.Config.ConnectPeers != nil {
 		fmt.Println("ERROR:", cl.Ine(),
 			"cannot have addpeers at the same time as connectpeers")
 		return 1
@@ -362,16 +370,22 @@ func validateAddresses(app *App) int {
 		node.NormalizeAddresses(*app.Config.RPCListeners,
 			app.Config.ActiveNetParams.RPCPort)
 	// Add default port to all listener addresses if needed and remove duplicate addresses.
-	*app.Config.Listeners =
-		node.NormalizeAddresses(*app.Config.Listeners,
-			app.Config.ActiveNetParams.DefaultPort)
+	if app.Config.Listeners != nil {
+		*app.Config.Listeners =
+			node.NormalizeAddresses(*app.Config.Listeners,
+				app.Config.ActiveNetParams.DefaultPort)
+	}
 	// Add default port to all added peer addresses if needed and remove duplicate addresses.
-	*app.Config.AddPeers =
-		node.NormalizeAddresses(*app.Config.AddPeers,
-			app.Config.ActiveNetParams.DefaultPort)
-	*app.Config.ConnectPeers =
-		node.NormalizeAddresses(*app.Config.ConnectPeers,
-			app.Config.ActiveNetParams.DefaultPort)
+	if app.Config.AddPeers != nil {
+		*app.Config.AddPeers =
+			node.NormalizeAddresses(*app.Config.AddPeers,
+				app.Config.ActiveNetParams.DefaultPort)
+	}
+	if app.Config.ConnectPeers != nil {
+		*app.Config.ConnectPeers =
+			node.NormalizeAddresses(*app.Config.ConnectPeers,
+				app.Config.ActiveNetParams.DefaultPort)
+	}
 	// --onionproxy and not --onion are contradictory (TODO: this is kinda stupid hm? switch *and* toggle by presence of flag value, one should be enough)
 	return 0
 }

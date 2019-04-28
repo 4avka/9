@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"git.parallelcoin.io/dev/9/cmd/node"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -234,18 +235,18 @@ func Net(s string) (o *Line) {
 					switch s {
 					case "testnet":
 						tn, sn, rn = true, false, false
-						// activenetparams = &node.TestNet3Params
+						activenetparams = &node.TestNet3Params
 						fork.IsTestnet = true
 					case "simnet":
 						tn, sn, rn = false, true, false
-						// activenetparams = &node.SimNetParams
+						activenetparams = &node.SimNetParams
 					case "regtestnet":
 						tn, sn, rn = false, false, true
-						// activenetparams = &node.RegressionNetParams
+						activenetparams = &node.RegressionNetParams
 					default:
 						s = "mainnet"
 						tn, sn, rn = false, false, false
-						// activenetparams = &node.MainNetParams
+						activenetparams = &node.MainNetParams
 					}
 					log <- cl.Info{"running on", s}
 					l.STRING(s)

@@ -2,6 +2,7 @@ package config
 
 import (
 	"git.parallelcoin.io/dev/9/cmd/nine"
+	"git.parallelcoin.io/dev/9/cmd/node"
 )
 
 func MakeConfig(c *App) (out *nine.Config) {
@@ -97,6 +98,7 @@ func MakeConfig(c *App) (out *nine.Config) {
 		LegacyRPCMaxClients:      C.Int("rpc", "maxclients"),
 		LegacyRPCMaxWebsockets:   C.Int("rpc", "maxwebsockets"),
 		ExperimentalRPCListeners: &[]string{},
+		State:                    node.StateCfg,
 	}
 	return
 }

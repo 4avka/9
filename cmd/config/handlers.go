@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"git.parallelcoin.io/dev/9/cmd/nine"
 	"sort"
 
 	"git.parallelcoin.io/dev/9/cmd/node"
@@ -139,6 +140,9 @@ func Ctl(args []string, tokens Tokens, app *App) int {
 func Node(args []string, tokens Tokens, app *App) int {
 	cl.Register.SetAllLevels(*app.Config.LogLevel)
 	setAppDataDir(app, "node")
+	node.StateCfg = app.Config.State
+	node.Cfg = app.Config
+	_ = nine.ActiveNetParams //= activenetparams
 	if validateWhitelists(app) != 0 ||
 		validateProxyListeners(app) != 0 ||
 		validatePasswords(app) != 0 ||
@@ -152,9 +156,6 @@ func Node(args []string, tokens Tokens, app *App) int {
 		return 1
 	}
 	// run the node!
-	node.StateCfg = app.Config.State
-	node.Cfg = app.Config
-	// nine.ActiveNetParams = activenetparams
 	if node.Main(nil) != nil {
 		return 1
 	}

@@ -51,7 +51,7 @@ func Main(serverChan chan<- *server) (err error) {
 		}()
 	}
 	// Write cpu profile if requested.
-	if *Cfg.CPUProfile != "" {
+	if Cfg.CPUProfile != nil {
 		var f *os.File
 		f, err = os.Create(*Cfg.CPUProfile)
 		if err != nil {

@@ -2269,7 +2269,7 @@ func initListeners(
 		listeners = append(listeners, listener)
 	}
 	var nat NAT
-	if len(*Cfg.ExternalIPs) != 0 {
+	if Cfg.ExternalIPs != nil {
 		defaultPort, err := strconv.ParseUint(ActiveNetParams.DefaultPort, 10, 16)
 		if err != nil {
 			log <- cl.Errorf{"can not parse default port %s for active chain: %v",
@@ -2379,6 +2379,14 @@ func mergeCheckpoints(
 // newPeerConfig returns the configuration for the given serverPeer.
 func newPeerConfig(
 	sp *serverPeer) *peer.Config {
+	proxyaddress := new(string)
+	if Cfg.Proxy != nil {
+		*proxyaddress = *Cfg.Proxy
+	}
+	useragentcomments := new([]string)
+	if Cfg.UserAgentComments != nil {
+		*useragentcomments = *Cfg.UserAgentComments
+	}
 	return &peer.Config{
 		Listeners: peer.MessageListeners{
 			OnVersion:      sp.OnVersion,
@@ -2406,10 +2414,10 @@ func newPeerConfig(
 		},
 		NewestBlock:       sp.newestBlock,
 		HostToNetAddress:  sp.server.addrManager.HostToNetAddress,
-		Proxy:             *Cfg.Proxy,
+		Proxy:             *proxyaddress,
 		UserAgentName:     userAgentName,
 		UserAgentVersion:  userAgentVersion,
-		UserAgentComments: *Cfg.UserAgentComments,
+		UserAgentComments: *useragentcomments,
 		ChainParams:       sp.server.chainParams,
 		Services:          sp.server.services,
 		DisableRelayTx:    *Cfg.BlocksOnly,
@@ -2642,7 +2650,7 @@ func newServer(
 		discovered peers in order to prevent it from becoming a public test
 		network. */
 	var newAddressFunc func() (net.Addr, error)
-	if !*Cfg.SimNet && len(*Cfg.ConnectPeers) == 0 {
+	if !*Cfg.SimNet && Cfg.ConnectPeers == nil {
 		newAddressFunc = func() (net.Addr, error) {
 			for tries := 0; tries < 100; tries++ {
 				addr := s.addrManager.GetAddress()
@@ -2696,21 +2704,23 @@ func newServer(
 	}
 	s.connManager = cmgr
 	// Start up persistent peers.
-	permanentPeers := *Cfg.ConnectPeers
-	if len(permanentPeers) == 0 {
-		permanentPeers = *Cfg.AddPeers
-	}
-	for _, addr := range permanentPeers {
-		netAddr, err := addrStringToNetAddr(addr)
-		if err != nil {
-			return nil, err
+	if Cfg.ConnectPeers != nil {
+		permanentPeers := *Cfg.ConnectPeers
+		if len(permanentPeers) == 0 {
+			permanentPeers = *Cfg.AddPeers
 		}
-		go s.connManager.Connect(
-			&connmgr.ConnReq{
-				Addr:      netAddr,
-				Permanent: true,
-			},
-		)
+		for _, addr := range permanentPeers {
+			netAddr, err := addrStringToNetAddr(addr)
+			if err != nil {
+				return nil, err
+			}
+			go s.connManager.Connect(
+				&connmgr.ConnReq{
+					Addr:      netAddr,
+					Permanent: true,
+				},
+			)
+		}
 	}
 	if !*Cfg.DisableRPC {
 		/*	Setup listeners for the configured RPC listen addresses and

@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"git.parallelcoin.io/dev/9/cmd/node"
 	"git.parallelcoin.io/dev/9/pkg/util"
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 	"io/ioutil"
@@ -78,6 +79,8 @@ func (app *App) Parse(args []string) int {
 	}
 	// app.Config = MakeConfig(app)
 	app.Config = MakeConfig(app)
+	app.Config.ActiveNetParams = node.ActiveNetParams
+	fmt.Println(app.Config.ActiveNetParams)
 	// now we can initialise the App
 	for i, x := range app.Cats {
 		for j := range x {
