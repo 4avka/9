@@ -2,6 +2,10 @@ cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMT
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 ekyu.moe/cryptonight v0.3.0 h1:Ur4LA+koVyo52/G7GF/5QKyVcloXkIQWjsw0vNvSKEA=
 ekyu.moe/cryptonight v0.3.0/go.mod h1:ZSoDow0HyP4oPny5lywoY1Szuo4eH+fpZn7J5YRCVBc=
+git.parallelcoin.io/dev/tcell v1.0.0 h1:8r8axp6rJ/JvH0PvUIimA6dwzm1GWyzB7dZbfNIx0WI=
+git.parallelcoin.io/dev/tcell v1.0.0/go.mod h1:UxYIGUR0RchipfkUdcHMugAxSZMOQPQxqCtKlHud20A=
+git.parallelcoin.io/dev/tview v0.0.0-20190406182340-90b4da1bd64c h1:QnY+MHB7E6NsYo7NjM9pTQ1McaFbwgldFH0bl6jKI4s=
+git.parallelcoin.io/dev/tview v0.0.0-20190406182340-90b4da1bd64c/go.mod h1:zPtVGldo7bzygpNZFRZmh55aM3gtFY2qe5dUVhI2AAk=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/DataDog/zstd v1.4.0 h1:vhoV+DUHnRZdKW1i5UMjAk2G4JY8wN4ayRfYDNdEhwo=
 github.com/DataDog/zstd v1.4.0/go.mod h1:1jcaCB/ufaK+sKp1NBhlGmpz41jOoPQ35bpF36t7BBo=

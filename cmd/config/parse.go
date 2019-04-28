@@ -7,15 +7,12 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-
-	"git.parallelcoin.io/dev/9/pkg/util/cl"
+	// "git.parallelcoin.io/dev/9/pkg/util/cl"
 )
 
 var datadir *string = new(string)
 
 func (app *App) Parse(args []string) int {
-	app.Config = MakeConfig(app)
-
 	// parse commandline
 	cmd, tokens := app.ParseCLI(args)
 	if cmd == nil {
@@ -27,11 +24,9 @@ func (app *App) Parse(args []string) int {
 		pwd, _ := os.Getwd()
 		*datadir = filepath.Join(pwd, *datadir)
 		dd.Value = *datadir
-		// fmt.Println("datadir set", dd.Value, datadir)
 		app.Cats["app"]["datadir"].Value.Put(*datadir)
 		DataDir = *datadir
 	} else {
-		// fmt.Println("datadir default")
 		ddd := util.AppDataDir("9", false)
 		app.Cats["app"]["datadir"].Put(ddd)
 		datadir = &ddd
@@ -50,21 +45,19 @@ func (app *App) Parse(args []string) int {
 			app.Cats[i][j].Init(app.Cats[i][j])
 		}
 	}
-	// set AppDataDir for running as node
-	// fmt.Println("cmd.Name", cmd.Name)
-	aa := CleanAndExpandPath(filepath.Join(
-		*datadir,
-		cmd.Name),
-		*datadir)
-	app.Config.AppDataDir, app.Config.LogDir = &aa, &aa
+	// app.Config = MakeConfig(app)
+	// // set AppDataDir for running as node
+	// aa := CleanAndExpandPath(filepath.Join(
+	// 	*datadir,
+	// 	cmd.Name),
+	// 	*datadir)
+	// app.Config.AppDataDir, app.Config.LogDir = &aa, &aa
 
 	configFile := CleanAndExpandPath(filepath.Join(
 		*datadir, "config"), *datadir)
-	*app.Config.ConfigFile = configFile
+	// *app.Config.ConfigFile = configFile
 	if !FileExists(configFile) {
-		// fmt.Println("config file not found: creating new one at ", configFile)
 		if EnsureDir(configFile) {
-			// fmt.Println("created new directory to store data", datadir)
 		}
 		fh, err := os.Create(configFile)
 		if err != nil {
@@ -79,35 +72,27 @@ func (app *App) Parse(args []string) int {
 			panic(err)
 		}
 	}
-	// fmt.Println("reading config", configFile)
 	conf, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		panic(err)
 	}
-	// fmt.Println("unmarshalling config")
 	e := json.Unmarshal(conf, app)
 	if e != nil {
 		panic(e)
 	}
-	// app.Config = MakeConfig(app)
-	// spew.Dump(app)
 
-	if app.Config.LogLevel != nil {
-		// fmt.Println("setting debug level to", *app.Config.LogLevel)
-		cl.Register.SetAllLevels(*app.Config.LogLevel)
-	}
+	// if app.Config.LogLevel != nil {
+	// 	cl.Register.SetAllLevels(*app.Config.LogLevel)
+	// }
 	// run as configured
 	r := cmd.Handler(
 		args,
 		tokens,
 		app)
-	// fmt.Println("finished parse", cmd.Name, cmd.Handler, r)
 	return r
 }
 
 func (app *App) ParseCLI(args []string) (cmd *Command, tokens Tokens) {
-	// fmt.Println("args", args)
-	// cmds = make(Commands)
 	cmd = new(Command)
 	// collect set of items in commandline
 	if len(args) < 2 {
@@ -120,7 +105,6 @@ func (app *App) ParseCLI(args []string) (cmd *Command, tokens Tokens) {
 		for i, y := range app.Commands {
 			if y.RE.MatchString(x) {
 				if _, ok := commandsFound[i]; ok {
-					// TODO change token to struct{val,command}
 					tokens[i] = Token{x, *y}
 					commandsFound[i]++
 					break
@@ -132,8 +116,6 @@ func (app *App) ParseCLI(args []string) (cmd *Command, tokens Tokens) {
 			}
 		}
 	}
-	// fmt.Println("tokens", tokens)
-	// fmt.Println("commandsFound", commandsFound)
 	var withHandlersNames []string
 	withHandlers := make(Commands)
 	for i := range commandsFound {
@@ -164,8 +146,8 @@ func (app *App) ParseCLI(args []string) (cmd *Command, tokens Tokens) {
 				}
 			}
 		}
+		resolved = uniq(resolved)
 		if len(resolved) > 1 {
-			resolved = uniq(resolved)
 			withHandlers = make(Commands)
 			common = [][]string{}
 			withHandlersNames = resolved
@@ -189,6 +171,7 @@ func (app *App) ParseCLI(args []string) (cmd *Command, tokens Tokens) {
 	} else if len(withHandlersNames) == 1 {
 		resolved = []string{withHandlersNames[0]}
 	}
+	fmt.Println(resolved)
 	if len(resolved) < 1 {
 		err := fmt.Errorf(
 			"\nunable to resolve which command to run:\n\tinput: '%s'",

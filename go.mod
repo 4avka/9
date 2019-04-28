@@ -4,6 +4,8 @@ go 1.12
 
 require (
 	ekyu.moe/cryptonight v0.3.0
+	git.parallelcoin.io/dev/tcell v1.0.0
+	git.parallelcoin.io/dev/tview v0.0.0-20190406182340-90b4da1bd64c
 	github.com/DataDog/zstd v1.4.0 // indirect
 	github.com/aead/siphash v1.0.1
 	github.com/aead/skein v0.0.0-20160722084837-9365ae6e95d2

@@ -19,7 +19,7 @@ import (
 func newHTTPClient(cfg *nine.Config) (*http.Client, error) {
 	// Configure proxy if needed.
 	var dial func(network, addr string) (net.Conn, error)
-	if *cfg.Proxy != "" {
+	if cfg.Proxy != nil {
 		proxy := &socks.Proxy{
 			Addr:     *cfg.Proxy,
 			Username: *cfg.ProxyUser,

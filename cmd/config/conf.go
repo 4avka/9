@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"encoding/json"
@@ -9,9 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"git.parallelcoin.io/dev/9/cmd/config"
-	"github.com/gdamore/tcell"
-	"github.com/rivo/tview"
+	"git.parallelcoin.io/dev/tcell"
+	"git.parallelcoin.io/dev/tview"
 )
 
 const menutitle = "ⓟ parallelcoin 9 configuration CLI"
@@ -39,7 +38,7 @@ func BackgroundColor() tcell.Color {
 var iteminput *tview.InputField
 var toggle *tview.Table
 
-func Run(_ []string, _ config.Tokens, app *config.App) int {
+func Run(_ []string, _ Tokens, app *App) int {
 	var cattable *tview.Table
 	var cattablewidth int
 
@@ -296,9 +295,9 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 	saveConfig := func() {
 		ddir, ok := app.Cats["app"]["datadir"].Get().(string)
 		if ok {
-			configFile := config.CleanAndExpandPath(filepath.Join(
+			configFile := CleanAndExpandPath(filepath.Join(
 				ddir, "config"), "")
-			if config.EnsureDir(configFile) {
+			if EnsureDir(configFile) {
 			}
 			fh, err := os.Create(configFile)
 			if err != nil {
@@ -315,7 +314,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 		}
 	}
 
-	var genPage func(cat, item string, active bool, app *config.App,
+	var genPage func(cat, item string, active bool, app *App,
 		editoreventhandler func(event *tcell.EventKey) *tcell.EventKey, idx int) (out *tview.Flex)
 
 	inputhandler = func(event *tcell.EventKey) *tcell.EventKey {
@@ -335,7 +334,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 		return event
 	}
 
-	genPage = func(cat, item string, active bool, app *config.App,
+	genPage = func(cat, item string, active bool, app *App,
 		editoreventhandler func(event *tcell.EventKey) *tcell.EventKey, idx int) (out *tview.Flex) {
 		currow := app.Cats[cat][item]
 		var darkness, lightness tcell.Color
@@ -437,8 +436,8 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 					iteminput.SetText(strings.TrimSpace(outstring))
 				}
 			}
-			var canceller func(rw *config.Row) func(event *tcell.EventKey) *tcell.EventKey
-			canceller = func(rw *config.Row) func(event *tcell.EventKey) *tcell.EventKey {
+			var canceller func(rw *Row) func(event *tcell.EventKey) *tcell.EventKey
+			canceller = func(rw *Row) func(event *tcell.EventKey) *tcell.EventKey {
 				return func(event *tcell.EventKey) *tcell.EventKey {
 					switch {
 					case event.Key() == tcell.KeyCtrlU:

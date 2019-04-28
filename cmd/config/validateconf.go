@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"errors"
@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"git.parallelcoin.io/dev/9/cmd/config"
 	"git.parallelcoin.io/dev/9/cmd/node"
 	blockchain "git.parallelcoin.io/dev/9/pkg/chain"
 	"git.parallelcoin.io/dev/9/pkg/chain/fork"
@@ -19,24 +18,26 @@ import (
 	"github.com/btcsuite/go-socks/socks"
 )
 
-func setAppDataDir(app *config.App, name string) {
+func setAppDataDir(app *App, name string) {
 	if app != nil {
 		if app.Config != nil {
 			if app.Config.AppDataDir == nil {
+				app.Config.AppDataDir = new(string)
 				// set AppDataDir for running as node
 				*app.Config.AppDataDir =
-					config.CleanAndExpandPath(
+					CleanAndExpandPath(
 						filepath.Join(*app.Config.DataDir, name),
 						*app.Config.DataDir)
 			}
 			if app.Config.LogDir == nil {
+				app.Config.LogDir = new(string)
 				*app.Config.LogDir = *app.Config.AppDataDir
 			}
 		}
 	}
 }
 
-func validateWhitelists(app *config.App) int {
+func validateWhitelists(app *App) int {
 	// Validate any given whitelisted IP addresses and networks.
 	if len(*app.Config.Whitelists) > 0 {
 		var ip net.IP
@@ -72,7 +73,7 @@ func validateWhitelists(app *config.App) int {
 	return 0
 }
 
-func validateProxyListeners(app *config.App) int {
+func validateProxyListeners(app *App) int {
 	// if proxy is not enabled, empty the proxy field as node sees presence as a
 	// on switch
 	if app.Config.Proxy != nil {
@@ -80,9 +81,15 @@ func validateProxyListeners(app *config.App) int {
 	}
 	// if proxy is enabled or listeners list is empty, or connect peers are set,
 	// disable p2p listener
-	if app.Config.Proxy != nil || len(*app.Config.ConnectPeers) > 0 ||
-		len(*app.Config.Listeners) < 1 {
-		*app.Config.DisableListen = true
+	if app.Config.Proxy != nil ||
+		app.Config.ConnectPeers != nil ||
+		app.Config.Listeners == nil {
+		if app.Config.DisableListen == nil {
+			acd := true
+			app.Config.DisableListen = &acd
+		} else {
+			*app.Config.DisableListen = true
+		}
 	}
 	if !*app.Config.DisableListen && len(*app.Config.Listeners) < 1 {
 		*app.Config.Listeners = []string{
@@ -92,7 +99,7 @@ func validateProxyListeners(app *config.App) int {
 	return 0
 }
 
-func validatePasswords(app *config.App) int {
+func validatePasswords(app *App) int {
 
 	// Check to make sure limited and admin users don't have the same username
 	if *app.Config.Username != "" && *app.Config.Username == *app.Config.LimitUser {
@@ -112,7 +119,7 @@ func validatePasswords(app *config.App) int {
 	return 0
 }
 
-func validateRPCCredentials(app *config.App) int {
+func validateRPCCredentials(app *App) int {
 	// The RPC server is disabled if no username or password is provided.
 	if (*app.Config.Username == "" || *app.Config.Password == "") &&
 		(*app.Config.LimitUser == "" || *app.Config.LimitPass == "") {
@@ -134,7 +141,7 @@ func validateRPCCredentials(app *config.App) int {
 	return 0
 }
 
-func validateBlockLimits(app *config.App) int {
+func validateBlockLimits(app *App) int {
 	// Validate the the minrelaytxfee.
 	// log <- cl.Debug{"checking min relay tx fee"}
 	var err error
@@ -146,13 +153,13 @@ func validateBlockLimits(app *config.App) int {
 		return 1
 	}
 	// Limit the block priority and minimum block sizes to max block size.
-	*app.Config.BlockPrioritySize = int(config.MinUint32(
+	*app.Config.BlockPrioritySize = int(MinUint32(
 		uint32(*app.Config.BlockPrioritySize),
 		uint32(*app.Config.BlockMaxSize)))
-	*app.Config.BlockMinSize = int(config.MinUint32(
+	*app.Config.BlockMinSize = int(MinUint32(
 		uint32(*app.Config.BlockMinSize),
 		uint32(*app.Config.BlockMaxSize)))
-	*app.Config.BlockMinWeight = int(config.MinUint32(
+	*app.Config.BlockMinWeight = int(MinUint32(
 		uint32(*app.Config.BlockMinWeight),
 		uint32(*app.Config.BlockMaxWeight)))
 	switch {
@@ -172,7 +179,7 @@ func validateBlockLimits(app *config.App) int {
 	return 0
 }
 
-func validateUAComments(app *config.App) int {
+func validateUAComments(app *App) int {
 	// Look for illegal characters in the user agent comments.
 	// log <- cl.Debug{"checking user agent comments"}
 	for _, uaComment := range *app.Config.UserAgentComments {
@@ -187,7 +194,7 @@ func validateUAComments(app *config.App) int {
 	return 0
 }
 
-func validateMiner(app *config.App) int {
+func validateMiner(app *App) int {
 	// Check mining addresses are valid and saved parsed versions.
 	// log <- cl.Debug{"checking mining addresses"}
 	app.Config.State.ActiveMiningAddrs =
@@ -229,7 +236,7 @@ func validateMiner(app *config.App) int {
 	return 0
 }
 
-func validateCheckpoints(app *config.App) int {
+func validateCheckpoints(app *App) int {
 	var err error
 	// Check the checkpoints for syntax errors.
 	// log <- cl.Debug{"checking the checkpoints"}
@@ -244,7 +251,7 @@ func validateCheckpoints(app *config.App) int {
 	return 0
 }
 
-func validateDialers(app *config.App) int {
+func validateDialers(app *App) int {
 	if !*app.Config.Onion && *app.Config.OnionProxy != "" {
 		// log <- cl.Error{"cannot enable tor proxy without an address specified"}
 		return 1
@@ -342,7 +349,7 @@ func validateDialers(app *config.App) int {
 	return 0
 }
 
-func validateAddresses(app *config.App) int {
+func validateAddresses(app *App) int {
 	// TODO: simplify this to a boolean and one slice for config fercryinoutloud
 	if len(*app.Config.AddPeers) > 0 && len(*app.Config.ConnectPeers) > 0 {
 		fmt.Println("ERROR:", cl.Ine(),

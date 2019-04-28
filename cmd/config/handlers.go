@@ -1,10 +1,9 @@
-package main
+package config
 
 import (
 	"fmt"
 	"sort"
 
-	"git.parallelcoin.io/dev/9/cmd/config"
 	"git.parallelcoin.io/dev/9/cmd/node"
 	"git.parallelcoin.io/dev/9/cmd/walletmain"
 
@@ -28,7 +27,7 @@ func optTagList(s []string) (ss string) {
 	return
 }
 
-func getCommands(cmds config.Commands) (s []string) {
+func getCommands(cmds Commands) (s []string) {
 	for i := range cmds {
 		s = append(s, i)
 	}
@@ -36,7 +35,7 @@ func getCommands(cmds config.Commands) (s []string) {
 	return
 }
 
-func getTokens(cmds config.Tokens) (s []string) {
+func getTokens(cmds Tokens) (s []string) {
 	for _, x := range cmds {
 		s = append(s, x.Value)
 	}
@@ -44,7 +43,7 @@ func getTokens(cmds config.Tokens) (s []string) {
 	return
 }
 
-func Help(args []string, tokens config.Tokens, app *config.App) int {
+func Help(args []string, tokens Tokens, app *App) int {
 	fmt.Println(app.Name, app.Version(), "-", app.Tagline)
 	fmt.Println()
 	fmt.Println("help with", app.Name)
@@ -86,26 +85,25 @@ func Help(args []string, tokens config.Tokens, app *config.App) int {
 	return 0
 }
 
-func Conf(args []string, tokens config.Tokens, app *config.App) int {
+func Conf(args []string, tokens Tokens, app *App) int {
 	var r int
 	for r = 2; r == 2; {
-		// r = RunConf(args, tokens, app)
 		r = Run(args, tokens, app)
 	}
 	return r
 }
 
-func New(args []string, tokens config.Tokens, app *config.App) int {
+func New(args []string, tokens Tokens, app *App) int {
 	fmt.Println("running New", args, getTokens(tokens))
 	return 0
 }
 
-func Copy(args []string, tokens config.Tokens, app *config.App) int {
+func Copy(args []string, tokens Tokens, app *App) int {
 	fmt.Println("running Copy", args, getTokens(tokens))
 	return 0
 }
 
-func List(args []string, tokens config.Tokens, app *config.App) int {
+func List(args []string, tokens Tokens, app *App) int {
 	if j := validateProxyListeners(app); j != 0 {
 		return j
 	}
@@ -116,8 +114,9 @@ func List(args []string, tokens config.Tokens, app *config.App) int {
 	return 0
 }
 
-func Ctl(args []string, tokens config.Tokens, app *config.App) int {
-	cl.Register.SetAllLevels(*app.Config.LogLevel)
+func Ctl(args []string, tokens Tokens, app *App) int {
+	app.Config = MakeConfig(app)
+	cl.Register.SetAllLevels(app.Cats["log"]["level"].Value.Get().(string))
 	setAppDataDir(app, "ctl")
 	if j := validateProxyListeners(app); j != 0 {
 		return j
@@ -137,7 +136,7 @@ func Ctl(args []string, tokens config.Tokens, app *config.App) int {
 	return 0
 }
 
-func Node(args []string, tokens config.Tokens, app *config.App) int {
+func Node(args []string, tokens Tokens, app *App) int {
 	cl.Register.SetAllLevels(*app.Config.LogLevel)
 	setAppDataDir(app, "node")
 	if validateWhitelists(app) != 0 ||
@@ -162,8 +161,7 @@ func Node(args []string, tokens config.Tokens, app *config.App) int {
 	return 0
 }
 
-func Wallet(args []string, tokens config.Tokens, app *config.App) int {
-	// spew.Dump(*config)
+func Wallet(args []string, tokens Tokens, app *App) int {
 	cl.Register.SetAllLevels(*app.Config.LogLevel)
 	setAppDataDir(app, "wallet")
 	walletmain.CreateWallet(app.Config, app.Config.ActiveNetParams)
@@ -171,20 +169,38 @@ func Wallet(args []string, tokens config.Tokens, app *config.App) int {
 	return 0
 }
 
-func Shell(args []string, tokens config.Tokens, app *config.App) int {
+func Shell(args []string, tokens Tokens, app *App) int {
 	cl.Register.SetAllLevels(*app.Config.LogLevel)
 	fmt.Println("running Shell", args, getTokens(tokens))
 	return 0
 }
 
-func Test(args []string, tokens config.Tokens, app *config.App) int {
+func Test(args []string, tokens Tokens, app *App) int {
 	cl.Register.SetAllLevels(*app.Config.LogLevel)
 	fmt.Println("running Test", args, getTokens(tokens))
 	return 0
 }
 
-func Create(args []string, tokens config.Tokens, app *config.App) int {
+func Create(args []string, tokens Tokens, app *App) int {
 	cl.Register.SetAllLevels(*app.Config.LogLevel)
 	fmt.Println("running Create", args, getTokens(tokens))
+	return 0
+}
+
+func TestHandler(args []string, tokens Tokens, app *App) int {
+	return 0
+}
+
+func GUI(args []string, tokens Tokens, app *App) int {
+	return 0
+}
+
+func Mine(args []string, tokens Tokens, app *App) int {
+	return 0
+}
+func GenCerts(args []string, tokens Tokens, app *App) int {
+	return 0
+}
+func GenCA(args []string, tokens Tokens, app *App) int {
 	return 0
 }
