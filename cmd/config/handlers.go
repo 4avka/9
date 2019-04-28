@@ -115,7 +115,7 @@ func List(args []string, tokens Tokens, app *App) int {
 }
 
 func Ctl(args []string, tokens Tokens, app *App) int {
-	app.Config = MakeConfig(app)
+	// spew.Dump(app.Cats["app"])
 	cl.Register.SetAllLevels(app.Cats["log"]["level"].Value.Get().(string))
 	setAppDataDir(app, "ctl")
 	if j := validateProxyListeners(app); j != 0 {

@@ -71,7 +71,7 @@ func GenAddr(name string, port int) func(r *Row, in interface{}) bool {
 			}
 		}
 		if r != nil {
-			r.Value = r.Value.Put(*s)
+			r.Value.Put(*s)
 			r.String = *s
 			r.App.SaveConfig()
 		}
@@ -142,7 +142,7 @@ func GenAddrs(name string, port int) func(r *Row, in interface{}) bool {
 				existing = append(existing, i)
 			}
 			sort.Strings(existing)
-			r.Value = r.Value.Put(existing)
+			r.Value.Put(existing)
 			r.String = fmt.Sprint(existing)
 			r.App.SaveConfig()
 		}
@@ -168,10 +168,6 @@ var Valid = struct {
 	Level func(*Row, interface{}) bool
 }{
 	File: func(r *Row, in interface{}) bool {
-		if datadir == nil {
-			ddb := ""
-			datadir = &ddb
-		}
 		var s *string
 		switch I := in.(type) {
 		case string:
@@ -198,10 +194,6 @@ var Valid = struct {
 		return false
 	},
 	Dir: func(r *Row, in interface{}) bool {
-		if datadir == nil {
-			ddb := ""
-			datadir = &ddb
-		}
 		var s *string
 		switch I := in.(type) {
 		case string:
@@ -256,7 +248,7 @@ var Valid = struct {
 			return false
 		}
 		if r != nil {
-			r.Value = r.Value.Put(ii)
+			r.Value.Put(ii)
 			r.String = fmt.Sprint(ii)
 			r.App.SaveConfig()
 		}
@@ -296,7 +288,7 @@ var Valid = struct {
 	boolout:
 		if r != nil {
 			r.String = fmt.Sprint(b)
-			r.Value = r.Value.Put(b)
+			r.Value.Put(b)
 			r.App.SaveConfig()
 		}
 		return true
@@ -328,7 +320,8 @@ var Valid = struct {
 		}
 		if r != nil {
 			r.String = fmt.Sprint(ii)
-			r.Value = r.Value.Put(ii)
+			//r.Value =
+			r.Value.Put(ii)
 			r.App.SaveConfig()
 		}
 		return true
@@ -348,7 +341,7 @@ var Valid = struct {
 			return false
 		}
 		if r != nil {
-			r.Value = r.Value.Put(s)
+			r.Value.Put(s)
 			r.String = fmt.Sprint(s)
 			r.App.SaveConfig()
 		}
@@ -396,7 +389,7 @@ var Valid = struct {
 				existing = append(existing, i)
 			}
 			sort.Strings(existing)
-			r.Value = r.Value.Put(existing)
+			r.Value.Put(existing)
 			r.String = fmt.Sprint(existing)
 			r.App.SaveConfig()
 		}
@@ -425,7 +418,7 @@ var Valid = struct {
 		}
 		if r != nil {
 			r.String = fmt.Sprint(o)
-			r.Value = r.Value.Put(o)
+			r.Value.Put(o)
 			r.App.SaveConfig()
 		}
 		return true
@@ -456,7 +449,7 @@ var Valid = struct {
 			f = ff
 		}
 		if r != nil {
-			r.Value = r.Value.Put(f)
+			r.Value.Put(f)
 			r.String = fmt.Sprint(f)
 			r.App.SaveConfig()
 		}
@@ -489,7 +482,7 @@ var Valid = struct {
 		}
 		if r != nil {
 			r.String = fmt.Sprint(t)
-			r.Value = r.Value.Put(t)
+			r.Value.Put(t)
 			r.App.SaveConfig()
 		}
 		return true
@@ -513,7 +506,7 @@ var Valid = struct {
 		}
 		if r != nil && found {
 			r.String = fmt.Sprint(sn)
-			r.Value = r.Value.Put(sn)
+			r.Value.Put(sn)
 			r.App.SaveConfig()
 		}
 		return found
@@ -536,7 +529,7 @@ var Valid = struct {
 		}
 		if r != nil && found {
 			r.String = fmt.Sprint(sl)
-			r.Value = r.Value.Put(sl)
+			r.Value.Put(sl)
 			r.App.SaveConfig()
 		}
 		return found

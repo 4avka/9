@@ -86,7 +86,6 @@ func (r *App) UnmarshalJSON(data []byte) error {
 	if e != nil {
 		return e
 	}
-	// spew.Dump(out)
 	for i, x := range out {
 		for j, y := range x {
 			R := r.Cats[i][j]
@@ -104,9 +103,9 @@ func (r *App) UnmarshalJSON(data []byte) error {
 							R.Validate(R, z)
 							ro = append(ro, z)
 						}
-						R.Value.Put(ro)
+						// R.Value.Put(ro)
 					}
-					break
+					// break
 				case "float":
 				}
 			}

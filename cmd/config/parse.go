@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"git.parallelcoin.io/dev/9/pkg/util"
+	"git.parallelcoin.io/dev/9/pkg/util/cl"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -32,20 +33,15 @@ func (app *App) Parse(args []string) int {
 		datadir = &ddd
 		DataDir = *datadir
 	}
-	// now we can initialise the App
-	for i, x := range app.Cats {
-		for j := range x {
-			temp := app.Cats[i][j]
-			temp.App = app
-			app.Cats[i][j] = temp
-		}
-	}
-	for i, x := range app.Cats {
-		for j := range x {
-			app.Cats[i][j].Init(app.Cats[i][j])
-		}
-	}
-	// app.Config = MakeConfig(app)
+	// for i, x := range app.Cats {
+	// 	for j := range x {
+	// 		// if i == "app" && j == "datadir" {
+	// 		// 	break
+	// 		// }
+	// 		app.Cats[i][j].Init(app.Cats[i][j])
+	// 	}
+	// }
+
 	// // set AppDataDir for running as node
 	// aa := CleanAndExpandPath(filepath.Join(
 	// 	*datadir,
@@ -80,10 +76,20 @@ func (app *App) Parse(args []string) int {
 	if e != nil {
 		panic(e)
 	}
+	// app.Config = MakeConfig(app)
+	app.Config = MakeConfig(app)
+	// now we can initialise the App
+	for i, x := range app.Cats {
+		for j := range x {
+			temp := app.Cats[i][j]
+			temp.App = app
+			app.Cats[i][j] = temp
+		}
+	}
 
-	// if app.Config.LogLevel != nil {
-	// 	cl.Register.SetAllLevels(*app.Config.LogLevel)
-	// }
+	if app.Config.LogLevel != nil {
+		cl.Register.SetAllLevels(*app.Config.LogLevel)
+	}
 	// run as configured
 	r := cmd.Handler(
 		args,

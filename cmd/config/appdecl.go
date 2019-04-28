@@ -135,7 +135,7 @@ func File(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		// c.Init(c)
+		c.Init(c)
 		(*ctx)[name] = c
 	}
 }
@@ -163,7 +163,7 @@ func Dir(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		// c.Init(c)
+		c.Init(c)
 		(*ctx)[name] = c
 	}
 }
@@ -190,7 +190,7 @@ func Port(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		// c.Init(c)
+		c.Init(c)
 		(*ctx)[name] = c
 	}
 }
@@ -218,7 +218,7 @@ func Enable(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		// c.Init(c)
+		c.Init(c)
 		(*ctx)[name] = c
 	}
 }
@@ -246,7 +246,7 @@ func Enabled(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		// c.Init(c)
+		c.Init(c)
 		(*ctx)[name] = c
 	}
 }
@@ -273,7 +273,7 @@ func Int(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		// c.Init(c)
+		c.Init(c)
 		(*ctx)[name] = c
 	}
 }
@@ -299,7 +299,7 @@ func Tag(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		// c.Init(c)
+		c.Init(c)
 		(*ctx)[name] = c
 	}
 }
@@ -326,7 +326,7 @@ func Tags(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		// c.Init(c)
+		c.Init(c)
 		(*ctx)[name] = c
 	}
 }
@@ -356,7 +356,7 @@ func Addr(name string, defPort int, g ...RowGenerator) CatGenerator {
 				defPort)
 			G.RunAll(cc)
 		}
-		// c.Init(c)
+		c.Init(c)
 		(*ctx)[name] = c
 	}
 }
@@ -382,7 +382,7 @@ func Addrs(name string, defPort int, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		// c.Init(c)
+		c.Init(c)
 		(*ctx)[name] = c
 	}
 }
@@ -410,7 +410,7 @@ func Level(g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		// c.Init(c)
+		c.Init(c)
 		(*ctx)[lvl] = c
 	}
 }
@@ -437,7 +437,7 @@ func Algo(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		// c.Init(c)
+		c.Init(c)
 		(*ctx)[name] = c
 	}
 }
@@ -463,7 +463,7 @@ func Float(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		// c.Init(c)
+		c.Init(c)
 		(*ctx)[name] = c
 	}
 }
@@ -489,7 +489,7 @@ func Duration(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		// c.Init(c)
+		c.Init(c)
 		(*ctx)[name] = c
 	}
 }
@@ -516,7 +516,7 @@ func Net(name string, g ...RowGenerator) CatGenerator {
 			}
 			G.RunAll(cc)
 		}
-		// c.Init(c)
+		c.Init(c)
 		(*ctx)[name] = c
 	}
 }
@@ -589,7 +589,7 @@ func Default(in interface{}) RowGenerator {
 			fmt.Println("type not found", ctx.Name, reflect.TypeOf(in))
 			return
 		}
-		ctx.Value.Put(nil)
+		// ctx.Value.Put(nil)
 	}
 }
 
