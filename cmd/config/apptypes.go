@@ -3,7 +3,6 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -87,7 +86,7 @@ func (r *App) UnmarshalJSON(data []byte) error {
 	if e != nil {
 		return e
 	}
-	spew.Dump(out)
+	// spew.Dump(out)
 	for i, x := range out {
 		for j, y := range x {
 			R := r.Cats[i][j]

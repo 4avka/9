@@ -63,11 +63,13 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 		SetBorder(false).
 		SetBackgroundColor(BackgroundColor())
 	coverbox.SetBorderPadding(1, 1, 2, 2)
+	// coverbox.SetBorder(true)
 
 	roottable, roottablewidth := genMenu("launch", "configure", "reinitialize")
 	activateTable(roottable)
 
-	launchtable, launchtablewidth := genMenu("node", "wallet", "shell")
+	launchmenutexts := []string{"node", "wallet", "shell"}
+	launchtable, launchtablewidth := genMenu(launchmenutexts...)
 	prelightTable(launchtable)
 
 	catstable, catstablewidth := genMenu(app.Cats.GetSortedKeys()...)
@@ -84,9 +86,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 	roottable.SetSelectionChangedFunc(func(y, x int) {
 		leftExitActive = false
 		coverbox.SetText(
-			"\n" +
-				"" +
-				"",
+			"",
 		)
 		menuflex.
 			RemoveItem(coverbox).
@@ -95,7 +95,9 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			RemoveItem(cattable).
 			RemoveItem(confirm)
 		switch y {
-		case 0:
+		case 0, 3:
+			menuflex.
+				AddItem(coverbox, 0, 1, true)
 		case 1:
 			menuflex.
 				AddItem(launchtable, launchtablewidth, 1, true).
@@ -108,7 +110,6 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 				menuflex.AddItem(cattable, cattablewidth, 1, true)
 			}
 			menuflex.AddItem(coverbox, 0, 1, true)
-		case 3:
 		}
 	})
 	var resetbutton int
@@ -188,7 +189,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 		case 1:
 			activatedTable(roottable)
 			activateTable(launchtable)
-			coverbox.SetTextColor(TextColor())
+			menuflex.AddItem(coverbox, 0, 1, true)
 			tapp.SetFocus(launchtable)
 		case 2:
 			activatedTable(roottable)
@@ -197,12 +198,14 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 				menuflex.AddItem(cattable, cattablewidth, 0, false)
 				prelightTable(cattable)
 			}
+			menuflex.AddItem(coverbox, 0, 1, true)
 			tapp.SetFocus(catstable)
 		case 3:
 			factoryResetFunc()
 		}
 	})
 	roottable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		menuflex.RemoveItem(coverbox)
 		roottable.GetCell(0, 0).SetText("<")
 		menuflex.
 			RemoveItem(cattable).
@@ -215,7 +218,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			case 1:
 				activatedTable(roottable)
 				activateTable(launchtable)
-				coverbox.SetTextColor(TextColor())
+				menuflex.AddItem(coverbox, 0, 1, true)
 				tapp.SetFocus(launchtable)
 			case 2:
 				activatedTable(roottable)
@@ -224,6 +227,7 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 					menuflex.AddItem(cattable, cattablewidth, 0, false)
 					prelightTable(cattable)
 				}
+				menuflex.AddItem(coverbox, 0, 1, true)
 				tapp.SetFocus(catstable)
 			case 3:
 				factoryResetFunc()
@@ -247,7 +251,11 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 	launchtable.SetSelectionChangedFunc(func(y, x int) {
 		switch y {
 		case 0:
-			menuflex.RemoveItem(cattable).RemoveItem(catstable)
+			menuflex.
+				RemoveItem(coverbox).
+				RemoveItem(cattable).
+				RemoveItem(catstable).
+				AddItem(coverbox, 0, 1, false)
 			coverbox.SetText("")
 		case 1:
 			coverbox.SetText("run a full peer to peer parallelcoin node")
@@ -263,9 +271,16 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 			prelightTable(launchtable)
 			activateTable(roottable)
 			tapp.SetFocus(roottable)
+			return
 		case 1:
+			tapp.Stop()
+			fmt.Println("starting up", launchmenutexts[y-1])
 		case 2:
+			tapp.Stop()
+			fmt.Println("starting up", launchmenutexts[y-1])
 		case 3:
+			tapp.Stop()
+			fmt.Println("starting up", launchmenutexts[y-1])
 		}
 	})
 	launchtable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
@@ -273,7 +288,6 @@ func Run(_ []string, _ config.Tokens, app *config.App) int {
 		case tcell.KeyLeft, tcell.KeyEsc:
 			prelightTable(launchtable)
 			activateTable(roottable)
-			coverbox.SetTextColor(PrelightColor()) // SetAttributes(tcell.AttrDim)
 			tapp.SetFocus(roottable)
 		}
 		return event

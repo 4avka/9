@@ -27,11 +27,11 @@ func (app *App) Parse(args []string) int {
 		pwd, _ := os.Getwd()
 		*datadir = filepath.Join(pwd, *datadir)
 		dd.Value = *datadir
-		fmt.Println("datadir set", dd.Value, datadir)
+		// fmt.Println("datadir set", dd.Value, datadir)
 		app.Cats["app"]["datadir"].Value.Put(*datadir)
 		DataDir = *datadir
 	} else {
-		fmt.Println("datadir default")
+		// fmt.Println("datadir default")
 		ddd := util.AppDataDir("9", false)
 		app.Cats["app"]["datadir"].Put(ddd)
 		datadir = &ddd
@@ -79,12 +79,12 @@ func (app *App) Parse(args []string) int {
 			panic(err)
 		}
 	}
-	fmt.Println("reading config", configFile)
+	// fmt.Println("reading config", configFile)
 	conf, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("unmarshalling config")
+	// fmt.Println("unmarshalling config")
 	e := json.Unmarshal(conf, app)
 	if e != nil {
 		panic(e)
