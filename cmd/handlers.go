@@ -190,7 +190,7 @@ func Wallet(args []string, tokens Tokens, app *App) int {
 }
 
 func Shell(args []string, tokens Tokens, app *App) int {
-	fmt.Println("running Shell", args, getTokens(tokens))
+	// fmt.Println("running Shell", args, getTokens(tokens))
 	setAppDataDir(app, "node")
 	// dbDir := walletmain.NetworkDir(*app.Config.AppDataDir, app.Config.ActiveNetParams.Params)
 	netDir := walletmain.NetworkDir(filepath.Join(*app.Config.DataDir, "wallet"), app.Config.ActiveNetParams.Params)
@@ -217,8 +217,17 @@ func Test(args []string, tokens Tokens, app *App) int {
 }
 
 func Create(args []string, tokens Tokens, app *App) int {
-	cl.Register.SetAllLevels(*app.Config.LogLevel)
-	fmt.Println("running Create", args, getTokens(tokens))
+	netDir := walletmain.NetworkDir(filepath.Join(*app.Config.DataDir, "wallet"), app.Config.ActiveNetParams.Params)
+	wdb := netDir // + "/wallet.db"
+	if !FileExists(wdb) {
+		if e := walletmain.CreateWallet(
+			app.Config, app.Config.ActiveNetParams, wdb); e != nil {
+			panic("could not create wallet " + e.Error())
+		}
+	} else {
+		fmt.Println("wallet already exists in", wdb+"/wallet.db", "refusing to overwrite")
+		return 1
+	}
 	return 0
 }
 
