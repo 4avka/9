@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"git.parallelcoin.io/dev/9/cmd/nine"
+	"path/filepath"
 	"sort"
 
 	"git.parallelcoin.io/dev/9/cmd/node"
@@ -146,7 +147,7 @@ func Node(args []string, tokens Tokens, app *App) int {
 	node.StateCfg = app.Config.State
 	node.Cfg = app.Config
 	cl.Register.SetAllLevels(*app.Config.LogLevel)
-	// setAppDataDir(app, "node")
+	setAppDataDir(app, "node")
 	_ = nine.ActiveNetParams //= activenetparams
 	if validateWhitelists(app) != 0 ||
 		validateProxyListeners(app) != 0 ||
@@ -172,15 +173,16 @@ func Wallet(args []string, tokens Tokens, app *App) int {
 
 	// dbDir := walletmain.NetworkDir(*app.Config.AppDataDir, app.Config.ActiveNetParams.Params)
 	netDir := walletmain.NetworkDir(*app.Config.AppDataDir, app.Config.ActiveNetParams.Params)
-	wdb := netDir + "/wallet.db"
+	wdb := netDir // + "/wallet.db"
 	log <- cl.Debug{"opening wallet:", wdb}
 	if !FileExists(wdb) {
 		if e := walletmain.CreateWallet(
-			app.Config, app.Config.ActiveNetParams); e != nil {
+			app.Config, app.Config.ActiveNetParams, wdb); e != nil {
 			panic("could not create wallet " + e.Error())
 		}
 	} else {
-		if e := walletmain.Main(app.Config, app.Config.ActiveNetParams); e != nil {
+		setAppDataDir(app, "node")
+		if e := walletmain.Main(app.Config, app.Config.ActiveNetParams, netDir); e != nil {
 			return 1
 		}
 	}
@@ -189,19 +191,19 @@ func Wallet(args []string, tokens Tokens, app *App) int {
 
 func Shell(args []string, tokens Tokens, app *App) int {
 	fmt.Println("running Shell", args, getTokens(tokens))
-	setAppDataDir(app, "wallet")
+	setAppDataDir(app, "node")
 	// dbDir := walletmain.NetworkDir(*app.Config.AppDataDir, app.Config.ActiveNetParams.Params)
-	netDir := walletmain.NetworkDir(*app.Config.AppDataDir, app.Config.ActiveNetParams.Params)
-	wdb := netDir + "/wallet.db"
+	netDir := walletmain.NetworkDir(filepath.Join(*app.Config.DataDir, "wallet"), app.Config.ActiveNetParams.Params)
+	wdb := netDir // + "/wallet.db"
 	log <- cl.Debug{"opening wallet:", wdb}
 	if !FileExists(wdb) {
 		if e := walletmain.CreateWallet(
-			app.Config, app.Config.ActiveNetParams); e != nil {
+			app.Config, app.Config.ActiveNetParams, wdb); e != nil {
 			panic("could not create wallet " + e.Error())
 		}
 	} else {
 		go Node(args, tokens, app)
-		if e := walletmain.Main(app.Config, app.Config.ActiveNetParams); e != nil {
+		if e := walletmain.Main(app.Config, app.Config.ActiveNetParams, netDir); e != nil {
 			return 1
 		}
 	}

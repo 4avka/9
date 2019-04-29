@@ -46,18 +46,18 @@ func CreateSimulationWallet(
 }
 
 // CreateWallet prompts the user for information needed to generate a new wallet and generates the wallet accordingly.  The new wallet will reside at the provided path.
-func CreateWallet(cfg *nine.Config, activeNet *nine.Params) error {
+func CreateWallet(cfg *nine.Config, activeNet *nine.Params, path string) error {
 	// log <- cl.Info{*cfg.AppDataDir}
-	dbDir := NetworkDir(*cfg.AppDataDir, activeNet.Params)
-	loader := wallet.NewLoader(activeNet.Params, dbDir, 250)
+	// dbDir := NetworkDir(path, activeNet.Params)
+	loader := wallet.NewLoader(activeNet.Params, path, 250)
 	// When there is a legacy keystore, open it now to ensure any errors
 	// don't end up exiting the process after the user has spent time
 	// entering a bunch of information.
-	netDir := NetworkDir(*cfg.DataDir, activeNet.Params)
-	keystorePath := filepath.Join(netDir, keystore.Filename)
+	// netDir := NetworkDir(*cfg.DataDir, activeNet.Params)
+	keystorePath := filepath.Join(path, keystore.Filename)
 	var legacyKeyStore *keystore.Store
-	log <- cl.Debug{"keystore", dbDir, netDir, keystorePath}
-	wdb := netDir + "/wallet.db"
+	// log <- cl.Debug{"keystore", path, netDir, keystorePath}
+	wdb := path + "/wallet.db"
 	log <- cl.Debug{wdb}
 	_, err := os.Stat(wdb)
 	log <- cl.Debug{os.IsNotExist(err)}
@@ -73,7 +73,7 @@ func CreateWallet(cfg *nine.Config, activeNet *nine.Params) error {
 		return err
 	} else if err == nil {
 		// Keystore file exists.
-		legacyKeyStore, err = keystore.OpenDir(netDir)
+		legacyKeyStore, err = keystore.OpenDir(path)
 		if err != nil {
 			return err
 		}

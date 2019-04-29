@@ -303,9 +303,8 @@ func (l *Line) Default(d interface{}) (out *Line) {
 
 // Usage is the short text explaining a configuration option
 func (l *Line) Usage(s string) *Line {
-	spew.Dump(l)
+	// spew.Dump(l)
 	if l != nil {
-		// All lines *should* have a Usage and it *should* be last so validate!
 		l.Comment = s
 	}
 	return l

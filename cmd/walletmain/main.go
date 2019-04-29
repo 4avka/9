@@ -24,7 +24,7 @@ var (
 
 // Main is a work-around main function that is required since deferred functions (such as log flushing) are not called with calls to os.Exit.
 // Instead, main runs this function and checks for a non-nil error, at point any defers have already run, and if the error is non-nil, the program can be exited with an error exit status.
-func Main(c *nine.Config, activeNet *nine.Params) error {
+func Main(c *nine.Config, activeNet *nine.Params, path string) error {
 	// fmt.Println("wallet Main")
 	cfg = c
 	ActiveNet = activeNet
@@ -42,9 +42,9 @@ func Main(c *nine.Config, activeNet *nine.Params) error {
 			log <- cl.Error{http.ListenAndServe(listenAddr, nil)}
 		}()
 	}
-	dbDir := NetworkDir(*cfg.AppDataDir, activeNet.Params)
-	log <- cl.Debug{"dbDir", dbDir, *cfg.DataDir, *cfg.DataDir, activeNet.Params.Name}
-	loader := wallet.NewLoader(activeNet.Params, dbDir, 250)
+	// dbDir := NetworkDir(path, activeNet.Params)
+	log <- cl.Debug{"dbDir", path, *cfg.DataDir, *cfg.DataDir, activeNet.Params.Name}
+	loader := wallet.NewLoader(activeNet.Params, path, 250)
 	// Create and start HTTP server to serve wallet client connections.
 	// This will be updated with the wallet and chain server RPC client
 	// created below after each is created.

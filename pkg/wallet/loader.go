@@ -4,6 +4,7 @@ package wallet
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -76,6 +77,7 @@ func (l *Loader) CreateNewWallet(pubPassphrase, privPassphrase, seed []byte,
 	if l.wallet != nil {
 		return nil, ErrLoaded
 	}
+	fmt.Println("walletdb", l, WalletDbName)
 	dbPath := filepath.Join(l.dbDirPath, WalletDbName)
 	exists, err := fileExists(dbPath)
 	if err != nil {
