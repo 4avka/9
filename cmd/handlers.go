@@ -1,4 +1,4 @@
-package config
+package cmd
 
 import (
 	"fmt"
@@ -170,8 +170,6 @@ func Node(args []string, tokens Tokens, app *App) int {
 
 func Wallet(args []string, tokens Tokens, app *App) int {
 	setAppDataDir(app, "wallet")
-
-	// dbDir := walletmain.NetworkDir(*app.Config.AppDataDir, app.Config.ActiveNetParams.Params)
 	netDir := walletmain.NetworkDir(*app.Config.AppDataDir, app.Config.ActiveNetParams.Params)
 	wdb := netDir // + "/wallet.db"
 	log <- cl.Debug{"opening wallet:", wdb}
@@ -190,9 +188,7 @@ func Wallet(args []string, tokens Tokens, app *App) int {
 }
 
 func Shell(args []string, tokens Tokens, app *App) int {
-	// fmt.Println("running Shell", args, getTokens(tokens))
 	setAppDataDir(app, "node")
-	// dbDir := walletmain.NetworkDir(*app.Config.AppDataDir, app.Config.ActiveNetParams.Params)
 	netDir := walletmain.NetworkDir(filepath.Join(*app.Config.DataDir, "wallet"), app.Config.ActiveNetParams.Params)
 	wdb := netDir // + "/wallet.db"
 	log <- cl.Debug{"opening wallet:", wdb}

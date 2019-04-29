@@ -1,4 +1,4 @@
-package config
+package cmd
 
 import (
 	"git.parallelcoin.io/dev/9/cmd/nine"
