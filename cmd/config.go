@@ -1,154 +1,104 @@
-package cmd
+package config
 
 import (
-	"time"
-
 	"git.parallelcoin.io/dev/9/cmd/nine"
 	"git.parallelcoin.io/dev/9/cmd/node"
 )
 
-var activenetparams = node.ActiveNetParams
-var config = getConfig()
-var Config = MakeConfig(config)
-var stateconfig = node.StateCfg
-var tn, sn, rn bool
-var DataDir string
-var ConfigFile string
-
-func MakeConfig(c *Lines) (out *nine.Config) {
-	cfg := *c
-	String := func(path string) (out *string) {
-		if cfg[path] != nil && cfg[path].Value != nil {
-			return cfg[path].Value.(*string)
-		}
-		return
-	}
-	Tags := func(path string) (out *[]string) {
-		if cfg[path] != nil && cfg[path].Value != nil {
-			return cfg[path].Value.(*[]string)
-		}
-		return
-	}
-	Map := func(path string) (out *nine.Mapstringstring) {
-		if cfg[path] != nil && cfg[path].Value != nil {
-			return cfg[path].Value.(*nine.Mapstringstring)
-		}
-		return
-	}
-	Int := func(path string) (out *int) {
-		if cfg[path] != nil && cfg[path].Value != nil {
-			return cfg[path].Value.(*int)
-		}
-		return
-	}
-	Bool := func(path string) (out *bool) {
-		if cfg[path] != nil && cfg[path].Value != nil {
-			return cfg[path].Value.(*bool)
-		}
-		return
-	}
-	Float := func(path string) (out *float64) {
-		if cfg[path] != nil && cfg[path].Value != nil {
-			return cfg[path].Value.(*float64)
-		}
-		return
-	}
-	Duration := func(path string) (out *time.Duration) {
-		if cfg[path] != nil && cfg[path].Value != nil {
-			return cfg[path].Value.(*time.Duration)
-		}
-		return
-	}
-
+func MakeConfig(c *App) (out *nine.Config) {
+	C := c.Cats
+	var configFile string
+	var tn, sn, rn bool
 	out = &nine.Config{
-		ConfigFile:               &ConfigFile,
-		AppDataDir:               String("app.appdatadir"),
-		DataDir:                  &DataDir,
-		LogDir:                   String("app.logdir"),
-		LogLevel:                 String("log.level"),
-		Subsystems:               Map("log.subsystem"),
-		Network:                  String("p2p.network"),
-		AddPeers:                 Tags("p2p.addpeer"),
-		ConnectPeers:             Tags("p2p.connect"),
-		MaxPeers:                 Int("p2p.maxpeers"),
-		Listeners:                Tags("p2p.listen"),
-		DisableListen:            Bool("p2p.nolisten"),
-		DisableBanning:           Bool("p2p.disableban"),
-		BanDuration:              Duration("p2p.banduration"),
-		BanThreshold:             Int("p2p.banthreshold"),
-		Whitelists:               Tags("p2p.whitelist"),
-		Username:                 String("rpc.user"),
-		Password:                 String("rpc.pass"),
-		ServerUser:               String("rpc.user"),
-		ServerPass:               String("rpc.pass"),
-		LimitUser:                String("limit.user"),
-		LimitPass:                String("limit.pass"),
-		RPCConnect:               String("rpc.connect"),
-		RPCListeners:             Tags("rpc.listen"),
-		RPCCert:                  String("tls.cert"),
-		RPCKey:                   String("tls.key"),
-		RPCMaxClients:            Int("rpc.maxclients"),
-		RPCMaxWebsockets:         Int("rpc.maxwebsockets"),
-		RPCMaxConcurrentReqs:     Int("rpc.maxconcurrentreqs"),
-		RPCQuirks:                Bool("rpc.quirks"),
-		DisableRPC:               Bool("rpc.disable"),
-		NoTLS:                    Bool("tls.disable"),
-		DisableDNSSeed:           Bool("p2p.nodns"),
-		ExternalIPs:              Tags("p2p.externalips"),
-		Proxy:                    String("proxy.address"),
-		ProxyUser:                String("proxy.user"),
-		ProxyPass:                String("proxy.pass"),
-		OnionProxy:               String("proxy.address"),
-		OnionProxyUser:           String("proxy.user"),
-		OnionProxyPass:           String("proxy.pass"),
-		Onion:                    Bool("proxy.tor"),
-		TorIsolation:             Bool("proxy.isolation"),
+		ConfigFile:               &configFile,
+		AppDataDir:               C.Str("app", "appdatadir"),
+		DataDir:                  C.Str("app", "datadir"),
+		LogDir:                   C.Str("app", "logdir"),
+		LogLevel:                 C.Str("log", "level"),
+		Subsystems:               C.Map("log", "subsystem"),
+		Network:                  C.Str("p2p", "network"),
+		AddPeers:                 C.Tags("p2p", "addpeer"),
+		ConnectPeers:             C.Tags("p2p", "connect"),
+		MaxPeers:                 C.Int("p2p", "maxpeers"),
+		Listeners:                C.Tags("p2p", "listen"),
+		DisableListen:            C.Bool("p2p", "nolisten"),
+		DisableBanning:           C.Bool("p2p", "disableban"),
+		BanDuration:              C.Duration("p2p", "banduration"),
+		BanThreshold:             C.Int("p2p", "banthreshold"),
+		Whitelists:               C.Tags("p2p", "whitelist"),
+		Username:                 C.Str("rpc", "user"),
+		Password:                 C.Str("rpc", "pass"),
+		ServerUser:               C.Str("rpc", "user"),
+		ServerPass:               C.Str("rpc", "pass"),
+		LimitUser:                C.Str("limit", "user"),
+		LimitPass:                C.Str("limit", "pass"),
+		RPCConnect:               C.Str("rpc", "connect"),
+		RPCListeners:             C.Tags("rpc", "listen"),
+		RPCCert:                  C.Str("tls", "cert"),
+		RPCKey:                   C.Str("tls", "key"),
+		RPCMaxClients:            C.Int("rpc", "maxclients"),
+		RPCMaxWebsockets:         C.Int("rpc", "maxwebsockets"),
+		RPCMaxConcurrentReqs:     C.Int("rpc", "maxconcurrentreqs"),
+		RPCQuirks:                C.Bool("rpc", "quirks"),
+		DisableRPC:               C.Bool("rpc", "disable"),
+		NoTLS:                    C.Bool("tls", "disable"),
+		DisableDNSSeed:           C.Bool("p2p", "nodns"),
+		ExternalIPs:              C.Tags("p2p", "externalips"),
+		Proxy:                    C.Str("proxy", "address"),
+		ProxyUser:                C.Str("proxy", "user"),
+		ProxyPass:                C.Str("proxy", "pass"),
+		OnionProxy:               C.Str("proxy", "address"),
+		OnionProxyUser:           C.Str("proxy", "user"),
+		OnionProxyPass:           C.Str("proxy", "pass"),
+		Onion:                    C.Bool("proxy", "tor"),
+		TorIsolation:             C.Bool("proxy", "isolation"),
 		TestNet3:                 &tn,
 		RegressionTest:           &rn,
 		SimNet:                   &sn,
-		AddCheckpoints:           Tags("chain.addcheckpoints"),
-		DisableCheckpoints:       Bool("chain.disablecheckpoints"),
-		DbType:                   String("chain.dbtype"),
-		Profile:                  Int("app.profile"),
-		CPUProfile:               String("app.cpuprofile"),
-		Upnp:                     Bool("app.upnp"),
-		MinRelayTxFee:            Float("p2p.minrelaytxfee"),
-		FreeTxRelayLimit:         Float("p2p.freetxrelaylimit"),
-		NoRelayPriority:          Bool("p2p.norelaypriority"),
-		TrickleInterval:          Duration("p2p.trickleinterval"),
-		MaxOrphanTxs:             Int("p2p.maxorphantxs"),
-		Algo:                     String("mining.algo"),
-		Generate:                 Bool("mining.generate"),
-		GenThreads:               Int("mining.genthreads"),
-		MiningAddrs:              Tags("mining.addresses"),
-		MinerListener:            String("mining.listener"),
-		MinerPass:                String("mining.pass"),
-		BlockMinSize:             Int("block.minsize"),
-		BlockMaxSize:             Int("block.maxsize"),
-		BlockMinWeight:           Int("block.minweight"),
-		BlockMaxWeight:           Int("block.maxweight"),
-		BlockPrioritySize:        Int("block.prioritysize"),
-		UserAgentComments:        Tags("p2p.useragentcomments"),
-		NoPeerBloomFilters:       Bool("p2p.nobloomfilters"),
-		NoCFilters:               Bool("p2p.nocfilters"),
-		SigCacheMaxSize:          Int("chain.sigcachemaxsize"),
-		BlocksOnly:               Bool("p2p.blocksonly"),
-		TxIndex:                  Bool("chain.txindex"),
-		AddrIndex:                Bool("chain.addrindex"),
-		RelayNonStd:              Bool("chain.relaynonstd"),
-		RejectNonStd:             Bool("chain.rejectnonstd"),
-		TLSSkipVerify:            Bool("tls.skipverify"),
-		Wallet:                   Bool("wallet.enable"),
-		NoInitialLoad:            Bool("wallet.noinitialload"),
-		WalletPass:               String("wallet.pass"),
-		WalletServer:             String("rpc.wallet"),
-		CAFile:                   String("tls.cafile"),
-		OneTimeTLSKey:            Bool("tls.onetime"),
-		ServerTLS:                Bool("tls.server"),
-		LegacyRPCListeners:       Tags("rpc.listen"),
-		LegacyRPCMaxClients:      Int("rpc.maxclients"),
-		LegacyRPCMaxWebsockets:   Int("rpc.maxwebsockets"),
+		AddCheckpoints:           C.Tags("chain", "addcheckpoints"),
+		DisableCheckpoints:       C.Bool("chain", "disablecheckpoints"),
+		DbType:                   C.Str("chain", "dbtype"),
+		Profile:                  C.Int("app", "profile"),
+		CPUProfile:               C.Str("app", "cpuprofile"),
+		Upnp:                     C.Bool("app", "upnp"),
+		MinRelayTxFee:            C.Float("p2p", "minrelaytxfee"),
+		FreeTxRelayLimit:         C.Float("p2p", "freetxrelaylimit"),
+		NoRelayPriority:          C.Bool("p2p", "norelaypriority"),
+		TrickleInterval:          C.Duration("p2p", "trickleinterval"),
+		MaxOrphanTxs:             C.Int("p2p", "maxorphantxs"),
+		Algo:                     C.Str("mining", "algo"),
+		Generate:                 C.Bool("mining", "generate"),
+		GenThreads:               C.Int("mining", "genthreads"),
+		MiningAddrs:              C.Tags("mining", "addresses"),
+		MinerListener:            C.Str("mining", "listener"),
+		MinerPass:                C.Str("mining", "pass"),
+		BlockMinSize:             C.Int("block", "minsize"),
+		BlockMaxSize:             C.Int("block", "maxsize"),
+		BlockMinWeight:           C.Int("block", "minweight"),
+		BlockMaxWeight:           C.Int("block", "maxweight"),
+		BlockPrioritySize:        C.Int("block", "prioritysize"),
+		UserAgentComments:        C.Tags("p2p", "useragentcomments"),
+		NoPeerBloomFilters:       C.Bool("p2p", "nobloomfilters"),
+		NoCFilters:               C.Bool("p2p", "nocfilters"),
+		SigCacheMaxSize:          C.Int("chain", "sigcachemaxsize"),
+		BlocksOnly:               C.Bool("p2p", "blocksonly"),
+		TxIndex:                  C.Bool("chain", "txindex"),
+		AddrIndex:                C.Bool("chain", "addrindex"),
+		RelayNonStd:              C.Bool("chain", "relaynonstd"),
+		RejectNonStd:             C.Bool("chain", "rejectnonstd"),
+		TLSSkipVerify:            C.Bool("tls", "skipverify"),
+		Wallet:                   C.Bool("wallet", "enable"),
+		NoInitialLoad:            C.Bool("wallet", "noinitialload"),
+		WalletPass:               C.Str("wallet", "pass"),
+		WalletServer:             C.Str("wallet", "server"),
+		CAFile:                   C.Str("tls", "cafile"),
+		OneTimeTLSKey:            C.Bool("tls", "onetime"),
+		ServerTLS:                C.Bool("tls", "server"),
+		LegacyRPCListeners:       C.Tags("rpc", "listen"),
+		LegacyRPCMaxClients:      C.Int("rpc", "maxclients"),
+		LegacyRPCMaxWebsockets:   C.Int("rpc", "maxwebsockets"),
 		ExperimentalRPCListeners: &[]string{},
+		State:                    node.StateCfg,
 	}
 	return
 }

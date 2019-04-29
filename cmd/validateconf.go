@@ -1,9 +1,10 @@
-package cmd
+package config
 
 import (
 	"errors"
 	"fmt"
 	"net"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -17,27 +18,33 @@ import (
 	"github.com/btcsuite/go-socks/socks"
 )
 
-func setAppDataDir(name string) {
-	if Config != nil {
-		if Config.AppDataDir != nil {
-			// set AppDataDir for running as node
-			*Config.AppDataDir =
-				CleanAndExpandPath(filepath.Join(*Config.DataDir, name))
-		}
-		if Config.LogDir != nil {
-			*Config.LogDir = *Config.AppDataDir
+func setAppDataDir(app *App, name string) {
+	if app != nil {
+		if app.Config != nil {
+			if app.Config.AppDataDir == nil {
+				app.Config.AppDataDir = new(string)
+				// set AppDataDir for running as node
+				*app.Config.AppDataDir =
+					CleanAndExpandPath(
+						filepath.Join(*app.Config.DataDir, name),
+						*app.Config.DataDir)
+			}
+			if app.Config.LogDir == nil {
+				app.Config.LogDir = new(string)
+				*app.Config.LogDir = *app.Config.AppDataDir
+			}
 		}
 	}
 }
 
-func validateWhitelists() int {
+func validateWhitelists(app *App) int {
 	// Validate any given whitelisted IP addresses and networks.
-	log <- cl.Debug{"validating whitelists"}
-	if len(*Config.Whitelists) > 0 {
+	if app.Config.Whitelists != nil {
 		var ip net.IP
-		stateconfig.ActiveWhitelists =
-			make([]*net.IPNet, 0, len(*Config.Whitelists))
-		for _, addr := range *Config.Whitelists {
+
+		app.Config.State.ActiveWhitelists =
+			make([]*net.IPNet, 0, len(*app.Config.Whitelists))
+		for _, addr := range *app.Config.Whitelists {
 			_, ipnet, err := net.ParseCIDR(addr)
 			if err != nil {
 				err = fmt.Errorf("%s '%s'", cl.Ine(), err.Error())
@@ -45,7 +52,6 @@ func validateWhitelists() int {
 				if ip == nil {
 					str := err.Error() + " %s: the whitelist value of '%s' is invalid"
 					err = fmt.Errorf(str, "runNode", addr)
-					log <- cl.Err(err.Error())
 					return 1
 				}
 				var bits int
@@ -60,316 +66,326 @@ func validateWhitelists() int {
 					Mask: net.CIDRMask(bits, bits),
 				}
 			}
-			stateconfig.ActiveWhitelists =
-				append(stateconfig.ActiveWhitelists, ipnet)
+			app.Config.State.ActiveWhitelists =
+				append(app.Config.State.ActiveWhitelists, ipnet)
 		}
 	}
 	return 0
 }
 
-func validateProxyListeners() int {
+func validateProxyListeners(app *App) int {
 	// if proxy is not enabled, empty the proxy field as node sees presence as a
 	// on switch
-	if !*(*config)["proxy.enable"].Value.(*bool) {
-		*Config.Proxy = ""
+	if app.Config.Proxy != nil {
+		*app.Config.Proxy = ""
 	}
-	// if proxy is enabled or listeners list is empty, disable p2p listener
-	if *Config.Proxy != "" || len(*Config.ConnectPeers) > 0 &&
-		len(*Config.Listeners) < 1 {
-		*Config.DisableListen = true
+	// if proxy is enabled or listeners list is empty, or connect peers are set,
+	// disable p2p listener
+	if app.Config.Proxy != nil ||
+		app.Config.ConnectPeers != nil ||
+		app.Config.Listeners == nil {
+		if app.Config.DisableListen == nil {
+			acd := true
+			app.Config.DisableListen = &acd
+		} else {
+			*app.Config.DisableListen = true
+		}
 	}
-	if *Config.DisableListen && len(*Config.Listeners) < 1 {
-		*Config.Listeners = []string{
+	if !*app.Config.DisableListen && len(*app.Config.Listeners) < 1 {
+		*app.Config.Listeners = []string{
 			net.JoinHostPort("127.0.0.1", node.DefaultPort),
 		}
 	}
 	return 0
 }
 
-func validatePasswords() int {
+func validatePasswords(app *App) int {
 
 	// Check to make sure limited and admin users don't have the same username
-	log <- cl.Debug{"checking admin and limited username is different"}
-	if *Config.Username != "" && *Config.Username == *Config.LimitUser {
+	if *app.Config.Username != "" && *app.Config.Username == *app.Config.LimitUser {
 		str := "%s: --username and --limituser must not specify the same username"
 		err := fmt.Errorf(str, "runNode")
-		log <- cl.Error{err}
+		fmt.Fprintln(os.Stderr, err)
 		return 1
 	}
 	// Check to make sure limited and admin users don't have the same password
-	log <- cl.Debug{"checking limited and admin passwords are not the same"}
-	if *Config.Password != "" &&
-		*Config.Password == *Config.LimitPass {
+	if *app.Config.Password != "" &&
+		*app.Config.Password == *app.Config.LimitPass {
 		str := "%s: --password and --limitpass must not specify the same password"
 		err := fmt.Errorf(str, "runNode")
-		log <- cl.Error{err}
-		// fmt.Fprintln(os.Stderr, usageMessage)
+		fmt.Fprintln(os.Stderr, err)
 		return 1
 	}
 	return 0
 }
 
-func validateRPCCredentials() int {
+func validateRPCCredentials(app *App) int {
 	// The RPC server is disabled if no username or password is provided.
-	log <- cl.Debug{"checking rpc server has a login enabled"}
-	if (*Config.Username == "" || *Config.Password == "") &&
-		(*Config.LimitUser == "" || *Config.LimitPass == "") {
-		*Config.DisableRPC = true
+	if (*app.Config.Username == "" || *app.Config.Password == "") &&
+		(*app.Config.LimitUser == "" || *app.Config.LimitPass == "") {
+		*app.Config.DisableRPC = true
 	}
-	if *Config.DisableRPC {
-		log <- cl.Inf("RPC service is disabled")
+	if *app.Config.DisableRPC {
 	}
-	log <- cl.Debug{"checking rpc server has listeners set"}
-	if !*Config.DisableRPC && len(*Config.RPCListeners) == 0 {
-		log <- cl.Debug{"looking up default listener"}
+	if !*app.Config.DisableRPC && len(*app.Config.RPCListeners) == 0 {
 		addrs, err := net.LookupHost(node.DefaultRPCListener)
 		if err != nil {
-			log <- cl.Error{err}
 			return 1
 		}
-		*Config.RPCListeners = make([]string, 0, len(addrs))
-		log <- cl.Debug{"setting listeners"}
+		*app.Config.RPCListeners = make([]string, 0, len(addrs))
 		for _, addr := range addrs {
-			addr = net.JoinHostPort(addr, activenetparams.RPCPort)
-			*Config.RPCListeners = append(*Config.RPCListeners, addr)
+			addr = net.JoinHostPort(addr, app.Config.ActiveNetParams.RPCPort)
+			*app.Config.RPCListeners = append(*app.Config.RPCListeners, addr)
 		}
 	}
 	return 0
 }
 
-func validateBlockLimits() int {
+func validateBlockLimits(app *App) int {
 	// Validate the the minrelaytxfee.
-	log <- cl.Debug{"checking min relay tx fee"}
+	// log <- cl.Debug{"checking min relay tx fee"}
 	var err error
-	stateconfig.ActiveMinRelayTxFee, err = util.NewAmount(*Config.MinRelayTxFee)
+	app.Config.State.ActiveMinRelayTxFee, err =
+		util.NewAmount(*app.Config.MinRelayTxFee)
 	if err != nil {
 		str := "%s: invalid minrelaytxfee: %v"
 		err := fmt.Errorf(str, "runNode", err)
-		log <- cl.Error{err}
+		fmt.Println(err)
 		return 1
 	}
 	// Limit the block priority and minimum block sizes to max block size.
-	log <- cl.Debug{
-		"checking validating block priority and minimium size/weight"}
-	*Config.BlockPrioritySize = int(minUint32(
-		uint32(*Config.BlockPrioritySize),
-		uint32(*Config.BlockMaxSize)))
-	*Config.BlockMinSize = int(minUint32(
-		uint32(*Config.BlockMinSize),
-		uint32(*Config.BlockMaxSize)))
-	*Config.BlockMinWeight = int(minUint32(
-		uint32(*Config.BlockMinWeight),
-		uint32(*Config.BlockMaxWeight)))
+	*app.Config.BlockPrioritySize = int(MinUint32(
+		uint32(*app.Config.BlockPrioritySize),
+		uint32(*app.Config.BlockMaxSize)))
+	*app.Config.BlockMinSize = int(MinUint32(
+		uint32(*app.Config.BlockMinSize),
+		uint32(*app.Config.BlockMaxSize)))
+	*app.Config.BlockMinWeight = int(MinUint32(
+		uint32(*app.Config.BlockMinWeight),
+		uint32(*app.Config.BlockMaxWeight)))
 	switch {
 	// If the max block size isn't set, but the max weight is, then we'll set the limit for the max block size to a safe limit so weight takes precedence.
-	case *Config.BlockMaxSize == node.DefaultBlockMaxSize &&
-		*Config.BlockMaxWeight != node.DefaultBlockMaxWeight:
-		*Config.BlockMaxSize = blockchain.MaxBlockBaseSize - 1000
+	case *app.Config.BlockMaxSize == node.DefaultBlockMaxSize &&
+		*app.Config.BlockMaxWeight != node.DefaultBlockMaxWeight:
+		*app.Config.BlockMaxSize = blockchain.MaxBlockBaseSize - 1000
 	// If the max block weight isn't set, but the block size is, then we'll scale the set weight accordingly based on the max block size value.
-	case *Config.BlockMaxSize != node.DefaultBlockMaxSize &&
-		*Config.BlockMaxWeight == node.DefaultBlockMaxWeight:
-		*Config.BlockMaxWeight = *Config.BlockMaxSize * blockchain.WitnessScaleFactor
+	case *app.Config.BlockMaxSize != node.DefaultBlockMaxSize &&
+		*app.Config.BlockMaxWeight == node.DefaultBlockMaxWeight:
+		*app.Config.BlockMaxWeight = *app.Config.BlockMaxSize * blockchain.WitnessScaleFactor
 	}
-	if *Config.RejectNonStd && *Config.RelayNonStd {
+	if *app.Config.RejectNonStd && *app.Config.RelayNonStd {
 		fmt.Println("cannot both relay and reject nonstandard transactions")
 		return 1
 	}
 	return 0
 }
 
-func validateUAComments() int {
+func validateUAComments(app *App) int {
 	// Look for illegal characters in the user agent comments.
-	log <- cl.Debug{"checking user agent comments"}
-	for _, uaComment := range *Config.UserAgentComments {
-		if strings.ContainsAny(uaComment, "/:()") {
-			err := fmt.Errorf("%s: The following characters must not "+
-				"appear in user agent comments: '/', ':', '(', ')'",
-				"runNode")
-			log <- cl.Err(err.Error())
-			return 1
+	// log <- cl.Debug{"checking user agent comments"}
+	if app.Config.UserAgentComments != nil {
+		for _, uaComment := range *app.Config.UserAgentComments {
+			if strings.ContainsAny(uaComment, "/:()") {
+				err := fmt.Errorf("%s: The following characters must not "+
+					"appear in user agent comments: '/', ':', '(', ')'",
+					"runNode")
+				fmt.Fprintln(os.Stderr, err)
+				return 1
+			}
 		}
 	}
 	return 0
 }
 
-func validateMiner() int {
+func validateMiner(app *App) int {
 	// Check mining addresses are valid and saved parsed versions.
-	log <- cl.Debug{"checking mining addresses"}
-	stateconfig.ActiveMiningAddrs =
-		make([]util.Address, 0, len(*Config.MiningAddrs))
-	if len(*Config.MiningAddrs) > 0 {
-		for _, strAddr := range *Config.MiningAddrs {
-			if len(strAddr) > 1 {
-				addr, err := util.DecodeAddress(strAddr, activenetparams.Params)
-				if err != nil {
-					str := "%s: mining address '%s' failed to decode: %v"
-					err := fmt.Errorf(str, "runNode", strAddr, err)
-					log <- cl.Err(err.Error())
-					return 1
+	// log <- cl.Debug{"checking mining addresses"}
+	if app.Config.MiningAddrs != nil {
+		app.Config.State.ActiveMiningAddrs =
+			make([]util.Address, 0, len(*app.Config.MiningAddrs))
+		if len(*app.Config.MiningAddrs) > 0 {
+			for _, strAddr := range *app.Config.MiningAddrs {
+				if len(strAddr) > 1 {
+					addr, err := util.DecodeAddress(strAddr, app.Config.ActiveNetParams.Params)
+					if err != nil {
+						str := "%s: mining address '%s' failed to decode: %v"
+						err := fmt.Errorf(str, "runNode", strAddr, err)
+						fmt.Fprintln(os.Stderr, err)
+						return 1
+					}
+					if !addr.IsForNet(app.Config.ActiveNetParams.Params) {
+						str := "%s: mining address '%s' is on the wrong network"
+						err := fmt.Errorf(str, "runNode", strAddr)
+						fmt.Fprintln(os.Stderr, err)
+						return 1
+					}
+					app.Config.State.ActiveMiningAddrs =
+						append(app.Config.State.ActiveMiningAddrs, addr)
+				} else {
+					*app.Config.MiningAddrs = []string{}
 				}
-				if !addr.IsForNet(activenetparams.Params) {
-					str := "%s: mining address '%s' is on the wrong network"
-					err := fmt.Errorf(str, "runNode", strAddr)
-					log <- cl.Error{err}
-					return 1
-				}
-				stateconfig.ActiveMiningAddrs =
-					append(stateconfig.ActiveMiningAddrs, addr)
-			} else {
-				*Config.MiningAddrs = []string{}
 			}
 		}
 	}
 	// Ensure there is at least one mining address when the generate flag
 	// is set.
-	if (*Config.Generate || len(*Config.MinerListener) > 1) && len(*Config.MiningAddrs) == 0 {
+	if (*app.Config.Generate ||
+		app.Config.MinerListener != nil) &&
+		app.Config.MiningAddrs != nil {
 		str := "%s: the generate flag is set, but there are no mining addresses specified "
 		err := fmt.Errorf(str, "runNode")
-		log <- cl.Err(err.Error())
+		fmt.Fprintln(os.Stderr, err)
 		return 1
 	}
-	if *Config.MinerPass != "" {
-		stateconfig.ActiveMinerKey = fork.Argon2i([]byte(*Config.MinerPass))
+	if *app.Config.MinerPass != "" {
+		app.Config.State.ActiveMinerKey = fork.Argon2i([]byte(*app.Config.MinerPass))
 	}
 	return 0
 }
 
-func validateCheckpoints() int {
+func validateCheckpoints(app *App) int {
 	var err error
 	// Check the checkpoints for syntax errors.
-	log <- cl.Debug{"checking the checkpoints"}
-	stateconfig.AddedCheckpoints, err =
-		node.ParseCheckpoints(*Config.AddCheckpoints)
-	if err != nil {
-		str := "%s: Error parsing checkpoints: %v"
-		err := fmt.Errorf(str, "runNode", err)
-		log <- cl.Err(err.Error())
-		return 1
+	// log <- cl.Debug{"checking the checkpoints"}
+	if app.Config.AddCheckpoints != nil {
+		app.Config.State.AddedCheckpoints, err =
+			node.ParseCheckpoints(*app.Config.AddCheckpoints)
+		if err != nil {
+			str := "%s: Error parsing checkpoints: %v"
+			err := fmt.Errorf(str, "runNode", err)
+			fmt.Fprintln(os.Stderr, err)
+			return 1
+		}
 	}
 	return 0
 }
 
-func validateDialers() int {
-	if !*Config.Onion && *Config.OnionProxy != "" {
-		log <- cl.Error{"cannot enable tor proxy without an address specified"}
-		return 1
-	}
+func validateDialers(app *App) int {
+	// if !*app.Config.Onion && *app.Config.OnionProxy != "" {
+	// 	// log <- cl.Error{"cannot enable tor proxy without an address specified"}
+	// 	return 1
+	// }
 
 	// Tor stream isolation requires either proxy or onion proxy to be set.
-	if *Config.TorIsolation &&
-		*Config.Proxy == "" &&
-		*Config.OnionProxy == "" {
+	if *app.Config.TorIsolation &&
+		app.Config.Proxy == nil {
 		str := "%s: Tor stream isolation requires either proxy or onionproxy to be set"
 		err := fmt.Errorf(str, "runNode")
-		log <- cl.Error{err}
+		fmt.Fprintln(os.Stderr, err)
 		return 1
 	}
 	// Setup dial and DNS resolution (lookup) functions depending on the specified options.  The default is to use the standard net.DialTimeout function as well as the system DNS resolver.  When a proxy is specified, the dial function is set to the proxy specific dial function and the lookup is set to use tor (unless --noonion is specified in which case the system DNS resolver is used).
-	log <- cl.Debug{"setting network dialer and lookup"}
-	stateconfig.Dial = net.DialTimeout
-	stateconfig.Lookup = net.LookupIP
-	if *Config.Proxy != "" {
+	// log <- cl.Debug{"setting network dialer and lookup"}
+	app.Config.State.Dial = net.DialTimeout
+	app.Config.State.Lookup = net.LookupIP
+	if app.Config.Proxy != nil {
 		fmt.Println("loading proxy")
-		log <- cl.Debug{"we are loading a proxy!"}
-		_, _, err := net.SplitHostPort(*Config.Proxy)
+		// log <- cl.Debug{"we are loading a proxy!"}
+		_, _, err := net.SplitHostPort(*app.Config.Proxy)
 		if err != nil {
 			str := "%s: Proxy address '%s' is invalid: %v"
-			err := fmt.Errorf(str, "runNode", *Config.Proxy, err)
-			log <- cl.Error{err}
+			err := fmt.Errorf(str, "runNode", *app.Config.Proxy, err)
+			fmt.Fprintln(os.Stderr, err)
 			return 1
 		}
-		// Tor isolation flag means proxy credentials will be overridden unless there is also an onion proxy configured in which case that one will be overridden.
+		// Tor isolation flag means proxy credentials will be overridden unless
+		// there is also an onion proxy configured in which case that one will be overridden.
 		torIsolation := false
-		if *Config.TorIsolation &&
-			*Config.OnionProxy == "" &&
-			(*Config.ProxyUser != "" ||
-				*Config.ProxyPass != "") {
+		if *app.Config.TorIsolation &&
+			(app.Config.ProxyUser != nil ||
+				app.Config.ProxyPass != nil) {
 			torIsolation = true
-			log <- cl.Warn{
-				"Tor isolation set -- overriding specified proxy user credentials"}
+			// log <- cl.Warn{
+			// "Tor isolation set -- overriding specified proxy user credentials"}
 		}
 		proxy := &socks.Proxy{
-			Addr:         *Config.Proxy,
-			Username:     *Config.ProxyUser,
-			Password:     *Config.ProxyPass,
+			Addr:         *app.Config.Proxy,
+			Username:     *app.Config.ProxyUser,
+			Password:     *app.Config.ProxyPass,
 			TorIsolation: torIsolation,
 		}
-		stateconfig.Dial = proxy.DialTimeout
+		app.Config.State.Dial = proxy.DialTimeout
 		// Treat the proxy as tor and perform DNS resolution through it unless the --noonion flag is set or there is an onion-specific proxy configured.
-		if *Config.Onion &&
-			*Config.OnionProxy != "" {
-			stateconfig.Lookup = func(host string) ([]net.IP, error) {
-				return connmgr.TorLookupIP(host, *Config.Proxy)
+		if *app.Config.Onion &&
+			*app.Config.OnionProxy != "" {
+			app.Config.State.Lookup = func(host string) ([]net.IP, error) {
+				return connmgr.TorLookupIP(host, *app.Config.Proxy)
 			}
 		}
 	}
 	// Setup onion address dial function depending on the specified options. The default is to use the same dial function selected above.  However, when an onion-specific proxy is specified, the onion address dial function is set to use the onion-specific proxy while leaving the normal dial function as selected above.  This allows .onion address traffic to be routed through a different proxy than normal traffic.
-	log <- cl.Debug{"setting up tor proxy if enabled"}
-	if *Config.OnionProxy != "" {
-		_, _, err := net.SplitHostPort(*Config.OnionProxy)
+	// log <- cl.Debug{"setting up tor proxy if enabled"}
+	if app.Config.OnionProxy != nil {
+		_, _, err := net.SplitHostPort(*app.Config.OnionProxy)
 		if err != nil {
 			str := "%s: Onion proxy address '%s' is invalid: %v"
-			err := fmt.Errorf(str, "runNode", *Config.OnionProxy, err)
-			log <- cl.Error{err}
+			err := fmt.Errorf(str, "runNode", *app.Config.OnionProxy, err)
+			fmt.Fprintln(os.Stderr, err)
 			return 1
 		}
 		// Tor isolation flag means onion proxy credentials will be overriddenode.
-		if *Config.TorIsolation &&
-			(*Config.OnionProxyUser != "" || *Config.OnionProxyPass != "") {
-			log <- cl.Warn{
-				"Tor isolation set - overriding specified onionproxy user credentials "}
+		if *app.Config.TorIsolation &&
+			(*app.Config.OnionProxyUser != "" || *app.Config.OnionProxyPass != "") {
+			// log <- cl.Warn{
+			// "Tor isolation set - overriding specified onionproxy user credentials "}
 		}
-		stateconfig.Oniondial =
+		app.Config.State.Oniondial =
 			func(network, addr string, timeout time.Duration) (net.Conn, error) {
 				proxy := &socks.Proxy{
-					Addr:         *Config.OnionProxy,
-					Username:     *Config.OnionProxyUser,
-					Password:     *Config.OnionProxyPass,
-					TorIsolation: *Config.TorIsolation,
+					Addr:         *app.Config.OnionProxy,
+					Username:     *app.Config.OnionProxyUser,
+					Password:     *app.Config.OnionProxyPass,
+					TorIsolation: *app.Config.TorIsolation,
 				}
 				return proxy.DialTimeout(network, addr, timeout)
 			}
 		// When configured in bridge mode (both --onion and --proxy are configured), it means that the proxy configured by --proxy is not a tor proxy, so override the DNS resolution to use the onion-specific proxy.
-		if *Config.Proxy != "" {
-			stateconfig.Lookup = func(host string) ([]net.IP, error) {
-				return connmgr.TorLookupIP(host, *Config.OnionProxy)
+		if *app.Config.Proxy != "" {
+			app.Config.State.Lookup = func(host string) ([]net.IP, error) {
+				return connmgr.TorLookupIP(host, *app.Config.OnionProxy)
 			}
 		}
 	} else {
-		stateconfig.Oniondial = stateconfig.Dial
+		app.Config.State.Oniondial = app.Config.State.Dial
 	}
 	// Specifying --noonion means the onion address dial function results in an error.
-	if !*Config.Onion {
-		stateconfig.Oniondial = func(a, b string, t time.Duration) (net.Conn, error) {
+	if !*app.Config.Onion {
+		app.Config.State.Oniondial = func(a, b string, t time.Duration) (net.Conn, error) {
 			return nil, errors.New("tor has been disabled")
 		}
 	}
 	return 0
 }
 
-func validateAddresses() int {
+func validateAddresses(app *App) int {
 	// TODO: simplify this to a boolean and one slice for config fercryinoutloud
-	if len(*Config.AddPeers) > 0 && len(*Config.ConnectPeers) > 0 {
+	if app.Config.AddPeers != nil && app.Config.ConnectPeers != nil {
 		fmt.Println("ERROR:", cl.Ine(),
 			"cannot have addpeers at the same time as connectpeers")
 		return 1
 	}
 	// Add default port to all rpc listener addresses if needed and remove duplicate addresses.
-	log <- cl.Debug{"checking rpc listener addresses"}
-	*Config.RPCListeners =
-		node.NormalizeAddresses(*Config.RPCListeners,
-			activenetparams.RPCPort)
+	// log <- cl.Debug{"checking rpc listener addresses"}
+	*app.Config.RPCListeners =
+		node.NormalizeAddresses(*app.Config.RPCListeners,
+			app.Config.ActiveNetParams.RPCPort)
 	// Add default port to all listener addresses if needed and remove duplicate addresses.
-	*Config.Listeners =
-		node.NormalizeAddresses(*Config.Listeners,
-			activenetparams.DefaultPort)
+	if app.Config.Listeners != nil {
+		*app.Config.Listeners =
+			node.NormalizeAddresses(*app.Config.Listeners,
+				app.Config.ActiveNetParams.DefaultPort)
+	}
 	// Add default port to all added peer addresses if needed and remove duplicate addresses.
-	*Config.AddPeers =
-		node.NormalizeAddresses(*Config.AddPeers,
-			activenetparams.DefaultPort)
-	*Config.ConnectPeers =
-		node.NormalizeAddresses(*Config.ConnectPeers,
-			activenetparams.DefaultPort)
+	if app.Config.AddPeers != nil {
+		*app.Config.AddPeers =
+			node.NormalizeAddresses(*app.Config.AddPeers,
+				app.Config.ActiveNetParams.DefaultPort)
+	}
+	if app.Config.ConnectPeers != nil {
+		*app.Config.ConnectPeers =
+			node.NormalizeAddresses(*app.Config.ConnectPeers,
+				app.Config.ActiveNetParams.DefaultPort)
+	}
 	// --onionproxy and not --onion are contradictory (TODO: this is kinda stupid hm? switch *and* toggle by presence of flag value, one should be enough)
 	return 0
 }
