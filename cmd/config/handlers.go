@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"git.parallelcoin.io/dev/9/cmd/nine"
+	"github.com/davecgh/go-spew/spew"
 	"sort"
 
 	"git.parallelcoin.io/dev/9/cmd/node"
@@ -140,6 +141,7 @@ func Ctl(args []string, tokens Tokens, app *App) int {
 func Node(args []string, tokens Tokens, app *App) int {
 	node.StateCfg = app.Config.State
 	node.Cfg = app.Config
+	spew.Dump(node.Cfg)
 	cl.Register.SetAllLevels(*app.Config.LogLevel)
 	setAppDataDir(app, "node")
 	_ = nine.ActiveNetParams //= activenetparams
@@ -165,6 +167,7 @@ func Node(args []string, tokens Tokens, app *App) int {
 func Wallet(args []string, tokens Tokens, app *App) int {
 	cl.Register.SetAllLevels(*app.Config.LogLevel)
 	setAppDataDir(app, "wallet")
+
 	walletmain.CreateWallet(app.Config, app.Config.ActiveNetParams)
 	walletmain.Main(app.Config, app.Config.ActiveNetParams)
 	return 0

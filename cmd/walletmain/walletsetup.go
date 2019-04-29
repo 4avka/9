@@ -121,8 +121,12 @@ func CreateWallet(cfg *nine.Config, activeNet *nine.Params) error {
 		// })
 	}
 	// Ascertain the public passphrase.  This will either be a value specified by the user or the default hard-coded public passphrase if the user does not want the additional public data encryption.
+	wpass := []byte{}
+	if cfg.WalletPass != nil {
+		wpass = []byte(*cfg.WalletPass)
+	}
 	pubPass, err := prompt.PublicPass(reader, privPass,
-		[]byte(""), []byte(*cfg.WalletPass))
+		[]byte(""), wpass)
 	if err != nil {
 		log <- cl.Debug{err}
 		time.Sleep(time.Second * 5)

@@ -9,9 +9,9 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program":"${workspaceFolder}/main.go",
+            "program":"${workspaceFolder}/cmd/config/cmd/main.go",
             "env": {},
-            "args": ["${workspaceFolder}/test","C"]
+            "args": ["./test","n"]
         }
     ]
 }

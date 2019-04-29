@@ -77,10 +77,6 @@ func (app *App) Parse(args []string) int {
 	if e != nil {
 		panic(e)
 	}
-	// app.Config = MakeConfig(app)
-	app.Config = MakeConfig(app)
-	app.Config.ActiveNetParams = node.ActiveNetParams
-	fmt.Println(app.Config.ActiveNetParams)
 	// now we can initialise the App
 	for i, x := range app.Cats {
 		for j := range x {
@@ -89,6 +85,8 @@ func (app *App) Parse(args []string) int {
 			app.Cats[i][j] = temp
 		}
 	}
+	app.Config = MakeConfig(app)
+	app.Config.ActiveNetParams = node.ActiveNetParams
 
 	if app.Config.LogLevel != nil {
 		cl.Register.SetAllLevels(*app.Config.LogLevel)

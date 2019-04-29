@@ -267,9 +267,8 @@ func Int(name string, g ...RowGenerator) CatGenerator {
 				valid := cc.Validate(cc, in)
 				if valid {
 					cc.Value = cc.Value.Put(in)
-					return true
 				}
-				return false
+				return valid
 			}
 			G.RunAll(cc)
 		}
@@ -291,11 +290,11 @@ func Tag(name string, g ...RowGenerator) CatGenerator {
 			cc.Validate = Valid.Tag
 			cc.Value = NewIface()
 			cc.Put = func(in interface{}) bool {
-				if cc.Validate(cc, in) {
+				valid := cc.Validate(cc, in)
+				if valid {
 					cc.Value = cc.Value.Put(in)
-					return true
 				}
-				return false
+				return valid
 			}
 			G.RunAll(cc)
 		}
@@ -320,9 +319,8 @@ func Tags(name string, g ...RowGenerator) CatGenerator {
 				valid := cc.Validate(cc, in)
 				if valid {
 					cc.Value = cc.Value.Put(in)
-					return true
 				}
-				return false
+				return valid
 			}
 			G.RunAll(cc)
 		}
@@ -347,9 +345,8 @@ func Addr(name string, defPort int, g ...RowGenerator) CatGenerator {
 				valid := cc.Validate(cc, in)
 				if valid {
 					cc.Value = cc.Value.Put(in)
-					return true
 				}
-				return false
+				return valid
 			}
 			cc.Usage = fmt.Sprintf(
 				"\n\nNOTE: port must be between 1025-65535, port %d will be assumed if no port is given",
@@ -589,7 +586,7 @@ func Default(in interface{}) RowGenerator {
 			fmt.Println("type not found", ctx.Name, reflect.TypeOf(in))
 			return
 		}
-		ctx.Value.Put(nil)
+		// ctx.Value.Put(nil)
 	}
 }
 

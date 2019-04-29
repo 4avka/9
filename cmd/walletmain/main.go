@@ -2,6 +2,7 @@ package walletmain
 
 import (
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -69,7 +70,11 @@ func Main(c *nine.Config, activeNet *nine.Params) error {
 		log <- cl.Debug{"loading database"}
 		// Load the wallet database.  It must have been created already
 		// or this will return an appropriate error.
-		_, err = loader.OpenExistingWallet([]byte(*cfg.WalletPass), true)
+		if cfg.WalletPass != nil {
+			_, err = loader.OpenExistingWallet([]byte(*cfg.WalletPass), true)
+		} else {
+			_, err = loader.OpenExistingWallet([]byte{}, true)
+		}
 		if err != nil {
 			fmt.Println(err)
 			log <- cl.Error{err}
@@ -237,9 +242,14 @@ func startChainRPC(certs []byte) (*chain.RPCClient, error) {
 	// 	"attempting RPC client connection to %v, TLS: %s",
 	// 	*cfg.RPCConnect, fmt.Sprint(!*cfg.NoTLS),
 	// }
-	// spew.Dump(cfg)
-	rpcc, err := chain.NewRPCClient(ActiveNet.Params, *cfg.RPCConnect,
-		*cfg.Username, *cfg.Password, certs, !*cfg.NoTLS, 0)
+	spew.Dump(cfg)
+	rpcc, err := chain.NewRPCClient(
+		ActiveNet.Params,
+		*cfg.RPCConnect,
+		*cfg.Username,
+		*cfg.Password,
+		certs,
+		!*cfg.NoTLS, 0)
 	if err != nil {
 		return nil, err
 	}
