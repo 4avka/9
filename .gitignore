@@ -16,4 +16,5 @@ test*/**
 test/config
 test/**
 bin/*
-.vscode
+.*
+!/.gitignore
