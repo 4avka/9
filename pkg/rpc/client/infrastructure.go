@@ -9,7 +9,6 @@ import (
 	js "encoding/json"
 	"errors"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"io"
 	"io/ioutil"
 	"math"
@@ -1310,7 +1309,6 @@ func (c *Client) Connect(tries int) error {
 	for i := 0; tries == 0 || i < tries; i++ {
 		log <- cl.Debug{"try", i}
 		var wsConn *websocket.Conn
-		spew.Dump(c.config)
 		wsConn, err = dial(c.config)
 		if err != nil {
 			log <- cl.Error{"dial error", err}

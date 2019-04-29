@@ -1,4 +1,4 @@
-package cmd
+package config
 
 import (
 	"net"
@@ -10,12 +10,16 @@ import (
 	"git.parallelcoin.io/dev/9/pkg/util"
 )
 
-// minUint32 is a helper function to return the minimum of two uint32s. This avoids a math import and the need to cast to floats.
-func minUint32(a, b uint32) uint32 {
+// MinUint32 is a helper function to return the minimum of two uint32s. This avoids a math import and the need to cast to floats.
+func MinUint32(a, b uint32) uint32 {
 	if a < b {
 		return a
 	}
 	return b
+}
+
+func isWindows() bool {
+	return runtime.GOOS == "windows"
 }
 
 // EnsureDir checks a file could be written to a path, creates the directories as needed
@@ -38,19 +42,24 @@ func FileExists(filePath string) bool {
 }
 
 // CleanAndExpandPath expands environment variables and leading ~ in the passed path, cleans the result, and returns it.
-func CleanAndExpandPath(path string) string {
+func CleanAndExpandPath(path, datadir string) string {
 	// Expand initial ~ to OS specific home directory.
+	homeDir := filepath.Dir(util.AppDataDir("9", false))
 	if strings.HasPrefix(path, "~") {
-		homeDir := filepath.Dir(util.AppDataDir("pod", false))
-		path = strings.Replace(path, "~", homeDir, 1)
+		return strings.Replace(path, "~", homeDir, 1)
+
+	}
+	if strings.HasPrefix(path, "./") {
+		// explicitly prefix is this must be a relative path
+		pwd, _ := os.Getwd()
+		return filepath.Join(pwd, path)
+	} else if !strings.HasPrefix(path, "/") && !strings.HasPrefix(path, "\\") {
+		if path != datadir {
+			return filepath.Join(datadir, path)
+		}
 	}
 	// NOTE: The os.ExpandEnv doesn't work with Windows-style %VARIABLE%, but they variables can still be expanded via POSIX-style $VARIABLE.
 	path = filepath.Clean(os.ExpandEnv(path))
-	if !strings.HasPrefix(path, "/") && !strings.HasPrefix(path, ".") &&
-		runtime.GOOS != "windows" {
-		// explicitly prefix is this must be a relative path
-		path = "./" + path
-	}
 	return path
 }
 
