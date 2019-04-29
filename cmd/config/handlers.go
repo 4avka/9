@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"git.parallelcoin.io/dev/9/cmd/nine"
-	"github.com/davecgh/go-spew/spew"
 	"sort"
 
 	"git.parallelcoin.io/dev/9/cmd/node"
@@ -68,6 +67,11 @@ func Help(args []string, tokens Tokens, app *App) int {
 		}
 	} else {
 		// some number of other commands were mentioned
+		fmt.Println(
+			"showing items mentioned alongside help in commandline:",
+			tokens.GetSortedKeys(),
+		)
+		fmt.Println()
 		var tags []string
 		for i := range tokens {
 			tags = append(tags, i)
@@ -141,9 +145,8 @@ func Ctl(args []string, tokens Tokens, app *App) int {
 func Node(args []string, tokens Tokens, app *App) int {
 	node.StateCfg = app.Config.State
 	node.Cfg = app.Config
-	spew.Dump(node.Cfg)
 	cl.Register.SetAllLevels(*app.Config.LogLevel)
-	setAppDataDir(app, "node")
+	// setAppDataDir(app, "node")
 	_ = nine.ActiveNetParams //= activenetparams
 	if validateWhitelists(app) != 0 ||
 		validateProxyListeners(app) != 0 ||
@@ -165,7 +168,6 @@ func Node(args []string, tokens Tokens, app *App) int {
 }
 
 func Wallet(args []string, tokens Tokens, app *App) int {
-	cl.Register.SetAllLevels(*app.Config.LogLevel)
 	setAppDataDir(app, "wallet")
 
 	// dbDir := walletmain.NetworkDir(*app.Config.AppDataDir, app.Config.ActiveNetParams.Params)
@@ -186,8 +188,23 @@ func Wallet(args []string, tokens Tokens, app *App) int {
 }
 
 func Shell(args []string, tokens Tokens, app *App) int {
-	cl.Register.SetAllLevels(*app.Config.LogLevel)
 	fmt.Println("running Shell", args, getTokens(tokens))
+	setAppDataDir(app, "wallet")
+	// dbDir := walletmain.NetworkDir(*app.Config.AppDataDir, app.Config.ActiveNetParams.Params)
+	netDir := walletmain.NetworkDir(*app.Config.AppDataDir, app.Config.ActiveNetParams.Params)
+	wdb := netDir + "/wallet.db"
+	log <- cl.Debug{"opening wallet:", wdb}
+	if !FileExists(wdb) {
+		if e := walletmain.CreateWallet(
+			app.Config, app.Config.ActiveNetParams); e != nil {
+			panic("could not create wallet " + e.Error())
+		}
+	} else {
+		go Node(args, tokens, app)
+		if e := walletmain.Main(app.Config, app.Config.ActiveNetParams); e != nil {
+			return 1
+		}
+	}
 	return 0
 }
 

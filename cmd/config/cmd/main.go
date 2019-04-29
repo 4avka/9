@@ -167,7 +167,7 @@ var NineApp = func() *App {
 			Short("directory to look for configuration or write logs etc"),
 			Detail(`	<datadir> sets the data directory where the wallet will be stored`),
 			Opts(),
-			Precs("help", "node", "ctl", "wallet", "conf", "test", "new", "copy"),
+			Precs("help", "node", "ctl", "wallet", "conf", "test", "new", "copy", "shell"),
 			Handler(func(args []string, tokens Tokens, app *App) int { return 0 }),
 		),
 		Cmd("integer",
