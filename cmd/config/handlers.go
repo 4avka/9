@@ -168,8 +168,20 @@ func Wallet(args []string, tokens Tokens, app *App) int {
 	cl.Register.SetAllLevels(*app.Config.LogLevel)
 	setAppDataDir(app, "wallet")
 
-	walletmain.CreateWallet(app.Config, app.Config.ActiveNetParams)
-	walletmain.Main(app.Config, app.Config.ActiveNetParams)
+	// dbDir := walletmain.NetworkDir(*app.Config.AppDataDir, app.Config.ActiveNetParams.Params)
+	netDir := walletmain.NetworkDir(*app.Config.AppDataDir, app.Config.ActiveNetParams.Params)
+	wdb := netDir + "/wallet.db"
+	log <- cl.Debug{"opening wallet:", wdb}
+	if !FileExists(wdb) {
+		if e := walletmain.CreateWallet(
+			app.Config, app.Config.ActiveNetParams); e != nil {
+			panic("could not create wallet " + e.Error())
+		}
+	} else {
+		if e := walletmain.Main(app.Config, app.Config.ActiveNetParams); e != nil {
+			return 1
+		}
+	}
 	return 0
 }
 

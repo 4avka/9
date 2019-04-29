@@ -25,7 +25,7 @@ var (
 // Main is a work-around main function that is required since deferred functions (such as log flushing) are not called with calls to os.Exit.
 // Instead, main runs this function and checks for a non-nil error, at point any defers have already run, and if the error is non-nil, the program can be exited with an error exit status.
 func Main(c *nine.Config, activeNet *nine.Params) error {
-	fmt.Println("wallet Main")
+	// fmt.Println("wallet Main")
 	cfg = c
 	ActiveNet = activeNet
 	if ActiveNet.Name == "testnet" {
@@ -66,6 +66,7 @@ func Main(c *nine.Config, activeNet *nine.Params) error {
 		log <- cl.Trc("starting startWalletRPCServices")
 		startWalletRPCServices(w, rpcs, legacyRPCServer)
 	})
+
 	if !*cfg.NoInitialLoad {
 		log <- cl.Debug{"loading database"}
 		// Load the wallet database.  It must have been created already

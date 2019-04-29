@@ -47,7 +47,7 @@ func CreateSimulationWallet(
 
 // CreateWallet prompts the user for information needed to generate a new wallet and generates the wallet accordingly.  The new wallet will reside at the provided path.
 func CreateWallet(cfg *nine.Config, activeNet *nine.Params) error {
-	log <- cl.Info{*cfg.AppDataDir}
+	// log <- cl.Info{*cfg.AppDataDir}
 	dbDir := NetworkDir(*cfg.AppDataDir, activeNet.Params)
 	loader := wallet.NewLoader(activeNet.Params, dbDir, 250)
 	// When there is a legacy keystore, open it now to ensure any errors

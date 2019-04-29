@@ -178,7 +178,7 @@ func (app *App) ParseCLI(args []string) (cmd *Command, tokens Tokens) {
 	} else if len(withHandlersNames) == 1 {
 		resolved = []string{withHandlersNames[0]}
 	}
-	fmt.Println(resolved)
+	// fmt.Println(resolved)
 	if len(resolved) < 1 {
 		err := fmt.Errorf(
 			"\nunable to resolve which command to run:\n\tinput: '%s'",
