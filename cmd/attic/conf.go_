@@ -1,5 +1,4 @@
 package cmd
-
 import (
 	"fmt"
 	"os"
@@ -9,13 +8,10 @@ import (
 	"sort"
 	"strings"
 	"time"
-
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 	"github.com/AlecAivazis/survey.v1"
 )
-
 const BACK = "back"
-
 func RunConf(args []string, tokens Tokens, cmds, all Commands) int {
 	fmt.Println("ⓟarallelcoin configuration CLI")
 	runner := ConfMain()
@@ -35,7 +31,6 @@ func RunConf(args []string, tokens Tokens, cmds, all Commands) int {
 	}
 	return 0
 }
-
 func ConfMain() string {
 	cont := true
 	for cont {
@@ -83,7 +78,6 @@ func ConfMain() string {
 	}
 	return ""
 }
-
 func ConfRun() string {
 	prompt := &survey.Select{
 		Message: "select server to run:",
@@ -99,9 +93,7 @@ func ConfRun() string {
 	}
 	return name
 }
-
 var cursor string
-
 func ConfConf(subsection string) int {
 	cursor = subsection
 	for {
@@ -135,7 +127,6 @@ func ConfConf(subsection string) int {
 					// if we don't recognise it we can't print it
 					continue
 				}
-
 				item := fmt.Sprintf("%s : %v (%v) = %v", sects[0][2], c.Comment, c.Initial, value)
 				lines = append(lines, item)
 			}
@@ -180,7 +171,6 @@ func ConfConf(subsection string) int {
 	}
 	return 0
 }
-
 func ConfConfEdit(key string) int {
 	if _, ok := (*config)[key]; !ok {
 		return 1

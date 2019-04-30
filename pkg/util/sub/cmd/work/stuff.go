@@ -1,7 +1,5 @@
 package main
-
 import "github.com/parallelcointeam/sub/clog"
-
 var (
 	lf = &clog.Ftl.Chan
 	le = &clog.Err.Chan

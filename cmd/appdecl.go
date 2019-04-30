@@ -1,5 +1,4 @@
 package cmd
-
 import (
 	"fmt"
 	"math/rand"
@@ -7,10 +6,8 @@ import (
 	"regexp"
 	"strconv"
 	"time"
-
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
-
 func NewApp(name string, g ...AppGenerator) (out *App) {
 	gen := AppGenerators(g)
 	out = &App{
@@ -27,9 +24,7 @@ func NewApp(name string, g ...AppGenerator) (out *App) {
 	}
 	return
 }
-
 // which is made from
-
 func Version(ver string) AppGenerator {
 	return func(ctx *App) {
 		ctx.Version = func() string {
@@ -37,25 +32,21 @@ func Version(ver string) AppGenerator {
 		}
 	}
 }
-
 func Tagline(ver string) AppGenerator {
 	return func(ctx *App) {
 		ctx.Tagline = ver
 	}
 }
-
 func About(ver string) AppGenerator {
 	return func(ctx *App) {
 		ctx.About = ver
 	}
 }
-
 func DefaultRunner(fn func(ctx *App) int) AppGenerator {
 	return func(ctx *App) {
 		ctx.Default = fn
 	}
 }
-
 func Group(name string, g ...CatGenerator) AppGenerator {
 	G := CatGenerators(g)
 	return func(ctx *App) {
@@ -63,55 +54,45 @@ func Group(name string, g ...CatGenerator) AppGenerator {
 		G.RunAll(ctx.Cats[name])
 	}
 }
-
 func Cmd(name string, g ...CommandGenerator) AppGenerator {
 	G := CommandGenerators(g)
 	return func(ctx *App) {
 		ctx.Commands[name] = G.RunAll()
 	}
 }
-
 // Command Item Generators
-
 func Pattern(patt string) CommandGenerator {
 	return func(ctx *Command) {
 		ctx.Pattern = patt
 		ctx.RE = regexp.MustCompile(ctx.Pattern)
 	}
 }
-
 func Short(usage string) CommandGenerator {
 	return func(ctx *Command) {
 		ctx.Short = usage
 	}
 }
-
 func Detail(usage string) CommandGenerator {
 	return func(ctx *Command) {
 		ctx.Detail = usage
 	}
 }
-
 func Opts(opts ...string) CommandGenerator {
 	return func(ctx *Command) {
 		ctx.Opts = opts
 	}
 }
-
 func Precs(precs ...string) CommandGenerator {
 	return func(ctx *Command) {
 		ctx.Precedent = precs
 	}
 }
-
 func Handler(hnd func(args []string, tokens Tokens, app *App) int) CommandGenerator {
 	return func(ctx *Command) {
 		ctx.Handler = hnd
 	}
 }
-
 // Group Item Generators
-
 func File(name string, g ...RowGenerator) CatGenerator {
 	G := RowGenerators(g)
 	return func(ctx *Cat) {
@@ -139,7 +120,6 @@ func File(name string, g ...RowGenerator) CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 func Dir(name string, g ...RowGenerator) CatGenerator {
 	G := RowGenerators(g)
 	return func(ctx *Cat) {
@@ -167,7 +147,6 @@ func Dir(name string, g ...RowGenerator) CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 func Port(name string, g ...RowGenerator) CatGenerator {
 	G := RowGenerators(g)
 	return func(ctx *Cat) {
@@ -194,7 +173,6 @@ func Port(name string, g ...RowGenerator) CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 func Enable(name string, g ...RowGenerator) CatGenerator {
 	G := RowGenerators(g)
 	return func(ctx *Cat) {
@@ -222,7 +200,6 @@ func Enable(name string, g ...RowGenerator) CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 func Enabled(name string, g ...RowGenerator) CatGenerator {
 	G := RowGenerators(g)
 	return func(ctx *Cat) {
@@ -250,7 +227,6 @@ func Enabled(name string, g ...RowGenerator) CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 func Int(name string, g ...RowGenerator) CatGenerator {
 	G := RowGenerators(g)
 	return func(ctx *Cat) {
@@ -276,7 +252,6 @@ func Int(name string, g ...RowGenerator) CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 func Tag(name string, g ...RowGenerator) CatGenerator {
 	G := RowGenerators(g)
 	return func(ctx *Cat) {
@@ -302,7 +277,6 @@ func Tag(name string, g ...RowGenerator) CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 func Tags(name string, g ...RowGenerator) CatGenerator {
 	G := RowGenerators(g)
 	return func(ctx *Cat) {
@@ -328,7 +302,6 @@ func Tags(name string, g ...RowGenerator) CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 func Addr(name string, defPort int, g ...RowGenerator) CatGenerator {
 	G := RowGenerators(g)
 	return func(ctx *Cat) {
@@ -357,7 +330,6 @@ func Addr(name string, defPort int, g ...RowGenerator) CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 func Addrs(name string, defPort int, g ...RowGenerator) CatGenerator {
 	G := RowGenerators(g)
 	return func(ctx *Cat) {
@@ -383,7 +355,6 @@ func Addrs(name string, defPort int, g ...RowGenerator) CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 func Level(g ...RowGenerator) CatGenerator {
 	G := RowGenerators(g)
 	const lvl = "level"
@@ -411,7 +382,6 @@ func Level(g ...RowGenerator) CatGenerator {
 		(*ctx)[lvl] = c
 	}
 }
-
 func Algo(name string, g ...RowGenerator) CatGenerator {
 	G := RowGenerators(g)
 	return func(ctx *Cat) {
@@ -438,7 +408,6 @@ func Algo(name string, g ...RowGenerator) CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 func Float(name string, g ...RowGenerator) CatGenerator {
 	G := RowGenerators(g)
 	return func(ctx *Cat) {
@@ -464,7 +433,6 @@ func Float(name string, g ...RowGenerator) CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 func Duration(name string, g ...RowGenerator) CatGenerator {
 	G := RowGenerators(g)
 	return func(ctx *Cat) {
@@ -490,7 +458,6 @@ func Duration(name string, g ...RowGenerator) CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 func Net(name string, g ...RowGenerator) CatGenerator {
 	G := RowGenerators(g)
 	return func(ctx *Cat) {
@@ -517,16 +484,13 @@ func Net(name string, g ...RowGenerator) CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 // which is populated by
-
 // Usage populates the usage field for information about a config item
 func Usage(usage string) RowGenerator {
 	return func(ctx *Row) {
 		ctx.Usage = usage + " " + ctx.Usage
 	}
 }
-
 // Default sets the default value for a config item
 func Default(in interface{}) RowGenerator {
 	return func(ctx *Row) {
@@ -581,7 +545,6 @@ func Default(in interface{}) RowGenerator {
 				ctx.Default.Put(I)
 			}
 		case nil:
-
 		default:
 			fmt.Println("type not found", ctx.Name, reflect.TypeOf(in))
 			return
@@ -589,7 +552,6 @@ func Default(in interface{}) RowGenerator {
 		// ctx.Value.Put(nil)
 	}
 }
-
 // Min attaches to the validator a test that enforces a minimum
 func Min(min int) RowGenerator {
 	return func(ctx *Row) {
@@ -623,7 +585,6 @@ func Min(min int) RowGenerator {
 		}
 	}
 }
-
 // Max attaches to the validator a test that enforces a maximum
 func Max(max int) RowGenerator {
 	return func(ctx *Row) {
@@ -657,7 +618,6 @@ func Max(max int) RowGenerator {
 		}
 	}
 }
-
 // RandomsString generates a random number and converts to base32 for
 // a default random password of some number of characters
 func RandomString(n int) RowGenerator {
@@ -683,7 +643,6 @@ func RandomString(n int) RowGenerator {
 			cache >>= letterIdxBits
 			remain--
 		}
-
 		sb := string(b)
 		ctx.Value = ctx.Value.Put(sb)
 	}

@@ -1,5 +1,4 @@
 package walletmain
-
 import (
 	"fmt"
 	"github.com/davecgh/go-spew/spew"
@@ -8,7 +7,6 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"sync"
-
 	"git.parallelcoin.io/dev/9/cmd/nine"
 	"git.parallelcoin.io/dev/9/pkg/chain/fork"
 	legacyrpc "git.parallelcoin.io/dev/9/pkg/rpc/legacy"
@@ -17,11 +15,9 @@ import (
 	"git.parallelcoin.io/dev/9/pkg/wallet"
 	chain "git.parallelcoin.io/dev/9/pkg/wallet/chain"
 )
-
 var (
 	cfg *nine.Config
 )
-
 // Main is a work-around main function that is required since deferred functions (such as log flushing) are not called with calls to os.Exit.
 // Instead, main runs this function and checks for a non-nil error, at point any defers have already run, and if the error is non-nil, the program can be exited with an error exit status.
 func Main(c *nine.Config, activeNet *nine.Params, path string) error {
@@ -66,7 +62,6 @@ func Main(c *nine.Config, activeNet *nine.Params, path string) error {
 		log <- cl.Trc("starting startWalletRPCServices")
 		startWalletRPCServices(w, rpcs, legacyRPCServer)
 	})
-
 	if !*cfg.NoInitialLoad {
 		log <- cl.Debug{"loading database"}
 		// Load the wallet database.  It must have been created already
@@ -138,7 +133,6 @@ func readCAFile() []byte {
 	}
 	return certs
 }
-
 // rpcClientConnectLoop continuously attempts a connection to the consensus RPC server.
 // When a connection is established, the client is used to sync the loaded wallet, either
 // immediately or when loaded at a later time.
@@ -233,7 +227,6 @@ func rpcClientConnectLoop(legacyRPCServer *legacyrpc.Server, loader *wallet.Load
 		}
 	}
 }
-
 // startChainRPC opens a RPC client connection to a pod server for blockchain
 // services.  This function uses the RPC options from the global config and
 // there is no recovery in case the server is not available or if there is an

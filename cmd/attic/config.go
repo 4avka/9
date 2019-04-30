@@ -1,12 +1,9 @@
 package cmd
-
 import (
 	"time"
-
 	"git.parallelcoin.io/dev/9/cmd/nine"
 	"git.parallelcoin.io/dev/9/cmd/node"
 )
-
 var activenetparams = node.ActiveNetParams
 var config = getConfig()
 var Config = MakeConfig(config)
@@ -14,7 +11,6 @@ var stateconfig = node.StateCfg
 var tn, sn, rn bool
 var DataDir string
 var ConfigFile string
-
 func MakeConfig(c *Lines) (out *nine.Config) {
 	cfg := *c
 	String := func(path string) (out *string) {
@@ -59,7 +55,6 @@ func MakeConfig(c *Lines) (out *nine.Config) {
 		}
 		return
 	}
-
 	out = &nine.Config{
 		ConfigFile:               &ConfigFile,
 		AppDataDir:               String("app.appdatadir"),

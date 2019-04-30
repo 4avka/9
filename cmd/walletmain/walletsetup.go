@@ -1,12 +1,10 @@
 package walletmain
-
 import (
 	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
 	"time"
-
 	"git.parallelcoin.io/dev/9/cmd/nine"
 	chaincfg "git.parallelcoin.io/dev/9/pkg/chain/config"
 	"git.parallelcoin.io/dev/9/pkg/chain/wire"
@@ -17,7 +15,6 @@ import (
 	walletdb "git.parallelcoin.io/dev/9/pkg/wallet/db"
 	_ "git.parallelcoin.io/dev/9/pkg/wallet/db/bdb"
 )
-
 // CreateSimulationWallet is intended to be called from the rpcclient
 // and used to create a wallet for actors involved in simulations.
 func CreateSimulationWallet(
@@ -44,7 +41,6 @@ func CreateSimulationWallet(
 	fmt.Println("The wallet has been created successfully.")
 	return nil
 }
-
 // CreateWallet prompts the user for information needed to generate a new wallet and generates the wallet accordingly.  The new wallet will reside at the provided path.
 func CreateWallet(cfg *nine.Config, activeNet *nine.Params, path string) error {
 	// log <- cl.Info{*cfg.AppDataDir}
@@ -65,7 +61,6 @@ func CreateWallet(cfg *nine.Config, activeNet *nine.Params, path string) error {
 		log <- cl.Debug{"found existing wallet"}
 		return nil
 	}
-
 	_, err = os.Stat(keystorePath)
 	if err != nil && !os.IsNotExist(err) {
 		// A stat error not due to a non-existant file should be
@@ -152,7 +147,6 @@ func CreateWallet(cfg *nine.Config, activeNet *nine.Params, path string) error {
 	log <- cl.Dbg("The wallet has been created successfully.")
 	return nil
 }
-
 // NetworkDir returns the directory name of a network directory to hold wallet files.
 func NetworkDir(
 	dataDir string, chainParams *chaincfg.Params) string {
@@ -163,7 +157,6 @@ func NetworkDir(
 	}
 	return filepath.Join(dataDir, netname)
 }
-
 // checkCreateDir checks that the path exists and is a directory.
 // If path does not exist, it is created.
 func checkCreateDir(
@@ -184,7 +177,6 @@ func checkCreateDir(
 	}
 	return nil
 }
-
 // // convertLegacyKeystore converts all of the addresses in the passed legacy key store to the new waddrmgr.Manager format.  Both the legacy keystore and the new manager must be unlocked.
 // func convertLegacyKeystore(
 // 	legacyKeyStore *keystore.Store, w *wallet.Wallet) error {

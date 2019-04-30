@@ -1,10 +1,8 @@
 package cmd
-
 import (
 	"git.parallelcoin.io/dev/9/cmd/nine"
 	"git.parallelcoin.io/dev/9/cmd/node"
 )
-
 func MakeConfig(c *App) (out *nine.Config) {
 	C := c.Cats
 	var configFile string

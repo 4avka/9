@@ -1,17 +1,14 @@
 // Copyright (c) 2016 The Decred developers
 // Copyright (c) 2017 The btcsuite developers
 package wallet
-
 import (
 	chainhash "git.parallelcoin.io/dev/9/pkg/chain/hash"
 	wtxmgr "git.parallelcoin.io/dev/9/pkg/chain/tx/mgr"
 	walletdb "git.parallelcoin.io/dev/9/pkg/wallet/db"
 )
-
 type unstableAPI struct {
 	w *Wallet
 }
-
 // UnstableAPI exposes additional unstable public APIs for a Wallet.  These APIs
 // may be changed or removed at any time.  Currently this type exists to ease
 // the transation (particularly for the legacy JSON-RPC server) from using
@@ -21,7 +18,6 @@ func UnstableAPI(
 	w *Wallet) unstableAPI {
 	return unstableAPI{w}
 }
-
 // TxDetails calls wtxmgr.Store.TxDetails under a single database view transaction.
 func (u unstableAPI) TxDetails(txHash *chainhash.Hash) (*wtxmgr.TxDetails, error) {
 	var details *wtxmgr.TxDetails
@@ -33,7 +29,6 @@ func (u unstableAPI) TxDetails(txHash *chainhash.Hash) (*wtxmgr.TxDetails, error
 	})
 	return details, err
 }
-
 // RangeTransactions calls wtxmgr.Store.RangeTransactions under a single
 // database view tranasction.
 func (u unstableAPI) RangeTransactions(begin, end int32, f func([]wtxmgr.TxDetails) (bool, error)) error {

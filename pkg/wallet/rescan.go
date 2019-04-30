@@ -1,6 +1,5 @@
 // Copyright (c) 2013-2017 The btcsuite developers
 package wallet
-
 import (
 	wtxmgr "git.parallelcoin.io/dev/9/pkg/chain/tx/mgr"
 	txscript "git.parallelcoin.io/dev/9/pkg/chain/tx/script"
@@ -10,21 +9,18 @@ import (
 	waddrmgr "git.parallelcoin.io/dev/9/pkg/wallet/addrmgr"
 	chain "git.parallelcoin.io/dev/9/pkg/wallet/chain"
 )
-
 // RescanProgressMsg reports the current progress made by a rescan for a
 // set of wallet addresses.
 type RescanProgressMsg struct {
 	Addresses    []util.Address
 	Notification *chain.RescanProgress
 }
-
 // RescanFinishedMsg reports the addresses that were rescanned when a
 // rescanfinished message was received rescanning a batch of addresses.
 type RescanFinishedMsg struct {
 	Addresses    []util.Address
 	Notification *chain.RescanFinished
 }
-
 // RescanJob is a job to be processed by the RescanManager.  The job includes
 // a set of wallet addresses, a starting height to begin the rescan, and
 // outpoints spendable by the addresses thought to be unspent.  After the
@@ -37,7 +33,6 @@ type RescanJob struct {
 	BlockStamp  waddrmgr.BlockStamp
 	err         chan error
 }
-
 // rescanBatch is a collection of one or more RescanJobs that were merged
 // together before a rescan is performed.
 type rescanBatch struct {
@@ -47,7 +42,6 @@ type rescanBatch struct {
 	bs          waddrmgr.BlockStamp
 	errChans    []chan error
 }
-
 // SubmitRescan submits a RescanJob to the RescanManager.  A channel is
 // returned with the final error of the rescan.  The channel is buffered
 // and does not need to be read to prevent a deadlock.
@@ -57,7 +51,6 @@ func (w *Wallet) SubmitRescan(job *RescanJob) <-chan error {
 	w.rescanAddJob <- job
 	return errChan
 }
-
 // batch creates the rescanBatch for a single rescan job.
 func (job *RescanJob) batch() *rescanBatch {
 	return &rescanBatch{
@@ -68,7 +61,6 @@ func (job *RescanJob) batch() *rescanBatch {
 		errChans:    []chan error{job.err},
 	}
 }
-
 // merge merges the work from k into j, setting the starting height to
 // the minimum of the two jobs.  This method does not check for
 // duplicate addresses or outpoints.
@@ -85,7 +77,6 @@ func (b *rescanBatch) merge(job *RescanJob) {
 	}
 	b.errChans = append(b.errChans, job.err)
 }
-
 // done iterates through all error channels, duplicating sending the error
 // to inform callers that the rescan finished (or could not complete due
 // to an error).
@@ -94,7 +85,6 @@ func (b *rescanBatch) done(err error) {
 		c <- err
 	}
 }
-
 // rescanBatchHandler handles incoming rescan request, serializing rescan
 // submissions, and possibly batching many waiting requests together so they
 // can be handled by a single rescan after the current one completes.
@@ -157,7 +147,6 @@ out:
 	}
 	w.wg.Done()
 }
-
 // rescanProgressHandler handles notifications for partially and fully completed rescans by marking each rescanned address as partially or fully synced.
 func (w *Wallet) rescanProgressHandler() {
 	quit := w.quitChan()
@@ -186,7 +175,6 @@ out:
 	}
 	w.wg.Done()
 }
-
 // rescanRPCHandler reads batch jobs sent by rescanBatchHandler and sends the
 // RPC requests to perform a rescan.  New jobs are not read until a rescan
 // finishes.
@@ -223,7 +211,6 @@ out:
 	}
 	w.wg.Done()
 }
-
 // Rescan begins a rescan for all active addresses and unspent outputs of
 // a wallet.  This is intended to be used to sync a wallet back up to the
 // current best block in the main chain, and is considered an initial sync
@@ -231,7 +218,6 @@ out:
 func (w *Wallet) Rescan(addrs []util.Address, unspent []wtxmgr.Credit) error {
 	return w.rescanWithTarget(addrs, unspent, nil)
 }
-
 // rescanWithTarget performs a rescan starting at the optional startStamp. If
 // none is provided, the rescan will begin from the manager's sync tip.
 func (w *Wallet) rescanWithTarget(addrs []util.Address,

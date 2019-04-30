@@ -1,23 +1,18 @@
 package nine
-
 import (
 	"net"
 	"strings"
 	"time"
-
 	chaincfg "git.parallelcoin.io/dev/9/pkg/chain/config"
 	"git.parallelcoin.io/dev/9/pkg/util"
 )
-
 type Mapstringstring map[string]*string
-
 func (m Mapstringstring) String() (out string) {
 	for i, x := range m {
 		out += i + ":" + *x + " "
 	}
 	return strings.TrimSpace(out)
 }
-
 type Config struct {
 	ConfigFile               *string
 	AppDataDir               *string
@@ -110,7 +105,6 @@ type Config struct {
 	State                    *StateConfig
 	ActiveNetParams          *Params
 }
-
 // StateConfig stores current state of the node
 type StateConfig struct {
 	Lookup              func(string) ([]net.IP, error)
@@ -126,35 +120,29 @@ type StateConfig struct {
 	DropCfIndex         bool
 	Save                bool
 }
-
 // Params is used to group parameters for various networks such as the main network and test networks.
 type Params struct {
 	*chaincfg.Params
 	RPCPort string
 }
-
 // MainNetParams contains parameters specific to the main network (wire.MainNet).  NOTE: The RPC port is intentionally different than the reference implementation because pod does not handle wallet requests.  The separate wallet process listens on the well-known port and forwards requests it does not handle on to pod.  This approach allows the wallet process to emulate the full reference implementation RPC API.
 var MainNetParams = Params{
 	Params:  &chaincfg.MainNetParams,
 	RPCPort: "11048",
 }
-
 // RegressionNetParams contains parameters specific to the regression test network (wire.TestNet).  NOTE: The RPC port is intentionally different than the reference implementation - see the MainNetParams comment for details.
 var RegressionNetParams = Params{
 	Params:  &chaincfg.RegressionNetParams,
 	RPCPort: "31048",
 }
-
 // SimNetParams contains parameters specific to the simulation test network (wire.SimNet).
 var SimNetParams = Params{
 	Params:  &chaincfg.SimNetParams,
 	RPCPort: "41048",
 }
-
 // TestNet3Params contains parameters specific to the test network (version 3) (wire.TestNet3).  NOTE: The RPC port is intentionally different than the reference implementation - see the MainNetParams comment for details.
 var TestNet3Params = Params{
 	Params:  &chaincfg.TestNet3Params,
 	RPCPort: "21048",
 }
-
 var ActiveNetParams = &MainNetParams

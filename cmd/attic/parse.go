@@ -1,5 +1,4 @@
 package cmd
-
 import (
 	"fmt"
 	"io/ioutil"
@@ -7,13 +6,10 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
-
 var configRE = regexp.MustCompile(
 	"(NAME )(.*)( VALUE )(.*)( DEFAULT )(.*)( COMMENT )(.*)")
-
 func Parse(args []string) int {
 	// parse commandline
 	cmd, tokens, cmds := parseCLI(args)
@@ -30,9 +26,7 @@ func Parse(args []string) int {
 		datadir = *Config.DataDir
 	}
 	setAppDataDir(cmd.name)
-
 	setDefaultTLSPaths(datadir)
-
 	configFile := CleanAndExpandPath(filepath.Join(datadir, "config"))
 	log <- cl.Debug{"loading config from:", configFile}
 	if !FileExists(configFile) {
@@ -48,7 +42,6 @@ func Parse(args []string) int {
 		if err != nil {
 			panic(err)
 		}
-
 	} else {
 		conf, err := ioutil.ReadFile(configFile)
 		if err != nil {

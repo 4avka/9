@@ -1,13 +1,9 @@
 // Copyright (c) 2015 The btcsuite developers
-
 //+build !generate
-
 package rpchelp
-
 import (
 	"git.parallelcoin.io/dev/9/pkg/rpc/json"
 )
-
 // HelpDescs contains the locale-specific help strings along with the locale.
 var HelpDescs = []struct {
 	Locale   string // Actual locale, e.g. en_US
@@ -16,7 +12,6 @@ var HelpDescs = []struct {
 }{
 	{"en_US", "EnUS", helpDescsEnUS}, // helpdescs_en_US.go
 }
-
 // Methods contains all methods and result types that help is generated for, for every locale.
 var Methods = []struct {
 	Method      string
@@ -68,18 +63,13 @@ var Methods = []struct {
 	{"renameaccount", nil},
 	{"walletislocked", returnsBool},
 }
-
 // Common return types.
 var returnsBool = []interface{}{(*bool)(nil)}
-
 // Common return types.
 var returnsLTRArray = []interface{}{(*[]json.ListTransactionsResult)(nil)}
-
 // Common return types.
 var returnsNumber = []interface{}{(*float64)(nil)}
-
 // Common return types.
 var returnsString = []interface{}{(*string)(nil)}
-
 // Common return types.
 var returnsStringArray = []interface{}{(*[]string)(nil)}

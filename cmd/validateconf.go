@@ -1,5 +1,4 @@
 package cmd
-
 import (
 	"errors"
 	"fmt"
@@ -8,7 +7,6 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-
 	"git.parallelcoin.io/dev/9/cmd/node"
 	blockchain "git.parallelcoin.io/dev/9/pkg/chain"
 	"git.parallelcoin.io/dev/9/pkg/chain/fork"
@@ -17,7 +15,6 @@ import (
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 	"github.com/btcsuite/go-socks/socks"
 )
-
 func setAppDataDir(app *App, name string) {
 	if app != nil {
 		if app.Config != nil {
@@ -36,12 +33,10 @@ func setAppDataDir(app *App, name string) {
 		}
 	}
 }
-
 func validateWhitelists(app *App) int {
 	// Validate any given whitelisted IP addresses and networks.
 	if app.Config.Whitelists != nil {
 		var ip net.IP
-
 		app.Config.State.ActiveWhitelists =
 			make([]*net.IPNet, 0, len(*app.Config.Whitelists))
 		for _, addr := range *app.Config.Whitelists {
@@ -72,7 +67,6 @@ func validateWhitelists(app *App) int {
 	}
 	return 0
 }
-
 func validateProxyListeners(app *App) int {
 	// if proxy is not enabled, empty the proxy field as node sees presence as a
 	// on switch
@@ -98,9 +92,7 @@ func validateProxyListeners(app *App) int {
 	}
 	return 0
 }
-
 func validatePasswords(app *App) int {
-
 	// Check to make sure limited and admin users don't have the same username
 	if *app.Config.Username != "" && *app.Config.Username == *app.Config.LimitUser {
 		str := "%s: --username and --limituser must not specify the same username"
@@ -118,7 +110,6 @@ func validatePasswords(app *App) int {
 	}
 	return 0
 }
-
 func validateRPCCredentials(app *App) int {
 	// The RPC server is disabled if no username or password is provided.
 	if (*app.Config.Username == "" || *app.Config.Password == "") &&
@@ -140,7 +131,6 @@ func validateRPCCredentials(app *App) int {
 	}
 	return 0
 }
-
 func validateBlockLimits(app *App) int {
 	// Validate the the minrelaytxfee.
 	// log <- cl.Debug{"checking min relay tx fee"}
@@ -179,7 +169,6 @@ func validateBlockLimits(app *App) int {
 	}
 	return 0
 }
-
 func validateUAComments(app *App) int {
 	// Look for illegal characters in the user agent comments.
 	// log <- cl.Debug{"checking user agent comments"}
@@ -196,7 +185,6 @@ func validateUAComments(app *App) int {
 	}
 	return 0
 }
-
 func validateMiner(app *App) int {
 	// Check mining addresses are valid and saved parsed versions.
 	// log <- cl.Debug{"checking mining addresses"}
@@ -242,7 +230,6 @@ func validateMiner(app *App) int {
 	}
 	return 0
 }
-
 func validateCheckpoints(app *App) int {
 	var err error
 	// Check the checkpoints for syntax errors.
@@ -259,13 +246,11 @@ func validateCheckpoints(app *App) int {
 	}
 	return 0
 }
-
 func validateDialers(app *App) int {
 	// if !*app.Config.Onion && *app.Config.OnionProxy != "" {
 	// 	// log <- cl.Error{"cannot enable tor proxy without an address specified"}
 	// 	return 1
 	// }
-
 	// Tor stream isolation requires either proxy or onion proxy to be set.
 	if *app.Config.TorIsolation &&
 		app.Config.Proxy == nil {
@@ -356,7 +341,6 @@ func validateDialers(app *App) int {
 	}
 	return 0
 }
-
 func validateAddresses(app *App) int {
 	// TODO: simplify this to a boolean and one slice for config fercryinoutloud
 	if app.Config.AddPeers != nil && app.Config.ConnectPeers != nil {

@@ -1,14 +1,11 @@
 package cmd
-
 import (
 	"fmt"
 	"path/filepath"
 	"regexp"
 	"sort"
-
 	"git.parallelcoin.io/dev/9/cmd/nine"
 )
-
 // Line is a configuration line, made into map becomes a configuration thingy
 // that has set-like properties.
 type Line struct {
@@ -25,12 +22,10 @@ type Line struct {
 	// Value is where this value is actually stored
 	Value interface{}
 }
-
 func (l *Line) Label(name string) *Line {
 	l.Name = name
 	return l
 }
-
 func (l *Line) BOOL(v ...bool) *bool {
 	if len(v) == 1 {
 		l.Value = &v[0]
@@ -41,7 +36,6 @@ func (l *Line) BOOL(v ...bool) *bool {
 	}
 	return l.Value.(*bool)
 }
-
 func (l *Line) STRING(v ...string) *string {
 	if len(v) == 1 {
 		l.Value = &v[0]
@@ -52,7 +46,6 @@ func (l *Line) STRING(v ...string) *string {
 	}
 	return l.Value.(*string)
 }
-
 func (l *Line) INT(v ...int) *int {
 	if len(v) == 1 {
 		l.Value = &v[0]
@@ -63,7 +56,6 @@ func (l *Line) INT(v ...int) *int {
 	}
 	return l.Value.(*int)
 }
-
 func (l *Line) FLOAT(v ...float64) *float64 {
 	if len(v) == 1 {
 		l.Value = &v[0]
@@ -74,7 +66,6 @@ func (l *Line) FLOAT(v ...float64) *float64 {
 	}
 	return l.Value.(*float64)
 }
-
 func (l *Line) SLICE(v ...[]string) *[]string {
 	if len(v) == 1 {
 		l.Value = &v[0]
@@ -85,7 +76,6 @@ func (l *Line) SLICE(v ...[]string) *[]string {
 	}
 	return l.Value.(*[]string)
 }
-
 func (l *Line) MAP(v ...nine.Mapstringstring) *nine.Mapstringstring {
 	if len(v) == 1 {
 		l.Value = &v[0]
@@ -96,11 +86,8 @@ func (l *Line) MAP(v ...nine.Mapstringstring) *nine.Mapstringstring {
 	}
 	return l.Value.(*nine.Mapstringstring)
 }
-
 type Lines map[string]*Line
-
 type Stringslice []string
-
 func (s Stringslice) String() (out string) {
 	for i, x := range s {
 		out += x
@@ -110,7 +97,6 @@ func (s Stringslice) String() (out string) {
 	}
 	return
 }
-
 func (l Lines) String() (out string) {
 	tags := make([]string, 0)
 	for i := range l {
@@ -148,9 +134,7 @@ func (l Lines) String() (out string) {
 	}
 	return
 }
-
 var Networks = []string{"mainnet", "testnet", "simnet", "regtestnet"}
-
 // func logLevelValidate(s string) bool {
 // 	for x := range cl.Levels {
 // 		if x == s {
@@ -159,7 +143,6 @@ var Networks = []string{"mainnet", "testnet", "simnet", "regtestnet"}
 // 	}
 // 	return false
 // }
-
 // func LogLevel(def, usage string) *Line {
 // 	var p string
 // 	if !logLevelValidate(def) {
@@ -171,7 +154,6 @@ var Networks = []string{"mainnet", "testnet", "simnet", "regtestnet"}
 // 		options = append(options, i)
 // 	}
 // 	avail := fmt.Sprint(" { ", Stringslice(options), " }")
-
 // 	var l Line
 // 	l = Line{
 // 		def, func(si interface{}) bool {
@@ -192,7 +174,6 @@ var Networks = []string{"mainnet", "testnet", "simnet", "regtestnet"}
 // 	}
 // 	return &l
 // }
-
 // func Path(def, usage string) *Line {
 // 	p := ""
 // 	var l Line
@@ -214,7 +195,6 @@ var Networks = []string{"mainnet", "testnet", "simnet", "regtestnet"}
 // 	}, usage, &p}
 // 	return &l
 // }
-
 // // SubSystem is just a list of alphanumeric names followed by a colon followed
 // // by a string value, space separated, all lower case.
 // func SubSystem(def, usage string) *Line {
@@ -241,7 +221,6 @@ var Networks = []string{"mainnet", "testnet", "simnet", "regtestnet"}
 // 		return false
 // 	}, usage, &p}
 // }
-
 func setDefaultTLSPaths(datadir string) {
 	c := *config
 	if _, ok := c["tls.cert"]; ok {
@@ -266,7 +245,6 @@ func setDefaultTLSPaths(datadir string) {
 		}
 	}
 }
-
 func setDefaultPorts(base int) {
 	c := *config
 	c["chain.rpc"].Initial = fmt.Sprintf("127.0.0.1:%d7", base)
@@ -279,7 +257,6 @@ func setDefaultPorts(base int) {
 	c["rpc.listen"].Initial = fmt.Sprintf("127.0.0.1:%d8", base)
 	c["rpc.wallet"].Initial = fmt.Sprintf("127.0.0.1:%d6", base)
 }
-
 func switchDefaultAddrs(s string) {
 	switch s {
 	case "mainnet":
@@ -293,7 +270,6 @@ func switchDefaultAddrs(s string) {
 	default:
 	}
 }
-
 // func (l *Line) Default(s interface{}) *Line {
 // 	if !networkValidate(fmt.Sprint(s)) {
 // 		panic("default network was not in available set")
@@ -301,7 +277,6 @@ func switchDefaultAddrs(s string) {
 // 	l.Initial = s
 // 	return l
 // }
-
 // func Network() *Line {
 // 	var p string
 // 	nets := fmt.Sprint(Networks)
@@ -311,7 +286,6 @@ func switchDefaultAddrs(s string) {
 // 		nil, networkValidate, usage + nets, &p,
 // 	}
 // }
-
 // // NetAddr is for a single network address ie scheme://host:port
 // func NetAddr(def, usage string) *Line {
 // 	p := def
@@ -328,7 +302,6 @@ func switchDefaultAddrs(s string) {
 // 	}, usage, &p}
 // 	return &l
 // }
-
 // // NetAddrs is for a multiple network addresses ie scheme://host:port,
 // // separated by spaces.
 // // If a default is given, its port is taken as the default port. If only a
@@ -384,7 +357,6 @@ func switchDefaultAddrs(s string) {
 // 	}
 // 	return &l
 // }
-
 // // Int is for a single 64 bit integer. We see no point in complicating things,
 // // so this is golang `int` with no special meanings
 // func Int(def int, usage string) *Line {
@@ -401,7 +373,6 @@ func switchDefaultAddrs(s string) {
 // 	}, usage, &o}
 // 	return &l
 // }
-
 // // IntBounded is an integer whose value must be between a min and max
 // func IntBounded(def int, usage string, min, max int) *Line {
 // 	o := def
@@ -418,7 +389,6 @@ func switchDefaultAddrs(s string) {
 // 	}, usage + fmt.Sprintf(" { %d < %d }", min, max), &o}
 // 	return &l
 // }
-
 // // Enable is a boolean value
 // func Enable(usage string) *Line {
 // 	o := false
@@ -436,7 +406,6 @@ func switchDefaultAddrs(s string) {
 // 	}, usage, &o}
 // 	return &l
 // }
-
 // // Disable is a boolean value
 // func Disable(usage string) *Line {
 // 	o := true
@@ -454,7 +423,6 @@ func switchDefaultAddrs(s string) {
 // 	}, usage, &o}
 // 	return &l
 // }
-
 // // Duration is a time value in golang 24h60m60s format. If it fails to parse it
 // // will return zero duration (as well as if it was zero duration)
 // func Duration(def, usage string) *Line {
@@ -485,7 +453,6 @@ func switchDefaultAddrs(s string) {
 // 	}, usage, &o}
 // 	return &l
 // }
-
 // // String is just a boring old string. There is no limitations on what a string
 // // can contain, it will have any leading or trailing whitespace trimmed.
 // func String(def, usage string) *Line {
@@ -503,11 +470,9 @@ func switchDefaultAddrs(s string) {
 // 	}, usage, &o}
 // 	return &l
 // }
-
 // // StringSlice is an array of strings, encoded as a series of strings separated
 // // by backticks `
 // func StringSlice(def, usage string) *Line {
-
 // 	var ss []string
 // 	var l Line
 // 	l = Line{def, func(si interface{}) bool {
@@ -539,7 +504,6 @@ func switchDefaultAddrs(s string) {
 // 	}
 // 	return &l
 // }
-
 // // Float is a 64 bit floating point number. Returns zero if nothing parsed out.
 // func Float(def, usage string) *Line {
 // 	f, e := strconv.ParseFloat(def, 64)
@@ -562,7 +526,6 @@ func switchDefaultAddrs(s string) {
 // 	}, usage, &f}
 // 	return &l
 // }
-
 // // Algos is the available mining algorithms, read out of the fork package
 // func Algos(def, usage string) *Line {
 // 	const modernd = "random"
@@ -596,7 +559,6 @@ func switchDefaultAddrs(s string) {
 // 	}, usage + avail, &o}
 // 	return &l
 // }
-
 // ValidName checks to see a name is a valid name - first letter alphabetical,
 // last alpha/numeric, all between also . and -
 func ValidName(s string) bool {

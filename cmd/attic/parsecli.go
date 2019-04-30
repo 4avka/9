@@ -1,11 +1,8 @@
 package cmd
-
 import (
 	"fmt"
-
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
-
 func parseCLI(args []string) (cmd *Command, tokens Tokens, cmds Commands) {
 	cmds = make(Commands)
 	cmd = new(Command)
@@ -35,7 +32,6 @@ func parseCLI(args []string) (cmd *Command, tokens Tokens, cmds Commands) {
 			}
 		}
 	}
-
 	var withHandlersNames []string
 	withHandlers := make(Commands)
 	for i := range commandsFound {

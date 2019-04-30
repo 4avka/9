@@ -1,29 +1,23 @@
 package main
-
 import (
 	"fmt"
 	"net"
 	"time"
-
 	l "github.com/parallelcointeam/sub/clog"
 )
-
 type nodeCfg struct {
 	Listener   string
 	Worker     string
 	BufferSize int
 }
-
 type node struct {
 	cfg        nodeCfg
 	connection *net.UDPConn
 	kill       chan bool
 }
-
 const (
 	uNet = "udp4"
 )
-
 var (
 	_n = nodeCfg{
 		Listener:   "127.0.0.1:11011",
@@ -36,12 +30,10 @@ var (
 		BufferSize: 10240,
 	}
 )
-
 func main() {
 	l.Init()
 	*ld <- "starting up"
 	n := newNode(_n)
-
 	n.setupListener()
 	time.Sleep(time.Second * 1)
 	w := newNode(_w)
@@ -51,7 +43,6 @@ func main() {
 		go w.send([]byte("hello world" + fmt.Sprint(time.Now())))
 	}
 }
-
 func newNode(nc nodeCfg) (n *node) {
 	n = &node{
 		cfg:  nc,
@@ -59,14 +50,12 @@ func newNode(nc nodeCfg) (n *node) {
 	}
 	return
 }
-
 func (n *node) setupListener() {
 	addr, err := net.ResolveUDPAddr(uNet, n.cfg.Listener)
 	check(err)
 	n.connection, err = net.ListenUDP(uNet, addr)
 	check(err)
 }
-
 func (n *node) readFromSocket() {
 	for {
 		var b = make([]byte, n.cfg.BufferSize)
@@ -84,7 +73,6 @@ func (n *node) readFromSocket() {
 		}
 	}
 }
-
 func (n *node) send(b []byte) {
 	addr, err := net.ResolveUDPAddr("udp4", n.cfg.Worker)
 	check(err)
@@ -94,7 +82,6 @@ func (n *node) send(b []byte) {
 	check(err)
 	*li <- "'" + string(b) + "' -> " + n.cfg.Worker
 }
-
 func check(err error) {
 	if err != nil {
 		*le <- err.Error()

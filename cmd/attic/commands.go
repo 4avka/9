@@ -1,11 +1,8 @@
 package cmd
-
 import (
 	"regexp"
 )
-
 type Commands map[string]Command
-
 // Command is a set-based syntax for command line invocation. A set has a
 // more limited range of possibilities when an item type cannot appear more
 // than once, but for any given task, there usually is only one thing for
@@ -31,24 +28,19 @@ type Command struct {
 	// Handler
 	Handler func(args []string, tokens Tokens, cmds, all Commands) int
 }
-
 type Tokens map[string]Token
-
 // Token is a struct that ties together CLI invocation to the Command it
 // relates to
 type Token struct {
 	Value string
 	Cmd   Command
 }
-
 type opts []string
 type precedent []string
-
 const (
 	APPNAME    = "9"
 	APPDESC    = "all in one everything for parallelcoin"
 	APPVERSION = "v1.9.9"
-
 	HELP, RE_HELP       = "help", "(h|help)"
 	CONF, RE_CONF       = "conf", "(C|conf)"
 	NEW, RE_NEW         = "new", "(N|new)"
@@ -67,16 +59,13 @@ const (
 	WORD, RE_WORD       = "word", "([a-zA-Z0-9._-]+)"
 	// triggers TODO put in drop/reindex etc things
 )
-
 var commandsList = []string{
 	HELP, CONF, NEW, COPY, LIST, CTL, NODE, WALLET, SHELL,
 	TEST, CREATE, LOG, DATADIR, INTEGER, FLOAT, WORD,
 }
-
 func match(s string) *regexp.Regexp {
 	return regexp.MustCompile("^" + s + "$")
 }
-
 var commands = Commands{
 	HELP: {
 		HELP,
@@ -263,7 +252,6 @@ var commands = Commands{
 		nil,
 	},
 }
-
 // var Subcommands = Command{
 // 	"default": {
 // 		"launch the GUI",

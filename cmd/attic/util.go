@@ -1,15 +1,12 @@
 package cmd
-
 import (
 	"net"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
-
 	"git.parallelcoin.io/dev/9/pkg/util"
 )
-
 // minUint32 is a helper function to return the minimum of two uint32s. This avoids a math import and the need to cast to floats.
 func minUint32(a, b uint32) uint32 {
 	if a < b {
@@ -17,7 +14,6 @@ func minUint32(a, b uint32) uint32 {
 	}
 	return b
 }
-
 // EnsureDir checks a file could be written to a path, creates the directories as needed
 func EnsureDir(fileName string) bool {
 	dirName := filepath.Dir(fileName)
@@ -30,13 +26,11 @@ func EnsureDir(fileName string) bool {
 	}
 	return false
 }
-
 // FileExists reports whether the named file or directory exists.
 func FileExists(filePath string) bool {
 	_, err := os.Stat(filePath)
 	return err == nil
 }
-
 // CleanAndExpandPath expands environment variables and leading ~ in the passed path, cleans the result, and returns it.
 func CleanAndExpandPath(path string) string {
 	// Expand initial ~ to OS specific home directory.
@@ -53,7 +47,6 @@ func CleanAndExpandPath(path string) string {
 	}
 	return path
 }
-
 // NormalizeAddress returns addr with the passed default port appended if there is not already a port specified.
 func NormalizeAddress(addr, defaultPort string) string {
 	_, _, err := net.SplitHostPort(addr)
@@ -62,7 +55,6 @@ func NormalizeAddress(addr, defaultPort string) string {
 	}
 	return addr
 }
-
 // NormalizeAddresses returns a new slice with all the passed peer addresses normalized with the given default port, and all duplicates removed.
 func NormalizeAddresses(addrs []string, defaultPort string) []string {
 	for i, addr := range addrs {
@@ -70,7 +62,6 @@ func NormalizeAddresses(addrs []string, defaultPort string) []string {
 	}
 	return RemoveDuplicateAddresses(addrs)
 }
-
 // RemoveDuplicateAddresses returns a new slice with all duplicate entries in addrs removed.
 func RemoveDuplicateAddresses(addrs []string) []string {
 	result := make([]string, 0, len(addrs))
@@ -83,7 +74,6 @@ func RemoveDuplicateAddresses(addrs []string) []string {
 	}
 	return result
 }
-
 func intersection(a, b []string) (out []string) {
 	for _, x := range a {
 		for _, y := range b {
@@ -94,12 +84,10 @@ func intersection(a, b []string) (out []string) {
 	}
 	return
 }
-
 func uniq(elements []string) []string {
 	// Use map to record duplicates as we find them.
 	encountered := map[string]bool{}
 	result := []string{}
-
 	for v := range elements {
 		if encountered[elements[v]] == true {
 			// Do not add duplicate.

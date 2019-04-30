@@ -1,7 +1,5 @@
 package fork
-
 import "math/big"
-
 // CompactToBig converts a compact representation of a whole number N to an unsigned 32-bit number.  The representation is similar to IEEE754 floating point numbers.
 // Like IEEE754 floating point, there are three basic components: the sign, the exponent, and the mantissa.  They are broken out as follows:
 //	* the most significant 8 bits represent the unsigned base 256 exponent
@@ -36,7 +34,6 @@ func CompactToBig(
 	}
 	return bn
 }
-
 // BigToCompact converts a whole number N to a compact representation using an unsigned 32-bit number.  The compact representation only provides 23 bits of precision, so values larger than (2^23 - 1) only encode the most significant digits of the number.  See CompactToBig for details.
 func BigToCompact(
 	n *big.Int) uint32 {

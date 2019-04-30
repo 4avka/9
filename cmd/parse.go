@@ -1,5 +1,4 @@
 package cmd
-
 import (
 	"encoding/json"
 	"fmt"
@@ -11,9 +10,7 @@ import (
 	"path/filepath"
 	// "git.parallelcoin.io/dev/9/pkg/util/cl"
 )
-
 var datadir *string = new(string)
-
 func (app *App) Parse(args []string) int {
 	// parse commandline
 	cmd, tokens := app.ParseCLI(args)
@@ -42,14 +39,12 @@ func (app *App) Parse(args []string) int {
 	// 		app.Cats[i][j].Init(app.Cats[i][j])
 	// 	}
 	// }
-
 	// // set AppDataDir for running as node
 	// aa := CleanAndExpandPath(filepath.Join(
 	// 	*datadir,
 	// 	cmd.Name),
 	// 	*datadir)
 	// app.Config.AppDataDir, app.Config.LogDir = &aa, &aa
-
 	configFile := CleanAndExpandPath(filepath.Join(
 		*datadir, "config"), *datadir)
 	// *app.Config.ConfigFile = configFile
@@ -87,7 +82,6 @@ func (app *App) Parse(args []string) int {
 	}
 	app.Config = MakeConfig(app)
 	app.Config.ActiveNetParams = node.ActiveNetParams
-
 	if app.Config.LogLevel != nil {
 		cl.Register.SetAllLevels(*app.Config.LogLevel)
 	}
@@ -98,7 +92,6 @@ func (app *App) Parse(args []string) int {
 		app)
 	return r
 }
-
 func (app *App) ParseCLI(args []string) (cmd *Command, tokens Tokens) {
 	cmd = new(Command)
 	// collect set of items in commandline

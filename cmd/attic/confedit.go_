@@ -1,15 +1,12 @@
 package cmd
-
 import (
 	"fmt"
 	"sort"
 	"strconv"
-
 	"git.parallelcoin.io/dev/9/pkg/chain/fork"
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 	"github.com/AlecAivazis/survey"
 )
-
 func ParseNetwork(key string, name *string) int {
 	k := (*config)[key].Initial.(string)
 	prompt := &survey.Select{
@@ -25,7 +22,6 @@ func ParseNetwork(key string, name *string) int {
 	cursor = "p2p"
 	return 0
 }
-
 func ParseLogLevel(key string, name *string) int {
 	options := make([]string, len(cl.Levels))
 	j := 0
@@ -40,7 +36,6 @@ func ParseLogLevel(key string, name *string) int {
 		Options: options,
 		Default: *k,
 	}
-
 	err := survey.AskOne(prompt, name, nil)
 	if err != nil {
 		fmt.Println("ERROR:", cl.Ine(), err)
@@ -49,7 +44,6 @@ func ParseLogLevel(key string, name *string) int {
 	cursor = "log"
 	return 0
 }
-
 func ParseAlgo(key string, name *string) int {
 	options := []string{}
 	for _, x := range fork.P9AlgoVers {
@@ -71,7 +65,6 @@ func ParseAlgo(key string, name *string) int {
 	cursor = "mining"
 	return 0
 }
-
 func ParseInt(t *int, key string, name *string) int {
 	for {
 		name := fmt.Sprint(*t)
@@ -108,7 +101,6 @@ func ParseInt(t *int, key string, name *string) int {
 		}
 	}
 }
-
 func ParseBool(t *bool, key string, name *string) int {
 	k := fmt.Sprint(!*(*config)[key].Value.(*bool))
 	prompt := &survey.Select{
@@ -125,7 +117,6 @@ func ParseBool(t *bool, key string, name *string) int {
 	}
 	return 0
 }
-
 func ParseString(t *string, key string, name *string) int {
 	k := *t
 	prompt := &survey.Input{

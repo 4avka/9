@@ -1,23 +1,16 @@
 package chainhash
-
 import (
 	"encoding/hex"
 	"fmt"
 )
-
 // HashSize of array used to store hashes.  See Hash.
 const HashSize = 32
-
 // MaxHashStringSize is the maximum length of a Hash hash string.
 const MaxHashStringSize = HashSize * 2
-
 // ErrHashStrSize describes an error that indicates the caller specified a hash string that has too many characters.
 var ErrHashStrSize = fmt.Errorf("max hash string length is %v bytes", MaxHashStringSize)
-
 // Hash is used in several of the bitcoin messages and common structures.  It typically represents the double sha256 of data.
-
 type Hash [HashSize]byte
-
 // String returns the Hash as the hexadecimal string of the byte-reversed hash.
 func (hash Hash) String() string {
 	for i := 0; i < HashSize/2; i++ {
@@ -25,14 +18,12 @@ func (hash Hash) String() string {
 	}
 	return hex.EncodeToString(hash[:])
 }
-
 // CloneBytes returns a copy of the bytes which represent the hash as a byte slice. NOTE: It is generally cheaper to just slice the hash directly thereby reusing the same bytes rather than calling this method.
 func (hash *Hash) CloneBytes() []byte {
 	newHash := make([]byte, HashSize)
 	copy(newHash, hash[:])
 	return newHash
 }
-
 // SetBytes sets the bytes which represent the hash.  An error is returned if the number of bytes passed in is not HashSize.
 func (hash *Hash) SetBytes(newHash []byte) error {
 	nhlen := len(newHash)
@@ -43,7 +34,6 @@ func (hash *Hash) SetBytes(newHash []byte) error {
 	copy(hash[:], newHash)
 	return nil
 }
-
 // IsEqual returns true if target is the same as hash.
 func (hash *Hash) IsEqual(target *Hash) bool {
 	if hash == nil && target == nil {
@@ -54,7 +44,6 @@ func (hash *Hash) IsEqual(target *Hash) bool {
 	}
 	return *hash == *target
 }
-
 // NewHash returns a new Hash from a byte slice.  An error is returned if the number of bytes passed in is not HashSize.
 func NewHash(newHash []byte) (*Hash, error) {
 	var sh Hash
@@ -64,7 +53,6 @@ func NewHash(newHash []byte) (*Hash, error) {
 	}
 	return &sh, err
 }
-
 // NewHashFromStr creates a Hash from a hash string.  The string should be the hexadecimal string of a byte-reversed hash, but any missing characters result in zero padding at the end of the Hash.
 func NewHashFromStr(hash string) (*Hash, error) {
 	ret := new(Hash)
@@ -74,7 +62,6 @@ func NewHashFromStr(hash string) (*Hash, error) {
 	}
 	return ret, nil
 }
-
 // Decode decodes the byte-reversed hexadecimal string encoding of a Hash to a destination.
 func Decode(dst *Hash, src string) error {
 	// Return error if hash string is too long.

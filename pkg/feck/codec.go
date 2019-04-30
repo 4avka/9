@@ -1,14 +1,11 @@
 package feck
-
 import (
 	"github.com/templexxx/reedsolomon"
 )
-
 const (
 	ShardsTotal    = 9
 	ShardsRequired = 3
 )
-
 func Split(data []byte, required, total int) [][]byte {
 	b := make([][]byte, total)
 	shardSize := len(data) / required
@@ -23,13 +20,11 @@ func Split(data []byte, required, total int) [][]byte {
 	}
 	return b
 }
-
 type RS struct {
 	*reedsolomon.RS
 	required int
 	total    int
 }
-
 func New(required, total int) *RS {
 	rsc, err := reedsolomon.New(required, total-required)
 	if err != nil {
@@ -37,7 +32,6 @@ func New(required, total int) *RS {
 	}
 	return &RS{rsc, required, total}
 }
-
 func (r *RS) Encode(data []byte) [][]byte {
 	padded := PadData(data, r.required, r.total)
 	splitted := Split(padded, r.required, r.total)
@@ -59,7 +53,6 @@ func (r *RS) Encode(data []byte) [][]byte {
 	}
 	return splitted
 }
-
 func (r *RS) Decode(shards [][]byte) (out []byte) {
 	bytes := make(map[int][]byte)
 	shardLens := make([]int, r.total)
@@ -70,7 +63,6 @@ func (r *RS) Decode(shards [][]byte) (out []byte) {
 			bytes[int(shards[i][0])] = shards[i][1:]
 		}
 	}
-
 	for i, x := range bytes {
 		shardLens[i] = len(x)
 	}

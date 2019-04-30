@@ -1,25 +1,20 @@
 // Package fork handles tracking the hard fork status and is used to determine which consensus rules apply on a block
 // TODO: add trailing auto-checkpoint system and hard fork block time change
 package fork
-
 import (
 	"crypto/rand"
 	"encoding/hex"
 	"math/big"
 	"time"
 )
-
 // AlgoParams are the identifying block version number and their minimum target bits
-
 type AlgoParams struct {
 	Version int32
 	MinBits uint32
 	AlgoID  uint32
 	NSperOp int64
 }
-
 // HardForks is the details related to a hard fork, number, name and activation height
-
 type HardForks struct {
 	Number             uint32
 	ActivationHeight   int32
@@ -31,32 +26,25 @@ type HardForks struct {
 	AveragingInterval  int64
 	TestnetStart       int32
 }
-
 // AlgoVers is the lookup for pre hardfork
 var AlgoVers = map[int32]string{
 	2:   "sha256d",
 	514: "scrypt",
 }
-
 // Algos are the specifications identifying the algorithm used in the block proof
 var Algos = map[string]AlgoParams{
 	AlgoVers[2]:   {2, mainPowLimitBits, 0, 824},      //824 ns/op
 	AlgoVers[514]: {514, mainPowLimitBits, 1, 740839}, //740839 ns/op
 }
-
 // FirstPowLimit is
 var FirstPowLimit = func() big.Int {
-
 	mplb, _ := hex.DecodeString("0fffffff00000000000000000000000000000000000000000000000000000000")
 	return *big.NewInt(0).SetBytes(mplb)
 }()
-
 // FirstPowLimitBits is
 var FirstPowLimitBits = BigToCompact(&FirstPowLimit)
-
 // IsTestnet is set at startup here to be accessible to all other libraries
 var IsTestnet bool
-
 // List is the list of existing hard forks and when they activate
 var List = []HardForks{
 	{
@@ -94,7 +82,6 @@ var List = []HardForks{
 		TestnetStart:       100,
 	},
 }
-
 // P9AlgoVers is the lookup for after 1st hardfork
 var P9AlgoVers = map[int32]string{
 	0: "blake2b",
@@ -107,7 +94,6 @@ var P9AlgoVers = map[int32]string{
 	7: "stribog",
 	8: "x11",
 }
-
 // P9Algos is the algorithm specifications after the hard fork
 var P9Algos = map[string]AlgoParams{
 	P9AlgoVers[0]: {0, FirstPowLimitBits, 0, 69495444},
@@ -120,25 +106,18 @@ var P9Algos = map[string]AlgoParams{
 	P9AlgoVers[7]: {7, FirstPowLimitBits, 6, 69987634},
 	P9AlgoVers[8]: {8, FirstPowLimitBits, 8, 64936544},
 }
-
 // SecondPowLimit is
 var SecondPowLimit = func() big.Int {
-
 	mplb, _ := hex.DecodeString("07fffffff0000000000000000000000000000000000000000000000000000000")
 	return *big.NewInt(0).SetBytes(mplb)
 }()
-
 // SecondPowLimitBits is
 var SecondPowLimitBits = BigToCompact(&SecondPowLimit)
-
 var mainPowLimit = func() big.Int {
-
 	mplb, _ := hex.DecodeString("00000fffff000000000000000000000000000000000000000000000000000000")
 	return *big.NewInt(0).SetBytes(mplb)
 }()
-
 var mainPowLimitBits = BigToCompact(&mainPowLimit)
-
 // GetAlgoID returns the 'algo_id' which in pre-hardfork is not the same as the block version number, but is afterwards
 func GetAlgoID(algoname string, height int32) uint32 {
 	if GetCurrent(height) > 1 {
@@ -146,14 +125,12 @@ func GetAlgoID(algoname string, height int32) uint32 {
 	}
 	return Algos[algoname].AlgoID
 }
-
 // GetAlgoName returns the string identifier of an algorithm depending on hard fork activation status
 func GetAlgoName(algoVer int32, height int32) (name string) {
 	hf := GetCurrent(height)
 	name = List[hf].AlgoVers[algoVer]
 	return
 }
-
 // GetAlgoVer returns the version number for a given algorithm (by string name) at a given height. If "random" is given, a random number is taken from the system secure random source (for randomised cpu mining)
 func GetAlgoVer(name string, height int32) (version int32) {
 	n := "sha256d"
@@ -182,13 +159,11 @@ func GetAlgoVer(name string, height int32) (version int32) {
 	version = List[hf].Algos[n].Version
 	return
 }
-
 // GetAveragingInterval returns the active block interval target based on hard fork status
 func GetAveragingInterval(height int32) (r int64) {
 	r = List[GetCurrent(height)].AveragingInterval
 	return
 }
-
 // GetCurrent returns the hardfork number code
 func GetCurrent(height int32) (curr int) {
 	if IsTestnet {
@@ -205,19 +180,16 @@ func GetCurrent(height int32) (curr int) {
 	}
 	return
 }
-
 // GetMinBits returns the minimum diff bits based on height and testnet
 func GetMinBits(algoname string, height int32) (mb uint32) {
 	curr := GetCurrent(height)
 	mb = List[curr].Algos[algoname].MinBits
 	return
 }
-
 // GetMinDiff returns the minimum difficulty in uint256 form
 func GetMinDiff(algoname string, height int32) (md *big.Int) {
 	return CompactToBig(GetMinBits(algoname, height))
 }
-
 // GetTargetTimePerBlock returns the active block interval target based on hard fork status
 func GetTargetTimePerBlock(height int32) (r int64) {
 	r = int64(List[GetCurrent(height)].TargetTimePerBlock)

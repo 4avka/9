@@ -1,5 +1,4 @@
 package cmd
-
 import (
 	"encoding/json"
 	"fmt"
@@ -8,10 +7,8 @@ import (
 	"regexp"
 	"sort"
 	"time"
-
 	"git.parallelcoin.io/dev/9/cmd/nine"
 )
-
 type App struct {
 	Name     string
 	Tagline  string
@@ -22,7 +19,6 @@ type App struct {
 	Commands Commands
 	Config   *nine.Config
 }
-
 func (app *App) SaveConfig() {
 	if app == nil {
 		return
@@ -48,7 +44,6 @@ func (app *App) SaveConfig() {
 		panic(err)
 	}
 }
-
 type Line struct {
 	Value   interface{} `json:"value"`
 	Default interface{} `json:"default,omitempty"`
@@ -56,11 +51,8 @@ type Line struct {
 	Max     int         `json:"max,omitempty"`
 	Usage   string      `json:"usage"`
 }
-
 type CatJSON map[string]Line
-
 type CatsJSON map[string]CatJSON
-
 func (r *App) MarshalJSON() ([]byte, error) {
 	out := make(CatsJSON)
 	for i, x := range r.Cats {
@@ -79,7 +71,6 @@ func (r *App) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(out)
 }
-
 func (r *App) UnmarshalJSON(data []byte) error {
 	out := make(CatsJSON)
 	e := json.Unmarshal(data, &out)
@@ -115,19 +106,15 @@ func (r *App) UnmarshalJSON(data []byte) error {
 	}
 	return nil
 }
-
 type AppGenerator func(ctx *App)
 type AppGenerators []AppGenerator
-
 func (r *AppGenerators) RunAll(app *App) {
 	for _, x := range *r {
 		x(app)
 	}
 	return
 }
-
 type Cats map[string]Cat
-
 func (r *Cats) getValue(cat, item string) (out *interface{}) {
 	if r == nil {
 		return
@@ -140,7 +127,6 @@ func (r *Cats) getValue(cat, item string) (out *interface{}) {
 		return &o
 	}
 }
-
 // Str returns the pointer to a value in the category map
 func (r *Cats) Str(cat, item string) (out *string) {
 	cv := r.getValue(cat, item)
@@ -154,7 +140,6 @@ func (r *Cats) Str(cat, item string) (out *string) {
 		return &ci
 	}
 }
-
 // Tags returns the pointer to a value in the category map
 func (r *Cats) Tags(cat, item string) (out *[]string) {
 	cv := r.getValue(cat, item)
@@ -168,7 +153,6 @@ func (r *Cats) Tags(cat, item string) (out *[]string) {
 		return &ci
 	}
 }
-
 // Map returns the pointer to a value in the category map
 func (r *Cats) Map(cat, item string) (out *nine.Mapstringstring) {
 	cv := r.getValue(cat, item)
@@ -182,7 +166,6 @@ func (r *Cats) Map(cat, item string) (out *nine.Mapstringstring) {
 		return &ci
 	}
 }
-
 // Int returns the pointer to a value in the category map
 func (r *Cats) Int(cat, item string) (out *int) {
 	cv := r.getValue(cat, item)
@@ -196,7 +179,6 @@ func (r *Cats) Int(cat, item string) (out *int) {
 		return &ci
 	}
 }
-
 // Bool returns the pointer to a value in the category map
 func (r *Cats) Bool(cat, item string) (out *bool) {
 	cv := r.getValue(cat, item)
@@ -210,7 +192,6 @@ func (r *Cats) Bool(cat, item string) (out *bool) {
 		return &ci
 	}
 }
-
 // Float returns the pointer to a value in the category map
 func (r *Cats) Float(cat, item string) (out *float64) {
 	cv := r.getValue(cat, item)
@@ -224,7 +205,6 @@ func (r *Cats) Float(cat, item string) (out *float64) {
 		return &ci
 	}
 }
-
 // Duration returns the pointer to a value in the category map
 func (r *Cats) Duration(cat, item string) (out *time.Duration) {
 	cv := r.getValue(cat, item)
@@ -238,26 +218,21 @@ func (r *Cats) Duration(cat, item string) (out *time.Duration) {
 		return &ci
 	}
 }
-
 type Cat map[string]*Row
 type CatGenerator func(ctx *Cat)
 type CatGenerators []CatGenerator
-
 func (r *CatGenerators) RunAll(cat Cat) {
 	for _, x := range *r {
 		x(&cat)
 	}
 	return
 }
-
 type Iface struct {
 	Data *interface{}
 }
-
 func NewIface() *Iface {
 	return &Iface{Data: new(interface{})}
 }
-
 func (i *Iface) Get() interface{} {
 	if i == nil {
 		return nil
@@ -267,7 +242,6 @@ func (i *Iface) Get() interface{} {
 	}
 	return *i.Data
 }
-
 func (i *Iface) Put(in interface{}) *Iface {
 	if i == nil {
 		i = NewIface()
@@ -278,7 +252,6 @@ func (i *Iface) Put(in interface{}) *Iface {
 	*i.Data = in
 	return i
 }
-
 type Row struct {
 	Name     string
 	Type     string
@@ -295,40 +268,31 @@ type Row struct {
 	Usage    string
 	App      *App
 }
-
 func (r *Row) Bool() bool {
 	return r.Value.Get().(bool)
 }
-
 func (r *Row) Int() int {
 	return r.Value.Get().(int)
 }
-
 func (r *Row) Float() float64 {
 	return r.Value.Get().(float64)
 }
-
 func (r *Row) Duration() time.Duration {
 	return r.Value.Get().(time.Duration)
 }
-
 func (r *Row) Tag() string {
 	return r.Value.Get().(string)
 }
-
 func (r *Row) Tags() []string {
 	return r.Value.Get().([]string)
 }
-
 type RowGenerator func(ctx *Row)
 type RowGenerators []RowGenerator
-
 func (r *RowGenerators) RunAll(row *Row) {
 	for _, x := range *r {
 		x(row)
 	}
 }
-
 // Token is a struct that ties together CLI invocation to the Command it
 // relates to
 type Token struct {
@@ -336,12 +300,9 @@ type Token struct {
 	Cmd   Command
 }
 type Tokens map[string]Token
-
 type Optional []string
 type Precedent []string
-
 type CommandHandler func(args []string, tokens Tokens, app *App) int
-
 type Command struct {
 	Name      string
 	Pattern   string
@@ -355,7 +316,6 @@ type Command struct {
 type CommandGenerator func(ctx *Command)
 type CommandGenerators []CommandGenerator
 type Commands map[string]*Command
-
 func (r *CommandGenerators) RunAll() *Command {
 	c := &Command{}
 	for _, x := range *r {
@@ -363,7 +323,6 @@ func (r *CommandGenerators) RunAll() *Command {
 	}
 	return c
 }
-
 // GetSortedKeys returns the keys of a map in alphabetical order
 func (r *CatJSON) GetSortedKeys() (out []string) {
 	for i := range *r {
@@ -372,7 +331,6 @@ func (r *CatJSON) GetSortedKeys() (out []string) {
 	sort.Strings(out)
 	return
 }
-
 func (r *CatsJSON) GetSortedKeys() (out []string) {
 	for i := range *r {
 		out = append(out, i)
@@ -380,7 +338,6 @@ func (r *CatsJSON) GetSortedKeys() (out []string) {
 	sort.Strings(out)
 	return
 }
-
 func (r *Cats) GetSortedKeys() (out []string) {
 	for i := range *r {
 		out = append(out, i)
@@ -388,7 +345,6 @@ func (r *Cats) GetSortedKeys() (out []string) {
 	sort.Strings(out)
 	return
 }
-
 func (r Cat) GetSortedKeys() (out []string) {
 	for i := range r {
 		out = append(out, i)
@@ -396,7 +352,6 @@ func (r Cat) GetSortedKeys() (out []string) {
 	sort.Strings(out)
 	return
 }
-
 func (r *Tokens) GetSortedKeys() (out []string) {
 	for i := range *r {
 		out = append(out, i)
@@ -404,7 +359,6 @@ func (r *Tokens) GetSortedKeys() (out []string) {
 	sort.Strings(out)
 	return
 }
-
 func (r *Commands) GetSortedKeys() (out []string) {
 	for i := range *r {
 		out = append(out, i)

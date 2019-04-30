@@ -1,6 +1,5 @@
 // Copyright (c) 2015-2016 The btcsuite developers
 package wallet
-
 import (
 	"bytes"
 	chainhash "git.parallelcoin.io/dev/9/pkg/chain/hash"
@@ -13,7 +12,6 @@ import (
 	walletdb "git.parallelcoin.io/dev/9/pkg/wallet/db"
 	"sync"
 )
-
 // AccountBalance associates a total (zero confirmation) balance with an
 // account.  Balances for other minimum confirmation counts require more
 // expensive logic and it is not clear which minimums a client is interested in,
@@ -22,7 +20,6 @@ type AccountBalance struct {
 	Account      uint32
 	TotalBalance util.Amount
 }
-
 // AccountNotification contains properties regarding an account, such as its
 // name and the number of derived and imported keys.  When any of these
 // properties change, the notification is fired.
@@ -33,13 +30,11 @@ type AccountNotification struct {
 	InternalKeyCount uint32
 	ImportedKeyCount uint32
 }
-
 // AccountNotificationsClient receives AccountNotifications over the channel C.
 type AccountNotificationsClient struct {
 	C      chan *AccountNotification
 	server *NotificationServer
 }
-
 // Block contains the properties and all relevant transactions of an attached
 // block.
 type Block struct {
@@ -48,7 +43,6 @@ type Block struct {
 	Timestamp    int64
 	Transactions []TransactionSummary
 }
-
 // TODO: It would be good to send errors during notification creation to the rpc
 // server instead of just logging them here so the client is aware that wallet
 // isn't working correctly and notifications are missing.
@@ -69,7 +63,6 @@ type NotificationServer struct {
 	mu             sync.Mutex // Only protects registered client channels
 	wallet         *Wallet    // smells like hacks
 }
-
 // SpentnessNotifications is a notification that is fired for transaction
 // outputs controlled by some account's keys.  The notification may be about a
 // newly added unspent transaction output or that a previously unspent output is
@@ -81,7 +74,6 @@ type SpentnessNotifications struct {
 	index        uint32
 	spenderIndex uint32
 }
-
 // SpentnessNotificationsClient receives SpentnessNotifications from the
 // NotificationServer over the channel C.
 type SpentnessNotificationsClient struct {
@@ -89,7 +81,6 @@ type SpentnessNotificationsClient struct {
 	account uint32
 	server  *NotificationServer
 }
-
 // TransactionNotifications is a notification of changes to the wallet's
 // transaction set and the current chain tip that wallet is considered to be
 // synced with.  All transactions added to the blockchain are organized by the
@@ -115,14 +106,12 @@ type TransactionNotifications struct {
 	UnminedTransactionHashes []*chainhash.Hash
 	NewBalances              []AccountBalance
 }
-
 // TransactionNotificationsClient receives TransactionNotifications from the
 // NotificationServer over the channel C.
 type TransactionNotificationsClient struct {
 	C      <-chan *TransactionNotifications
 	server *NotificationServer
 }
-
 // TransactionSummary contains a transaction relevant to the wallet and marks
 // which inputs and outputs were relevant.
 type TransactionSummary struct {
@@ -133,7 +122,6 @@ type TransactionSummary struct {
 	Fee         util.Amount
 	Timestamp   int64
 }
-
 // TransactionSummaryInput describes a transaction input that is relevant to the
 // wallet.  The Index field marks the transaction input index of the transaction
 // (not included here).  The PreviousAccount and PreviousAmount fields describe
@@ -143,7 +131,6 @@ type TransactionSummaryInput struct {
 	PreviousAccount uint32
 	PreviousAmount  util.Amount
 }
-
 // TransactionSummaryOutput describes wallet properties of a transaction output
 // controlled by the wallet.  The Index field marks the transaction output index
 // of the transaction (not included here).
@@ -152,7 +139,6 @@ type TransactionSummaryOutput struct {
 	Account  uint32
 	Internal bool
 }
-
 // Done deregisters the client from the server and drains any remaining
 // messages.  It must be called exactly once when the client is finished
 // receiving notifications.
@@ -176,7 +162,6 @@ func (c *AccountNotificationsClient) Done() {
 		s.mu.Unlock()
 	}()
 }
-
 // AccountNotifications returns a client for receiving AccountNotifications over
 // a channel.  The channel is unbuffered.  When finished, the client's Done
 // method should be called to disassociate the client from the server.
@@ -190,7 +175,6 @@ func (s *NotificationServer) AccountNotifications() AccountNotificationsClient {
 		server: s,
 	}
 }
-
 // AccountSpentnessNotifications registers a client for spentness changes of
 // outputs controlled by the account.
 func (s *NotificationServer) AccountSpentnessNotifications(account uint32) SpentnessNotificationsClient {
@@ -204,7 +188,6 @@ func (s *NotificationServer) AccountSpentnessNotifications(account uint32) Spent
 		server:  s,
 	}
 }
-
 // TransactionNotifications returns a client for receiving
 // TransactionNotifiations notifications over a channel.  The channel is
 // unbuffered.
@@ -322,7 +305,6 @@ func (s *NotificationServer) notifyMinedTransaction(dbtx walletdb.ReadTx, detail
 	s.currentTxNtfn.AttachedBlocks[n-1].Transactions =
 		append(txs, makeTxSummary(dbtx, s.wallet, details))
 }
-
 // notifySpentOutput notifies registered clients that a previously-unspent
 // output is now spent, and includes the spender hash and input index in the
 // notification.
@@ -385,7 +367,6 @@ func (s *NotificationServer) notifyUnminedTransaction(dbtx walletdb.ReadTx, deta
 		c <- n
 	}
 }
-
 // notifyUnspentOutput notifies registered clients of a new unspent output that
 // is controlled by the wallet.
 func (s *NotificationServer) notifyUnspentOutput(account uint32, hash *chainhash.Hash, index uint32) {
@@ -403,23 +384,19 @@ func (s *NotificationServer) notifyUnspentOutput(account uint32, hash *chainhash
 		c <- n
 	}
 }
-
 // Hash returns the transaction hash of the spent output.
 func (n *SpentnessNotifications) Hash() *chainhash.Hash {
 	return n.hash
 }
-
 // Index returns the transaction output index of the spent output.
 func (n *SpentnessNotifications) Index() uint32 {
 	return n.index
 }
-
 // Spender returns the spending transction's hash and input index, if any.  If
 // the output is unspent, the final bool return is false.
 func (n *SpentnessNotifications) Spender() (*chainhash.Hash, uint32, bool) {
 	return n.spenderHash, n.spenderIndex, n.spenderHash != nil
 }
-
 // Done deregisters the client from the server and drains any remaining
 // messages.  It must be called exactly once when the client is finished
 // receiving notifications.
@@ -445,7 +422,6 @@ func (c *SpentnessNotificationsClient) Done() {
 		s.mu.Unlock()
 	}()
 }
-
 // Done deregisters the client from the server and drains any remaining
 // messages.  It must be called exactly once when the client is finished
 // receiving notifications.

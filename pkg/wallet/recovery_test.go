@@ -1,11 +1,9 @@
 package wallet_test
-
 import (
 	"git.parallelcoin.io/dev/9/pkg/wallet"
 	"runtime"
 	"testing"
 )
-
 // Harness holds the BranchRecoveryState being tested, the recovery window being
 // used, provides access to the test object, and tracks the expected horizon
 // and next unfound values.
@@ -51,7 +49,6 @@ type (
 		child uint32
 	}
 )
-
 // Apply extends the current horizon of the branch recovery state, and checks
 // that the returned delta is equal to the test's recovery window. If the
 // assertions pass, the harness's expected horizon is increased by the returned
@@ -64,7 +61,6 @@ func (_ InitialDelta) Apply(i int, h *Harness) {
 	assertDelta(h.t, i, delta, h.recoveryWindow)
 	h.expHorizon += delta
 }
-
 // Apply extends the current horizon of the branch recovery state, and checks
 // that the returned delta is equal to the CheckDelta's child value.
 func (d CheckDelta) Apply(i int, h *Harness) {
@@ -73,21 +69,18 @@ func (d CheckDelta) Apply(i int, h *Harness) {
 	assertDelta(h.t, i, delta, d.delta)
 	h.expHorizon += delta
 }
-
 // Apply queries the branch recovery state for the number of invalid children
 // that lie between the last found address and the current horizon, and compares
 // that to the CheckNumInvalid's total.
 func (m CheckNumInvalid) Apply(i int, h *Harness) {
 	assertNumInvalid(h.t, i, h.brs.NumInvalidInHorizon(), m.total)
 }
-
 // Apply marks the MarkInvalid's child index as invalid in the branch recovery
 // state, and increments the harness's expected horizon.
 func (m MarkInvalid) Apply(i int, h *Harness) {
 	h.brs.MarkInvalidChild(m.child)
 	h.expHorizon++
 }
-
 // Apply reports the ReportFound's child index as found in the branch recovery
 // state. If the child index meets or exceeds our expected next unfound value,
 // the expected value will be modified to be the child index + 1. Afterwards,
@@ -100,14 +93,12 @@ func (r ReportFound) Apply(i int, h *Harness) {
 	}
 	assertNextUnfound(h.t, i, h.brs.NextUnfound(), h.expNextUnfound)
 }
-
 // Compile-time checks to ensure our steps implement the Step interface.
 var _ Stepper = InitialDelta{}
 var _ Stepper = CheckDelta{}
 var _ Stepper = CheckNumInvalid{}
 var _ Stepper = MarkInvalid{}
 var _ Stepper = ReportFound{}
-
 // TestBranchRecoveryState walks the BranchRecoveryState through a sequence of
 // steps, verifying that:
 //   - the horizon is properly expanded in response to found addrs

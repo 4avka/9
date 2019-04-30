@@ -1,5 +1,4 @@
 package cmd
-
 import (
 	"fmt"
 	"git.parallelcoin.io/dev/9/cmd/node"
@@ -7,16 +6,13 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-
 	"git.parallelcoin.io/dev/9/pkg/chain/fork"
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 	"github.com/davecgh/go-spew/spew"
 )
-
 func NewConfig() *Lines {
 	return &Lines{}
 }
-
 func maybeStringPointer(si interface{}) string {
 	switch st := si.(type) {
 	case string:
@@ -27,7 +23,6 @@ func maybeStringPointer(si interface{}) string {
 		return ""
 	}
 }
-
 func (l *Lines) Group(s string, items ...*Line) (out *Lines) {
 	ll := make(Lines)
 	out = &ll
@@ -51,7 +46,6 @@ func (l *Lines) Group(s string, items ...*Line) (out *Lines) {
 	// spew.Dump(*out)
 	return
 }
-
 func Int(s string) *Line {
 	o := Line{
 		Name: s,
@@ -69,7 +63,6 @@ func Int(s string) *Line {
 	}
 	return &o
 }
-
 func Float(s string) *Line {
 	o := Line{Name: s,
 		Validate: func(l *Line, si interface{}) bool {
@@ -86,12 +79,10 @@ func Float(s string) *Line {
 	}
 	return &o
 }
-
 func Duration(s string) *Line {
 	o := Line{Name: s}
 	return &o
 }
-
 func Log(s string) *Line {
 	o := Line{
 		Name: s,
@@ -108,7 +99,6 @@ func Log(s string) *Line {
 	}
 	return &o
 }
-
 func Tags(s string) *Line {
 	o := Line{
 		Name: s,
@@ -135,7 +125,6 @@ func Tags(s string) *Line {
 	}
 	return &o
 }
-
 func Tag(s string) *Line {
 	o := Line{
 		Name: s,
@@ -150,7 +139,6 @@ func Tag(s string) *Line {
 	}
 	return &o
 }
-
 func File(s string) *Line {
 	out := Line{
 		Name: s,
@@ -176,7 +164,6 @@ func File(s string) *Line {
 	}
 	return &out
 }
-
 func Dir(s string) *Line {
 	out := Line{
 		Name: s,
@@ -203,27 +190,22 @@ func Dir(s string) *Line {
 	}
 	return &out
 }
-
 func Port(s string) *Line {
 	o := Line{Name: s}
 	return &o
 }
-
 func Addr(s string) *Line {
 	o := Line{Name: s}
 	return &o
 }
-
 func Addrs(s string) *Line {
 	o := Line{Name: s}
 	return &o
 }
-
 func Algo(s string) *Line {
 	o := Line{Name: s}
 	return &o
 }
-
 func Net(s string) (o *Line) {
 	o = &Line{
 		Name: s,
@@ -259,7 +241,6 @@ func Net(s string) (o *Line) {
 	}
 	return o
 }
-
 func bv(l *Line, si interface{}) bool {
 	if si == nil {
 		return false
@@ -274,21 +255,18 @@ func bv(l *Line, si interface{}) bool {
 	}
 	return true
 }
-
 // Enable is a boolean that defaults to false
 func Enable(s string) *Line {
 	g := false
 	o := Line{Name: s, Validate: bv, Value: &g}
 	return &o
 }
-
 // Enabled is a boolean that defaults to true
 func Enabled(s string) (o *Line) {
 	o = &Line{Name: s, Validate: bv}
 	o.BOOL(true)
 	return &Line{Name: s}
 }
-
 // Default sets a default value for the Line
 func (l *Line) Default(d interface{}) (out *Line) {
 	// spew.Dump(l)
@@ -300,7 +278,6 @@ func (l *Line) Default(d interface{}) (out *Line) {
 	fmt.Println(*l.Value.(*string))
 	return l
 }
-
 // Usage is the short text explaining a configuration option
 func (l *Line) Usage(s string) *Line {
 	// spew.Dump(l)
@@ -309,7 +286,6 @@ func (l *Line) Usage(s string) *Line {
 	}
 	return l
 }
-
 // Min is chained to validate at initialisation
 func (l *Line) Min(i int) *Line {
 	v := l.Validate
@@ -324,7 +300,6 @@ func (l *Line) Min(i int) *Line {
 	}
 	return l
 }
-
 // Max is chained to validate at initialisation
 func (l *Line) Max(i int) *Line {
 	v := l.Validate

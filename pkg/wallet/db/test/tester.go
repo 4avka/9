@@ -1,10 +1,7 @@
 // Copyright (c) 2017 The btcsuite developers
-
 package walletdbtest
-
 // Tester is an interface type that can be implemented by *testing.T.  This
 // allows drivers to call into the non-test API using their own test contexts.
-
 type Tester interface {
 	Error(...interface{})
 	Errorf(string, ...interface{})

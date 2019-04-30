@@ -1,11 +1,9 @@
 // Copyright (c) 2015 The btcsuite developers
 package wallet
-
 import (
 	"fmt"
 	"os"
 )
-
 // checkCreateDir checks that the path exists and is a directory.
 // If path does not exist, it is created.
 func checkCreateDir(

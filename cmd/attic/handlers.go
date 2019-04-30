@@ -1,19 +1,14 @@
 package cmd
-
 import (
 	"fmt"
 	"sort"
-
 	"git.parallelcoin.io/dev/9/cmd/node"
 	"git.parallelcoin.io/dev/9/cmd/walletmain"
-
 	"git.parallelcoin.io/dev/9/cmd/ctl"
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
-
 func optTagList(s []string) (ss string) {
 	if len(ss) > 1 {
-
 		ss = "[<"
 		for i, x := range s {
 			ss += x
@@ -26,21 +21,18 @@ func optTagList(s []string) (ss string) {
 	}
 	return
 }
-
 func getCommands(cmds Commands) (s []string) {
 	for i := range cmds {
 		s = append(s, i)
 	}
 	return
 }
-
 func getTokens(cmds Tokens) (s []string) {
 	for _, x := range cmds {
 		s = append(s, x.Value)
 	}
 	return
 }
-
 func Help(args []string, tokens Tokens, cmds, all Commands) int {
 	log <- cl.Debug{"HELP\n", "Help", args, getTokens(tokens)}
 	fmt.Println(APPNAME, APPVERSION, "-", APPDESC)
@@ -82,7 +74,6 @@ func Help(args []string, tokens Tokens, cmds, all Commands) int {
 	}
 	return 0
 }
-
 func Conf(args []string, tokens Tokens, cmds, all Commands) int {
 	var r int
 	for r = 2; r == 2; {
@@ -90,17 +81,14 @@ func Conf(args []string, tokens Tokens, cmds, all Commands) int {
 	}
 	return r
 }
-
 func New(args []string, tokens Tokens, cmds, all Commands) int {
 	fmt.Println("running New", args, getTokens(tokens))
 	return 0
 }
-
 func Copy(args []string, tokens Tokens, cmds, all Commands) int {
 	fmt.Println("running Copy", args, getTokens(tokens))
 	return 0
 }
-
 func List(args []string, tokens Tokens, cmds, all Commands) int {
 	if j := validateProxyListeners(); j != 0 {
 		return j
@@ -111,7 +99,6 @@ func List(args []string, tokens Tokens, cmds, all Commands) int {
 	ctl.ListCommands()
 	return 0
 }
-
 func Ctl(args []string, tokens Tokens, cmds, all Commands) int {
 	cl.Register.SetAllLevels(*Config.LogLevel)
 	setAppDataDir("node")
@@ -132,7 +119,6 @@ func Ctl(args []string, tokens Tokens, cmds, all Commands) int {
 	ctl.Main(args[i:], Config)
 	return 0
 }
-
 func Node(args []string, tokens Tokens, cmds, all Commands) int {
 	cl.Register.SetAllLevels(*Config.LogLevel)
 	setAppDataDir("node")
@@ -157,7 +143,6 @@ func Node(args []string, tokens Tokens, cmds, all Commands) int {
 	}
 	return 0
 }
-
 func Wallet(args []string, tokens Tokens, cmds, all Commands) int {
 	// spew.Dump(*config)
 	cl.Register.SetAllLevels(*Config.LogLevel)
@@ -166,19 +151,16 @@ func Wallet(args []string, tokens Tokens, cmds, all Commands) int {
 	walletmain.Main(Config, activenetparams)
 	return 0
 }
-
 func Shell(args []string, tokens Tokens, cmds, all Commands) int {
 	cl.Register.SetAllLevels(*Config.LogLevel)
 	fmt.Println("running Shell", args, getTokens(tokens))
 	return 0
 }
-
 func Test(args []string, tokens Tokens, cmds, all Commands) int {
 	cl.Register.SetAllLevels(*Config.LogLevel)
 	fmt.Println("running Test", args, getTokens(tokens))
 	return 0
 }
-
 func Create(args []string, tokens Tokens, cmds, all Commands) int {
 	cl.Register.SetAllLevels(*Config.LogLevel)
 	fmt.Println("running Create", args, getTokens(tokens))

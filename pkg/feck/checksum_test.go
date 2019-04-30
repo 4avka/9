@@ -1,9 +1,7 @@
 package feck
-
 import (
 	"testing"
 )
-
 func TestChecksum(t *testing.T) {
 	test := []byte("hello world!")
 	t.Log(string(test))

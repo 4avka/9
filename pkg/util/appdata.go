@@ -1,5 +1,4 @@
 package util
-
 import (
 	"os"
 	"os/user"
@@ -8,7 +7,6 @@ import (
 	"strings"
 	"unicode"
 )
-
 // appDataDir returns an operating system specific directory to be used for storing application data for an application.  See AppDataDir for more details.  This unexported version takes an operating system argument primarily to enable the testing package to properly test the function by forcing an operating system that is not the currently one.
 func appDataDir(
 	goos, appName string, roaming bool) string {
@@ -54,11 +52,9 @@ func appDataDir(
 			return filepath.Join(homeDir, "."+appNameLower)
 		}
 	}
-
 	// Fall back to the current directory if all else fails.
 	return "."
 }
-
 // AppDataDir returns an operating system specific directory to be used for storing application data for an application. The appName parameter is the name of the application the data directory is being requested for.  This function will prepend a period to the appName for POSIX style operating systems since that is standard practice.  An empty appName or one with a single dot is treated as requesting the current directory so only "." will be returned.  Further, the first character of appName will be made lowercase for POSIX style operating systems and uppercase for Mac and Windows since that is standard practice.
 // The roaming parameter only applies to Windows where it specifies the roaming application data profile (%APPDATA%) should be used instead of the local one (%LOCALAPPDATA%) that is used by default. Example results:
 //  dir := AppDataDir("myapp", false)

@@ -1,7 +1,5 @@
 package cmd
-
 var defaultDatadir = CleanAndExpandPath("~/." + APPNAME)
-
 // Config is the declaration of our set of application configuration variables.
 // Custom functions are written per type that generate a Line struct and contain
 // a validator/setter function that checks the input

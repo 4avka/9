@@ -1,5 +1,4 @@
 package ffldb
-
 import (
 	"container/list"
 	"encoding/binary"
@@ -9,26 +8,19 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
-
 	chainhash "git.parallelcoin.io/dev/9/pkg/chain/hash"
 	"git.parallelcoin.io/dev/9/pkg/chain/wire"
 	database "git.parallelcoin.io/dev/9/pkg/db"
 	cl "git.parallelcoin.io/dev/9/pkg/util/cl"
 )
-
 const (
-
 	// The Bitcoin protocol encodes block height as int32, so max number of blocks is 2^31.  Max block size per the protocol is 32MiB per block. So the theoretical max at the time this comment was written is 64PiB (pebibytes).  With files @ 512MiB each, this would require a maximum of 134,217,728 files.  Thus, choose 9 digits of precision for the filenames.  An additional benefit is 9 digits provides 10^9 files @ 512MiB each for a total of ~476.84PiB (roughly 7.4 times the current theoretical max), so there is room for the max block size to grow in the future.
 	blockFilenameTemplate = "%09d.fdb"
-
 	// maxOpenFiles is the max number of open files to maintain in the open blocks cache.  Note that this does not include the current write file, so there will typically be one more than this value open.
 	maxOpenFiles = 25
-
 	// maxBlockFileSize is the maximum size for each file used to store blocks.
-
 	// NOTE: The current code uses uint32 for all offsets, so this value must be less than 2^32 (4 GiB).  This is also why it's a typed constant.
 	maxBlockFileSize uint32 = 512 * 1024 * 1024 // 512 MiB
-
 	// blockLocSize is the number of bytes the serialized block location data that is stored in the block index.
 	// 
 	// The serialized block location format is:
@@ -41,15 +33,11 @@ const (
 	blockLocSize = 12
 )
 
-
 var (
-
 	// castagnoli houses the Catagnoli polynomial used for CRC-32 checksums.
 	castagnoli = crc32.MakeTable(crc32.Castagnoli)
 )
-
 // filer is an interface which acts very similar to a *os.File and is typically implemented by it.  It exists so the test code can provide mock files for properly testing corruption and file system issues.
-
 type filer interface {
 	io.Closer
 	io.WriterAt
@@ -57,122 +45,81 @@ type filer interface {
 	Truncate(size int64) error
 	Sync() error
 }
-
 // lockableFile represents a block file on disk that has been opened for either read or read/write access.  It also contains a read-write mutex to support multiple concurrent readers.
-
 type lockableFile struct {
 	sync.RWMutex
 	file filer
 }
-
 // writeCursor represents the current file and offset of the block file on disk for performing all writes. It also contains a read-write mutex to support multiple concurrent readers which can reuse the file handle.
-
 type writeCursor struct {
 	sync.RWMutex
-
 	// curFile is the current block file that will be appended to when writing new blocks.
 	curFile *lockableFile
-
 	// curFileNum is the current block file number and is used to allow readers to use the same open file handle.
 	curFileNum uint32
-
 	// curOffset is the offset in the current write block file where the next new block will be written.
 	curOffset uint32
 }
-
 // blockStore houses information used to handle reading and writing blocks (and part of blocks) into flat files with support for multiple concurrent readers.
-
 type blockStore struct {
-
 	// network is the specific network to use in the flat files for each block.
 	network wire.BitcoinNet
-
 	// basePath is the base path used for the flat block files and metadata.
 	basePath string
-
 	// maxBlockFileSize is the maximum size for each file used to store blocks.  It is defined on the store so the whitebox tests can override the value.
 	maxBlockFileSize uint32
-
 	// The following fields are related to the flat files which hold the actual blocks.   The number of open files is limited by maxOpenFiles.
-
 	// obfMutex protects concurrent access to the openBlockFiles map.  It is a RWMutex so multiple readers can simultaneously access open files.
-
 	// openBlockFiles houses the open file handles for existing block files which have been opened read-only along with an individual RWMutex. This scheme allows multiple concurrent readers to the same file while preventing the file from being closed out from under them.
-
 	// lruMutex protects concurrent access to the least recently used list and lookup map.
-
 	// openBlocksLRU tracks how the open files are refenced by pushing the most recently used files to the front of the list thereby trickling the least recently used files to end of the list.  When a file needs to be closed due to exceeding the the max number of allowed open files, the one at the end of the list is closed.
-
 	// fileNumToLRUElem is a mapping between a specific block file number and the associated list element on the least recently used list.
-
 	// Thus, with the combination of these fields, the database supports concurrent non-blocking reads across multiple and individual files along with intelligently limiting the number of open file handles by closing the least recently used files as needed.
-
 	// NOTE: The locking order used throughout is well-defined and MUST be followed.  Failure to do so could lead to deadlocks.  In particular, the locking order is as follows:
-
 	//   1) obfMutex
-
 	//   2) lruMutex
-
 	//   3) writeCursor mutex
-
 	//   4) specific file mutexes
-
 	// None of the mutexes are required to be locked at the same time, and often aren't.  However, if they are to be locked simultaneously, they MUST be locked in the order previously specified.
-
 	// Due to the high performance and multi-read concurrency requirements, write locks should only be held for the minimum time necessary.
 	obfMutex         sync.RWMutex
 	lruMutex         sync.Mutex
 	openBlocksLRU    *list.List // Contains uint32 block file numbers.
 	fileNumToLRUElem map[uint32]*list.Element
 	openBlockFiles   map[uint32]*lockableFile
-
 	// writeCursor houses the state for the current file and location that new blocks are written to.
 	writeCursor *writeCursor
-
 	// These functions are set to openFile, openWriteFile, and deleteFile by default, but are exposed here to allow the whitebox tests to replace them when working with mock files.
 	openFileFunc      func(fileNum uint32) (*lockableFile, error)
 	openWriteFileFunc func(
 		fileNum uint32) (filer, error)
 	deleteFileFunc func(fileNum uint32) error
 }
-
 // blockLocation identifies a particular block file and location.
-
 type blockLocation struct {
 	blockFileNum uint32
 	fileOffset   uint32
 	blockLen     uint32
 }
-
 // deserializeBlockLoc deserializes the passed serialized block location information.  This is data stored into the block index metadata for each block.  The serialized data passed to this function MUST be at least blockLocSize bytes or it will panic.  The error check is avoided here because this information will always be coming from the block index which includes a checksum to detect corruption.  Thus it is safe to use this unchecked here.
 func deserializeBlockLoc(
 	serializedLoc []byte) blockLocation {
-
 	// The serialized block location format is:
-
 	//  [0:4]  Block file (4 bytes)
-
 	//  [4:8]  File offset (4 bytes)
-
 	//  [8:12] Block length (4 bytes)
 	return blockLocation{
 		blockFileNum: byteOrder.Uint32(serializedLoc[0:4]),
 		fileOffset:   byteOrder.Uint32(serializedLoc[4:8]),
 		blockLen:     byteOrder.Uint32(serializedLoc[8:12]),
 	}
-
 }
-
 // serializeBlockLoc returns the serialization of the passed block location. This is data to be stored into the block index metadata for each block.
 func serializeBlockLoc(
 	loc blockLocation) []byte {
-
 	// The serialized block location format is:
-
 	//  [0:4]  Block file (4 bytes)
-
 	//  [4:8]  File offset (4 bytes)
-
 	//  [8:12] Block length (4 bytes)
 	var serializedData [12]byte
 	byteOrder.PutUint32(serializedData[0:4], loc.blockFileNum)
@@ -180,55 +127,39 @@ func serializeBlockLoc(
 	byteOrder.PutUint32(serializedData[8:12], loc.blockLen)
 	return serializedData[:]
 }
-
 // blockFilePath return the file path for the provided block file number.
 func blockFilePath(
 	dbPath string, fileNum uint32) string {
-
 	fileName := fmt.Sprintf(blockFilenameTemplate, fileNum)
 	return filepath.Join(dbPath, fileName)
 }
-
 // openWriteFile returns a file handle for the passed flat file number in read/write mode.  The file will be created if needed.  It is typically used for the current file that will have all new data appended.  Unlike openFile, this function does not keep track of the open file and it is not subject to the maxOpenFiles limit.
 func (s *blockStore) openWriteFile(fileNum uint32) (filer, error) {
-
 	// The current block file needs to be read-write so it is possible to append to it.  Also, it shouldn't be part of the least recently used file.
 	filePath := blockFilePath(s.basePath, fileNum)
 	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE, 0666)
-
 	if err != nil {
-
 		str := fmt.Sprintf("failed to open file %q: %v", filePath, err)
 		return nil, makeDbErr(database.ErrDriverSpecific, str, err)
 	}
-
 	return file, nil
 }
-
 // openFile returns a read-only file handle for the passed flat file number. The function also keeps track of the open files, performs least recently used tracking, and limits the number of open files to maxOpenFiles by closing the least recently used file as needed.
 // This function MUST be called with the overall files mutex (s.obfMutex) locked for WRITES.
 func (s *blockStore) openFile(fileNum uint32) (*lockableFile, error) {
-
 	// Open the appropriate file as read-only.
 	filePath := blockFilePath(s.basePath, fileNum)
 	file, err := os.Open(filePath)
-
 	if err != nil {
-
 		return nil, makeDbErr(database.ErrDriverSpecific, err.Error(),
 			err)
 	}
-
 	blockFile := &lockableFile{file: file}
-
 	// Close the least recently used file if the file exceeds the max allowed open files.  This is not done until after the file open in case the file fails to open, there is no need to close any files.
-
 	// A write lock is required on the LRU list here to protect against modifications happening as already open files are read from and shuffled to the front of the list.
-
 	// Also, add the file that was just opened to the front of the least recently used list to indicate it is the most recently used file and therefore should be closed last.
 	s.lruMutex.Lock()
 	lruList := s.openBlocksLRU
-
 	if lruList.Len() >= maxOpenFiles {
 
 		lruFileNum := lruList.Remove(lruList.Back()).(uint32)

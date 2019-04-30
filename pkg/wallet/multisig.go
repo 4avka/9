@@ -1,7 +1,6 @@
 // Copyright (c) 2017 The btcsuite developers
 // Copyright (c) 2016 The Decred developers
 package wallet
-
 import (
 	"errors"
 	txscript "git.parallelcoin.io/dev/9/pkg/chain/tx/script"
@@ -9,7 +8,6 @@ import (
 	waddrmgr "git.parallelcoin.io/dev/9/pkg/wallet/addrmgr"
 	walletdb "git.parallelcoin.io/dev/9/pkg/wallet/db"
 )
-
 // MakeMultiSigScript creates a multi-signature script that can be redeemed with
 // nRequired signatures of the passed keys and addresses.  If the address is a
 // P2PKH address, the associated pubkey is looked up by the wallet if possible,
@@ -60,7 +58,6 @@ func (w *Wallet) MakeMultiSigScript(addrs []util.Address, nRequired int) ([]byte
 	}
 	return txscript.MultiSigScript(pubKeys, nRequired)
 }
-
 // ImportP2SHRedeemScript adds a P2SH redeem script to the wallet.
 func (w *Wallet) ImportP2SHRedeemScript(script []byte) (*util.AddressScriptHash, error) {
 	var p2shAddr *util.AddressScriptHash

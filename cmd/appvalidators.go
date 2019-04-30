@@ -1,5 +1,4 @@
 package cmd
-
 import (
 	"fmt"
 	"git.parallelcoin.io/dev/9/pkg/util"
@@ -10,13 +9,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
 	"git.parallelcoin.io/dev/9/cmd/nine"
-
 	"git.parallelcoin.io/dev/9/pkg/chain/fork"
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
-
 var DataDir string = filepath.Dir(util.AppDataDir("9", false))
 var Networks = []string{"mainnet", "testnet", "simnet", "regtestnet"}
 var NetParams = map[string]*nine.Params{
@@ -25,7 +21,6 @@ var NetParams = map[string]*nine.Params{
 	"simnet":     &nine.SimNetParams,
 	"regtestnet": &nine.RegressionNetParams,
 }
-
 // GenAddr returns a validator with a set default port assumed if one is not present
 func GenAddr(name string, port int) func(r *Row, in interface{}) bool {
 	return func(r *Row, in interface{}) bool {
@@ -78,7 +73,6 @@ func GenAddr(name string, port int) func(r *Row, in interface{}) bool {
 		return true
 	}
 }
-
 // GenAddrs returns a validator with a set default port assumed if one is not present
 func GenAddrs(name string, port int) func(r *Row, in interface{}) bool {
 	return func(r *Row, in interface{}) bool {
@@ -149,7 +143,6 @@ func GenAddrs(name string, port int) func(r *Row, in interface{}) bool {
 		return true
 	}
 }
-
 func getAlgoOptions() (options []string) {
 	var modernd = "random"
 	for _, x := range fork.P9AlgoVers {
@@ -159,7 +152,6 @@ func getAlgoOptions() (options []string) {
 	sort.Strings(options)
 	return
 }
-
 // Valid is a collection of validator functions for the different types used
 // in a configuration. These functions optionally can accept a *Row and with
 // this they assign the validated, parsed value into the Value slot.

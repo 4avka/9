@@ -1,13 +1,10 @@
 package main
-
 import (
 	"fmt"
 	"net"
 	"time"
-
 	"github.com/obsilp/rmnp"
 )
-
 var (
 	myListener = "127.0.0.1:11011"
 	server     = rmnp.NewServer(myListener)
@@ -16,9 +13,7 @@ var (
 	heartbeat  = time.Second * 3 / 2
 	mapWrite   = false
 )
-
 func main() {
-
 	server.ClientConnect = clientConnect
 	server.ClientDisconnect = clientDisconnect
 	server.ClientTimeout = clientTimeout
@@ -28,23 +23,16 @@ func main() {
 	defer server.Stop()
 	select {}
 }
-
 // Client callbacks
 func serverConnect(
 	conn *rmnp.Connection, data []byte) {
-
 	// fmt.Println("serverConnect")
 	originAddr := conn.Addr.String()
-
 	for conn.Addr != nil {
-
 		for i := range clients {
-
 			returnAddr := clientsMap[originAddr]
 			time.Sleep(heartbeat)
-
 			if i == returnAddr {
-
 				fmt.Println("ping", conn.Addr)
 				conn.SendReliableOrdered([]byte("ping " + myListener))
 				break
@@ -54,12 +42,9 @@ func serverConnect(
 }
 func serverDisconnect(
 	conn *rmnp.Connection, data []byte) {
-
 	fmt.Println("server disconnect")
 	addr := clientsMap[conn.Addr.String()]
-
 	for mapWrite {
-
 	}
 	mapWrite = true
 	delete(clients, clientsMap[addr])
@@ -69,12 +54,9 @@ func serverDisconnect(
 }
 func serverTimeout(
 	conn *rmnp.Connection, data []byte) {
-
 	// fmt.Println("server timeout")
 	addr := clientsMap[conn.Addr.String()]
-
 	for mapWrite {
-
 	}
 	mapWrite = true
 	delete(clients, clientsMap[addr])
@@ -84,28 +66,21 @@ func serverTimeout(
 }
 func handleClientPacket(
 	conn *rmnp.Connection, data []byte, channel rmnp.Channel) {
-
 	fmt.Println("->", string(data))
 }
-
 // Server callbacks
 func clientConnect(
 	conn *rmnp.Connection, data []byte) {
-
 	// fmt.Println("clientConnection")
 	if string(data) != "kopach" {
-
 		conn.Disconnect([]byte("wrong handshake"))
 	}
 }
 func clientDisconnect(
 	conn *rmnp.Connection, data []byte) {
-
 	// fmt.Println("client disconnect")
 	addr := clientsMap[conn.Addr.String()]
-
 	for mapWrite {
-
 	}
 	mapWrite = true
 	delete(clients, clientsMap[addr])
@@ -115,12 +90,9 @@ func clientDisconnect(
 }
 func clientTimeout(
 	conn *rmnp.Connection, data []byte) {
-
 	// fmt.Println("client timeout")
 	addr := clientsMap[conn.Addr.String()]
-
 	for mapWrite {
-
 	}
 	mapWrite = true
 	delete(clients, clientsMap[addr])
@@ -130,28 +102,21 @@ func clientTimeout(
 }
 func validateClient(
 	addr *net.UDPAddr, data []byte) (valid bool) {
-
 	// fmt.Println("validateClient")
 	valid = string(data) == "kopach"
 	if !valid {
-
 		fmt.Println("Wrong handshake from", addr.IP, addr.Port, addr.Network(), addr.Zone)
 	}
 	return
 }
 func handleServerPacket(
 	conn *rmnp.Connection, data []byte, channel rmnp.Channel) {
-
 	// fmt.Println("handleServerPacket", string(data))
 	str := string(data)
-
 	switch {
-
 	case str[:9] == "subscribe":
 		addr := string(str[10:])
-
 		if _, ok := clients[addr]; ok {
-
 			// conn.Disconnect([]byte("already subscribed"))
 			break
 		}
@@ -161,9 +126,7 @@ func handleServerPacket(
 		newClient.ServerTimeout = serverTimeout
 		newClient.PacketHandler = handleClientPacket
 		newClient.ConnectWithData([]byte("nachalnik"))
-
 		for mapWrite {
-
 		}
 		mapWrite = true
 		clients[addr] = newClient

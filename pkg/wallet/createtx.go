@@ -1,7 +1,6 @@
 // Copyright (c) 2013-2017 The btcsuite developers
 // Copyright (c) 2015-2016 The btcsuite developers
 package wallet
-
 import (
 	"fmt"
 	txauthor "git.parallelcoin.io/dev/9/pkg/chain/tx/author"
@@ -15,11 +14,9 @@ import (
 	walletdb "git.parallelcoin.io/dev/9/pkg/wallet/db"
 	"sort"
 )
-
 // byAmount defines the methods needed to satisify sort.Interface to
 // sort credits by their output amount.
 type byAmount []wtxmgr.Credit
-
 func (s byAmount) Len() int           { return len(s) }
 func (s byAmount) Less(i, j int) bool { return s[i].Amount < s[j].Amount }
 func (s byAmount) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
@@ -48,14 +45,12 @@ func makeInputSource(
 		return currentTotal, currentInputs, currentInputValues, currentScripts, nil
 	}
 }
-
 // secretSource is an implementation of txauthor.SecretSource for the wallet's
 // address manager.
 type secretSource struct {
 	*waddrmgr.Manager
 	addrmgrNs walletdb.ReadBucket
 }
-
 func (s secretSource) GetKey(addr util.Address) (*ec.PrivateKey, bool, error) {
 	ma, err := s.Address(s.addrmgrNs, addr)
 	if err != nil {
@@ -86,7 +81,6 @@ func (s secretSource) GetScript(addr util.Address) ([]byte, error) {
 	}
 	return msa.Script()
 }
-
 // txToOutputs creates a signed transaction which includes each output from
 // outputs.  Previous outputs to reedeem are chosen from the passed account's
 // UTXO set and minconf policy. An additional output may be added to return
@@ -205,7 +199,6 @@ func (w *Wallet) findEligibleOutputs(dbtx walletdb.ReadTx, account uint32, minco
 	}
 	return eligible, nil
 }
-
 // validateMsgTx verifies transaction input scripts for tx.  All previous output
 // scripts from outputs redeemed by the transaction, in the same order they are
 // spent, must be passed in the prevScripts slice.

@@ -1,5 +1,4 @@
 package ctl
-
 import (
 	"bufio"
 	"bytes"
@@ -8,15 +7,12 @@ import (
 	"io"
 	"os"
 	"strings"
-
 	"git.parallelcoin.io/dev/9/cmd/nine"
 	"git.parallelcoin.io/dev/9/pkg/rpc/json"
 )
-
 var HelpPrint = func() {
 	fmt.Println("help has not been overridden")
 }
-
 // Main is the entry point for the pod.Ctl component
 func Main(
 	args []string,
@@ -127,7 +123,6 @@ func Main(
 		fmt.Println(strResult)
 	}
 }
-
 // commandUsage display the usage for a specific command.
 func commandUsage(
 	method string,
@@ -141,7 +136,6 @@ func commandUsage(
 	fmt.Fprintln(os.Stderr, "Usage:")
 	fmt.Fprintf(os.Stderr, "  %s\n", usage)
 }
-
 // usage displays the general usage when the help flag is not displayed and and an invalid command was specified.  The commandUsage function is used instead when a valid command was specified.
 func usage(
 	errorMessage string,

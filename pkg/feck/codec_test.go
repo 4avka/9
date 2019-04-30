@@ -1,15 +1,12 @@
 package feck
-
 import (
 	"crypto/rand"
 	"testing"
 )
-
 const (
 	requiredshards = 3
 	totalshards    = 9
 )
-
 func TestSplit(t *testing.T) {
 	testData := make([]byte, 256)
 	_, _ = rand.Read(testData)
@@ -39,7 +36,6 @@ func TestSplit(t *testing.T) {
 	// padded := PadData(testData, 3, 9)
 	// t.Log(len(padded), padded)
 	// splitted := Split(padded, 3, 9)
-
 	// err := rsc.Reconst(splitted, []int{0, 1, 2}, []int{3, 4, 5, 6, 7, 8})
 	// if err != nil {
 	// 	panic(err)

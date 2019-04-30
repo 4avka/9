@@ -1,21 +1,16 @@
 package cmd
-
 import (
 	"fmt"
 	"git.parallelcoin.io/dev/9/cmd/nine"
 	"path/filepath"
 	"sort"
-
 	"git.parallelcoin.io/dev/9/cmd/node"
 	"git.parallelcoin.io/dev/9/cmd/walletmain"
-
 	"git.parallelcoin.io/dev/9/cmd/ctl"
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
-
 func optTagList(s []string) (ss string) {
 	if len(ss) > 1 {
-
 		ss = "[<"
 		for i, x := range s {
 			ss += x
@@ -28,7 +23,6 @@ func optTagList(s []string) (ss string) {
 	}
 	return
 }
-
 func getCommands(cmds Commands) (s []string) {
 	for i := range cmds {
 		s = append(s, i)
@@ -36,7 +30,6 @@ func getCommands(cmds Commands) (s []string) {
 	sort.Strings(s)
 	return
 }
-
 func getTokens(cmds Tokens) (s []string) {
 	for _, x := range cmds {
 		s = append(s, x.Value)
@@ -44,7 +37,6 @@ func getTokens(cmds Tokens) (s []string) {
 	sort.Strings(s)
 	return
 }
-
 func Help(args []string, tokens Tokens, app *App) int {
 	fmt.Println(app.Name, app.Version(), "-", app.Tagline)
 	fmt.Println()
@@ -91,7 +83,6 @@ func Help(args []string, tokens Tokens, app *App) int {
 	}
 	return 0
 }
-
 func Conf(args []string, tokens Tokens, app *App) int {
 	var r int
 	for r = 2; r == 2; {
@@ -99,17 +90,14 @@ func Conf(args []string, tokens Tokens, app *App) int {
 	}
 	return r
 }
-
 func New(args []string, tokens Tokens, app *App) int {
 	fmt.Println("running New", args, getTokens(tokens))
 	return 0
 }
-
 func Copy(args []string, tokens Tokens, app *App) int {
 	fmt.Println("running Copy", args, getTokens(tokens))
 	return 0
 }
-
 func List(args []string, tokens Tokens, app *App) int {
 	if j := validateProxyListeners(app); j != 0 {
 		return j
@@ -120,7 +108,6 @@ func List(args []string, tokens Tokens, app *App) int {
 	ctl.ListCommands()
 	return 0
 }
-
 func Ctl(args []string, tokens Tokens, app *App) int {
 	// spew.Dump(app.Cats["app"])
 	cl.Register.SetAllLevels(*app.Config.LogLevel)
@@ -142,7 +129,6 @@ func Ctl(args []string, tokens Tokens, app *App) int {
 	ctl.Main(args[i:], app.Config)
 	return 0
 }
-
 func Node(args []string, tokens Tokens, app *App) int {
 	node.StateCfg = app.Config.State
 	node.Cfg = app.Config
@@ -167,7 +153,6 @@ func Node(args []string, tokens Tokens, app *App) int {
 	}
 	return 0
 }
-
 func Wallet(args []string, tokens Tokens, app *App) int {
 	setAppDataDir(app, "wallet")
 	netDir := walletmain.NetworkDir(*app.Config.AppDataDir, app.Config.ActiveNetParams.Params)
@@ -186,7 +171,6 @@ func Wallet(args []string, tokens Tokens, app *App) int {
 	}
 	return 0
 }
-
 func Shell(args []string, tokens Tokens, app *App) int {
 	setAppDataDir(app, "node")
 	netDir := walletmain.NetworkDir(filepath.Join(*app.Config.DataDir, "wallet"), app.Config.ActiveNetParams.Params)
@@ -205,13 +189,11 @@ func Shell(args []string, tokens Tokens, app *App) int {
 	}
 	return 0
 }
-
 func Test(args []string, tokens Tokens, app *App) int {
 	cl.Register.SetAllLevels(*app.Config.LogLevel)
 	fmt.Println("running Test", args, getTokens(tokens))
 	return 0
 }
-
 func Create(args []string, tokens Tokens, app *App) int {
 	netDir := walletmain.NetworkDir(filepath.Join(*app.Config.DataDir, "wallet"), app.Config.ActiveNetParams.Params)
 	wdb := netDir // + "/wallet.db"
@@ -226,15 +208,12 @@ func Create(args []string, tokens Tokens, app *App) int {
 	}
 	return 0
 }
-
 func TestHandler(args []string, tokens Tokens, app *App) int {
 	return 0
 }
-
 func GUI(args []string, tokens Tokens, app *App) int {
 	return 0
 }
-
 func Mine(args []string, tokens Tokens, app *App) int {
 	return 0
 }
