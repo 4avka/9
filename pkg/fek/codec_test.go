@@ -1,14 +1,17 @@
-package feck
+package fek
+
 import (
 	"crypto/rand"
 	"testing"
 )
+
 const (
 	requiredshards = 3
 	totalshards    = 9
 )
+
 func TestSplit(t *testing.T) {
-	testData := make([]byte, 256)
+	testData := make([]byte, 64)
 	_, _ = rand.Read(testData)
 	t.Log(len(testData), testData)
 	rsc := New(requiredshards, totalshards)
@@ -28,11 +31,11 @@ func TestSplit(t *testing.T) {
 		t.Log(i, len(x), x)
 		if i%2 == 0 || i%3 == 0 {
 			muddled[i][int(muddled[i][4])/len(muddled[i])] = ^muddled[i][int(muddled[i][4])/len(muddled[i])]
-			t.Log("MANGLING", i, len(x), x)
+			t.Log(i, len(x), x, "MANG")
 		}
 	}
 	unmuddled := rsc.Decode(muddled)
-	t.Log(unmuddled)
+	t.Log(len(unmuddled), unmuddled)
 	// padded := PadData(testData, 3, 9)
 	// t.Log(len(padded), padded)
 	// splitted := Split(padded, 3, 9)

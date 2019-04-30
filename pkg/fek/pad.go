@@ -1,8 +1,10 @@
-package feck
+package fek
+
 // Reed Solomon 9/3 forward error correction, intended to be sent as 9 pieces where 3 uncorrupted parts allows assembly of the message
 import (
 	"encoding/binary"
 )
+
 // padData appends a 2 byte length prefix, and pads to a multiple of total.
 // Note that the 16 bit prefix limits max chunk size to 64kb, thus creating a
 // max of 64kb * number of required shares. If the data length is greater than
@@ -24,6 +26,7 @@ func PadData(data []byte, required, total int) []byte {
 	padLen := total*chunkLen - dataLen
 	return append(data, make([]byte, padLen)...)
 }
+
 // UnpadData reverses the padding applied in PadData by reading the length
 // prefix and slicing off the extra bytes
 func UnpadData(data []byte) (out []byte) {

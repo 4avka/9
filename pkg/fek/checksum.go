@@ -1,9 +1,12 @@
-package feck
+package fek
+
 import (
 	"encoding/binary"
 	"github.com/minio/highwayhash"
 )
+
 var zerokey = make([]byte, 32)
+
 func AppendChecksum(in []byte) []byte {
 	return append(in, Uint64ToBytes(highwayhash.Sum64(in, zerokey))...)
 }
@@ -20,12 +23,14 @@ func VerifyChecksum(in []byte) (out []byte, verified bool) {
 	}
 	return
 }
+
 // Uint64ToBytes - returns a byte slice from uint64 - required because Murmur3 takes bytes as input but returns uint32
 func Uint64ToBytes(input uint64) []byte {
 	p := make([]byte, 8)
 	binary.LittleEndian.PutUint64(p, input)
 	return p
 }
+
 // BytesToUint64 - converts 4 byte slice to uint32
 func BytesToUint64(bytes []byte) uint64 {
 	// We are taking off the seatbelt here for performance reasons. We know that
@@ -36,6 +41,7 @@ func BytesToUint64(bytes []byte) uint64 {
 	// }
 	return binary.LittleEndian.Uint64(bytes)
 }
+
 // func ZeroBytes(b []byte) {
 // 	for i := range b {
 // 		b[i] = 0
