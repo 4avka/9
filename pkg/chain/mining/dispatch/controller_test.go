@@ -27,8 +27,7 @@ func TestKCPClientServer(
 	time.Sleep(time.Second)
 	runClient(t)
 }
-func runServer(
-	t *testing.T) {
+func runServer(t *testing.T) {
 
 	server := rpcx.NewServer()
 	server.RegisterName("Kopach", &K)
@@ -45,11 +44,10 @@ func runServer(
 	}
 	fmt.Println("Running server")
 	server.ServeListener(ln)
-	ready <- true
+	// ready <- true
 	fmt.Println("Finished running server")
 }
-func runClient(
-	t *testing.T) {
+func runClient(t *testing.T) {
 
 	pass := argon2.Key([]byte(cryptKey), []byte(cryptSalt), 1, 4096, 32, 32)
 	bc, _ := kcp.NewAESBlockCrypt(pass)
