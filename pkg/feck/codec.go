@@ -33,7 +33,7 @@ type RS struct {
 func New(required, total int) *RS {
 	rsc, err := reedsolomon.New(required, total-required)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 	return &RS{rsc, required, total}
 }
@@ -51,7 +51,7 @@ func (r *RS) Encode(data []byte) [][]byte {
 	}
 	err := r.Reconst(splitted, have, missing)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 	for i, x := range splitted {
 		splitted[i] = append([]byte{byte(i)}, x...)
@@ -80,7 +80,6 @@ func (r *RS) Decode(shards [][]byte) (out []byte) {
 			if x > 0 {
 				if length > 0 {
 					if x != length {
-						// panic("shards must all be the same length")
 						return nil
 					}
 				} else {
@@ -104,7 +103,6 @@ func (r *RS) Decode(shards [][]byte) (out []byte) {
 	}
 	err := r.Reconst(outSlice, have[:r.required], missing)
 	if err != nil {
-		// panic(err)
 		return nil
 	}
 	for i, x := range outSlice {

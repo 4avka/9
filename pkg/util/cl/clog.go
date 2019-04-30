@@ -197,6 +197,8 @@ func NewSubSystem(name, level string) (ss *SubSystem) {
 func init() {
 	wg.Add(1)
 	worker := func() {
+		var outbuf string
+		// var lastprint int64
 		var t, s string
 		for {
 			select {
@@ -296,7 +298,14 @@ func init() {
 				if color {
 					t = colorstring.Color("[light_gray]" + t + "[dark_gray]")
 				}
-				fmt.Fprint(Writer, t+s)
+				if len(outbuf) < 120 {
+					//  || time.Now().Unix() > lastprint+int64(time.Second) {
+					outbuf += t + s
+				} else {
+					fmt.Fprint(Writer, outbuf+t+s)
+					outbuf = ""
+					// lastprint = time.Now().Unix()
+				}
 			}
 		}
 	}

@@ -43,9 +43,9 @@ func BytesToUint64(bytes []byte) uint64 {
 	return binary.LittleEndian.Uint64(bytes)
 }
 
-func ZeroBytes(b []byte) {
-	for i := range b {
-		b[i] = 0
-	}
+// func ZeroBytes(b []byte) {
+// 	for i := range b {
+// 		b[i] = 0
+// 	}
 
-}
+// }
