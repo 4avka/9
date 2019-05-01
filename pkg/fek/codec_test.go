@@ -17,6 +17,7 @@ func TestSplit(t *testing.T) {
 	rsc := New(requiredshards, totalshards)
 	encoded := rsc.Encode(testData)
 	for i, x := range encoded {
+		encoded[i] = AppendChecksum(encoded[i])
 		t.Log(i, len(x), x)
 	}
 	muddlemap := make(map[int][]byte)
@@ -30,7 +31,7 @@ func TestSplit(t *testing.T) {
 	for i, x := range muddled {
 		t.Log(i, len(x), x)
 		if i%2 == 0 || i%3 == 0 {
-			muddled[i][int(muddled[i][4])/len(muddled[i])] = ^muddled[i][int(muddled[i][4])/len(muddled[i])]
+			muddled[i][3] = ^muddled[i][3]
 			t.Log(i, len(x), x, "MANG")
 		}
 	}

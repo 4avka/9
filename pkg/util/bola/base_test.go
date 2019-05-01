@@ -13,5 +13,11 @@ func TestBase(t *testing.T) {
 		fek.New(3, 9),
 		4096,
 	})
-	_ = base0
+	base1 := NewBase(BaseCfg{
+		func(message Message) {},
+		"127.0.0.1:2222",
+		fek.New(3, 9),
+		4096,
+	})
+	_, _ = base0, base1
 }
