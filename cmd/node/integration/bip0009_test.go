@@ -1,4 +1,5 @@
 // +build rpctest
+
 package integration
 import (
 	"fmt"

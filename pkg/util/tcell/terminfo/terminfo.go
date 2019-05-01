@@ -733,7 +733,7 @@ func LookupTerminfo(name string) (*Terminfo, error) {
 		hash := fmt.Sprintf("%x", sha1.Sum([]byte(name)))
 		gzhfile := path.Join(hash[0:2], hash[0:8]+".gz")
 		jshfile := path.Join(hash[0:2], hash[0:8])
-		// Build up the search path.  Old versions of tcell used a
+		// build up the search path.  Old versions of tcell used a
 		// single database file, whereas the new ones locate them
 		// in JSON (optionally compressed) files.
 		//

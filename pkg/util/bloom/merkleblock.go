@@ -106,7 +106,7 @@ func NewMerkleBlock(
 
 		height++
 	}
-	// Build the depth-first partial merkle tree.
+	// build the depth-first partial merkle tree.
 	mBlock.traverseAndBuild(height, 0)
 	// Create and return the merkle block.
 	msgMerkleBlock := wire.MsgMerkleBlock{

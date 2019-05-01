@@ -77,7 +77,7 @@ func BuildGCSFilter(
 	if f.n == 0 {
 		return &f, nil
 	}
-	// Build the filter.
+	// build the filter.
 	values := make(uint64Slice, 0, len(data))
 	b := bstream.NewBStreamWriter(0)
 	// Insert the hash (fast-ranged over a space of N*P) of each data element into a slice and sort the slice. This can be greatly optimized with native 128-bit multiplication, but we're going to be fully portable for now.

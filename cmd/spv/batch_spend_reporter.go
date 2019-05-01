@@ -1,9 +1,11 @@
 package spv
+
 import (
 	chainhash "git.parallelcoin.io/dev/9/pkg/chain/hash"
 	"git.parallelcoin.io/dev/9/pkg/chain/wire"
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
+
 // batchSpendReporter orchestrates the delivery of spend reports to
 // GetUtxoRequests processed by the UtxoScanner. The reporter expects a sequence
 // of blocks consisting of those containing a UTXO to watch, or any whose
@@ -28,6 +30,7 @@ type batchSpendReporter struct {
 	// NOTE: This watchlist is updated during each call to ProcessBlock.
 	filterEntries [][]byte
 }
+
 // FailRemaining will return an error to all remaining requests in the event we
 // experience a critical rescan error. The error is threaded through to allow
 // the syntax:
@@ -38,6 +41,7 @@ func (b *batchSpendReporter) FailRemaining(err error) error {
 	}
 	return err
 }
+
 // NotifyUnspentAndUnfound iterates through any requests for which no spends
 // were detected. If we were able to find the initial output, this will be
 // delivered signaling that no spend was detected. If the original output could
@@ -57,6 +61,7 @@ func (b *batchSpendReporter) NotifyUnspentAndUnfound() {
 		b.notifyRequests(&outpoint, requests, tx, nil)
 	}
 }
+
 // ProcessBlock accepts a block, block height, and any new requests whose start
 // height matches the provided height. If a non-zero number of new requests are
 // presented, the block will first be checked for the initial outputs from which
@@ -85,6 +90,7 @@ func (b *batchSpendReporter) ProcessBlock(blk *wire.MsgBlock,
 		}
 	}
 }
+
 // addNewRequests adds a set of new GetUtxoRequests to the spend reporter's
 // state. This method immediately adds the request's outpoints to the reporter's
 // watchlist.
@@ -95,7 +101,7 @@ func (b *batchSpendReporter) addNewRequests(reqs []*GetUtxoRequest) {
 			"adding outpoint=%s height=%d to watchlist", outpoint, req.BirthHeight,
 		}
 		b.requests[outpoint] = append(b.requests[outpoint], req)
-		// Build the filter entry only if it is the first time seeing
+		// build the filter entry only if it is the first time seeing
 		// the outpoint.
 		if _, ok := b.outpoints[outpoint]; !ok {
 			entry := req.Input.PkScript
@@ -104,6 +110,7 @@ func (b *batchSpendReporter) addNewRequests(reqs []*GetUtxoRequest) {
 		}
 	}
 }
+
 // findInitialTransactions searches the given block for the creation of the
 // UTXOs that are supposed to be birthed in this block. If any are found, a
 // spend report containing the initial outpoint will be saved in case the
@@ -178,6 +185,7 @@ func (b *batchSpendReporter) findInitialTransactions(block *wire.MsgBlock,
 	}
 	return initialTxns
 }
+
 // notifyRequests delivers the same final response to the given requests, and
 // cleans up any remaining state for the outpoint.
 //
@@ -194,6 +202,7 @@ func (b *batchSpendReporter) notifyRequests(
 		request.deliver(report, err)
 	}
 }
+
 // notifySpends finds any transactions in the block that spend from our watched
 // outpoints. If a spend is detected, it is immediately delivered and cleaned up
 // from the reporter's internal state.
@@ -228,6 +237,7 @@ func (b *batchSpendReporter) notifySpends(block *wire.MsgBlock,
 	}
 	return spends
 }
+
 // newBatchSpendReporter instantiates a fresh batchSpendReporter.
 func newBatchSpendReporter() *batchSpendReporter {
 	return &batchSpendReporter{

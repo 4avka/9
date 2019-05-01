@@ -461,7 +461,7 @@ func (
 		return
 	}
 
-	// Build up a getdata request for the list of blocks the headers describe.  The size hint will be limited to wire.MaxInvPerMsg by the function, so no need to double check it here.
+	// build up a getdata request for the list of blocks the headers describe.  The size hint will be limited to wire.MaxInvPerMsg by the function, so no need to double check it here.
 	gdmsg := wire.NewMsgGetDataSizeHint(uint(sm.headerList.Len()))
 	numRequested := 0
 

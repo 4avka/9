@@ -175,7 +175,9 @@ func BuilderTest(
 		t.Fatalf("Builder instantiation with key hash failed: %s",
 			err.Error())
 	}
-	// Build a filter and test matches.
+	// +build
+
+ a filter and test matches.
 	b.AddEntries(contents)
 	f, err := b.Build()
 	if err != nil {

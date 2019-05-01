@@ -36,7 +36,9 @@ func podExecutablePath() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("Failed to build pod: %v", err)
 	}
-	// Build pod and output an executable in a static temp path.
+	// +build
+
+ pod and output an executable in a static temp path.
 	outputPath := filepath.Join(testDir, "pod")
 	if runtime.GOOS == "windows" {
 		outputPath += ".exe"

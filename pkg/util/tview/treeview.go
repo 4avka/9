@@ -543,7 +543,7 @@ func (t *TreeView) Draw(screen tcell.Screen) {
 		return
 	}
 
-	// Build the tree if necessary.
+	// build the tree if necessary.
 	if t.nodes == nil {
 		t.process()
 	}

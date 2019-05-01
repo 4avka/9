@@ -637,7 +637,7 @@ func (idx *AddrIndex) ConnectBlock(dbTx database.Tx, block *util.Block,
 
 		return err
 	}
-	// Build all of the address to transaction mappings in a local map.
+	// build all of the address to transaction mappings in a local map.
 	addrsToTxns := make(writeIndexData)
 	idx.indexBlock(addrsToTxns, block, stxos)
 	// Add all of the index entries for each address.
@@ -663,7 +663,7 @@ func (idx *AddrIndex) ConnectBlock(dbTx database.Tx, block *util.Block,
 func (idx *AddrIndex) DisconnectBlock(dbTx database.Tx, block *util.Block,
 	stxos []blockchain.SpentTxOut) error {
 
-	// Build all of the address to transaction mappings in a local map.
+	// build all of the address to transaction mappings in a local map.
 	addrsToTxns := make(writeIndexData)
 	idx.indexBlock(addrsToTxns, block, stxos)
 	// Remove all of the index entries for each address.

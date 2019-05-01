@@ -1,4 +1,5 @@
 // +build windows
+
 // Copyright 2016 The TCell Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 package tcell
+
 import (
 	"errors"
 	"sync"
@@ -20,6 +22,7 @@ import (
 	"unicode/utf16"
 	"unsafe"
 )
+
 type cScreen struct {
 	in         syscall.Handle
 	out        syscall.Handle
@@ -32,16 +35,17 @@ type cScreen struct {
 	style      Style
 	clear      bool
 	fini       bool
-	w int
-	h int
-	oscreen consoleInfo
-	ocursor cursorInfo
-	oimode  uint32
-	oomode  uint32
-	cells   CellBuffer
-	colors  map[Color]Color
+	w          int
+	h          int
+	oscreen    consoleInfo
+	ocursor    cursorInfo
+	oimode     uint32
+	oomode     uint32
+	cells      CellBuffer
+	colors     map[Color]Color
 	sync.Mutex
 }
+
 var winLock sync.Mutex
 var winPalette = []Color{
 	ColorBlack,
@@ -80,6 +84,7 @@ var winColors = map[Color]Color{
 	ColorWhite:   ColorWhite,
 }
 var k32 = syscall.NewLazyDLL("kernel32.dll")
+
 // We have to bring in the kernel32.dll directly, so we can get access to some
 // system calls that the core Go API lacks.
 //
@@ -103,10 +108,12 @@ var (
 	procSetConsoleScreenBufferSize = k32.NewProc("SetConsoleScreenBufferSize")
 	procSetConsoleTextAttribute    = k32.NewProc("SetConsoleTextAttribute")
 )
+
 const (
 	w32Infinite    = ^uintptr(0)
 	w32WaitObject0 = uintptr(0)
 )
+
 // NewConsoleScreen returns a Screen for the Windows console associated
 // with the current process.  The Screen makes use of the Windows Console
 // API to display content and read events.
@@ -208,6 +215,7 @@ func (s *cScreen) PollEvent() Event {
 		return ev
 	}
 }
+
 type cursorInfo struct {
 	size    uint32
 	visible uint32
@@ -216,16 +224,19 @@ type coord struct {
 	x int16
 	y int16
 }
+
 func (c coord) uintptr() uintptr {
 	// little endian, put x first
 	return uintptr(c.x) | (uintptr(c.y) << 16)
 }
+
 type rect struct {
 	left   int16
 	top    int16
 	right  int16
 	bottom int16
 }
+
 func (s *cScreen) showCursor() {
 	s.setCursorInfo(&cursorInfo{size: 100, visible: 1})
 }
@@ -254,6 +265,7 @@ func (s *cScreen) doCursor() {
 func (s *cScreen) HideCursor() {
 	s.ShowCursor(-1, -1)
 }
+
 type charInfo struct {
 	ch   uint16
 	attr uint16
@@ -263,6 +275,7 @@ type inputRecord struct {
 	_    uint16
 	data [16]byte
 }
+
 const (
 	keyEvent    uint16 = 1
 	mouseEvent  uint16 = 2
@@ -270,6 +283,7 @@ const (
 	menuEvent   uint16 = 8  // don't use
 	focusEvent  uint16 = 16 // don't use
 )
+
 type mouseRecord struct {
 	x     int16
 	y     int16
@@ -277,12 +291,14 @@ type mouseRecord struct {
 	mod   uint32
 	flags uint32
 }
+
 const (
 	mouseDoubleClick uint32 = 0x2
 	mouseHWheeled    uint32 = 0x8
 	mouseVWheeled    uint32 = 0x4
 	mouseMoved       uint32 = 0x1
 )
+
 type resizeRecord struct {
 	x int16
 	y int16
@@ -295,6 +311,7 @@ type keyRecord struct {
 	ch     uint16
 	mod    uint32
 }
+
 const (
 	// Constants per Microsoft.  We don't put the modifiers
 	// here.
@@ -344,6 +361,7 @@ const (
 	vkF23    = 0x86
 	vkF24    = 0x87
 )
+
 var vkKeys = map[uint16]Key{
 	vkCancel: KeyCancel,
 	vkBack:   KeyBackspace,
@@ -389,6 +407,7 @@ var vkKeys = map[uint16]Key{
 	vkF23:    KeyF23,
 	vkF24:    KeyF24,
 }
+
 // NB: All Windows platforms are little endian.  We assume this
 // never, ever change.  The following code is endian safe. and does
 // not use unsafe pointers.
@@ -404,6 +423,7 @@ func getu16(v []byte) uint16 {
 func geti16(v []byte) int16 {
 	return int16(getu16(v))
 }
+
 // Convert windows dwControlKeyState to modifier mask
 func mod2mask(cks uint32) ModMask {
 	mm := ModNone
@@ -562,10 +582,12 @@ func (s *cScreen) scanInput() {
 		}
 	}
 }
+
 // Windows console can display 8 characters, in either low or high intensity
 func (s *cScreen) Colors() int {
 	return 16
 }
+
 var vgaColors = map[Color]uint16{
 	ColorBlack:   0,
 	ColorMaroon:  0x4,
@@ -584,6 +606,7 @@ var vgaColors = map[Color]uint16{
 	ColorAqua:    0xb,
 	ColorWhite:   0xf,
 }
+
 // Windows uses RGB signals
 func mapColor2RGB(c Color) uint16 {
 	winLock.Lock()
@@ -600,6 +623,7 @@ func mapColor2RGB(c Color) uint16 {
 	}
 	return 0
 }
+
 // Map a tcell style to Windows attributes
 func (s *cScreen) mapStyle(style Style) uint16 {
 	f, b, a := style.Decompose()
@@ -742,6 +766,7 @@ func (s *cScreen) Sync() {
 	}
 	s.Unlock()
 }
+
 type consoleInfo struct {
 	size  coord
 	pos   coord
@@ -749,6 +774,7 @@ type consoleInfo struct {
 	win   rect
 	maxsz coord
 }
+
 func (s *cScreen) getConsoleInfo(info *consoleInfo) {
 	procGetConsoleScreenBufferInfo.Call(
 		uintptr(s.out),
@@ -829,6 +855,7 @@ func (s *cScreen) clearScreen(style Style) {
 		pos.uintptr(),
 		uintptr(unsafe.Pointer(&scratch)))
 }
+
 const (
 	modeExtndFlg uint32 = 0x0080
 	modeMouseEn  uint32 = 0x0010
@@ -836,6 +863,7 @@ const (
 	modeWrapEOL  uint32 = 0x0002
 	modeCooked   uint32 = 0x0001
 )
+
 func (s *cScreen) setInMode(mode uint32) error {
 	rv, _, err := procSetConsoleMode.Call(
 		uintptr(s.in),
@@ -869,6 +897,7 @@ func (s *cScreen) SetStyle(style Style) {
 	s.style = style
 	s.Unlock()
 }
+
 // No fallback rune support, since we have Unicode.  Yay!
 func (s *cScreen) RegisterRuneFallback(r rune, subst string) {
 }
