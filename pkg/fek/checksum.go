@@ -2,18 +2,19 @@ package fek
 
 import (
 	"encoding/binary"
+
 	"github.com/minio/highwayhash"
 )
 
-var zerokey = make([]byte, 32)
+var Zerokey = make([]byte, 32)
 
 func AppendChecksum(in []byte) []byte {
-	return append(in, Uint64ToBytes(highwayhash.Sum64(in, zerokey))...)
+	return append(in, Uint64ToBytes(highwayhash.Sum64(in, Zerokey))...)
 }
 func VerifyChecksum(in []byte) (out []byte, verified bool) {
 	l := len(in)
 	if l > 8 {
-		computed := highwayhash.Sum64(in[:l-8], zerokey)
+		computed := highwayhash.Sum64(in[:l-8], Zerokey)
 		if computed == BytesToUint64(in[l-8:]) {
 			out = in[:l-8]
 			verified = true

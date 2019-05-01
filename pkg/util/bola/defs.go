@@ -1,9 +1,10 @@
 package bola
 
 import (
-	"git.parallelcoin.io/dev/9/pkg/fek"
 	"net"
 	"time"
+
+	"git.parallelcoin.io/dev/9/pkg/fek"
 )
 
 var (
@@ -19,13 +20,14 @@ var (
 type BaseCfg struct {
 	Handler    func(message Message)
 	Listener   string
-	FEC        fek.RS
+	FEC        *fek.RS
 	BufferSize int
 }
 
 // Base is the common structure between a worker and a node
 type Base struct {
 	Cfg       BaseCfg
+	Address   Addr
 	Listener  *net.UDPConn
 	Packets   chan Packet
 	Incoming  chan Bundle
@@ -40,26 +42,37 @@ type Base struct {
 // are made from a 9/3 Reed Solomon code and 9 are sent in distinct packets and
 // only 3 are required to guarantee retransmit-free delivery.
 type Packet struct {
-	UUID     int32
-	Sender   string
-	Received time.Time
+	Sender   Addr
+	UUID     uint32
+	Size     uint16
 	Data     []byte
+	Received time.Time
+}
+
+// Packets lets us attach a method to unwrap to [][]byte
+type Packets []Packet
+
+func (p *Packets) GetShards() (out [][]byte) {
+	for _, x := range *p {
+		out = append(out, x.Data)
+	}
+	return
 }
 
 // A Bundle is a collection of the received packets received from the same
 // sender with up to 9 pieces.
 type Bundle struct {
-	Sender   string
-	UUID     int32
-	Received time.Time
-	Packets  [][]byte
+	Sender  Addr
+	UUID    uint32
+	Started time.Time
+	Packets Packets
+	Spent   bool
 }
 
-// Message is the data reconstructed from a complete Bundle, containing data in
-// messagepack format
+// Message is the data reconstructed from a complete Bundle, containing data
 type Message struct {
-	UUID     int32
-	Sender   string
+	Sender   Addr
+	UUID     uint32
 	Received time.Time
 	Data     []byte
 }

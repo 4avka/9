@@ -3,6 +3,7 @@ package bola
 import (
 	"encoding/binary"
 	"fmt"
+
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
 
@@ -12,21 +13,25 @@ const (
 
 type Addr []byte
 
-// Get takes a string from bytes on the prefix containing an IPv4 address (it is passed around as a string for easy comparison) and returns the format used by net.Dial
-func (a *Addr) Get(encoded string) (out string) {
-	if len(encoded) != 6 {
+// Get takes a string from bytes on the prefix containing an IPv4 address (it
+// is passed around as a string for easy comparison) and returns the format used
+// by net.Dial
+func (a *Addr) Get() (out string) {
+	if aa := *a; len(aa) == 6 {
+		return fmt.Sprintf(ipv4Format,
+			aa[0], aa[1], aa[2], aa[3],
+			binary.LittleEndian.Uint16(aa[4:6]),
+		)
+	} else {
 		return
 	}
-	e := []byte(encoded)
-	out = fmt.Sprintf(ipv4Format,
-		e[0], e[1], e[2], e[3],
-		binary.LittleEndian.Uint16(e[4:6]),
-	)
-	return
 }
 
 // Put takes a string in the format xxx.xxx.xxx.xxx:xxxxx and converts it to the encoded bytes format
 func (a *Addr) Put(addr string) {
+	if a == nil {
+		a = &Addr{}
+	}
 	b := make([]byte, 4)
 	o := make([]byte, 2)
 	var ou16 uint16
@@ -35,6 +40,6 @@ func (a *Addr) Put(addr string) {
 		log <- cl.Error{err}
 	}
 	binary.LittleEndian.PutUint16(o, ou16)
-	b = append(b, o...)
+	*a = Addr(append(b, o...))
 	return
 }

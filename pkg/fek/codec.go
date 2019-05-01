@@ -38,6 +38,7 @@ func New(required, total int) *RS {
 	return &RS{rsc, required, total}
 }
 
+// Encode returns a slice of the shards
 func (r *RS) Encode(data []byte) [][]byte {
 	padded := PadData(data, r.required, r.total)
 	splitted := Split(padded, r.required, r.total)
@@ -55,7 +56,7 @@ func (r *RS) Encode(data []byte) [][]byte {
 	}
 	for i, x := range splitted {
 		splitted[i] = append([]byte{byte(i)}, x...)
-		splitted[i] = AppendChecksum(splitted[i])
+		// splitted[i] = AppendChecksum(splitted[i])
 	}
 	return splitted
 }
@@ -65,8 +66,7 @@ func (r *RS) Decode(shards [][]byte) (out []byte) {
 	shardLens := make([]int, r.total)
 	var ok bool
 	for i, x := range shards {
-		shards[i], ok = VerifyChecksum(x)
-		if ok {
+		if shards[i], ok = VerifyChecksum(x); ok {
 			bytes[int(shards[i][0])] = shards[i][1:]
 		}
 	}
