@@ -11,15 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package views
-
 import (
 	"github.com/mattn/go-runewidth"
-
 	"git.parallelcoin.io/dev/9/pkg/util/tcell"
 )
-
 // Text is a Widget with containing a block of text, which can optionally
 // be styled.
 type Text struct {
@@ -32,10 +28,8 @@ type Text struct {
 	lengths []int
 	width   int
 	height  int
-
 	WidgetWatchers
 }
-
 func (t *Text) clear() {
 	v := t.view
 	w, h := v.Size()
@@ -46,7 +40,6 @@ func (t *Text) clear() {
 		}
 	}
 }
-
 // calcY figures the initial Y offset.  Alignment is top by default.
 func (t *Text) calcY(height int) int {
 	if t.align&VAlignCenter != 0 {
@@ -57,7 +50,6 @@ func (t *Text) calcY(height int) int {
 	}
 	return 0
 }
-
 // calcX figures the initial X offset for the given line.
 // Alignment is left by default.
 func (t *Text) calcX(width, line int) int {
@@ -69,25 +61,20 @@ func (t *Text) calcX(width, line int) int {
 	}
 	return 0
 }
-
 // Draw draws the Text.
 func (t *Text) Draw() {
 	v := t.view
 	if v == nil {
 		return
 	}
-
 	width, height := v.Size()
 	if width == 0 || height == 0 {
 		return
 	}
-
 	t.clear()
-
 	// Note that we might wind up with a negative X if the width
 	// is larger than the length.  That's OK, and correct even.
 	// The view will clip it properly in that case.
-
 	// We align to the left & top by default.
 	y := t.calcY(height)
 	r := rune(0)
@@ -98,7 +85,6 @@ func (t *Text) Draw() {
 	line := 0
 	newline := true
 	for i, l := range t.text {
-
 		if newline {
 			x = t.calcX(width, line)
 			newline = false
@@ -131,7 +117,6 @@ func (t *Text) Draw() {
 		v.SetContent(x, y, r, comb, styl)
 	}
 }
-
 // Size returns the width and height in character cells of the Text.
 func (t *Text) Size() (int, int) {
 	if len(t.text) != 0 {
@@ -139,7 +124,6 @@ func (t *Text) Size() (int, int) {
 	}
 	return 0, 0
 }
-
 // SetAlignment sets the alignment.  Negative values
 // indicate right justification, positive values are left,
 // and zero indicates center aligned.
@@ -149,22 +133,18 @@ func (t *Text) SetAlignment(align Alignment) {
 		t.PostEventWidgetContent(t)
 	}
 }
-
 // Alignment returns the alignment of the Text.
 func (t *Text) Alignment() Alignment {
 	return t.align
 }
-
 // SetView sets the View object used for the text bar.
 func (t *Text) SetView(view View) {
 	t.view = view
 }
-
 // HandleEvent implements a tcell.EventHandler, but does nothing.
 func (t *Text) HandleEvent(tcell.Event) bool {
 	return false
 }
-
 // SetText sets the text used for the string.  Any previously set
 // styles on individual rune indices are reset, and the default style
 // for the widget is set.
@@ -192,18 +172,15 @@ func (t *Text) SetText(s string) {
 				t.width = length
 				length = 0
 			}
-
 		} else if t.widths[i] == 0 && length == 0 {
 			// If first character on line is combining, inject
 			// a leading space.  (Shame on the caller!)
 			t.widths = append(t.widths, 0)
 			copy(t.widths[i+1:], t.widths[i:])
 			t.widths[i] = 1
-
 			t.text = append(t.text, ' ')
 			copy(t.text[i+1:], t.text[i:])
 			t.text[i] = ' '
-
 			t.styles = append(t.styles, t.style)
 			copy(t.styles[i+1:], t.styles[i:])
 			t.styles[i] = t.style
@@ -221,12 +198,10 @@ func (t *Text) SetText(s string) {
 	t.height = len(t.lengths)
 	t.PostEventWidgetContent(t)
 }
-
 // Text returns the text that was set.
 func (t *Text) Text() string {
 	return string(t.text)
 }
-
 // SetStyle sets the style used.  This applies to every cell in the
 // in the text.
 func (t *Text) SetStyle(style tcell.Style) {
@@ -238,13 +213,11 @@ func (t *Text) SetStyle(style tcell.Style) {
 	}
 	t.PostEventWidgetContent(t)
 }
-
 // Style returns the previously set default style.  Note that
 // individual characters may have different styles.
 func (t *Text) Style() tcell.Style {
 	return t.style
 }
-
 // SetStyleAt sets the style at the given rune index.  Note that for
 // strings containing combining characters, it is not possible to
 // change the style at the position of the combining character, but
@@ -257,7 +230,6 @@ func (t *Text) SetStyleAt(pos int, style tcell.Style) {
 	t.styles[pos] = style
 	t.PostEventWidgetContent(t)
 }
-
 // StyleAt gets the style at the given rune index.  If an invalid
 // index is given, or the index is a combining character, then
 // tcell.StyleDefault is returned.
@@ -267,12 +239,10 @@ func (t *Text) StyleAt(pos int) tcell.Style {
 	}
 	return t.styles[pos]
 }
-
 // Resize is called when our View changes sizes.
 func (t *Text) Resize() {
 	t.PostEventWidgetResize(t)
 }
-
 // NewText creates an empty Text.
 func NewText() *Text {
 	return &Text{}

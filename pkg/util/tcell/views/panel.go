@@ -11,9 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package views
-
 // Panel is a modified Layout that includes a primary content pane,
 // prefixed with an optional title, and an optional menubar, and then
 // suffixed by an optional status.
@@ -39,13 +37,11 @@ type Panel struct {
 	inited  bool
 	BoxLayout
 }
-
 // Draw draws the Panel.
 func (p *Panel) Draw() {
 	p.BoxLayout.SetOrientation(Vertical)
 	p.BoxLayout.Draw()
 }
-
 // SetTitle sets the Widget to display in the title area.
 func (p *Panel) SetTitle(w Widget) {
 	if p.title != nil {
@@ -54,7 +50,6 @@ func (p *Panel) SetTitle(w Widget) {
 	p.InsertWidget(0, w, 0.0)
 	p.title = w
 }
-
 // SetMenu sets the Widget to display in the menu area, which is
 // just below the title.
 func (p *Panel) SetMenu(w Widget) {
@@ -68,7 +63,6 @@ func (p *Panel) SetMenu(w Widget) {
 	p.InsertWidget(index, w, 0.0)
 	p.menu = w
 }
-
 // SetContent sets the Widget to display in the content area.
 func (p *Panel) SetContent(w Widget) {
 	index := 0
@@ -84,7 +78,6 @@ func (p *Panel) SetContent(w Widget) {
 	p.InsertWidget(index, w, 1.0)
 	p.content = w
 }
-
 // SetStatus sets the Widget to display in the status area, which is at
 // the bottom of the panel.
 func (p *Panel) SetStatus(w Widget) {
@@ -104,7 +97,6 @@ func (p *Panel) SetStatus(w Widget) {
 	p.InsertWidget(index, w, 0.0)
 	p.status = w
 }
-
 // NewPanel creates a new Panel.  A zero valued panel can be created too.
 func NewPanel() *Panel {
 	return &Panel{}

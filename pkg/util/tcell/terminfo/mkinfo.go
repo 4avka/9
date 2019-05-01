@@ -1,5 +1,4 @@
 // +build ignore
-
 // Copyright 2018 The TCell Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +12,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 // This command is used to generate suitable configuration files in either
 // go syntax or in JSON.  It defaults to JSON output on stdout.  If no
 // term values are specified on the command line, then $TERM is used.
@@ -29,9 +27,7 @@
 // -json     specifies JSON output in the named file.  Use - for stdout
 // -nofatal  indicates that errors loading definitions should not be fatal
 //
-
 package main
-
 import (
 	"bufio"
 	"bytes"
@@ -48,10 +44,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-
 	"git.parallelcoin.io/dev/9/pkg/util/tcell/terminfo"
 )
-
 type termcap struct {
 	name    string
 	desc    string
@@ -60,27 +54,21 @@ type termcap struct {
 	nums    map[string]int
 	strs    map[string]string
 }
-
 func (tc *termcap) getnum(s string) int {
 	return (tc.nums[s])
 }
-
 func (tc *termcap) getflag(s string) bool {
 	return (tc.bools[s])
 }
-
 func (tc *termcap) getstr(s string) string {
 	return (tc.strs[s])
 }
-
 const (
 	NONE = iota
 	CTRL
 	ESC
 )
-
 var notaddressable = errors.New("terminal not cursor addressable")
-
 func unescape(s string) string {
 	// Various escapes are in \x format.  Control codes are
 	// encoded as ^M (carat followed by ASCII equivalent).
@@ -88,7 +76,6 @@ func unescape(s string) string {
 	//  \0 NULL, \n \l \r \t \b \f \s for equivalent C escape.
 	buf := &bytes.Buffer{}
 	esc := NONE
-
 	for i := 0; i < len(s); i++ {
 		c := s[i]
 		switch esc {
@@ -137,7 +124,6 @@ func unescape(s string) string {
 	}
 	return (buf.String())
 }
-
 func getallterms() ([]string, error) {
 	out := []string{}
 	cmd := exec.Command("toe", "-a")
@@ -156,21 +142,17 @@ func getallterms() ([]string, error) {
 	}
 	return out, nil
 }
-
 func (tc *termcap) setupterm(name string) error {
 	cmd := exec.Command("infocmp", "-1", name)
 	output := &bytes.Buffer{}
 	cmd.Stdout = output
-
 	tc.strs = make(map[string]string)
 	tc.bools = make(map[string]bool)
 	tc.nums = make(map[string]int)
-
 	err := cmd.Run()
 	if err != nil {
 		return err
 	}
-
 	// Now parse the output.
 	// We get comment lines (starting with "#"), followed by
 	// a header line that looks like "<name>|<alias>|...|<desc>"
@@ -180,7 +162,6 @@ func (tc *termcap) setupterm(name string) error {
 	for len(lines) > 0 && strings.HasPrefix(lines[0], "#") {
 		lines = lines[1:]
 	}
-
 	// Ditch trailing empty last line
 	if lines[len(lines)-1] == "" {
 		lines = lines[:len(lines)-1]
@@ -202,10 +183,8 @@ func (tc *termcap) setupterm(name string) error {
 			(!strings.HasSuffix(val, ",")) {
 			return (errors.New("malformed infocmp: " + val))
 		}
-
 		val = val[1:]
 		val = val[:len(val)-1]
-
 		if k := strings.SplitN(val, "=", 2); len(k) == 2 {
 			tc.strs[k[0]] = unescape(k[1])
 		} else if k := strings.SplitN(val, "#", 2); len(k) == 2 {
@@ -220,7 +199,6 @@ func (tc *termcap) setupterm(name string) error {
 	}
 	return nil
 }
-
 // This program is used to collect data from the system's terminfo library,
 // and write it into Go source code.  That is, we maintain our terminfo
 // capabilities encoded in the program.  It should never need to be run by
@@ -370,7 +348,6 @@ func getinfo(name string) (*terminfo.Terminfo, string, error) {
 	t.KeyShfLeft = tc.getstr("kLFT")
 	t.KeyShfHome = tc.getstr("kHOM")
 	t.KeyShfEnd = tc.getstr("kEND")
-
 	// Terminfo lacks descriptions for a bunch of modified keys,
 	// but modern XTerm and emulators often have them.  Let's add them,
 	// if the shifted right and left arrows are defined.
@@ -393,12 +370,10 @@ func getinfo(name string) (*terminfo.Terminfo, string, error) {
 		t.KeyAltShfDown = "\x1b[1;4B"
 		t.KeyAltShfRight = "\x1b[1;4C"
 		t.KeyAltShfLeft = "\x1b[1;4D"
-
 		t.KeyMetaShfUp = "\x1b[1;10A"
 		t.KeyMetaShfDown = "\x1b[1;10B"
 		t.KeyMetaShfRight = "\x1b[1;10C"
 		t.KeyMetaShfLeft = "\x1b[1;10D"
-
 		t.KeyCtrlShfUp = "\x1b[1;6A"
 		t.KeyCtrlShfDown = "\x1b[1;6B"
 		t.KeyCtrlShfRight = "\x1b[1;6C"
@@ -417,7 +392,6 @@ func getinfo(name string) (*terminfo.Terminfo, string, error) {
 		t.KeyMetaShfHome = "\x1b[1;10H"
 		t.KeyMetaShfEnd = "\x1b[1;10F"
 	}
-
 	// And the same thing for rxvt and workalikes (Eterm, aterm, etc.)
 	// It seems that urxvt at least send ESC as ALT prefix for these,
 	// although some places seem to indicate a separate ALT key sesquence.
@@ -433,7 +407,6 @@ func getinfo(name string) (*terminfo.Terminfo, string, error) {
 		t.KeyCtrlHome = "\x1b[7^"
 		t.KeyCtrlEnd = "\x1b[8^"
 	}
-
 	// If the kmous entry is present, then we need to record the
 	// the codes to enter and exit mouse mode.  Sadly, this is not
 	// part of the terminfo databases anywhere that I've found, but
@@ -453,7 +426,6 @@ func getinfo(name string) (*terminfo.Terminfo, string, error) {
 		t.MouseMode = "%?%p1%{1}%=%t%'h'%Pa%e%'l'%Pa%;" +
 			"\x1b[?1000%ga%c\x1b[?1002%ga%c\x1b[?1003%ga%c\x1b[?1006%ga%c"
 	}
-
 	// We only support colors in ANSI 8 or 256 color mode.
 	if t.Colors < 8 || t.SetFg == "" {
 		t.Colors = 0
@@ -461,7 +433,6 @@ func getinfo(name string) (*terminfo.Terminfo, string, error) {
 	if t.SetCursor == "" {
 		return nil, "", notaddressable
 	}
-
 	// For padding, we lookup the pad char.  If that isn't present,
 	// and npc is *not* set, then we assume a null byte.
 	t.PadChar = tc.getstr("pad")
@@ -470,7 +441,6 @@ func getinfo(name string) (*terminfo.Terminfo, string, error) {
 			t.PadChar = "\u0000"
 		}
 	}
-
 	// For some terminals we fabricate a -truecolor entry, that may
 	// not exist in terminfo.
 	if addTrueColor {
@@ -479,7 +449,6 @@ func getinfo(name string) (*terminfo.Terminfo, string, error) {
 		t.SetFgBgRGB = "\x1b[38;2;%p1%d;%p2%d;%p3%d;" +
 			"48;2;%p4%d;%p5%d;%p6%dm"
 	}
-
 	// For terminals that use "standard" SGR sequences, lets combine the
 	// foreground and background together.
 	if strings.HasPrefix(t.SetFg, "\x1b[") &&
@@ -491,10 +460,8 @@ func getinfo(name string) (*terminfo.Terminfo, string, error) {
 		bg := r.ReplaceAllString(t.SetBg[2:], "%p2")
 		t.SetFgBg = fg + ";" + bg
 	}
-
 	return t, tc.desc, nil
 }
-
 func dotGoAddInt(w io.Writer, n string, i int) {
 	if i == 0 {
 		// initialized to 0, ignore
@@ -508,7 +475,6 @@ func dotGoAddStr(w io.Writer, n string, s string) {
 	}
 	fmt.Fprintf(w, "\t\t%-13s %q,\n", n+":", s)
 }
-
 func dotGoAddArr(w io.Writer, n string, a []string) {
 	if len(a) == 0 {
 		return
@@ -524,19 +490,15 @@ func dotGoAddArr(w io.Writer, n string, a []string) {
 	}
 	fmt.Fprintln(w, "},")
 }
-
 func dotGoHeader(w io.Writer, packname string) {
 	fmt.Fprintln(w, "// Generated automatically.  DO NOT HAND-EDIT.")
 	fmt.Fprintln(w, "")
 	fmt.Fprintf(w, "package %s\n", packname)
 	fmt.Fprintln(w, "")
 }
-
 func dotGoTrailer(w io.Writer) {
 }
-
 func dotGoInfo(w io.Writer, t *terminfo.Terminfo, desc string) {
-
 	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "func init() {")
 	fmt.Fprintf(w, "\t// %s\n", desc)
@@ -702,9 +664,7 @@ func dotGoInfo(w io.Writer, t *terminfo.Terminfo, desc string) {
 	fmt.Fprintln(w, "\t})")
 	fmt.Fprintln(w, "}")
 }
-
 var packname = "terminfo"
-
 func dotGoFile(fname string, term *terminfo.Terminfo, desc string, makeDir bool) error {
 	w := os.Stdout
 	var e error
@@ -727,9 +687,7 @@ func dotGoFile(fname string, term *terminfo.Terminfo, desc string, makeDir bool)
 	cmd.Run()
 	return nil
 }
-
 func dotGzFile(fname string, term *terminfo.Terminfo, makeDir bool) error {
-
 	var w io.WriteCloser = os.Stdout
 	var e error
 	if fname != "-" && fname != "" {
@@ -741,18 +699,14 @@ func dotGzFile(fname string, term *terminfo.Terminfo, makeDir bool) error {
 			return e
 		}
 	}
-
 	w = gzip.NewWriter(w)
-
 	js, e := json.Marshal(term)
 	fmt.Fprintln(w, string(js))
-
 	if w != os.Stdout {
 		w.Close()
 	}
 	return nil
 }
-
 func jsonFile(fname string, term *terminfo.Terminfo, makeDir bool) error {
 	w := os.Stdout
 	var e error
@@ -765,18 +719,14 @@ func jsonFile(fname string, term *terminfo.Terminfo, makeDir bool) error {
 			return e
 		}
 	}
-
 	js, e := json.Marshal(term)
 	fmt.Fprintln(w, string(js))
-
 	if w != os.Stdout {
 		w.Close()
 	}
 	return nil
 }
-
 func dumpDatabase(terms map[string]*terminfo.Terminfo, descs map[string]string) {
-
 	// Load models .text
 	mfile, e := os.Open("models.txt")
 	models := make(map[string]bool)
@@ -787,9 +737,7 @@ func dumpDatabase(terms map[string]*terminfo.Terminfo, descs map[string]string) 
 	for scanner.Scan() {
 		models[scanner.Text()] = true
 	}
-
 	for name, t := range terms {
-
 		// If this is one of our builtin models, generate the GO file
 		if models[name] {
 			desc := descs[name]
@@ -802,7 +750,6 @@ func dumpDatabase(terms map[string]*terminfo.Terminfo, descs map[string]string) 
 			}
 			continue
 		}
-
 		hash := fmt.Sprintf("%x", sha1.Sum([]byte(name)))
 		fname := fmt.Sprintf("%s.gz", hash[0:8])
 		fname = path.Join("database", hash[0:2], fname)
@@ -811,7 +758,6 @@ func dumpDatabase(terms map[string]*terminfo.Terminfo, descs map[string]string) 
 			fmt.Fprintf(os.Stderr, "Failed creating %s: %v", fname, e)
 			os.Exit(1)
 		}
-
 		for _, a := range t.Aliases {
 			hash = fmt.Sprintf("%x", sha1.Sum([]byte(a)))
 			fname = path.Join("database", hash[0:2], hash[0:8])
@@ -823,7 +769,6 @@ func dumpDatabase(terms map[string]*terminfo.Terminfo, descs map[string]string) 
 		}
 	}
 }
-
 func main() {
 	gofile := ""
 	jsonfile := ""
@@ -832,7 +777,6 @@ func main() {
 	dogzip := false
 	all := false
 	db := false
-
 	flag.StringVar(&gofile, "go", "", "generate go source in named file")
 	flag.StringVar(&jsonfile, "json", "", "generate json in named file")
 	flag.StringVar(&packname, "P", packname, "package name (go source)")
@@ -843,7 +787,6 @@ func main() {
 	flag.BoolVar(&db, "db", false, "generate json db file in place")
 	flag.Parse()
 	var e error
-
 	args := flag.Args()
 	if all {
 		db = true // implied
@@ -857,10 +800,8 @@ func main() {
 	if len(args) == 0 {
 		args = []string{os.Getenv("TERM")}
 	}
-
 	tdata := make(map[string]*terminfo.Terminfo)
 	descs := make(map[string]string)
-
 	for _, term := range args {
 		if t, desc, e := getinfo(term); e != nil {
 			if all && e == notaddressable {
@@ -878,12 +819,10 @@ func main() {
 			descs[term] = desc
 		}
 	}
-
 	if len(tdata) == 0 {
 		// No data.
 		os.Exit(0)
 	}
-
 	if db {
 		dumpDatabase(tdata, descs)
 	} else if gofile != "" {
@@ -896,7 +835,6 @@ func main() {
 				}
 			}
 		}
-
 	} else {
 		for _, t := range tdata {
 			if dogzip {

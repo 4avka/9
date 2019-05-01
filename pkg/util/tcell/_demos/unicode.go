@@ -11,29 +11,22 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 // unicode just displays a Unicode test on your screen.
 // Press ESC to exit the program.
 package main
-
 import (
 	"fmt"
 	"os"
-
 	"git.parallelcoin.io/dev/9/pkg/util/tcell"
 	"git.parallelcoin.io/dev/9/pkg/util/tcell/encoding"
 	"github.com/mattn/go-runewidth"
 )
-
 var row = 0
 var style = tcell.StyleDefault
-
 func putln(s tcell.Screen, str string) {
-
 	puts(s, style, 1, row, str)
 	row++
 }
-
 func puts(s tcell.Screen, style tcell.Style, x, y int, str string) {
 	i := 0
 	var deferred []rune
@@ -67,37 +60,28 @@ func puts(s tcell.Screen, style tcell.Style, x, y int, str string) {
 		i += dwidth
 	}
 }
-
 func main() {
-
 	s, e := tcell.NewScreen()
 	if e != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", e)
 		os.Exit(1)
 	}
-
 	encoding.Register()
-
 	if e = s.Init(); e != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", e)
 		os.Exit(1)
 	}
-
 	plain := tcell.StyleDefault
 	bold := style.Bold(true)
-
 	s.SetStyle(tcell.StyleDefault.
 		Foreground(tcell.ColorBlack).
 		Background(tcell.ColorWhite))
 	s.Clear()
-
 	quit := make(chan struct{})
-
 	style = bold
 	putln(s, "Press ESC to Exit")
 	putln(s, "Character set: "+s.CharacterSet())
 	style = plain
-
 	putln(s, "English:   October")
 	putln(s, "Icelandic: október")
 	putln(s, "Arabic:    أكتوبر")
@@ -146,7 +130,6 @@ func main() {
 		tcell.RuneHLine,
 		tcell.RuneLRCorner,
 	}))
-
 	s.Show()
 	go func() {
 		for {
@@ -165,8 +148,6 @@ func main() {
 			}
 		}
 	}()
-
 	<-quit
-
 	s.Fini()
 }

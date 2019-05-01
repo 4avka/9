@@ -11,15 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package tcell
-
 import (
 	"testing"
-
 	. "github.com/smartystreets/goconvey/convey"
 )
-
 func TestColor(t *testing.T) {
 	pal := []Color{}
 	for i := 0; i < 255; i++ {
@@ -34,26 +30,22 @@ func TestColor(t *testing.T) {
 		So(ColorWhite.Hex(), ShouldEqual, 0x00FFFFFF)
 		So(ColorSilver.Hex(), ShouldEqual, 0x00C0C0C0)
 	})
-
 	Convey("Color fitting from 16 colors to 8 colors works", t, func() {
 		for i := 0; i < 7; i++ {
 			So(FindColor(Color(i), pal[:8]), ShouldEqual, Color(i))
 		}
 		// Grey is closest to Silver
 		So(FindColor(Color(8), pal[:8]), ShouldEqual, Color(7))
-
 		for i := 9; i < 16; i++ {
 			So(FindColor(Color(i), pal[:8]), ShouldEqual, Color(i%8))
 		}
 	})
-
 	Convey("Color lookups by name work", t, func() {
 		So(GetColor("red"), ShouldEqual, ColorRed)
 		So(GetColor("#FF0000").Hex(), ShouldEqual, ColorRed.Hex())
 		So(GetColor("black"), ShouldEqual, ColorBlack)
 		So(GetColor("orange"), ShouldEqual, ColorOrange)
 	})
-
 	Convey("Color imperfect fit works", t, func() {
 		So(FindColor(ColorOrangeRed, pal[:16]), ShouldEqual, ColorRed)
 		So(FindColor(ColorAliceBlue, pal[:16]), ShouldEqual, ColorWhite)
@@ -61,7 +53,6 @@ func TestColor(t *testing.T) {
 		So(FindColor(ColorSienna, pal), ShouldEqual, Color173)
 		So(FindColor(GetColor("#00FD00"), pal), ShouldEqual, ColorLime)
 	})
-
 	Convey("Color RGB breakdown works", t, func() {
 		r, g, b := GetColor("#112233").RGB()
 		So(r, ShouldEqual, 0x11)

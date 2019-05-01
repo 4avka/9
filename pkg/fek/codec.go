@@ -32,6 +32,7 @@ func New(required, total int) *RS {
 	}
 	return &RS{rsc, required, total}
 }
+
 // Encode returns a slice of the shards, each with first byte containing the
 // shard number. Detecting their corruption requires
 func (r *RS) Encode(data []byte) [][]byte {

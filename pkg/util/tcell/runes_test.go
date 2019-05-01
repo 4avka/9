@@ -11,15 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package tcell
-
 import (
 	"testing"
-
 	. "github.com/smartystreets/goconvey/convey"
 )
-
 func TestCanDisplay(t *testing.T) {
 	Convey("With a UTF-8 screen", t,
 		WithScreen(t, "UTF-8", func(s SimulationScreen) {
@@ -29,7 +25,6 @@ func TestCanDisplay(t *testing.T) {
 			So(s.CanDisplay(RuneHLine, false), ShouldBeTrue)
 			So(s.CanDisplay('⌀', false), ShouldBeTrue)
 		}))
-
 	Convey("With an ASCII screen", t,
 		WithScreen(t, "US-ASCII", func(s SimulationScreen) {
 			So(s.CharacterSet(), ShouldEqual, "US-ASCII")
@@ -38,9 +33,7 @@ func TestCanDisplay(t *testing.T) {
 			So(s.CanDisplay(RunePi, false), ShouldBeFalse)
 			So(s.CanDisplay('⌀', false), ShouldBeFalse)
 		}))
-
 }
-
 func TestRegisterFallback(t *testing.T) {
 	Convey("With an ASCII screen", t,
 		WithScreen(t, "US-ASCII", func(s SimulationScreen) {
@@ -52,9 +45,7 @@ func TestRegisterFallback(t *testing.T) {
 			So(s.CanDisplay('⌀', false), ShouldBeFalse)
 			So(s.CanDisplay('⌀', true), ShouldBeFalse)
 		}))
-
 }
-
 func TestUnregisterFallback(t *testing.T) {
 	Convey("With an ASCII screen (HLine)", t,
 		WithScreen(t, "US-ASCII", func(s SimulationScreen) {

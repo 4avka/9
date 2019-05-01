@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 // boxes just displays random colored boxes on your terminal screen.
 // Press ESC to exit the program.
 package main
@@ -27,13 +26,10 @@ import (
 
 func makebox(s tcell.Screen) {
 	w, h := s.Size()
-
 	if w == 0 || h == 0 {
 		return
 	}
-
 	glyphs := []rune{'@', '#', '&', '*', '=', '%', 'Z', 'A'}
-
 	lx := rand.Int() % w
 	ly := rand.Int() % h
 	lw := rand.Int() % (w - lx)
@@ -49,7 +45,6 @@ func makebox(s tcell.Screen) {
 		st = st.Reverse(rand.Int()%2 == 0)
 		gl = glyphs[rand.Int()%len(glyphs)]
 	}
-
 	for row := 0; row < lh; row++ {
 		for col := 0; col < lw; col++ {
 			s.SetCell(lx+col, ly+row, st, gl)
@@ -57,9 +52,7 @@ func makebox(s tcell.Screen) {
 	}
 	s.Show()
 }
-
 func main() {
-
 	tcell.SetEncodingFallback(tcell.EncodingFallbackASCII)
 	s, e := tcell.NewScreen()
 	if e != nil {
@@ -70,12 +63,10 @@ func main() {
 		fmt.Fprintf(os.Stderr, "%v\n", e)
 		os.Exit(1)
 	}
-
 	s.SetStyle(tcell.StyleDefault.
 		Foreground(tcell.ColorBlack).
 		Background(tcell.ColorWhite))
 	s.Clear()
-
 	quit := make(chan struct{})
 	go func() {
 		for {
@@ -94,7 +85,6 @@ func main() {
 			}
 		}
 	}()
-
 	cnt := 0
 	dur := time.Duration(0)
 loop:
@@ -109,7 +99,6 @@ loop:
 		cnt++
 		dur += time.Now().Sub(start)
 	}
-
 	s.Fini()
 	fmt.Printf("Finished %d boxes in %s\n", cnt, dur)
 	fmt.Printf("Average is %0.3f ms / box\n", (float64(dur)/float64(cnt))/1000000.0)

@@ -11,15 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package views
-
 import (
 	"sync"
-
 	"git.parallelcoin.io/dev/9/pkg/util/tcell"
 )
-
 // CellModel models the content of a CellView.  The dimensions used within
 // a CellModel are always logical, and have origin 0, 0.
 type CellModel interface {
@@ -29,7 +25,6 @@ type CellModel interface {
 	GetCursor() (int, int, bool, bool)
 	MoveCursor(offx, offy int)
 }
-
 // CellView is a flexible view of a CellModel, offering both cursor
 // management and a panning.
 type CellView struct {
@@ -43,17 +38,13 @@ type CellView struct {
 	lines    []string
 	model    CellModel
 	once     sync.Once
-
 	WidgetWatchers
 }
-
 // Draw draws the content.
 func (a *CellView) Draw() {
-
 	port := a.port
 	model := a.model
 	port.Fill(' ', a.style)
-
 	if a.view == nil {
 		return
 	}
@@ -66,7 +57,6 @@ func (a *CellView) Draw() {
 			a.view.SetContent(x, y, ' ', nil, a.style)
 		}
 	}
-
 	ex, ey := model.GetBounds()
 	vx, vy := port.Size()
 	if ex < vx {
@@ -75,7 +65,6 @@ func (a *CellView) Draw() {
 	if ey < vy {
 		ey = vy
 	}
-
 	cx, cy, en, sh := a.model.GetCursor()
 	for y := 0; y < ey; y++ {
 		for x := 0; x < ex; x++ {
@@ -92,7 +81,6 @@ func (a *CellView) Draw() {
 		}
 	}
 }
-
 func (a *CellView) keyUp() {
 	if _, _, en, _ := a.model.GetCursor(); !en {
 		a.port.ScrollUp(1)
@@ -101,7 +89,6 @@ func (a *CellView) keyUp() {
 	a.model.MoveCursor(0, -1)
 	a.MakeCursorVisible()
 }
-
 func (a *CellView) keyDown() {
 	if _, _, en, _ := a.model.GetCursor(); !en {
 		a.port.ScrollDown(1)
@@ -110,7 +97,6 @@ func (a *CellView) keyDown() {
 	a.model.MoveCursor(0, 1)
 	a.MakeCursorVisible()
 }
-
 func (a *CellView) keyLeft() {
 	if _, _, en, _ := a.model.GetCursor(); !en {
 		a.port.ScrollLeft(1)
@@ -119,7 +105,6 @@ func (a *CellView) keyLeft() {
 	a.model.MoveCursor(-1, 0)
 	a.MakeCursorVisible()
 }
-
 func (a *CellView) keyRight() {
 	if _, _, en, _ := a.model.GetCursor(); !en {
 		a.port.ScrollRight(1)
@@ -128,7 +113,6 @@ func (a *CellView) keyRight() {
 	a.model.MoveCursor(+1, 0)
 	a.MakeCursorVisible()
 }
-
 func (a *CellView) keyPgUp() {
 	_, vy := a.port.Size()
 	if _, _, en, _ := a.model.GetCursor(); !en {
@@ -138,7 +122,6 @@ func (a *CellView) keyPgUp() {
 	a.model.MoveCursor(0, -vy)
 	a.MakeCursorVisible()
 }
-
 func (a *CellView) keyPgDn() {
 	_, vy := a.port.Size()
 	if _, _, en, _ := a.model.GetCursor(); !en {
@@ -148,7 +131,6 @@ func (a *CellView) keyPgDn() {
 	a.model.MoveCursor(0, +vy)
 	a.MakeCursorVisible()
 }
-
 func (a *CellView) keyHome() {
 	vx, vy := a.model.GetBounds()
 	if _, _, en, _ := a.model.GetCursor(); !en {
@@ -159,7 +141,6 @@ func (a *CellView) keyHome() {
 	a.model.SetCursor(0, 0)
 	a.MakeCursorVisible()
 }
-
 func (a *CellView) keyEnd() {
 	vx, vy := a.model.GetBounds()
 	if _, _, en, _ := a.model.GetCursor(); !en {
@@ -170,7 +151,6 @@ func (a *CellView) keyEnd() {
 	a.model.SetCursor(vx, vy)
 	a.MakeCursorVisible()
 }
-
 // MakeCursorVisible ensures that the cursor is visible, panning the ViewPort
 // as necessary, if the cursor is enabled.
 func (a *CellView) MakeCursorVisible() {
@@ -182,7 +162,6 @@ func (a *CellView) MakeCursorVisible() {
 		a.MakeVisible(x, y)
 	}
 }
-
 // HandleEvent handles events.  In particular, it handles certain key events
 // to move the cursor or pan the view.
 func (a *CellView) HandleEvent(e tcell.Event) bool {
@@ -220,7 +199,6 @@ func (a *CellView) HandleEvent(e tcell.Event) bool {
 	}
 	return false
 }
-
 // Size returns the content size, based on the model.
 func (a *CellView) Size() (int, int) {
 	// We always return a minimum of two rows, and two columns.
@@ -234,7 +212,6 @@ func (a *CellView) Size() (int, int) {
 	}
 	return w, h
 }
-
 // SetModel sets the model for this CellView.
 func (a *CellView) SetModel(model CellModel) {
 	w, h := model.GetBounds()
@@ -244,7 +221,6 @@ func (a *CellView) SetModel(model CellModel) {
 	a.port.ValidateView()
 	a.PostEventWidgetContent(a)
 }
-
 // SetView sets the View context.
 func (a *CellView) SetView(view View) {
 	port := a.port
@@ -261,7 +237,6 @@ func (a *CellView) SetView(view View) {
 	}
 	a.Resize()
 }
-
 // Resize is called when the View is resized.  It will ensure that the
 // cursor is visible, if present.
 func (a *CellView) Resize() {
@@ -271,35 +246,29 @@ func (a *CellView) Resize() {
 	a.port.ValidateView()
 	a.MakeCursorVisible()
 }
-
 // SetCursor sets the the cursor position.
 func (a *CellView) SetCursor(x, y int) {
 	a.cursorX = x
 	a.cursorY = y
 	a.model.SetCursor(x, y)
 }
-
 // SetCursorX sets the the cursor column.
 func (a *CellView) SetCursorX(x int) {
 	a.SetCursor(x, a.cursorY)
 }
-
 // SetCursorY sets the the cursor row.
 func (a *CellView) SetCursorY(y int) {
 	a.SetCursor(a.cursorX, y)
 }
-
 // MakeVisible makes the given coordinates visible, if they are not already.
 // It does this by moving the ViewPort for the CellView.
 func (a *CellView) MakeVisible(x, y int) {
 	a.port.MakeVisible(x, y)
 }
-
 // SetStyle sets the the default fill style.
 func (a *CellView) SetStyle(s tcell.Style) {
 	a.style = s
 }
-
 // Init initializes a new CellView for use.
 func (a *CellView) Init() {
 	a.once.Do(func() {
@@ -307,7 +276,6 @@ func (a *CellView) Init() {
 		a.style = tcell.StyleDefault
 	})
 }
-
 // NewCellView creates a CellView.
 func NewCellView() *CellView {
 	cv := &CellView{}

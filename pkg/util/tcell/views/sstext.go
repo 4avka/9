@@ -11,12 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package views
 
 import (
-	"git.parallelcoin.io/dev/9/pkg/util/tcell"
 	"unicode"
+
+	"git.parallelcoin.io/dev/9/pkg/util/tcell"
 )
 
 // SimpleStyledText is a form of Text that offers highlighting of the text
@@ -50,13 +50,10 @@ type SimpleStyledText struct {
 // of Markdown is not trivial, and these escape sequences make it clearer that
 // we are not even attempting to do that.
 func (t *SimpleStyledText) SetMarkup(s string) {
-
 	markup := []rune(s)
 	styl := make([]tcell.Style, 0, len(markup))
 	text := make([]rune, 0, len(markup))
-
 	style := t.styles['N']
-
 	esc := false
 	for _, r := range markup {
 		if esc {
@@ -79,7 +76,6 @@ func (t *SimpleStyledText) SetMarkup(s string) {
 			styl = append(styl, style)
 		}
 	}
-
 	t.Text.SetText(string(text))
 	for i, s := range styl {
 		t.SetStyleAt(i, s)

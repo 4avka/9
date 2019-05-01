@@ -11,13 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package views
-
 import (
 	"git.parallelcoin.io/dev/9/pkg/util/tcell"
 )
-
 // View represents a logical view on an area.  It will have some underlying
 // physical area as well, generally.  Views are operated on by Widgets.
 type View interface {
@@ -25,23 +22,18 @@ type View interface {
 	// location.  This will generally be called by the Draw() method of
 	// a Widget.
 	SetContent(x int, y int, ch rune, comb []rune, style tcell.Style)
-
 	// Size represents the visible size.  The actual content may be
 	// larger or smaller.
 	Size() (int, int)
-
 	// Resize tells the View that its visible dimensions have changed.
 	// It also tells it that it has a new offset relative to any parent
 	// view.
 	Resize(x, y, width, height int)
-
 	// Fill fills the displayed content with the given rune and style.
 	Fill(rune, tcell.Style)
-
 	// Clear clears the content.  Often just Fill(' ', tcell.StyleDefault)
 	Clear()
 }
-
 // ViewPort is an implementation of a View, that provides a smaller logical
 // view of larger content area.  For example, a scrollable window of text,
 // the visible window would be the ViewPort, on the underlying content.
@@ -62,13 +54,11 @@ type ViewPort struct {
 	locked bool // if true, don't autogrow
 	v      View
 }
-
 // Clear clears the displayed content, filling it with spaces of default
 // text attributes.
 func (v *ViewPort) Clear() {
 	v.Fill(' ', tcell.StyleDefault)
 }
-
 // Fill fills the displayed view port with the given character and style.
 func (v *ViewPort) Fill(ch rune, style tcell.Style) {
 	if v.v != nil {
@@ -79,12 +69,10 @@ func (v *ViewPort) Fill(ch rune, style tcell.Style) {
 		}
 	}
 }
-
 // Size returns the visible size of the ViewPort in character cells.
 func (v *ViewPort) Size() (int, int) {
 	return v.width, v.height
 }
-
 // Reset resets the record of content, and also resets the offset back
 // to the origin.  It doesn't alter the dimensions of the view port, nor
 // the physical location relative to its parent.
@@ -94,7 +82,6 @@ func (v *ViewPort) Reset() {
 	v.viewx = 0
 	v.viewy = 0
 }
-
 // SetContent is used to place data at the given cell location.  Note that
 // since the ViewPort doesn't retain this data, if the location is outside
 // of the visible area, it is simply discarded.
@@ -122,7 +109,6 @@ func (v *ViewPort) SetContent(x, y int, ch rune, comb []rune, s tcell.Style) {
 	}
 	v.v.SetContent(x-v.viewx+v.physx, y-v.viewy+v.physy, ch, comb, s)
 }
-
 // MakeVisible moves the ViewPort the minimum necessary to make the given
 // point visible.  This should be called before any content is changed with
 // SetContent, since otherwise it may be possible to move the location onto
@@ -142,7 +128,6 @@ func (v *ViewPort) MakeVisible(x, y int) {
 	}
 	v.ValidateView()
 }
-
 // ValidateViewY ensures that the Y offset of the view port is limited so that
 // it cannot scroll away from the content.
 func (v *ViewPort) ValidateViewY() {
@@ -153,7 +138,6 @@ func (v *ViewPort) ValidateViewY() {
 		v.viewy = 0
 	}
 }
-
 // ValidateViewX ensures that the X offset of the view port is limited so that
 // it cannot scroll away from the content.
 func (v *ViewPort) ValidateViewX() {
@@ -164,14 +148,12 @@ func (v *ViewPort) ValidateViewX() {
 		v.viewx = 0
 	}
 }
-
 // ValidateView does both ValidateViewX and ValidateViewY, ensuring both
 // offsets are valid.
 func (v *ViewPort) ValidateView() {
 	v.ValidateViewX()
 	v.ValidateViewY()
 }
-
 // Center centers the point, if possible, in the View.
 func (v *ViewPort) Center(x, y int) {
 	if x < 0 || y < 0 || x >= v.limx || y >= v.limy || v.v == nil {
@@ -181,31 +163,26 @@ func (v *ViewPort) Center(x, y int) {
 	v.viewy = y - (v.height / 2)
 	v.ValidateView()
 }
-
 // ScrollUp moves the view up, showing lower numbered rows of content.
 func (v *ViewPort) ScrollUp(rows int) {
 	v.viewy -= rows
 	v.ValidateViewY()
 }
-
 // ScrollDown moves the view down, showingh higher numbered rows of content.
 func (v *ViewPort) ScrollDown(rows int) {
 	v.viewy += rows
 	v.ValidateViewY()
 }
-
 // ScrollLeft moves the view to the left.
 func (v *ViewPort) ScrollLeft(cols int) {
 	v.viewx -= cols
 	v.ValidateViewX()
 }
-
 // ScrollRight moves the view to the left.
 func (v *ViewPort) ScrollRight(cols int) {
 	v.viewx += cols
 	v.ValidateViewX()
 }
-
 // SetSize is used to set the visible size of the view.  Enclosing views or
 // layout managers can use this to inform the View of its correct visible size.
 func (v *ViewPort) SetSize(width, height int) {
@@ -213,7 +190,6 @@ func (v *ViewPort) SetSize(width, height int) {
 	v.width = width
 	v.ValidateView()
 }
-
 // GetVisible returns the upper left and lower right coordinates of the visible
 // content.  That is, it will return x1, y1, x2, y2 where the upper left cell
 // is position x1, y1, and the lower right is x2, y2.  These coordinates are
@@ -222,14 +198,12 @@ func (v *ViewPort) SetSize(width, height int) {
 func (v *ViewPort) GetVisible() (int, int, int, int) {
 	return v.viewx, v.viewy, v.viewx + v.width - 1, v.viewy + v.height - 1
 }
-
 // GetPhysical returns the upper left and lower right coordinates of the visible
 // content in the coordinate space of the parent.  This is may be the physical
 // coordinates of the screen, if the screen is the view's parent.
 func (v *ViewPort) GetPhysical() (int, int, int, int) {
 	return v.physx, v.physy, v.physx + v.width - 1, v.physy + v.height - 1
 }
-
 // SetContentSize sets the size of the content area; this is used to limit
 // scrolling and view moment.  If locked is true, then the content size will
 // not automatically grow even if content is placed outside of this area
@@ -242,13 +216,11 @@ func (v *ViewPort) SetContentSize(width, height int, locked bool) {
 	v.locked = locked
 	v.ValidateView()
 }
-
 // GetContentSize returns the size of content as width, height in character
 // cells.
 func (v *ViewPort) GetContentSize() (int, int) {
 	return v.limx, v.limy
 }
-
 // Resize is called by the enclosing view to change the size of the ViewPort,
 // usually in response to a window resize event.  The x, y refer are the
 // ViewPort's location relative to the parent View.  A negative value for either
@@ -278,12 +250,10 @@ func (v *ViewPort) Resize(x, y, width, height int) {
 		v.height = height
 	}
 }
-
 // SetView is called during setup, to provide the parent View.
 func (v *ViewPort) SetView(view View) {
 	v.v = view
 }
-
 // NewViewPort returns a new ViewPort (and hence also a View).
 // The x and y coordinates are an offset relative to the parent.
 // The origin 0,0 represents the upper left.  The width and height
