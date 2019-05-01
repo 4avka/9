@@ -22,7 +22,6 @@ var (
 // type BaseInterface interface {
 // 	SetupListener()
 // }
-
 // BaseCfg is the configuration for a Base
 type BaseCfg struct {
 	Handler    func(message Message)

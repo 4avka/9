@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package terminfo
 
 import (
@@ -161,13 +160,11 @@ type Terminfo struct {
 	KeyShfLeft   string   `json:"kLFT,omitempty"`   // kLFT
 	KeyShfHome   string   `json:"kHOM,omitempty"`   // kHOM
 	KeyShfEnd    string   `json:"kEND,omitempty"`   // kEND
-
 	// These are non-standard extensions to terminfo.  This includes
 	// true color support, and some additional keys.  Its kind of bizarre
 	// that shifted variants of left and right exist, but not up and down.
 	// Terminal support for these are going to vary amongst XTerm
 	// emulations, so don't depend too much on them in your application.
-
 	SetFgBg         string `json:"_setfgbg,omitempty"`    // setfgbg
 	SetFgBgRGB      string `json:"_setfgbgrgb,omitempty"` // setfgbgrgb
 	SetFgRGB        string `json:"_setfrgb,omitempty"`    // setfrgb
@@ -211,14 +208,12 @@ type Terminfo struct {
 	KeyMetaShfHome  string `json:"_kmHOME,omitempty"`
 	KeyMetaShfEnd   string `json:"_kmEND,omitempty"`
 }
-
 type stackElem struct {
 	s     string
 	i     int
 	isStr bool
 	isInt bool
 }
-
 type stack []stackElem
 
 func (st stack) Push(v string) stack {
@@ -228,7 +223,6 @@ func (st stack) Push(v string) stack {
 	}
 	return append(st, e)
 }
-
 func (st stack) Pop() (string, stack) {
 	v := ""
 	if len(st) > 0 {
@@ -242,7 +236,6 @@ func (st stack) Pop() (string, stack) {
 	}
 	return v, st
 }
-
 func (st stack) PopInt() (int, stack) {
 	if len(st) > 0 {
 		e := st[len(st)-1]
@@ -256,7 +249,6 @@ func (st stack) PopInt() (int, stack) {
 	}
 	return 0, st
 }
-
 func (st stack) PopBool() (bool, stack) {
 	if len(st) > 0 {
 		e := st[len(st)-1]
@@ -274,7 +266,6 @@ func (st stack) PopBool() (bool, stack) {
 	}
 	return false, st
 }
-
 func (st stack) PushInt(i int) stack {
 	e := stackElem{
 		i:     i,
@@ -282,14 +273,12 @@ func (st stack) PushInt(i int) stack {
 	}
 	return append(st, e)
 }
-
 func (st stack) PushBool(i bool) stack {
 	if i {
 		return st.PushInt(1)
 	}
 	return st.PushInt(0)
 }
-
 func nextch(s string, index int) (byte, int) {
 	if index < len(s) {
 		return s[index], index + 1
@@ -355,54 +344,42 @@ func (t *Terminfo) TParm(s string, p ...int) string {
 	var ab bool
 	var dvars [26]string
 	var params [9]int
-
 	pb.Start(s)
-
 	// make sure we always have 9 parameters -- makes it easier
 	// later to skip checks
 	for i := 0; i < len(params) && i < len(p); i++ {
 		params[i] = p[i]
 	}
-
 	nest := 0
-
 	for {
-
 		ch, err := pb.NextCh()
 		if err != nil {
 			break
 		}
-
 		if ch != '%' {
 			pb.PutCh(ch)
 			continue
 		}
-
 		ch, err = pb.NextCh()
 		if err != nil {
 			// XXX Error
 			break
 		}
-
 		switch ch {
 		case '%': // quoted %
 			pb.PutCh(ch)
-
 		case 'i': // increment both parameters (ANSI cup support)
 			params[0]++
 			params[1]++
-
 		case 'c', 's':
 			// NB: these, and 'd' below are special cased for
 			// efficiency.  They could be handled by the richer
 			// format support below, less efficiently.
 			a, stk = stk.Pop()
 			pb.PutString(a)
-
 		case 'd':
 			ai, stk = stk.PopInt()
 			pb.PutString(strconv.Itoa(ai))
-
 		case '0', '1', '2', '3', '4', 'x', 'X', 'o', ':':
 			// This is pretty suboptimal, but this is rarely used.
 			// None of the mainstream terminals use any of this,
@@ -429,7 +406,6 @@ func (t *Terminfo) TParm(s string, p ...int) string {
 				a, stk = stk.Pop()
 				pb.PutString(fmt.Sprintf(f, a))
 			}
-
 		case 'p': // push parameter
 			ch, _ = pb.NextCh()
 			ai = int(ch - '1')
@@ -438,7 +414,6 @@ func (t *Terminfo) TParm(s string, p ...int) string {
 			} else {
 				stk = stk.PushInt(0)
 			}
-
 		case 'P': // pop & store variable
 			ch, _ = pb.NextCh()
 			if ch >= 'A' && ch <= 'Z' {
@@ -446,7 +421,6 @@ func (t *Terminfo) TParm(s string, p ...int) string {
 			} else if ch >= 'a' && ch <= 'z' {
 				dvars[int(ch-'a')], stk = stk.Pop()
 			}
-
 		case 'g': // recall & push variable
 			ch, _ = pb.NextCh()
 			if ch >= 'A' && ch <= 'Z' {
@@ -454,12 +428,10 @@ func (t *Terminfo) TParm(s string, p ...int) string {
 			} else if ch >= 'a' && ch <= 'z' {
 				stk = stk.Push(dvars[int(ch-'a')])
 			}
-
 		case '\'': // push(char)
 			ch, _ = pb.NextCh()
 			pb.NextCh() // must be ' but we don't check
 			stk = stk.Push(string(ch))
-
 		case '{': // push(int)
 			ai = 0
 			ch, _ = pb.NextCh()
@@ -470,26 +442,21 @@ func (t *Terminfo) TParm(s string, p ...int) string {
 			}
 			// ch must be '}' but no verification
 			stk = stk.PushInt(ai)
-
 		case 'l': // push(strlen(pop))
 			a, stk = stk.Pop()
 			stk = stk.PushInt(len(a))
-
 		case '+':
 			bi, stk = stk.PopInt()
 			ai, stk = stk.PopInt()
 			stk = stk.PushInt(ai + bi)
-
 		case '-':
 			bi, stk = stk.PopInt()
 			ai, stk = stk.PopInt()
 			stk = stk.PushInt(ai - bi)
-
 		case '*':
 			bi, stk = stk.PopInt()
 			ai, stk = stk.PopInt()
 			stk = stk.PushInt(ai * bi)
-
 		case '/':
 			bi, stk = stk.PopInt()
 			ai, stk = stk.PopInt()
@@ -498,7 +465,6 @@ func (t *Terminfo) TParm(s string, p ...int) string {
 			} else {
 				stk = stk.PushInt(0)
 			}
-
 		case 'm': // push(pop mod pop)
 			bi, stk = stk.PopInt()
 			ai, stk = stk.PopInt()
@@ -507,47 +473,37 @@ func (t *Terminfo) TParm(s string, p ...int) string {
 			} else {
 				stk = stk.PushInt(0)
 			}
-
 		case '&': // AND
 			bi, stk = stk.PopInt()
 			ai, stk = stk.PopInt()
 			stk = stk.PushInt(ai & bi)
-
 		case '|': // OR
 			bi, stk = stk.PopInt()
 			ai, stk = stk.PopInt()
 			stk = stk.PushInt(ai | bi)
-
 		case '^': // XOR
 			bi, stk = stk.PopInt()
 			ai, stk = stk.PopInt()
 			stk = stk.PushInt(ai ^ bi)
-
 		case '~': // bit complement
 			ai, stk = stk.PopInt()
 			stk = stk.PushInt(ai ^ -1)
-
 		case '!': // logical NOT
 			ai, stk = stk.PopInt()
 			stk = stk.PushBool(ai != 0)
-
 		case '=': // numeric compare or string compare
 			b, stk = stk.Pop()
 			a, stk = stk.Pop()
 			stk = stk.PushBool(a == b)
-
 		case '>': // greater than, numeric
 			bi, stk = stk.PopInt()
 			ai, stk = stk.PopInt()
 			stk = stk.PushBool(ai > bi)
-
 		case '<': // less than, numeric
 			bi, stk = stk.PopInt()
 			ai, stk = stk.PopInt()
 			stk = stk.PushBool(ai < bi)
-
 		case '?': // start conditional
-
 		case 't':
 			ab, stk = stk.PopBool()
 			if ab {
@@ -581,7 +537,6 @@ func (t *Terminfo) TParm(s string, p ...int) string {
 					}
 				}
 			}
-
 		case 'e':
 			// if we got here, it means we didn't use the else
 			// in the 't' case above, and we should skip until
@@ -607,12 +562,9 @@ func (t *Terminfo) TParm(s string, p ...int) string {
 					nest++
 				}
 			}
-
 		case ';': // endif
-
 		}
 	}
-
 	return pb.End()
 }
 
@@ -716,7 +668,6 @@ func AddTerminfo(t *Terminfo) {
 	}
 	dblock.Unlock()
 }
-
 func loadFromFile(fname string, term string) (*Terminfo, error) {
 	var e error
 	var f io.Reader
@@ -771,13 +722,10 @@ func LookupTerminfo(name string) (*Terminfo, error) {
 		// on the name[0] reference below
 		return nil, ErrTermNotFound
 	}
-
 	dblock.Lock()
 	t := terminfos[name]
 	dblock.Unlock()
-
 	if t == nil {
-
 		var files []string
 		letter := fmt.Sprintf("%02x", name[0])
 		gzfile := path.Join(letter, name+".gz")
@@ -785,7 +733,6 @@ func LookupTerminfo(name string) (*Terminfo, error) {
 		hash := fmt.Sprintf("%x", sha1.Sum([]byte(name)))
 		gzhfile := path.Join(hash[0:2], hash[0:8]+".gz")
 		jshfile := path.Join(hash[0:2], hash[0:8])
-
 		// Build up the search path.  Old versions of tcell used a
 		// single database file, whereas the new ones locate them
 		// in JSON (optionally compressed) files.
@@ -810,7 +757,6 @@ func LookupTerminfo(name string) (*Terminfo, error) {
 		// provided for compatibility.  We do not actually deliver
 		// any files with this style of naming, to avoid collisions
 		// on case insensitive filesystems. (*cough* mac *cough*).
-
 		// If $GOPATH set, honor it, else assume $HOME/go just like
 		// modern golang does.
 		gopath := os.Getenv("GOPATH")
@@ -832,7 +778,6 @@ func LookupTerminfo(name string) (*Terminfo, error) {
 				path.Join(pth, jsfile),
 				pth)
 		}
-
 		for _, pth := range filepath.SplitList(gopath) {
 			pth = path.Join(pth, "src", "github.com",
 				"gdamore", "tcell", "terminfo", "database")
@@ -842,7 +787,6 @@ func LookupTerminfo(name string) (*Terminfo, error) {
 				path.Join(pth, gzfile),
 				path.Join(pth, jsfile))
 		}
-
 		for _, fname := range files {
 			t, _ = loadFromFile(fname, name)
 			if t != nil {

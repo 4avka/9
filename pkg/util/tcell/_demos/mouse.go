@@ -1,5 +1,4 @@
 //+build ignore
-
 // Copyright 2015 The TCell Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +12,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 // mouse displays a text box and tests mouse interaction.  As you click
 // and drag, boxes are displayed on screen.  Other events are reported in
 // the box.  Press ESC twice to exit the program.
@@ -25,7 +23,6 @@ import (
 
 	"git.parallelcoin.io/dev/9/pkg/util/tcell"
 	"git.parallelcoin.io/dev/9/pkg/util/tcell/encoding"
-
 	"github.com/mattn/go-runewidth"
 )
 
@@ -44,7 +41,6 @@ func emitStr(s tcell.Screen, x, y int, style tcell.Style, str string) {
 		x += w
 	}
 }
-
 func drawBox(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, r rune) {
 	if y2 < y1 {
 		y1, y2 = y2, y1
@@ -52,7 +48,6 @@ func drawBox(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, r rune) {
 	if x2 < x1 {
 		x1, x2 = x2, x1
 	}
-
 	for col := x1; col <= x2; col++ {
 		s.SetContent(col, y1, tcell.RuneHLine, nil, style)
 		s.SetContent(col, y2, tcell.RuneHLine, nil, style)
@@ -74,9 +69,7 @@ func drawBox(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, r rune) {
 		}
 	}
 }
-
 func drawSelect(s tcell.Screen, x1, y1, x2, y2 int, sel bool) {
-
 	if y2 < y1 {
 		y1, y2 = y2, y1
 	}
@@ -99,9 +92,7 @@ func drawSelect(s tcell.Screen, x1, y1, x2, y2 int, sel bool) {
 // This program just shows simple mouse and keyboard events.  Press ESC twice to
 // exit.
 func main() {
-
 	encoding.Register()
-
 	s, e := tcell.NewScreen()
 	if e != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", e)
@@ -117,13 +108,11 @@ func main() {
 	s.SetStyle(defStyle)
 	s.EnableMouse()
 	s.Clear()
-
 	posfmt := "Mouse: %d, %d  "
 	btnfmt := "Buttons: %s"
 	keyfmt := "Keys: %s"
 	white := tcell.StyleDefault.
 		Foreground(tcell.ColorWhite).Background(tcell.ColorRed)
-
 	mx, my := -1, -1
 	ox, oy := -1, -1
 	bx, by := -1, -1
@@ -132,14 +121,12 @@ func main() {
 	bstr := ""
 	lks := ""
 	ecnt := 0
-
 	for {
 		drawBox(s, 1, 1, 42, 6, white, ' ')
 		emitStr(s, 2, 2, white, "Press ESC twice to exit, C to clear.")
 		emitStr(s, 2, 3, white, fmt.Sprintf(posfmt, mx, my))
 		emitStr(s, 2, 4, white, fmt.Sprintf(btnfmt, bstr))
 		emitStr(s, 2, 5, white, fmt.Sprintf(keyfmt, lks))
-
 		s.Show()
 		bstr = ""
 		ev := s.PollEvent()
@@ -148,12 +135,10 @@ func main() {
 			Background(tcell.ColorBlue).
 			Foreground(tcell.ColorBlack)
 		w, h = s.Size()
-
 		// always clear any old selection box
 		if ox >= 0 && oy >= 0 && bx >= 0 {
 			drawSelect(s, ox, oy, bx, by, false)
 		}
-
 		switch ev := ev.(type) {
 		case *tcell.EventResize:
 			s.Sync()
@@ -199,7 +184,6 @@ func main() {
 			// Only buttons, not wheel events
 			button &= tcell.ButtonMask(0xff)
 			ch := '*'
-
 			if button != tcell.ButtonNone && ox < 0 {
 				ox, oy = x, y
 			}
@@ -231,7 +215,6 @@ func main() {
 				ch = '8'
 			default:
 				ch = '*'
-
 			}
 			if button != tcell.ButtonNone {
 				bx, by = x, y
@@ -242,7 +225,6 @@ func main() {
 		default:
 			s.SetContent(w-1, h-1, 'X', nil, st)
 		}
-
 		if ox >= 0 && bx >= 0 {
 			drawSelect(s, ox, oy, bx, by, true)
 		}

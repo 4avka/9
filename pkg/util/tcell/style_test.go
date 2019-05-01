@@ -11,30 +11,22 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package tcell
-
 import (
 	"testing"
-
 	. "github.com/smartystreets/goconvey/convey"
 )
-
 func TestStyle(t *testing.T) {
 	Convey("Style checks", t, WithScreen(t, "", func(s SimulationScreen) {
-
 		style := StyleDefault
 		fg, bg, attr := style.Decompose()
-
 		So(fg, ShouldEqual, ColorDefault)
 		So(bg, ShouldEqual, ColorDefault)
 		So(attr, ShouldEqual, AttrNone)
-
 		s2 := style.
 			Background(ColorRed).
 			Foreground(ColorBlue).
 			Blink(true)
-
 		fg, bg, attr = s2.Decompose()
 		So(fg, ShouldEqual, ColorBlue)
 		So(bg, ShouldEqual, ColorRed)

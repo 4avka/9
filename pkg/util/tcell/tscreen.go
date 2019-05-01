@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package tcell
 
 import (
@@ -23,9 +22,8 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"golang.org/x/text/transform"
-
 	"git.parallelcoin.io/dev/9/pkg/util/tcell/terminfo"
+	"golang.org/x/text/transform"
 )
 
 // NewTerminfoScreen returns a Screen that uses the stock TTY interface
@@ -42,7 +40,6 @@ func NewTerminfoScreen() (Screen, error) {
 		return nil, e
 	}
 	t := &tScreen{ti: ti}
-
 	t.keyexist = make(map[Key]bool)
 	t.keycodes = make(map[string]*tKeyCode)
 	if len(ti.Mouse) > 0 {
@@ -55,7 +52,6 @@ func NewTerminfoScreen() (Screen, error) {
 	for k, v := range RuneFallbacks {
 		t.fallback[k] = v
 	}
-
 	return t, nil
 }
 
@@ -104,7 +100,6 @@ type tScreen struct {
 	truecolor bool
 	escaped   bool
 	buttondn  bool
-
 	sync.Mutex
 }
 
@@ -114,7 +109,6 @@ func (t *tScreen) Init() error {
 	t.keychan = make(chan []byte, 10)
 	t.keytimer = time.NewTimer(time.Millisecond * 50)
 	t.charset = "UTF-8"
-
 	t.charset = getCharset()
 	if enc := GetEncoding(t.charset); enc != nil {
 		t.encoder = enc.NewEncoder()
@@ -123,7 +117,6 @@ func (t *tScreen) Init() error {
 		return ErrNoCharset
 	}
 	ti := t.ti
-
 	// environment overrides
 	w := ti.Columns
 	h := ti.Lines
@@ -136,7 +129,6 @@ func (t *tScreen) Init() error {
 	if e := t.termioInit(); e != nil {
 		return e
 	}
-
 	if t.ti.SetFgBgRGB != "" || t.ti.SetFgRGB != "" || t.ti.SetBgRGB != "" {
 		t.truecolor = true
 	}
@@ -154,14 +146,11 @@ func (t *tScreen) Init() error {
 			t.colors[Color(i)] = Color(i)
 		}
 	}
-
 	t.TPuts(ti.EnterCA)
 	t.TPuts(ti.HideCursor)
 	t.TPuts(ti.EnableAcs)
 	t.TPuts(ti.Clear)
-
 	t.quit = make(chan struct{})
-
 	t.Lock()
 	t.cx = -1
 	t.cy = -1
@@ -171,13 +160,10 @@ func (t *tScreen) Init() error {
 	t.cursory = -1
 	t.resize()
 	t.Unlock()
-
 	go t.mainLoop()
 	go t.inputLoop()
-
 	return nil
 }
-
 func (t *tScreen) prepareKeyMod(key Key, mod ModMask, val string) {
 	if val != "" {
 		// Do not overrride codes that already exist
@@ -187,11 +173,9 @@ func (t *tScreen) prepareKeyMod(key Key, mod ModMask, val string) {
 		}
 	}
 }
-
 func (t *tScreen) prepareKey(key Key, val string) {
 	t.prepareKeyMod(key, ModNone, val)
 }
-
 func (t *tScreen) prepareKeys() {
 	ti := t.ti
 	t.prepareKey(KeyBackspace, ti.KeyBackspace)
@@ -274,56 +258,48 @@ func (t *tScreen) prepareKeys() {
 	t.prepareKey(KeyCancel, ti.KeyCancel)
 	t.prepareKey(KeyExit, ti.KeyExit)
 	t.prepareKey(KeyBacktab, ti.KeyBacktab)
-
 	t.prepareKeyMod(KeyRight, ModShift, ti.KeyShfRight)
 	t.prepareKeyMod(KeyLeft, ModShift, ti.KeyShfLeft)
 	t.prepareKeyMod(KeyUp, ModShift, ti.KeyShfUp)
 	t.prepareKeyMod(KeyDown, ModShift, ti.KeyShfDown)
 	t.prepareKeyMod(KeyHome, ModShift, ti.KeyShfHome)
 	t.prepareKeyMod(KeyEnd, ModShift, ti.KeyShfEnd)
-
 	t.prepareKeyMod(KeyRight, ModCtrl, ti.KeyCtrlRight)
 	t.prepareKeyMod(KeyLeft, ModCtrl, ti.KeyCtrlLeft)
 	t.prepareKeyMod(KeyUp, ModCtrl, ti.KeyCtrlUp)
 	t.prepareKeyMod(KeyDown, ModCtrl, ti.KeyCtrlDown)
 	t.prepareKeyMod(KeyHome, ModCtrl, ti.KeyCtrlHome)
 	t.prepareKeyMod(KeyEnd, ModCtrl, ti.KeyCtrlEnd)
-
 	t.prepareKeyMod(KeyRight, ModAlt, ti.KeyAltRight)
 	t.prepareKeyMod(KeyLeft, ModAlt, ti.KeyAltLeft)
 	t.prepareKeyMod(KeyUp, ModAlt, ti.KeyAltUp)
 	t.prepareKeyMod(KeyDown, ModAlt, ti.KeyAltDown)
 	t.prepareKeyMod(KeyHome, ModAlt, ti.KeyAltHome)
 	t.prepareKeyMod(KeyEnd, ModAlt, ti.KeyAltEnd)
-
 	t.prepareKeyMod(KeyRight, ModAlt, ti.KeyMetaRight)
 	t.prepareKeyMod(KeyLeft, ModAlt, ti.KeyMetaLeft)
 	t.prepareKeyMod(KeyUp, ModAlt, ti.KeyMetaUp)
 	t.prepareKeyMod(KeyDown, ModAlt, ti.KeyMetaDown)
 	t.prepareKeyMod(KeyHome, ModAlt, ti.KeyMetaHome)
 	t.prepareKeyMod(KeyEnd, ModAlt, ti.KeyMetaEnd)
-
 	t.prepareKeyMod(KeyRight, ModAlt|ModShift, ti.KeyAltShfRight)
 	t.prepareKeyMod(KeyLeft, ModAlt|ModShift, ti.KeyAltShfLeft)
 	t.prepareKeyMod(KeyUp, ModAlt|ModShift, ti.KeyAltShfUp)
 	t.prepareKeyMod(KeyDown, ModAlt|ModShift, ti.KeyAltShfDown)
 	t.prepareKeyMod(KeyHome, ModAlt|ModShift, ti.KeyAltShfHome)
 	t.prepareKeyMod(KeyEnd, ModAlt|ModShift, ti.KeyAltShfEnd)
-
 	t.prepareKeyMod(KeyRight, ModAlt|ModShift, ti.KeyMetaShfRight)
 	t.prepareKeyMod(KeyLeft, ModAlt|ModShift, ti.KeyMetaShfLeft)
 	t.prepareKeyMod(KeyUp, ModAlt|ModShift, ti.KeyMetaShfUp)
 	t.prepareKeyMod(KeyDown, ModAlt|ModShift, ti.KeyMetaShfDown)
 	t.prepareKeyMod(KeyHome, ModAlt|ModShift, ti.KeyMetaShfHome)
 	t.prepareKeyMod(KeyEnd, ModAlt|ModShift, ti.KeyMetaShfEnd)
-
 	t.prepareKeyMod(KeyRight, ModCtrl|ModShift, ti.KeyCtrlShfRight)
 	t.prepareKeyMod(KeyLeft, ModCtrl|ModShift, ti.KeyCtrlShfLeft)
 	t.prepareKeyMod(KeyUp, ModCtrl|ModShift, ti.KeyCtrlShfUp)
 	t.prepareKeyMod(KeyDown, ModCtrl|ModShift, ti.KeyCtrlShfDown)
 	t.prepareKeyMod(KeyHome, ModCtrl|ModShift, ti.KeyCtrlShfHome)
 	t.prepareKeyMod(KeyEnd, ModCtrl|ModShift, ti.KeyCtrlShfEnd)
-
 	// Sadly, xterm handling of keycodes is somewhat erratic.  In
 	// particular, different codes are sent depending on application
 	// mode is in use or not, and the entries for many of these are
@@ -333,7 +309,6 @@ func (t *tScreen) prepareKeys() {
 	// will not inject codes if the escape sequence is already known.
 	// We also only do this for terminals that have the application
 	// mode present.
-
 	// Cursor mode
 	if ti.EnterKeypad != "" {
 		t.prepareKey(KeyUp, "\x1b[A")
@@ -347,7 +322,6 @@ func (t *tScreen) prepareKeys() {
 		t.prepareKey(KeyEnd, "\x1b[4~")
 		t.prepareKey(KeyPgUp, "\x1b[5~")
 		t.prepareKey(KeyPgDn, "\x1b[6~")
-
 		// Application mode
 		t.prepareKey(KeyUp, "\x1bOA")
 		t.prepareKey(KeyDown, "\x1bOB")
@@ -355,7 +329,6 @@ func (t *tScreen) prepareKeys() {
 		t.prepareKey(KeyLeft, "\x1bOD")
 		t.prepareKey(KeyHome, "\x1bOH")
 	}
-
 outer:
 	// Add key mappings for control keys.
 	for i := 0; i < ' '; i++ {
@@ -369,9 +342,7 @@ outer:
 				continue outer
 			}
 		}
-
 		t.keyexist[Key(i)] = true
-
 		mod := ModCtrl
 		switch Key(i) {
 		case KeyBS, KeyTAB, KeyESC, KeyCR:
@@ -381,11 +352,9 @@ outer:
 		t.keycodes[string(rune(i))] = &tKeyCode{key: Key(i), mod: mod}
 	}
 }
-
 func (t *tScreen) Fini() {
 	t.Lock()
 	defer t.Unlock()
-
 	ti := t.ti
 	t.cells.Resize(0, 0)
 	t.TPuts(ti.ShowCursor)
@@ -397,18 +366,14 @@ func (t *tScreen) Fini() {
 	t.curstyle = Style(-1)
 	t.clear = false
 	t.fini = true
-
 	select {
 	case <-t.quit:
 		// do nothing, already closed
-
 	default:
 		close(t.quit)
 	}
-
 	t.termioFini()
 }
-
 func (t *tScreen) SetStyle(style Style) {
 	t.Lock()
 	if !t.fini {
@@ -416,11 +381,9 @@ func (t *tScreen) SetStyle(style Style) {
 	}
 	t.Unlock()
 }
-
 func (t *tScreen) Clear() {
 	t.Fill(' ', t.style)
 }
-
 func (t *tScreen) Fill(r rune, style Style) {
 	t.Lock()
 	if !t.fini {
@@ -428,7 +391,6 @@ func (t *tScreen) Fill(r rune, style Style) {
 	}
 	t.Unlock()
 }
-
 func (t *tScreen) SetContent(x, y int, mainc rune, combc []rune, style Style) {
 	t.Lock()
 	if !t.fini {
@@ -436,14 +398,12 @@ func (t *tScreen) SetContent(x, y int, mainc rune, combc []rune, style Style) {
 	}
 	t.Unlock()
 }
-
 func (t *tScreen) GetContent(x, y int) (rune, []rune, Style, int) {
 	t.Lock()
 	mainc, combc, style, width := t.cells.GetContent(x, y)
 	t.Unlock()
 	return mainc, combc, style, width
 }
-
 func (t *tScreen) SetCell(x, y int, style Style, ch ...rune) {
 	if len(ch) > 0 {
 		t.SetContent(x, y, ch[0], ch[1:], style)
@@ -451,9 +411,7 @@ func (t *tScreen) SetCell(x, y int, style Style, ch ...rune) {
 		t.SetContent(x, y, ' ', nil, style)
 	}
 }
-
 func (t *tScreen) encodeRune(r rune, buf []byte) []byte {
-
 	nb := make([]byte, 6)
 	ob := make([]byte, 6)
 	num := utf8.EncodeRune(ob, r)
@@ -478,10 +436,8 @@ func (t *tScreen) encodeRune(r rune, buf []byte) []byte {
 	} else {
 		buf = append(buf, nb[:dst]...)
 	}
-
 	return buf
 }
-
 func (t *tScreen) sendFgBg(fg Color, bg Color) {
 	ti := t.ti
 	if ti.Colors == 0 {
@@ -509,7 +465,6 @@ func (t *tScreen) sendFgBg(fg Color, bg Color) {
 		}
 		return
 	}
-
 	if fg != ColorDefault {
 		if v, ok := t.colors[fg]; ok {
 			fg = v
@@ -519,7 +474,6 @@ func (t *tScreen) sendFgBg(fg Color, bg Color) {
 			fg = v
 		}
 	}
-
 	if bg != ColorDefault {
 		if v, ok := t.colors[bg]; ok {
 			bg = v
@@ -529,7 +483,6 @@ func (t *tScreen) sendFgBg(fg Color, bg Color) {
 			bg = v
 		}
 	}
-
 	if ti.SetFgBg != "" && fg != ColorDefault && bg != ColorDefault {
 		t.TPuts(ti.TParm(ti.SetFgBg, int(fg), int(bg)))
 	} else {
@@ -541,30 +494,23 @@ func (t *tScreen) sendFgBg(fg Color, bg Color) {
 		}
 	}
 }
-
 func (t *tScreen) drawCell(x, y int) int {
-
 	ti := t.ti
-
 	mainc, combc, style, width := t.cells.GetContent(x, y)
 	if !t.cells.Dirty(x, y) {
 		return width
 	}
-
 	if t.cy != y || t.cx != x {
 		t.TPuts(ti.TGoto(x, y))
 		t.cx = x
 		t.cy = y
 	}
-
 	if style == StyleDefault {
 		style = t.style
 	}
 	if style != t.curstyle {
 		fg, bg, attrs := style.Decompose()
-
 		t.TPuts(ti.AttrOff)
-
 		t.sendFgBg(fg, bg)
 		if attrs&AttrBold != 0 {
 			t.TPuts(ti.Bold)
@@ -586,29 +532,22 @@ func (t *tScreen) drawCell(x, y int) int {
 	// now emit runes - taking care to not overrun width with a
 	// wide character, and to ensure that we emit exactly one regular
 	// character followed up by any residual combing characters
-
 	if width < 1 {
 		width = 1
 	}
-
 	var str string
-
 	buf := make([]byte, 0, 6)
-
 	buf = t.encodeRune(mainc, buf)
 	for _, r := range combc {
 		buf = t.encodeRune(r, buf)
 	}
-
 	str = string(buf)
 	if width > 1 && str == "?" {
 		// No FullWidth character support
 		str = "? "
 		t.cx = -1
 	}
-
 	// XXX: check for hazeltine not being able to display ~
-
 	if x > t.w-width {
 		// too wide to fit; emit a single space instead
 		width = 1
@@ -620,23 +559,18 @@ func (t *tScreen) drawCell(x, y int) int {
 	if width > 1 {
 		t.cx = -1
 	}
-
 	return width
 }
-
 func (t *tScreen) ShowCursor(x, y int) {
 	t.Lock()
 	t.cursorx = x
 	t.cursory = y
 	t.Unlock()
 }
-
 func (t *tScreen) HideCursor() {
 	t.ShowCursor(-1, -1)
 }
-
 func (t *tScreen) showCursor() {
-
 	x, y := t.cursorx, t.cursory
 	w, h := t.cells.Size()
 	if x < 0 || y < 0 || x >= w || y >= h {
@@ -648,11 +582,9 @@ func (t *tScreen) showCursor() {
 	t.cx = x
 	t.cy = y
 }
-
 func (t *tScreen) TPuts(s string) {
 	t.ti.TPuts(t.out, s, t.baud)
 }
-
 func (t *tScreen) Show() {
 	t.Lock()
 	if !t.fini {
@@ -661,14 +593,12 @@ func (t *tScreen) Show() {
 	}
 	t.Unlock()
 }
-
 func (t *tScreen) clearScreen() {
 	fg, bg, _ := t.style.Decompose()
 	t.sendFgBg(fg, bg)
 	t.TPuts(t.ti.Clear)
 	t.clear = false
 }
-
 func (t *tScreen) hideCursor() {
 	// does not update cursor position
 	if t.ti.HideCursor != "" {
@@ -680,19 +610,15 @@ func (t *tScreen) hideCursor() {
 		t.TPuts(t.ti.TGoto(t.cx, t.cy))
 	}
 }
-
 func (t *tScreen) draw() {
 	// clobber cursor position, because we're gonna change it all
 	t.cx = -1
 	t.cy = -1
-
 	// hide the cursor while we move stuff around
 	t.hideCursor()
-
 	if t.clear {
 		t.clearScreen()
 	}
-
 	for y := 0; y < t.h; y++ {
 		for x := 0; x < t.w; x++ {
 			width := t.drawCell(x, y)
@@ -707,36 +633,30 @@ func (t *tScreen) draw() {
 			x += width - 1
 		}
 	}
-
 	// restore the cursor
 	t.showCursor()
 }
-
 func (t *tScreen) EnableMouse() {
 	if len(t.mouse) != 0 {
 		t.TPuts(t.ti.TParm(t.ti.MouseMode, 1))
 	}
 }
-
 func (t *tScreen) DisableMouse() {
 	if len(t.mouse) != 0 {
 		t.TPuts(t.ti.TParm(t.ti.MouseMode, 0))
 	}
 }
-
 func (t *tScreen) Size() (int, int) {
 	t.Lock()
 	w, h := t.w, t.h
 	t.Unlock()
 	return w, h
 }
-
 func (t *tScreen) resize() {
 	if w, h, e := t.getWinSize(); e == nil {
 		if w != t.w || h != t.h {
 			t.cx = -1
 			t.cy = -1
-
 			t.cells.Resize(w, h)
 			t.cells.Invalidate()
 			t.h = h
@@ -746,7 +666,6 @@ func (t *tScreen) resize() {
 		}
 	}
 }
-
 func (t *tScreen) Colors() int {
 	// this doesn't change, no need for lock
 	if t.truecolor {
@@ -754,7 +673,6 @@ func (t *tScreen) Colors() int {
 	}
 	return t.ti.Colors
 }
-
 func (t *tScreen) PollEvent() Event {
 	select {
 	case <-t.quit:
@@ -827,11 +745,9 @@ func (t *tScreen) buildAcsMap() {
 		acsstr = acsstr[2:]
 	}
 }
-
 func (t *tScreen) PostEventWait(ev Event) {
 	t.evch <- ev
 }
-
 func (t *tScreen) PostEvent(ev Event) error {
 	select {
 	case t.evch <- ev:
@@ -840,7 +756,6 @@ func (t *tScreen) PostEvent(ev Event) error {
 		return ErrEventQFull
 	}
 }
-
 func (t *tScreen) clip(x, y int) (int, int) {
 	w, h := t.cells.Size()
 	if x < 0 {
@@ -857,17 +772,13 @@ func (t *tScreen) clip(x, y int) (int, int) {
 	}
 	return x, y
 }
-
 func (t *tScreen) postMouseEvent(x, y, btn int) {
-
 	// XTerm mouse events only report at most one button at a time,
 	// which may include a wheel button.  Wheel motion events are
 	// reported as single impulses, while other button events are reported
 	// as separate press & release events.
-
 	button := ButtonNone
 	mod := ModNone
-
 	// Mouse wheel has bit 6 set, no release events.  It should be noted
 	// that wheel events are sometimes misdelivered as mouse button events
 	// during a click-drag, so we debounce these, considering them to be
@@ -898,7 +809,6 @@ func (t *tScreen) postMouseEvent(x, y, btn int) {
 			button = Button2
 		}
 	}
-
 	if btn&0x4 != 0 {
 		mod |= ModShift
 	}
@@ -908,12 +818,10 @@ func (t *tScreen) postMouseEvent(x, y, btn int) {
 	if btn&0x10 != 0 {
 		mod |= ModCtrl
 	}
-
 	// Some terminals will report mouse coordinates outside the
 	// screen, especially with click-drag events.  Clip the coordinates
 	// to the screen in that case.
 	x, y = t.clip(x, y)
-
 	ev := NewEventMouse(x, y, button, mod)
 	t.PostEvent(ev)
 }
@@ -924,16 +832,13 @@ func (t *tScreen) postMouseEvent(x, y, btn int) {
 // contain such an event, but more bytes are necessary (partial match), and
 // false, false if the content is definitely *not* an SGR mouse record.
 func (t *tScreen) parseSgrMouse(buf *bytes.Buffer) (bool, bool) {
-
 	b := buf.Bytes()
-
 	var x, y, btn, state int
 	dig := false
 	neg := false
 	motion := false
 	i := 0
 	val := 0
-
 	for i = range b {
 		switch b[i] {
 		case '\x1b':
@@ -941,19 +846,16 @@ func (t *tScreen) parseSgrMouse(buf *bytes.Buffer) (bool, bool) {
 				return false, false
 			}
 			state = 1
-
 		case '\x9b':
 			if state != 0 {
 				return false, false
 			}
 			state = 2
-
 		case '[':
 			if state != 1 {
 				return false, false
 			}
 			state = 2
-
 		case '<':
 			if state != 2 {
 				return false, false
@@ -962,7 +864,6 @@ func (t *tScreen) parseSgrMouse(buf *bytes.Buffer) (bool, bool) {
 			dig = false
 			neg = false
 			state = 3
-
 		case '-':
 			if state != 3 && state != 4 && state != 5 {
 				return false, false
@@ -971,7 +872,6 @@ func (t *tScreen) parseSgrMouse(buf *bytes.Buffer) (bool, bool) {
 				return false, false
 			}
 			neg = true // stay in state
-
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			if state != 3 && state != 4 && state != 5 {
 				return false, false
@@ -979,7 +879,6 @@ func (t *tScreen) parseSgrMouse(buf *bytes.Buffer) (bool, bool) {
 			val *= 10
 			val += int(b[i] - '0')
 			dig = true // stay in state
-
 		case ';':
 			if neg {
 				val = -val
@@ -994,7 +893,6 @@ func (t *tScreen) parseSgrMouse(buf *bytes.Buffer) (bool, bool) {
 			default:
 				return false, false
 			}
-
 		case 'm', 'M':
 			if state != 5 {
 				return false, false
@@ -1003,7 +901,6 @@ func (t *tScreen) parseSgrMouse(buf *bytes.Buffer) (bool, bool) {
 				val = -val
 			}
 			y = val - 1
-
 			motion = (btn & 32) != 0
 			btn &^= 32
 			if b[i] == 'm' {
@@ -1035,7 +932,6 @@ func (t *tScreen) parseSgrMouse(buf *bytes.Buffer) (bool, bool) {
 			return true, true
 		}
 	}
-
 	// incomplete & inconclusve at this point
 	return true, false
 }
@@ -1043,14 +939,11 @@ func (t *tScreen) parseSgrMouse(buf *bytes.Buffer) (bool, bool) {
 // parseXtermMouse is like parseSgrMouse, but it parses a legacy
 // X11 mouse record.
 func (t *tScreen) parseXtermMouse(buf *bytes.Buffer) (bool, bool) {
-
 	b := buf.Bytes()
-
 	state := 0
 	btn := 0
 	x := 0
 	y := 0
-
 	for i := range b {
 		switch state {
 		case 0:
@@ -1090,7 +983,6 @@ func (t *tScreen) parseXtermMouse(buf *bytes.Buffer) (bool, bool) {
 	}
 	return true, false
 }
-
 func (t *tScreen) parseFunctionKey(buf *bytes.Buffer) (bool, bool) {
 	b := buf.Bytes()
 	partial := false
@@ -1123,7 +1015,6 @@ func (t *tScreen) parseFunctionKey(buf *bytes.Buffer) (bool, bool) {
 	}
 	return partial, false
 }
-
 func (t *tScreen) parseRune(buf *bytes.Buffer) (bool, bool) {
 	b := buf.Bytes()
 	if b[0] >= ' ' && b[0] <= 0x7F {
@@ -1138,12 +1029,10 @@ func (t *tScreen) parseRune(buf *bytes.Buffer) (bool, bool) {
 		buf.ReadByte()
 		return true, true
 	}
-
 	if b[0] < 0x80 {
 		// Low numbered values are control keys, not runes.
 		return false, false
 	}
-
 	utfb := make([]byte, 12)
 	for l := 1; l <= len(b); l++ {
 		t.decoder.Reset()
@@ -1172,19 +1061,15 @@ func (t *tScreen) parseRune(buf *bytes.Buffer) (bool, bool) {
 	// Looks like potential escape
 	return true, false
 }
-
 func (t *tScreen) scanInput(buf *bytes.Buffer, expire bool) {
-
 	t.Lock()
 	defer t.Unlock()
-
 	for {
 		b := buf.Bytes()
 		if len(b) == 0 {
 			buf.Reset()
 			return
 		}
-
 		partials := 0
 		t.Unlock()
 		if part, comp := t.parseRune(buf); comp {
@@ -1194,30 +1079,25 @@ func (t *tScreen) scanInput(buf *bytes.Buffer, expire bool) {
 			partials++
 		}
 		t.Lock()
-
 		if part, comp := t.parseFunctionKey(buf); comp {
 			continue
 		} else if part {
 			partials++
 		}
-
 		// Only parse mouse records if this term claims to have
 		// mouse support
-
 		if t.ti.Mouse != "" {
 			if part, comp := t.parseXtermMouse(buf); comp {
 				continue
 			} else if part {
 				partials++
 			}
-
 			if part, comp := t.parseSgrMouse(buf); comp {
 				continue
 			} else if part {
 				partials++
 			}
 		}
-
 		if partials == 0 || expire {
 			if b[0] == '\x1b' {
 				if len(b) == 1 {
@@ -1244,13 +1124,11 @@ func (t *tScreen) scanInput(buf *bytes.Buffer, expire bool) {
 			t.PostEvent(ev)
 			continue
 		}
-
 		// well we have some partial data, wait until we get
 		// some more
 		break
 	}
 }
-
 func (t *tScreen) mainLoop() {
 	buf := &bytes.Buffer{}
 	for {
@@ -1303,9 +1181,7 @@ func (t *tScreen) mainLoop() {
 		}
 	}
 }
-
 func (t *tScreen) inputLoop() {
-
 	for {
 		chunk := make([]byte, 128)
 		n, e := t.in.Read(chunk)
@@ -1319,7 +1195,6 @@ func (t *tScreen) inputLoop() {
 		t.keychan <- chunk[:n]
 	}
 }
-
 func (t *tScreen) Sync() {
 	t.Lock()
 	t.cx = -1
@@ -1332,30 +1207,24 @@ func (t *tScreen) Sync() {
 	}
 	t.Unlock()
 }
-
 func (t *tScreen) CharacterSet() string {
 	return t.charset
 }
-
 func (t *tScreen) RegisterRuneFallback(orig rune, fallback string) {
 	t.Lock()
 	t.fallback[orig] = fallback
 	t.Unlock()
 }
-
 func (t *tScreen) UnregisterRuneFallback(orig rune) {
 	t.Lock()
 	delete(t.fallback, orig)
 	t.Unlock()
 }
-
 func (t *tScreen) CanDisplay(r rune, checkFallbacks bool) bool {
-
 	if enc := t.encoder; enc != nil {
 		nb := make([]byte, 6)
 		ob := make([]byte, 6)
 		num := utf8.EncodeRune(ob, r)
-
 		enc.Reset()
 		dst, _, err := enc.Transform(nb, ob[:num], true)
 		if dst != 0 && err == nil && nb[0] != '\x1A' {
@@ -1375,16 +1244,13 @@ func (t *tScreen) CanDisplay(r rune, checkFallbacks bool) bool {
 	}
 	return false
 }
-
 func (t *tScreen) HasMouse() bool {
 	return len(t.mouse) != 0
 }
-
 func (t *tScreen) HasKey(k Key) bool {
 	if k == KeyRune {
 		return true
 	}
 	return t.keyexist[k]
 }
-
 func (t *tScreen) Resize(int, int, int, int) {}

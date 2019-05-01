@@ -1,5 +1,4 @@
 // +build windows
-
 // Copyright 2016 The TCell Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,9 +12,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package tcell
-
 import (
 	"errors"
 	"sync"
@@ -23,7 +20,6 @@ import (
 	"unicode/utf16"
 	"unsafe"
 )
-
 type cScreen struct {
 	in         syscall.Handle
 	out        syscall.Handle
@@ -36,22 +32,17 @@ type cScreen struct {
 	style      Style
 	clear      bool
 	fini       bool
-
 	w int
 	h int
-
 	oscreen consoleInfo
 	ocursor cursorInfo
 	oimode  uint32
 	oomode  uint32
 	cells   CellBuffer
 	colors  map[Color]Color
-
 	sync.Mutex
 }
-
 var winLock sync.Mutex
-
 var winPalette = []Color{
 	ColorBlack,
 	ColorMaroon,
@@ -70,7 +61,6 @@ var winPalette = []Color{
 	ColorAqua,
 	ColorWhite,
 }
-
 var winColors = map[Color]Color{
 	ColorBlack:   ColorBlack,
 	ColorMaroon:  ColorMaroon,
@@ -89,9 +79,7 @@ var winColors = map[Color]Color{
 	ColorAqua:    ColorAqua,
 	ColorWhite:   ColorWhite,
 }
-
 var k32 = syscall.NewLazyDLL("kernel32.dll")
-
 // We have to bring in the kernel32.dll directly, so we can get access to some
 // system calls that the core Go API lacks.
 //
@@ -115,24 +103,20 @@ var (
 	procSetConsoleScreenBufferSize = k32.NewProc("SetConsoleScreenBufferSize")
 	procSetConsoleTextAttribute    = k32.NewProc("SetConsoleTextAttribute")
 )
-
 const (
 	w32Infinite    = ^uintptr(0)
 	w32WaitObject0 = uintptr(0)
 )
-
 // NewConsoleScreen returns a Screen for the Windows console associated
 // with the current process.  The Screen makes use of the Windows Console
 // API to display content and read events.
 func NewConsoleScreen() (Screen, error) {
 	return &cScreen{}, nil
 }
-
 func (s *cScreen) Init() error {
 	s.evch = make(chan Event, 256)
 	s.quit = make(chan struct{})
 	s.scandone = make(chan struct{})
-
 	in, e := syscall.Open("CONIN$", syscall.O_RDWR, 0)
 	if e != nil {
 		return e
@@ -144,7 +128,6 @@ func (s *cScreen) Init() error {
 		return e
 	}
 	s.out = out
-
 	cf, _, e := procCreateEvent.Call(
 		uintptr(0),
 		uintptr(1),
@@ -154,9 +137,7 @@ func (s *cScreen) Init() error {
 		return e
 	}
 	s.cancelflag = syscall.Handle(cf)
-
 	s.Lock()
-
 	s.curx = -1
 	s.cury = -1
 	s.style = StyleDefault
@@ -165,7 +146,6 @@ func (s *cScreen) Init() error {
 	s.getOutMode(&s.oomode)
 	s.getInMode(&s.oimode)
 	s.resize()
-
 	s.fini = false
 	s.setInMode(modeResizeEn)
 	s.setOutMode(0)
@@ -173,23 +153,18 @@ func (s *cScreen) Init() error {
 	s.hideCursor()
 	s.Unlock()
 	go s.scanInput()
-
 	return nil
 }
-
 func (s *cScreen) CharacterSet() string {
 	// We are always UTF-16LE on Windows
 	return "UTF-16LE"
 }
-
 func (s *cScreen) EnableMouse() {
 	s.setInMode(modeResizeEn | modeMouseEn | modeExtndFlg)
 }
-
 func (s *cScreen) DisableMouse() {
 	s.setInMode(modeResizeEn)
 }
-
 func (s *cScreen) Fini() {
 	s.Lock()
 	s.style = StyleDefault
@@ -197,7 +172,6 @@ func (s *cScreen) Fini() {
 	s.cury = -1
 	s.fini = true
 	s.Unlock()
-
 	s.setCursorInfo(&s.ocursor)
 	s.setInMode(s.oimode)
 	s.setOutMode(s.oomode)
@@ -207,7 +181,6 @@ func (s *cScreen) Fini() {
 	procSetConsoleTextAttribute.Call(
 		uintptr(s.out),
 		uintptr(s.mapStyle(StyleDefault)))
-
 	close(s.quit)
 	procSetEvent.Call(uintptr(s.cancelflag))
 	// Block until scanInput returns; this prevents a race condition on Win 8+
@@ -216,11 +189,9 @@ func (s *cScreen) Fini() {
 	syscall.Close(s.in)
 	syscall.Close(s.out)
 }
-
 func (s *cScreen) PostEventWait(ev Event) {
 	s.evch <- ev
 }
-
 func (s *cScreen) PostEvent(ev Event) error {
 	select {
 	case s.evch <- ev:
@@ -229,7 +200,6 @@ func (s *cScreen) PostEvent(ev Event) error {
 		return ErrEventQFull
 	}
 }
-
 func (s *cScreen) PollEvent() Event {
 	select {
 	case <-s.quit:
@@ -238,37 +208,30 @@ func (s *cScreen) PollEvent() Event {
 		return ev
 	}
 }
-
 type cursorInfo struct {
 	size    uint32
 	visible uint32
 }
-
 type coord struct {
 	x int16
 	y int16
 }
-
 func (c coord) uintptr() uintptr {
 	// little endian, put x first
 	return uintptr(c.x) | (uintptr(c.y) << 16)
 }
-
 type rect struct {
 	left   int16
 	top    int16
 	right  int16
 	bottom int16
 }
-
 func (s *cScreen) showCursor() {
 	s.setCursorInfo(&cursorInfo{size: 100, visible: 1})
 }
-
 func (s *cScreen) hideCursor() {
 	s.setCursorInfo(&cursorInfo{size: 1, visible: 0})
 }
-
 func (s *cScreen) ShowCursor(x, y int) {
 	s.Lock()
 	if !s.fini {
@@ -278,10 +241,8 @@ func (s *cScreen) ShowCursor(x, y int) {
 	s.doCursor()
 	s.Unlock()
 }
-
 func (s *cScreen) doCursor() {
 	x, y := s.curx, s.cury
-
 	if x < 0 || y < 0 || x >= s.w || y >= s.h {
 		s.setCursorPos(0, 0)
 		s.hideCursor()
@@ -290,22 +251,18 @@ func (s *cScreen) doCursor() {
 		s.showCursor()
 	}
 }
-
 func (s *cScreen) HideCursor() {
 	s.ShowCursor(-1, -1)
 }
-
 type charInfo struct {
 	ch   uint16
 	attr uint16
 }
-
 type inputRecord struct {
 	typ  uint16
 	_    uint16
 	data [16]byte
 }
-
 const (
 	keyEvent    uint16 = 1
 	mouseEvent  uint16 = 2
@@ -313,7 +270,6 @@ const (
 	menuEvent   uint16 = 8  // don't use
 	focusEvent  uint16 = 16 // don't use
 )
-
 type mouseRecord struct {
 	x     int16
 	y     int16
@@ -321,19 +277,16 @@ type mouseRecord struct {
 	mod   uint32
 	flags uint32
 }
-
 const (
 	mouseDoubleClick uint32 = 0x2
 	mouseHWheeled    uint32 = 0x8
 	mouseVWheeled    uint32 = 0x4
 	mouseMoved       uint32 = 0x1
 )
-
 type resizeRecord struct {
 	x int16
 	y int16
 }
-
 type keyRecord struct {
 	isdown int32
 	repeat uint16
@@ -342,7 +295,6 @@ type keyRecord struct {
 	ch     uint16
 	mod    uint32
 }
-
 const (
 	// Constants per Microsoft.  We don't put the modifiers
 	// here.
@@ -392,7 +344,6 @@ const (
 	vkF23    = 0x86
 	vkF24    = 0x87
 )
-
 var vkKeys = map[uint16]Key{
 	vkCancel: KeyCancel,
 	vkBack:   KeyBackspace,
@@ -438,7 +389,6 @@ var vkKeys = map[uint16]Key{
 	vkF23:    KeyF23,
 	vkF24:    KeyF24,
 }
-
 // NB: All Windows platforms are little endian.  We assume this
 // never, ever change.  The following code is endian safe. and does
 // not use unsafe pointers.
@@ -454,7 +404,6 @@ func getu16(v []byte) uint16 {
 func geti16(v []byte) int16 {
 	return int16(getu16(v))
 }
-
 // Convert windows dwControlKeyState to modifier mask
 func mod2mask(cks uint32) ModMask {
 	mm := ModNone
@@ -472,7 +421,6 @@ func mod2mask(cks uint32) ModMask {
 	}
 	return mm
 }
-
 func mrec2btns(mbtns, flags uint32) ButtonMask {
 	btns := ButtonNone
 	if mbtns&0x1 != 0 {
@@ -499,7 +447,6 @@ func mrec2btns(mbtns, flags uint32) ButtonMask {
 	if mbtns&0x80 != 0 {
 		btns |= Button8
 	}
-
 	if flags&mouseVWheeled != 0 {
 		if mbtns&0x80000000 == 0 {
 			btns |= WheelUp
@@ -516,7 +463,6 @@ func mrec2btns(mbtns, flags uint32) ButtonMask {
 	}
 	return btns
 }
-
 func (s *cScreen) getConsoleInput() error {
 	// cancelFlag comes first as WaitForMultipleObjects returns the lowest index
 	// in the event that both events are signalled.
@@ -524,7 +470,6 @@ func (s *cScreen) getConsoleInput() error {
 	// As arrays are contiguous in memory, a pointer to the first object is the
 	// same as a pointer to the array itself.
 	pWaitObjects := unsafe.Pointer(&waitObjects[0])
-
 	rv, _, er := procWaitForMultipleObjects.Call(
 		uintptr(len(waitObjects)),
 		uintptr(pWaitObjects),
@@ -557,7 +502,6 @@ func (s *cScreen) getConsoleInput() error {
 			krec.scode = getu16(rec.data[8:])
 			krec.ch = getu16(rec.data[10:])
 			krec.mod = getu32(rec.data[12:])
-
 			if krec.isdown == 0 || krec.repeat < 1 {
 				// its a key release event, ignore it
 				return nil
@@ -587,7 +531,6 @@ func (s *cScreen) getConsoleInput() error {
 					mod2mask(krec.mod)))
 				krec.repeat--
 			}
-
 		case mouseEvent:
 			var mrec mouseRecord
 			mrec.x = geti16(rec.data[0:])
@@ -599,22 +542,18 @@ func (s *cScreen) getConsoleInput() error {
 			// we ignore double click, events are delivered normally
 			s.PostEvent(NewEventMouse(int(mrec.x), int(mrec.y), btns,
 				mod2mask(mrec.mod)))
-
 		case resizeEvent:
 			var rrec resizeRecord
 			rrec.x = geti16(rec.data[0:])
 			rrec.y = geti16(rec.data[2:])
 			s.PostEvent(NewEventResize(int(rrec.x), int(rrec.y)))
-
 		default:
 		}
 	default:
 		return er
 	}
-
 	return nil
 }
-
 func (s *cScreen) scanInput() {
 	for {
 		if e := s.getConsoleInput(); e != nil {
@@ -623,12 +562,10 @@ func (s *cScreen) scanInput() {
 		}
 	}
 }
-
 // Windows console can display 8 characters, in either low or high intensity
 func (s *cScreen) Colors() int {
 	return 16
 }
-
 var vgaColors = map[Color]uint16{
 	ColorBlack:   0,
 	ColorMaroon:  0x4,
@@ -647,7 +584,6 @@ var vgaColors = map[Color]uint16{
 	ColorAqua:    0xb,
 	ColorWhite:   0xf,
 }
-
 // Windows uses RGB signals
 func mapColor2RGB(c Color) uint16 {
 	winLock.Lock()
@@ -659,13 +595,11 @@ func mapColor2RGB(c Color) uint16 {
 		c = v
 	}
 	winLock.Unlock()
-
 	if vc, ok := vgaColors[c]; ok {
 		return vc
 	}
 	return 0
 }
-
 // Map a tcell style to Windows attributes
 func (s *cScreen) mapStyle(style Style) uint16 {
 	f, b, a := style.Decompose()
@@ -701,7 +635,6 @@ func (s *cScreen) mapStyle(style Style) uint16 {
 	// Blink is unsupported
 	return attr
 }
-
 func (s *cScreen) SetCell(x, y int, style Style, ch ...rune) {
 	if len(ch) > 0 {
 		s.SetContent(x, y, ch[0], ch[1:], style)
@@ -709,7 +642,6 @@ func (s *cScreen) SetCell(x, y int, style Style, ch ...rune) {
 		s.SetContent(x, y, ' ', nil, style)
 	}
 }
-
 func (s *cScreen) SetContent(x, y int, mainc rune, combc []rune, style Style) {
 	s.Lock()
 	if !s.fini {
@@ -717,14 +649,12 @@ func (s *cScreen) SetContent(x, y int, mainc rune, combc []rune, style Style) {
 	}
 	s.Unlock()
 }
-
 func (s *cScreen) GetContent(x, y int) (rune, []rune, Style, int) {
 	s.Lock()
 	mainc, combc, style, width := s.cells.GetContent(x, y)
 	s.Unlock()
 	return mainc, combc, style, width
 }
-
 func (s *cScreen) writeString(x, y int, style Style, ch []uint16) {
 	// we assume the caller has hidden the cursor
 	if len(ch) == 0 {
@@ -737,7 +667,6 @@ func (s *cScreen) writeString(x, y int, style Style, ch []uint16) {
 	s.setCursorPos(x, y)
 	syscall.WriteConsole(s.out, &ch[0], nw, &nw, nil)
 }
-
 func (s *cScreen) draw() {
 	// allocate a scratch line bit enough for no combining chars.
 	// if you have combining characters, you may pay for extra allocs.
@@ -749,10 +678,8 @@ func (s *cScreen) draw() {
 	buf := make([]uint16, 0, s.w)
 	wcs := buf[:]
 	lstyle := Style(-1) // invalid attribute
-
 	lx, ly := -1, -1
 	ra := make([]rune, 1)
-
 	for y := 0; y < int(s.h); y++ {
 		for x := 0; x < int(s.w); x++ {
 			mainc, combc, style, width := s.cells.GetContent(x, y)
@@ -760,7 +687,6 @@ func (s *cScreen) draw() {
 			if style == StyleDefault {
 				style = s.style
 			}
-
 			if !dirty || style != lstyle {
 				// write out any data queued thus far
 				// because we are going to skip over some
@@ -795,7 +721,6 @@ func (s *cScreen) draw() {
 		lstyle = Style(-1)
 	}
 }
-
 func (s *cScreen) Show() {
 	s.Lock()
 	if !s.fini {
@@ -806,7 +731,6 @@ func (s *cScreen) Show() {
 	}
 	s.Unlock()
 }
-
 func (s *cScreen) Sync() {
 	s.Lock()
 	if !s.fini {
@@ -818,7 +742,6 @@ func (s *cScreen) Sync() {
 	}
 	s.Unlock()
 }
-
 type consoleInfo struct {
 	size  coord
 	pos   coord
@@ -826,75 +749,59 @@ type consoleInfo struct {
 	win   rect
 	maxsz coord
 }
-
 func (s *cScreen) getConsoleInfo(info *consoleInfo) {
 	procGetConsoleScreenBufferInfo.Call(
 		uintptr(s.out),
 		uintptr(unsafe.Pointer(info)))
 }
-
 func (s *cScreen) getCursorInfo(info *cursorInfo) {
 	procGetConsoleCursorInfo.Call(
 		uintptr(s.out),
 		uintptr(unsafe.Pointer(info)))
 }
-
 func (s *cScreen) setCursorInfo(info *cursorInfo) {
 	procSetConsoleCursorInfo.Call(
 		uintptr(s.out),
 		uintptr(unsafe.Pointer(info)))
 }
-
 func (s *cScreen) setCursorPos(x, y int) {
 	procSetConsoleCursorPosition.Call(
 		uintptr(s.out),
 		coord{int16(x), int16(y)}.uintptr())
 }
-
 func (s *cScreen) setBufferSize(x, y int) {
 	procSetConsoleScreenBufferSize.Call(
 		uintptr(s.out),
 		coord{int16(x), int16(y)}.uintptr())
 }
-
 func (s *cScreen) Size() (int, int) {
 	s.Lock()
 	w, h := s.w, s.h
 	s.Unlock()
-
 	return w, h
 }
-
 func (s *cScreen) resize() {
 	info := consoleInfo{}
 	s.getConsoleInfo(&info)
-
 	w := int((info.win.right - info.win.left) + 1)
 	h := int((info.win.bottom - info.win.top) + 1)
-
 	if s.w == w && s.h == h {
 		return
 	}
-
 	s.cells.Resize(w, h)
 	s.w = w
 	s.h = h
-
 	r := rect{0, 0, int16(w - 1), int16(h - 1)}
 	procSetConsoleWindowInfo.Call(
 		uintptr(s.out),
 		uintptr(1),
 		uintptr(unsafe.Pointer(&r)))
-
 	s.setBufferSize(w, h)
-
 	s.PostEvent(NewEventResize(w, h))
 }
-
 func (s *cScreen) Clear() {
 	s.Fill(' ', s.style)
 }
-
 func (s *cScreen) Fill(r rune, style Style) {
 	s.Lock()
 	if !s.fini {
@@ -903,14 +810,12 @@ func (s *cScreen) Fill(r rune, style Style) {
 	}
 	s.Unlock()
 }
-
 func (s *cScreen) clearScreen(style Style) {
 	pos := coord{0, 0}
 	attr := s.mapStyle(style)
 	x, y := s.w, s.h
 	scratch := uint32(0)
 	count := uint32(x * y)
-
 	procFillConsoleOutputAttribute.Call(
 		uintptr(s.out),
 		uintptr(attr),
@@ -924,7 +829,6 @@ func (s *cScreen) clearScreen(style Style) {
 		pos.uintptr(),
 		uintptr(unsafe.Pointer(&scratch)))
 }
-
 const (
 	modeExtndFlg uint32 = 0x0080
 	modeMouseEn  uint32 = 0x0010
@@ -932,7 +836,6 @@ const (
 	modeWrapEOL  uint32 = 0x0002
 	modeCooked   uint32 = 0x0001
 )
-
 func (s *cScreen) setInMode(mode uint32) error {
 	rv, _, err := procSetConsoleMode.Call(
 		uintptr(s.in),
@@ -942,7 +845,6 @@ func (s *cScreen) setInMode(mode uint32) error {
 	}
 	return nil
 }
-
 func (s *cScreen) setOutMode(mode uint32) error {
 	rv, _, err := procSetConsoleMode.Call(
 		uintptr(s.out),
@@ -952,46 +854,36 @@ func (s *cScreen) setOutMode(mode uint32) error {
 	}
 	return nil
 }
-
 func (s *cScreen) getInMode(v *uint32) {
 	procGetConsoleMode.Call(
 		uintptr(s.in),
 		uintptr(unsafe.Pointer(v)))
 }
-
 func (s *cScreen) getOutMode(v *uint32) {
 	procGetConsoleMode.Call(
 		uintptr(s.out),
 		uintptr(unsafe.Pointer(v)))
 }
-
 func (s *cScreen) SetStyle(style Style) {
 	s.Lock()
 	s.style = style
 	s.Unlock()
 }
-
 // No fallback rune support, since we have Unicode.  Yay!
-
 func (s *cScreen) RegisterRuneFallback(r rune, subst string) {
 }
-
 func (s *cScreen) UnregisterRuneFallback(r rune) {
 }
-
 func (s *cScreen) CanDisplay(r rune, checkFallbacks bool) bool {
 	// We presume we can display anything -- we're Unicode.
 	// (Sadly this not precisely true.  Combinings are especially
 	// poorly supported under Windows.)
 	return true
 }
-
 func (s *cScreen) HasMouse() bool {
 	return true
 }
-
 func (s *cScreen) Resize(int, int, int, int) {}
-
 func (s *cScreen) HasKey(k Key) bool {
 	// Microsoft has codes for some keys, but they are unusual,
 	// so we don't include them.  We include all the typical
@@ -1027,6 +919,5 @@ func (s *cScreen) HasKey(k Key) bool {
 		KeyF12:       true,
 		KeyRune:      true,
 	}
-
 	return valid[k]
 }

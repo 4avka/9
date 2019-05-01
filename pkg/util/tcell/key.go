@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package tcell
 
 import (
@@ -218,7 +217,6 @@ func (ev *EventKey) Name() string {
 	if ev.mod&ModCtrl != 0 {
 		m = append(m, "Ctrl")
 	}
-
 	ok := false
 	if s, ok = KeyNames[ev.key]; !ok {
 		if ev.key == KeyRune {
@@ -414,7 +412,6 @@ const (
 
 // Special values - these are fixed in an attempt to make it more likely
 // that aliases will encode the same way.
-
 // These are the defined ASCII values for key codes.  They generally match
 // with KeyCtrl values.
 const (

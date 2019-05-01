@@ -11,16 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package tcell
-
 import (
 	"testing"
 	"time"
-
 	. "github.com/smartystreets/goconvey/convey"
 )
-
 func eventLoop(s SimulationScreen, evch chan Event) {
 	for {
 		ev := s.PollEvent()
@@ -34,24 +30,19 @@ func eventLoop(s SimulationScreen, evch chan Event) {
 		}
 	}
 }
-
 func TestMouseEvents(t *testing.T) {
-
 	Convey("Mouse events", t, WithScreen(t, "", func(s SimulationScreen) {
-
 		Convey("Size should be valid", func() {
 			x, y := s.Size()
 			So(x, ShouldEqual, 80)
 			So(y, ShouldEqual, 25)
 		})
-
 		s.EnableMouse()
 		s.InjectMouse(4, 9, Button1, ModCtrl)
 		evch := make(chan Event)
 		em := &EventMouse{}
 		done := false
 		go eventLoop(s, evch)
-
 		for !done {
 			select {
 			case ev := <-evch:
@@ -73,5 +64,4 @@ func TestMouseEvents(t *testing.T) {
 			So(em.Modifiers(), ShouldEqual, ModCtrl)
 		})
 	}))
-
 }

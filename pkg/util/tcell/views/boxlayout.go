@@ -11,13 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package views
-
 import (
 	"git.parallelcoin.io/dev/9/pkg/util/tcell"
 )
-
 // BoxLayout is a container Widget that lays out its child widgets in
 // either a horizontal row or a vertical column.
 type BoxLayout struct {
@@ -28,10 +25,8 @@ type BoxLayout struct {
 	width   int
 	height  int
 	changed bool
-
 	WidgetWatchers
 }
-
 type boxLayoutCell struct {
 	widget Widget
 	fill   float64 // fill factor - 0.0 means no expansion
@@ -39,10 +34,8 @@ type boxLayoutCell struct {
 	frac   float64 // calculated residual spacing, used internally
 	view   *ViewPort
 }
-
 func (b *BoxLayout) hLayout() {
 	w, h := b.view.Size()
-
 	totf := 0.0
 	for _, c := range b.cells {
 		x, y := c.widget.Size()
@@ -54,7 +47,6 @@ func (b *BoxLayout) hLayout() {
 		c.pad = 0
 		c.frac = 0
 	}
-
 	extra := w - b.width
 	if extra < 0 {
 		extra = 0
@@ -63,7 +55,6 @@ func (b *BoxLayout) hLayout() {
 	if totf == 0 {
 		resid = 0
 	}
-
 	for _, c := range b.cells {
 		if c.fill > 0 {
 			c.frac = float64(extra) * c.fill / totf
@@ -72,7 +63,6 @@ func (b *BoxLayout) hLayout() {
 			resid -= c.pad
 		}
 	}
-
 	// Distribute any left over padding.  We try to give it to the
 	// the cells with the highest residual fraction.  It should be
 	// the case that no single cell gets more than one more cell.
@@ -90,23 +80,18 @@ func (b *BoxLayout) hLayout() {
 		best.frac = 0
 		resid--
 	}
-
 	x, y, xinc := 0, 0, 0
 	for _, c := range b.cells {
 		cw, _ := c.widget.Size()
-
 		xinc = cw + c.pad
 		cw += c.pad
-
 		c.view.Resize(x, y, cw, h)
 		c.widget.Resize()
 		x += xinc
 	}
 }
-
 func (b *BoxLayout) vLayout() {
 	w, h := b.view.Size()
-
 	totf := 0.0
 	for _, c := range b.cells {
 		x, y := c.widget.Size()
@@ -118,17 +103,14 @@ func (b *BoxLayout) vLayout() {
 		c.pad = 0
 		c.frac = 0
 	}
-
 	extra := h - b.height
 	if extra < 0 {
 		extra = 0
 	}
-
 	resid := extra
 	if totf == 0 {
 		resid = 0
 	}
-
 	for _, c := range b.cells {
 		if c.fill > 0 {
 			c.frac = float64(extra) * c.fill / totf
@@ -137,7 +119,6 @@ func (b *BoxLayout) vLayout() {
 			resid -= c.pad
 		}
 	}
-
 	// Distribute any left over padding.  We try to give it to the
 	// the cells with the highest residual fraction.  It should be
 	// the case that no single cell gets more than one more cell.
@@ -155,11 +136,9 @@ func (b *BoxLayout) vLayout() {
 		best.frac = 0
 		resid--
 	}
-
 	x, y, yinc := 0, 0, 0
 	for _, c := range b.cells {
 		_, ch := c.widget.Size()
-
 		yinc = ch + c.pad
 		ch += c.pad
 		c.view.Resize(x, y, w, ch)
@@ -167,7 +146,6 @@ func (b *BoxLayout) vLayout() {
 		y += yinc
 	}
 }
-
 func (b *BoxLayout) layout() {
 	if b.view == nil {
 		return
@@ -183,21 +161,17 @@ func (b *BoxLayout) layout() {
 	}
 	b.changed = false
 }
-
 // Resize adjusts the layout when the underlying View changes size.
 func (b *BoxLayout) Resize() {
 	b.layout()
-
 	// Now also let the children know we resized.
 	for i := range b.cells {
 		b.cells[i].widget.Resize()
 	}
 	b.PostEventWidgetResize(b)
 }
-
 // Draw is called to update the displayed content.
 func (b *BoxLayout) Draw() {
-
 	if b.view == nil {
 		return
 	}
@@ -215,12 +189,10 @@ func (b *BoxLayout) Draw() {
 		b.cells[i].widget.Draw()
 	}
 }
-
 // Size returns the preferred size in character cells (width, height).
 func (b *BoxLayout) Size() (int, int) {
 	return b.width, b.height
 }
-
 // SetView sets the View object used for the text bar.
 func (b *BoxLayout) SetView(view View) {
 	b.changed = true
@@ -229,7 +201,6 @@ func (b *BoxLayout) SetView(view View) {
 		c.view.SetView(view)
 	}
 }
-
 // HandleEvent implements a tcell.EventHandler.  The only events
 // we care about are Widget change events from our children. We
 // watch for those so that if the child changes, we can arrange
@@ -249,7 +220,6 @@ func (b *BoxLayout) HandleEvent(ev tcell.Event) bool {
 	}
 	return false
 }
-
 // AddWidget adds a widget to the end of the BoxLayout.
 func (b *BoxLayout) AddWidget(widget Widget, fill float64) {
 	c := &boxLayoutCell{
@@ -264,7 +234,6 @@ func (b *BoxLayout) AddWidget(widget Widget, fill float64) {
 	b.layout()
 	b.PostEventWidgetContent(b)
 }
-
 // InsertWidget inserts a widget at the given offset.  Offset 0 is the
 // front.  If the index is longer than the number of widgets, then it
 // just gets appended to the end.
@@ -288,7 +257,6 @@ func (b *BoxLayout) InsertWidget(index int, widget Widget, fill float64) {
 	b.layout()
 	b.PostEventWidgetContent(b)
 }
-
 // RemoveWidget removes a Widget from the layout.
 func (b *BoxLayout) RemoveWidget(widget Widget) {
 	changed := false
@@ -306,7 +274,6 @@ func (b *BoxLayout) RemoveWidget(widget Widget) {
 	b.layout()
 	b.PostEventWidgetContent(b)
 }
-
 // Widgets returns the list of Widgets for this BoxLayout.
 func (b *BoxLayout) Widgets() []Widget {
 	w := make([]Widget, 0, len(b.cells))
@@ -315,7 +282,6 @@ func (b *BoxLayout) Widgets() []Widget {
 	}
 	return w
 }
-
 // SetOrientation sets the orientation as either Horizontal or Vertical.
 func (b *BoxLayout) SetOrientation(orient Orientation) {
 	if b.orient != orient {
@@ -324,13 +290,11 @@ func (b *BoxLayout) SetOrientation(orient Orientation) {
 		b.PostEventWidgetContent(b)
 	}
 }
-
 // SetStyle sets the style used.
 func (b *BoxLayout) SetStyle(style tcell.Style) {
 	b.style = style
 	b.PostEventWidgetContent(b)
 }
-
 // NewBoxLayout creates an empty BoxLayout.
 func NewBoxLayout(orient Orientation) *BoxLayout {
 	return &BoxLayout{orient: orient}

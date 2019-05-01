@@ -11,22 +11,16 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package tcell
-
 import (
 	"strings"
 	"sync"
-
 	"golang.org/x/text/encoding"
-
 	gencoding "github.com/gdamore/encoding"
 )
-
 var encodings map[string]encoding.Encoding
 var encodingLk sync.Mutex
 var encodingFallback EncodingFallback = EncodingFallbackFail
-
 // RegisterEncoding may be called by the application to register an encoding.
 // The presence of additional encodings will facilitate application usage with
 // terminal environments where the I/O subsystem does not support Unicode.
@@ -74,7 +68,6 @@ func RegisterEncoding(charset string, enc encoding.Encoding) {
 	encodings[charset] = enc
 	encodingLk.Unlock()
 }
-
 // EncodingFallback describes how the system behavees when the locale
 // requires a character set that we do not support.  The system always
 // supports UTF-8 and US-ASCII. On Windows consoles, UTF-16LE is also
@@ -82,23 +75,19 @@ func RegisterEncoding(charset string, enc encoding.Encoding) {
 // RegisterEncoding API.  (A large group of nearly all of them can be
 // added using the RegisterAll function in the encoding sub package.)
 type EncodingFallback int
-
 const (
 	// EncodingFallbackFail behavior causes GetEncoding to fail
 	// when it cannot find an encoding.
 	EncodingFallbackFail = iota
-
 	// EncodingFallbackASCII behaviore causes GetEncoding to fall back
 	// to a 7-bit ASCII encoding, if no other encoding can be found.
 	EncodingFallbackASCII
-
 	// EncodingFallbackUTF8 behavior causes GetEncoding to assume
 	// UTF8 can pass unmodified upon failure.  Note that this behavior
 	// is not recommended, unless you are sure your terminal can cope
 	// with real UTF8 sequences.
 	EncodingFallbackUTF8
 )
-
 // SetEncodingFallback changes the behavior of GetEncoding when a suitable
 // encoding is not found.  The default is EncodingFallbackFail, which
 // causes GetEncoding to simply return nil.
@@ -107,7 +96,6 @@ func SetEncodingFallback(fb EncodingFallback) {
 	encodingFallback = fb
 	encodingLk.Unlock()
 }
-
 // GetEncoding is used by Screen implementors who want to locate an encoding
 // for the given character set name.  Note that this will return nil for
 // either the Unicode (UTF-8) or ASCII encodings, since we don't use
@@ -127,7 +115,6 @@ func GetEncoding(charset string) encoding.Encoding {
 	}
 	return nil
 }
-
 func init() {
 	// We always support UTF-8 and ASCII.
 	encodings = make(map[string]encoding.Encoding)

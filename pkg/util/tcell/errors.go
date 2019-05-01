@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package tcell
 
 import (
@@ -30,7 +29,6 @@ var (
 	// whereas the slightly newer "adm3a" supports it.  This failure
 	// occurs most often with "dumb".
 	ErrTermNotFound = terminfo.ErrTermNotFound
-
 	// ErrNoScreen indicates that no suitable screen could be found.
 	// This may result from attempting to run on a platform where there
 	// is no support for either termios or console I/O (such as nacl),
@@ -38,13 +36,11 @@ var (
 	// a suitable console/terminal device.  (For example, running on
 	// without a controlling TTY or with no /dev/tty on POSIX platforms.)
 	ErrNoScreen = errors.New("no suitable screen available")
-
 	// ErrNoCharset indicates that the locale environment the
 	// program is not supported by the program, because no suitable
 	// encoding was found for it.  This problem never occurs if
 	// the environment is UTF-8 or UTF-16.
 	ErrNoCharset = errors.New("character set not supported")
-
 	// ErrEventQFull indicates that the event queue is full, and
 	// cannot accept more events.
 	ErrEventQFull = errors.New("event queue full")

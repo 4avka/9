@@ -1,5 +1,4 @@
 // +build freebsd netbsd openbsd dragonfly
-
 // Copyright 2018 The TCell Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +12,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package tcell
 
 import (
@@ -32,14 +30,12 @@ func (t *tScreen) termioInit() error {
 	var tios uintptr
 	var ioc uintptr
 	t.tiosp = &termiosPrivate{}
-
 	if t.in, e = os.OpenFile("/dev/tty", os.O_RDONLY, 0); e != nil {
 		goto failed
 	}
 	if t.out, e = os.OpenFile("/dev/tty", os.O_WRONLY, 0); e != nil {
 		goto failed
 	}
-
 	tios = uintptr(unsafe.Pointer(t.tiosp))
 	ioc = uintptr(syscall.TIOCGETA)
 	fd = uintptr(t.out.Fd())
@@ -47,7 +43,6 @@ func (t *tScreen) termioInit() error {
 		e = e1
 		goto failed
 	}
-
 	// On this platform (FreeBSD and family), the baud rate is stored
 	// directly as an integer in termios.c_ospeed.  No bitmasking required.
 	t.baud = int(t.tiosp.Ospeed)
@@ -60,23 +55,17 @@ func (t *tScreen) termioInit() error {
 		syscall.ISIG | syscall.IEXTEN
 	newtios.Cflag &^= syscall.CSIZE | syscall.PARENB
 	newtios.Cflag |= syscall.CS8
-
 	tios = uintptr(unsafe.Pointer(&newtios))
-
 	ioc = uintptr(syscall.TIOCSETA)
 	if _, _, e1 := syscall.Syscall6(syscall.SYS_IOCTL, fd, ioc, tios, 0, 0, 0); e1 != 0 {
 		e = e1
 		goto failed
 	}
-
 	signal.Notify(t.sigwinch, syscall.SIGWINCH)
-
 	if w, h, e := t.getWinSize(); e == nil && w != 0 && h != 0 {
 		t.cells.Resize(w, h)
 	}
-
 	return nil
-
 failed:
 	if t.in != nil {
 		t.in.Close()
@@ -86,13 +75,9 @@ failed:
 	}
 	return e
 }
-
 func (t *tScreen) termioFini() {
-
 	signal.Stop(t.sigwinch)
-
 	<-t.indoneq
-
 	if t.out != nil {
 		fd := uintptr(t.out.Fd())
 		ioc := uintptr(syscall.TIOCSETAF)
@@ -104,9 +89,7 @@ func (t *tScreen) termioFini() {
 		t.in.Close()
 	}
 }
-
 func (t *tScreen) getWinSize() (int, int, error) {
-
 	fd := uintptr(t.out.Fd())
 	dim := [4]uint16{}
 	dimp := uintptr(unsafe.Pointer(&dim))
