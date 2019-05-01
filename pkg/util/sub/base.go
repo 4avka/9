@@ -4,15 +4,15 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"git.parallelcoin.io/dev/9/pkg/util/cl"
 	"hash/crc32"
 	"math/rand"
 	"net"
 	"time"
+
+	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
 
 // Implementations of common parts for node and worker
-
 // NewBase creates a new base listener
 func NewBase(cfg BaseCfg) (b *Base) {
 	log <- cl.Debug{"creating new Base"}
@@ -68,7 +68,6 @@ func (b *Base) Stop() {
 	b.quit <- true
 	b.listener.Close()
 }
-
 func (b *Base) readFromSocket() {
 	log <- cl.Debug{"reading from socket"}
 	for {
@@ -101,7 +100,6 @@ func (b *Base) readFromSocket() {
 		}
 	}
 }
-
 func (b *Base) processPackets() {
 	for {
 		select {
@@ -154,7 +152,6 @@ func (b *Base) processPackets() {
 		}
 	}
 }
-
 func (b *Base) processBundles() {
 	for {
 		select {

@@ -1,12 +1,10 @@
 package votingpool
-
 import (
 	"bytes"
 	walletdb "git.parallelcoin.io/dev/9/pkg/wallet/db"
 	"reflect"
 	"testing"
 )
-
 func TestPutUsedAddrHash(
 	t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)

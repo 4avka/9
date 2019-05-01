@@ -20,13 +20,9 @@ type signatureTest struct {
 
 // decodeHex decodes the passed hex string and returns the resulting bytes.  It panics if an error occurs.  This is only used in the tests as a helper since the only way it can fail is if there is an error in the test source code.
 func decodeHex(
-
 	hexStr string) []byte {
-
 	b, err := hex.DecodeString(hexStr)
-
 	if err != nil {
-
 		panic("invalid hex string in test source: err " + err.Error() +
 			", hex: " + hexStr)
 	}
@@ -34,7 +30,6 @@ func decodeHex(
 }
 
 var signatureTests = []signatureTest{
-
 	// signatures from bitcoin blockchain tx 0437cd7f8525ceed2324359c2d0ba26006d92d85
 	{
 		name: "valid signature.",
@@ -294,7 +289,6 @@ var signatureTests = []signatureTest{
 		der:     true,
 		isValid: false,
 	},
-
 	// Standard checks (in BER format, without checking for 'canonical' DER signatures) don't test for negative numbers here because there isn't a way that is the same between openssl and go that will mark a number as negative. The Go ASN.1 parser marks numbers as negative when openssl does not (it doesn't handle negative numbers that I can tell at all. When not parsing DER signatures, which is done by by bitcoind when accepting transactions into its mempool, we otherwise only check for the coordinates being zero.
 	{
 		name: "X == 0",
@@ -321,38 +315,24 @@ var signatureTests = []signatureTest{
 }
 
 func TestSignatures(
-
 	t *testing.T) {
-
 	for _, test := range signatureTests {
-
 		var err error
-
 		if test.der {
-
 			_, err = ParseDERSignature(test.sig, S256())
-
 		} else {
-
 			_, err = ParseSignature(test.sig, S256())
 		}
-
 		if err != nil {
-
 			if test.isValid {
-
 				t.Errorf("%s signature failed when shouldn't %v",
 					test.name, err)
-
 			} /* else {
-
 			t.Errorf("%s got error %v", test.name, err)
 						} */
 			continue
 		}
-
 		if !test.isValid {
-
 			t.Errorf("%s counted as valid when it should fail",
 				test.name)
 		}
@@ -361,9 +341,7 @@ func TestSignatures(
 
 // TestSignatureSerialize ensures that serializing signatures works as expected.
 func TestSignatureSerialize(
-
 	t *testing.T) {
-
 	tests := []struct {
 		name     string
 		ecsig    *Signature
@@ -453,13 +431,9 @@ func TestSignatureSerialize(
 			[]byte{0x30, 0x06, 0x02, 0x01, 0x00, 0x02, 0x01, 0x00},
 		},
 	}
-
 	for i, test := range tests {
-
 		result := test.ecsig.Serialize()
-
 		if !bytes.Equal(result, test.expected) {
-
 			t.Errorf("Serialize #%d (%s) unexpected result:\n"+
 				"got:  %x\nwant: %x", i, test.name, result,
 				test.expected)
@@ -468,67 +442,47 @@ func TestSignatureSerialize(
 }
 func testSignCompact(
 	t *testing.T, tag string, curve *KoblitzCurve,
-
 	data []byte, isCompressed bool) {
-
 	tmp, _ := NewPrivateKey(curve)
 	priv := (*PrivateKey)(tmp)
 	hashed := []byte("testing")
 	sig, err := SignCompact(curve, priv, hashed, isCompressed)
-
 	if err != nil {
-
 		t.Errorf("%s: error signing: %s", tag, err)
 		return
 	}
 	pk, wasCompressed, err := RecoverCompact(curve, sig, hashed)
-
 	if err != nil {
-
 		t.Errorf("%s: error recovering: %s", tag, err)
 		return
 	}
-
 	if pk.X.Cmp(priv.X) != 0 || pk.Y.Cmp(priv.Y) != 0 {
-
 		t.Errorf("%s: recovered pubkey doesn't match original "+
 			"(%v,%v) vs (%v,%v) ", tag, pk.X, pk.Y, priv.X, priv.Y)
 		return
 	}
-
 	if wasCompressed != isCompressed {
-
 		t.Errorf("%s: recovered pubkey doesn't match compressed state "+
 			"(%v vs %v)", tag, isCompressed, wasCompressed)
 		return
 	}
-
 	// If we change the compressed bit we should get the same key back, but the compressed flag should be reversed.
-
 	if isCompressed {
-
 		sig[0] -= 4
-
 	} else {
-
 		sig[0] += 4
 	}
 	pk, wasCompressed, err = RecoverCompact(curve, sig, hashed)
-
 	if err != nil {
-
 		t.Errorf("%s: error recovering (2): %s", tag, err)
 		return
 	}
-
 	if pk.X.Cmp(priv.X) != 0 || pk.Y.Cmp(priv.Y) != 0 {
 		t.Errorf("%s: recovered pubkey (2) doesn't match original "+
 			"(%v,%v) vs (%v,%v) ", tag, pk.X, pk.Y, priv.X, priv.Y)
 		return
 	}
-
 	if wasCompressed == isCompressed {
-
 		t.Errorf("%s: recovered pubkey doesn't match reversed "+
 			"compressed state (%v vs %v)", tag, isCompressed,
 			wasCompressed)
@@ -536,17 +490,12 @@ func testSignCompact(
 	}
 }
 func TestSignCompact(
-
 	t *testing.T) {
-
 	for i := 0; i < 256; i++ {
-
 		name := fmt.Sprintf("test %d", i)
 		data := make([]byte, 32)
 		_, err := rand.Read(data)
-
 		if err != nil {
-
 			t.Errorf("failed to read random data for %s", name)
 			continue
 		}
@@ -556,7 +505,6 @@ func TestSignCompact(
 }
 
 // recoveryTests assert basic tests for public key recovery from signatures. The cases are borrowed from github.com/fjl/btcec-issue.
-
 var recoveryTests = []struct {
 	msg string
 	sig string
@@ -584,20 +532,15 @@ var recoveryTests = []struct {
 }
 
 func TestRecoverCompact(
-
 	t *testing.T) {
-
 	for i, test := range recoveryTests {
-
 		msg := decodeHex(test.msg)
 		sig := decodeHex(test.sig)
 		// Magic DER constant.
 		sig[0] += 27
 		pub, _, err := RecoverCompact(S256(), sig, msg)
 		// Verify that returned error matches as expected.
-
 		if !reflect.DeepEqual(test.err, err) {
-
 			t.Errorf("unexpected error returned from pubkey "+
 				"recovery #%d: wanted %v, got %v",
 				i, test.err, err)
@@ -605,31 +548,22 @@ func TestRecoverCompact(
 		}
 		// If check succeeded because a proper error was returned, we
 		// ignore the returned pubkey.
-
 		if err != nil {
-
 			continue
 		}
 		// Otherwise, ensure the correct public key was recovered.
 		exPub, _ := ParsePubKey(decodeHex(test.pub), S256())
-
 		if !exPub.IsEqual(pub) {
-
 			t.Errorf("unexpected recovered public key #%d: "+
 				"want %v, got %v", i, exPub, pub)
 		}
 	}
 }
 func TestRFC6979(
-
 	t *testing.T) {
-
 	// Test vectors matching Trezor and CoreBitcoin implementations.
-
 	// - https://github.com/trezor/trezor-crypto/blob/9fea8f8ab377dc514e40c6fd1f7c89a74c1d8dc6/tests.c#L432-L453
-
 	// - https://github.com/oleganza/CoreBitcoin/blob/e93dd71207861b5bf044415db5fa72405e7d8fbc/CoreBitcoin/BTCKey%2BTests.m#L23-L49
-
 	tests := []struct {
 		key       string
 		msg       string
@@ -674,17 +608,13 @@ func TestRFC6979(
 			"3045022100b552edd27580141f3b2a5463048cb7cd3e047b97c9f98076c32dbdf85a68718b0220279fa72dd19bfae05577e06c7c0c1900c371fcd5893f7e1d56a37d30174671f6",
 		},
 	}
-
 	for i, test := range tests {
-
 		privKey, _ := PrivKeyFromBytes(S256(), decodeHex(test.key))
 		hash := sha256.Sum256([]byte(test.msg))
 		// Ensure deterministically generated nonce is the expected value.
 		gotNonce := nonceRFC6979(privKey.D, hash[:]).Bytes()
 		wantNonce := decodeHex(test.nonce)
-
 		if !bytes.Equal(gotNonce, wantNonce) {
-
 			t.Errorf("NonceRFC6979 #%d (%s): Nonce is incorrect: "+
 				"%x (expected %x)", i, test.msg, gotNonce,
 				wantNonce)
@@ -692,18 +622,14 @@ func TestRFC6979(
 		}
 		// Ensure deterministically generated signature is the expected value.
 		gotSig, err := privKey.Sign(hash[:])
-
 		if err != nil {
-
 			t.Errorf("Sign #%d (%s): unexpected error: %v", i,
 				test.msg, err)
 			continue
 		}
 		gotSigBytes := gotSig.Serialize()
 		wantSigBytes := decodeHex(test.signature)
-
 		if !bytes.Equal(gotSigBytes, wantSigBytes) {
-
 			t.Errorf("Sign #%d (%s): mismatched signature: %x "+
 				"(expected %x)", i, test.msg, gotSigBytes,
 				wantSigBytes)
@@ -712,9 +638,7 @@ func TestRFC6979(
 	}
 }
 func TestSignatureIsEqual(
-
 	t *testing.T) {
-
 	sig1 := &Signature{
 		R: fromHex("0082235e21a2300022738dabb8e1bbd9d19cfb1e7ab8c30a23b0afbb8d178abcf3"),
 		S: fromHex("24bf68e256c534ddfaf966bf908deb944305596f7bdcc38d69acad7f9c868724"),
@@ -723,15 +647,11 @@ func TestSignatureIsEqual(
 		R: fromHex("4e45e16932b8af514961a1d3a1a25fdf3f4f7732e9d624c6c61548ab5fb8cd41"),
 		S: fromHex("181522ec8eca07de4860a4acdd12909d831cc56cbbac4622082221a8768d1d09"),
 	}
-
 	if !sig1.IsEqual(sig1) {
-
 		t.Fatalf("value of IsEqual is incorrect, %v is "+
 			"equal to %v", sig1, sig1)
 	}
-
 	if sig1.IsEqual(sig2) {
-
 		t.Fatalf("value of IsEqual is incorrect, %v is not "+
 			"equal to %v", sig1, sig2)
 	}

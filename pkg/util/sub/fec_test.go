@@ -27,7 +27,6 @@ func TestPadData(t *testing.T) {
 			actualUnaligned, expectedUnaligned)
 	}
 }
-
 func TestFECCodec(t *testing.T) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -50,7 +49,6 @@ func TestFECCodec(t *testing.T) {
 	dataLen := binary.LittleEndian.Uint16(data1)
 	result := data1[2 : dataLen+2]
 	// t.Log(result)
-
 	dataString := hex.EncodeToString(data1[2 : dataLen+2])
 	resultString := hex.EncodeToString(result)
 	// t.Log(dataString)

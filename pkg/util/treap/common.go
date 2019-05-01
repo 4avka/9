@@ -18,7 +18,6 @@ var (
 )
 
 // treapNode represents a node in the treap.
-
 type treapNode struct {
 	key      []byte
 	value    []byte
@@ -29,22 +28,17 @@ type treapNode struct {
 
 // nodeSize returns the number of bytes the specified node occupies including the struct fields and the contents of the key and value.
 func nodeSize(
-
 	node *treapNode) uint64 {
-
 	return nodeFieldsSize + uint64(len(node.key)+len(node.value))
 }
 
 // newTreapNode returns a new node from the given key, value, and priority.  The node is not initially linked to any others.
 func newTreapNode(
-
 	key, value []byte, priority int) *treapNode {
-
 	return &treapNode{key: key, value: value, priority: priority}
 }
 
 // parentStack represents a stack of parent treap nodes that are used during iteration.  It consists of a static array for holding the parents and a dynamic overflow slice.  It is extremely unlikely the overflow will ever be hit during normal operation, however, since a treap's height is probabilistic, the overflow case needs to be handled properly.  This approach is used because it is much more efficient for the majority case than dynamically allocating heap space every time the treap is iterated.
-
 type parentStack struct {
 	index    int
 	items    [staticDepth]*treapNode
@@ -53,22 +47,16 @@ type parentStack struct {
 
 // Len returns the current number of items in the stack.
 func (s *parentStack) Len() int {
-
 	return s.index
 }
 
 // At returns the item n number of items from the top of the stack, where 0 is the topmost item, without removing it.  It returns nil if n exceeds the number of items on the stack.
 func (s *parentStack) At(n int) *treapNode {
-
 	index := s.index - n - 1
-
 	if index < 0 {
-
 		return nil
 	}
-
 	if index < staticDepth {
-
 		return s.items[index]
 	}
 	return s.overflow[index-staticDepth]
@@ -76,15 +64,11 @@ func (s *parentStack) At(n int) *treapNode {
 
 // Pop removes the top item from the stack.  It returns nil if the stack is empty.
 func (s *parentStack) Pop() *treapNode {
-
 	if s.index == 0 {
-
 		return nil
 	}
 	s.index--
-
 	if s.index < staticDepth {
-
 		node := s.items[s.index]
 		s.items[s.index] = nil
 		return node
@@ -96,18 +80,14 @@ func (s *parentStack) Pop() *treapNode {
 
 // Push pushes the passed item onto the top of the stack.
 func (s *parentStack) Push(node *treapNode) {
-
 	if s.index < staticDepth {
-
 		s.items[s.index] = node
 		s.index++
 		return
 	}
 	// This approach is used over append because reslicing the slice to pop the item causes the compiler to make unneeded allocations.  Also, since the max number of items is related to the tree depth which requires expontentially more items to increase, only increase the cap one item at a time.  This is more intelligent than the generic append expansion algorithm which often doubles the cap.
 	index := s.index - staticDepth
-
 	if index+1 > cap(s.overflow) {
-
 		overflow := make([]*treapNode, index+1)
 		copy(overflow, s.overflow)
 		s.overflow = overflow
@@ -116,6 +96,5 @@ func (s *parentStack) Push(node *treapNode) {
 	s.index++
 }
 func init() {
-
 	rand.Seed(time.Now().UnixNano())
 }

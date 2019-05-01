@@ -15,7 +15,6 @@
  */
 // Helpers to create parameterized objects to use in tests.
 package votingpool
-
 import (
 	"bytes"
 	chaincfg "git.parallelcoin.io/dev/9/pkg/chain/config"
@@ -34,7 +33,6 @@ import (
 	"testing"
 	"time"
 )
-
 var (
 	// seed is the master seed used to create extended keys.
 	seed           = bytes.Repeat([]byte{0x2a, 0x64, 0xdf, 0x08}, 8)
@@ -44,11 +42,9 @@ var (
 	// The block height where all our test inputs are created.
 	TstInputsBlock = int32(10)
 )
-
 func getUniqueID() uint32 {
 	return atomic.AddUint32(&uniqueCounter, 1)
 }
-
 // createWithdrawalTx creates a withdrawalTx with the given input and output amounts.
 func createWithdrawalTx(
 	t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool, inputAmounts []int64, outputAmounts []int64) *withdrawalTx {
@@ -107,7 +103,6 @@ func TstTxStoreRWNamespace(
 	tx walletdb.ReadWriteTx) walletdb.ReadWriteBucket {
 	return tx.ReadWriteBucket(txmgrNamespaceKey)
 }
-
 // TstEnsureUsedAddr ensures the addresses defined by the given series/branch and
 // index==0..idx are present in the set of used addresses for the given Pool.
 func TstEnsureUsedAddr(
@@ -147,7 +142,6 @@ func TstCreatePkScript(
 	}
 	return pkScript
 }
-
 type TstSeriesDef struct {
 	ReqSigs  uint32
 	PubKeys  []string
@@ -155,7 +149,6 @@ type TstSeriesDef struct {
 	SeriesID uint32
 	Inactive bool
 }
-
 // TstCreateSeries creates a new Series for every definition in the given slice
 // of TstSeriesDef. If the definition includes any private keys, the Series is
 // empowered with them.
@@ -185,7 +178,6 @@ func TstCreateMasterKey(
 	}
 	return key
 }
-
 // createMasterKeys creates count master ExtendedKeys with unique seeds.
 func createMasterKeys(
 	t *testing.T, count int) []*hdkeychain.ExtendedKey {
@@ -195,7 +187,6 @@ func createMasterKeys(
 	}
 	return keys
 }
-
 // TstCreateSeriesDef creates a TstSeriesDef with a unique SeriesID, the given
 // reqSigs and the raw public/private keys extracted from the list of private
 // keys. The new series will be empowered with all private keys.
@@ -218,7 +209,6 @@ func TstCreatePoolAndTxStore(
 	store = TstCreateTxStore(t, db)
 	return teardown, db, pool, store
 }
-
 // TstCreateCreditsOnNewSeries creates a new Series (with a unique ID) and a
 // slice of credits locked to the series' address with branch==1 and index==0.
 // The new Series will use a 2-of-3 configuration and will be empowered with
@@ -234,7 +224,6 @@ func TstCreateCreditsOnNewSeries(
 	TstCreateSeries(t, dbtx, pool, []TstSeriesDef{def})
 	return def.SeriesID, TstCreateSeriesCredits(t, dbtx, pool, def.SeriesID, amounts)
 }
-
 // TstCreateSeriesCredits creates a new credit for every item in the amounts
 // slice, locked to the given series' address with branch==1 and index==0.
 func TstCreateSeriesCredits(
@@ -263,7 +252,6 @@ func TstCreateSeriesCredits(
 	}
 	return credits
 }
-
 // TstCreateSeriesCreditsOnStore inserts a new credit in the given store for
 // every item in the amounts slice. These credits are locked to the votingpool
 // address composed of the given seriesID, branch==1 and index==0.
@@ -279,7 +267,6 @@ func TstCreateSeriesCreditsOnStore(
 	}
 	return eligible
 }
-
 // TstCreateCreditsOnStore inserts a new credit in the given store for
 // every item in the amounts slice.
 func TstCreateCreditsOnStore(
@@ -313,13 +300,11 @@ func TstCreateCreditsOnStore(
 	}
 	return credits
 }
-
 var (
 	addrmgrNamespaceKey    = []byte("waddrmgr")
 	votingpoolNamespaceKey = []byte("votingpool")
 	txmgrNamespaceKey      = []byte("testtxstore")
 )
-
 // TstCreatePool creates a Pool on a fresh walletdb and returns it. It also
 // returns a teardown function that closes the Manager and removes the directory
 // used to store the database.

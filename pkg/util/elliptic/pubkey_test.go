@@ -8,17 +8,14 @@ import (
 )
 
 type pubKeyTest struct {
-	name string
-	key  []byte
-
+	name    string
+	key     []byte
 	format  byte
 	isValid bool
 }
 
 var pubKeyTests = []pubKeyTest{
-
 	// pubkey from bitcoin blockchain tx
-
 	// 0437cd7f8525ceed2324359c2d0ba26006d92d85
 	{
 		name: "uncompressed ok",
@@ -32,8 +29,7 @@ var pubKeyTests = []pubKeyTest{
 			0xb4, 0x12, 0xa3,
 		},
 		isValid: true,
-
-		format: pubkeyUncompressed,
+		format:  pubkeyUncompressed,
 	},
 	{
 		name: "uncompressed x changed",
@@ -86,8 +82,7 @@ var pubKeyTests = []pubKeyTest{
 			0xb4, 0x12, 0xa3,
 		},
 		isValid: true,
-
-		format: pubkeyHybrid,
+		format:  pubkeyHybrid,
 	},
 	{
 		name: "uncompressed as hybrid wrong",
@@ -102,7 +97,6 @@ var pubKeyTests = []pubKeyTest{
 		},
 		isValid: false,
 	},
-
 	// from tx 0b09c51c51ff762f00fb26217269d2a18e77a4fa87d69b3c363ab4df16543f20
 	{
 		name: "compressed ok (ybit = 0)",
@@ -112,10 +106,8 @@ var pubKeyTests = []pubKeyTest{
 			0xa9, 0xa1, 0xf4, 0x80, 0x9d, 0x3b, 0x4d,
 		},
 		isValid: true,
-
-		format: pubkeyCompressed,
+		format:  pubkeyCompressed,
 	},
-
 	// from tx fdeb8e72524e8dab0da507ddbaf5f88fe4a933eb10a66bc4745bb0aa11ea393c
 	{
 		name: "compressed ok (ybit = 1)",
@@ -125,8 +117,7 @@ var pubKeyTests = []pubKeyTest{
 			0x7f, 0x5b, 0x2a, 0x4b, 0x7d, 0x44, 0x8e,
 		},
 		isValid: true,
-
-		format: pubkeyCompressed,
+		format:  pubkeyCompressed,
 	},
 	{
 		name: "compressed claims uncompressed (ybit = 0)",
@@ -214,41 +205,29 @@ var pubKeyTests = []pubKeyTest{
 			0xa6, 0x85, 0x54, 0x19, 0x9c, 0x47, 0xd0, 0x8f, 0xfb,
 			0x10, 0xd4, 0xb8,
 		},
-
-		format: pubkeyHybrid,
-
+		format:  pubkeyHybrid,
 		isValid: true,
 	},
 }
 
 func TestPubKeys(
-
 	t *testing.T) {
-
 	for _, test := range pubKeyTests {
-
 		pk, err := ParsePubKey(test.key, S256())
-
 		if err != nil {
-
 			if test.isValid {
-
 				t.Errorf("%s pubkey failed when shouldn't %v",
 					test.name, err)
 			}
 			continue
 		}
-
 		if !test.isValid {
-
 			t.Errorf("%s counted as valid when it should fail",
 				test.name)
 			continue
 		}
 		var pkStr []byte
-
 		switch test.format {
-
 		case pubkeyUncompressed:
 			pkStr = (*PublicKey)(pk).SerializeUncompressed()
 		case pubkeyCompressed:
@@ -256,9 +235,7 @@ func TestPubKeys(
 		case pubkeyHybrid:
 			pkStr = (*PublicKey)(pk).SerializeHybrid()
 		}
-
 		if !bytes.Equal(test.key, pkStr) {
-
 			t.Errorf("%s pubkey: serialized keys do not match.",
 				test.name)
 			spew.Dump(test.key)
@@ -267,9 +244,7 @@ func TestPubKeys(
 	}
 }
 func TestPublicKeyIsEqual(
-
 	t *testing.T) {
-
 	pubKey1, err := ParsePubKey(
 		[]byte{0x03, 0x26, 0x89, 0xc7, 0xc2, 0xda, 0xb1, 0x33,
 			0x09, 0xfb, 0x14, 0x3e, 0x0e, 0x8f, 0xe3, 0x96, 0x34,
@@ -278,9 +253,7 @@ func TestPublicKeyIsEqual(
 		},
 		S256(),
 	)
-
 	if err != nil {
-
 		t.Fatalf("failed to parse raw bytes for pubKey1: %v", err)
 	}
 	pubKey2, err := ParsePubKey(
@@ -291,35 +264,24 @@ func TestPublicKeyIsEqual(
 		},
 		S256(),
 	)
-
 	if err != nil {
-
 		t.Fatalf("failed to parse raw bytes for pubKey2: %v", err)
 	}
-
 	if !pubKey1.IsEqual(pubKey1) {
-
 		t.Fatalf("value of IsEqual is incorrect, %v is "+
 			"equal to %v", pubKey1, pubKey1)
 	}
-
 	if pubKey1.IsEqual(pubKey2) {
-
 		t.Fatalf("value of IsEqual is incorrect, %v is not "+
 			"equal to %v", pubKey1, pubKey2)
 	}
 }
 func TestIsCompressed(
-
 	t *testing.T) {
-
 	for _, test := range pubKeyTests {
-
 		isCompressed := IsCompressedPubKey(test.key)
 		wantCompressed := (test.format == pubkeyCompressed)
-
 		if isCompressed != wantCompressed {
-
 			t.Fatalf("%s (%x) pubkey: unexpected compressed result, "+
 				"got %v, want %v", test.name, test.key,
 				isCompressed, wantCompressed)

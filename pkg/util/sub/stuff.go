@@ -3,8 +3,8 @@ package sub
 import (
 	"encoding/binary"
 	"fmt"
-	"git.parallelcoin.io/dev/9/cmd/ll"
 
+	"git.parallelcoin.io/dev/9/cmd/ll"
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
 

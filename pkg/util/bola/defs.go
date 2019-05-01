@@ -11,7 +11,7 @@ var (
 	UNet           = "udp4"
 	MaxMessageSize = 3072
 	// default channel buffer sizes for Base
-	BaseChanBufs = 128
+	BaseChanBufs = 512
 	// latency maximum
 	LatencyMax = time.Millisecond * 250
 )

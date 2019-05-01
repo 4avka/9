@@ -1,16 +1,19 @@
 package fek
 
 import (
-	"encoding/binary"
-
 	"github.com/minio/highwayhash"
 )
 
 var Zerokey = make([]byte, 32)
 
+func GetChecksum(in []byte) []byte {
+	return Uint64ToBytes(highwayhash.Sum64(in, Zerokey))
+}
+
 func AppendChecksum(in []byte) []byte {
 	return append(in, Uint64ToBytes(highwayhash.Sum64(in, Zerokey))...)
 }
+
 func VerifyChecksum(in []byte) (out []byte, verified bool) {
 	l := len(in)
 	if l > 8 {
@@ -26,21 +29,24 @@ func VerifyChecksum(in []byte) (out []byte, verified bool) {
 }
 
 // Uint64ToBytes - returns a byte slice from uint64 - required because Murmur3 takes bytes as input but returns uint32
-func Uint64ToBytes(input uint64) []byte {
-	p := make([]byte, 8)
-	binary.LittleEndian.PutUint64(p, input)
-	return p
+func Uint64ToBytes(input uint64) (out []byte) {
+	out = make([]byte, 8)
+	for i := range out {
+		out[i] = byte(input >> uint(i*8))
+	}
+	return
 }
 
 // BytesToUint64 - converts 4 byte slice to uint32
-func BytesToUint64(bytes []byte) uint64 {
+func BytesToUint64(bytes []byte) (out uint64) {
+	_ = bytes[7]
 	// We are taking off the seatbelt here for performance reasons. We know that
 	// the hash is uint64 thus we won't check it is right. Uint64() will panic
 	// either way if the slice is not at least 8 bytes
-	// if len(bytes) != 8 {
-	// 	log.Fatal("Byte slice is not 8 bytes long")
-	// }
-	return binary.LittleEndian.Uint64(bytes)
+	for i, x := range bytes {
+		out += uint64(x) << uint(i*8)
+	}
+	return
 }
 
 // func ZeroBytes(b []byte) {

@@ -1,5 +1,4 @@
 package votingpool
-
 import (
 	waddrmgr "git.parallelcoin.io/dev/9/pkg/wallet/addrmgr"
 	walletdb "git.parallelcoin.io/dev/9/pkg/wallet/db"
@@ -7,13 +6,11 @@ import (
 	"runtime"
 	"testing"
 )
-
 func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	// Enable logging (Debug level) to aid debugging failing tests.
 	Log.SetLevel("debug")
 }
-
 // TstCheckError ensures the passed error is a votingpool.Error with an error
 // code that matches the passed error code.
 func TstCheckError(
@@ -28,7 +25,6 @@ func TstCheckError(
 			testName, vpErr.ErrorCode, vpErr, wantErrCode)
 	}
 }
-
 // TstRunWithManagerUnlocked calls the given callback with the manager unlocked,
 // and locks it again before returning.
 func TstRunWithManagerUnlocked(
@@ -39,7 +35,6 @@ func TstRunWithManagerUnlocked(
 	defer mgr.Lock()
 	callback()
 }
-
 // TstCheckWithdrawalStatusMatches compares s1 and s2 using reflect.DeepEqual
 // and calls t.Fatal() if they're not identical.
 func TstCheckWithdrawalStatusMatches(

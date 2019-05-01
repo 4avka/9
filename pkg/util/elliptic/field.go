@@ -58,46 +58,29 @@ const (
 
 // Constants related to the field representation.
 const (
-
 	// fieldWords is the number of words used to internally represent the
-
 	// 256-bit value.
 	fieldWords = 10
-
 	// fieldBase is the exponent used to form the numeric base of each word.
-
 	// 2^(fieldBase*i) where i is the word position.
 	fieldBase = 26
-
 	// fieldOverflowBits is the minimum number of "overflow" bits for each
-
 	// word in the field value.
 	fieldOverflowBits = 32 - fieldBase
-
 	// fieldBaseMask is the mask for the bits in each word needed to
-
 	// represent the numeric base of each word (except the most significant
-
 	// word).
 	fieldBaseMask = (1 << fieldBase) - 1
-
 	// fieldMSBBits is the number of bits in the most significant word used
-
 	// to represent the value.
 	fieldMSBBits = 256 - (fieldBase * (fieldWords - 1))
-
 	// fieldMSBMask is the mask for the bits in the most significant word
-
 	// needed to represent the value.
 	fieldMSBMask = (1 << fieldMSBBits) - 1
-
 	// fieldPrimeWordZero is word zero of the secp256k1 prime in the
-
 	// internal field representation.  It is used during negation.
 	fieldPrimeWordZero = 0x3fffc2f
-
 	// fieldPrimeWordOne is word one of the secp256k1 prime in the
-
 	// internal field representation.  It is used during negation.
 	fieldPrimeWordOne = 0x3ffffbf
 )
@@ -129,14 +112,12 @@ const (
 // 	n[1] * 2^(26*1) = 2^23 * 2^26  = 2^49
 // 	n[0] * 2^(26*0) = 1    * 2^0   = 1
 // 	Sum: 0 + 0 + ... + 2^49 + 1 = 2^49 + 1
-
 type fieldVal struct {
 	n [10]uint32
 }
 
 // String returns the field value as a human-readable hex string.
 func (f fieldVal) String() string {
-
 	t := new(fieldVal).Set(&f).Normalize()
 	return hex.EncodeToString(t.Bytes()[:])
 }
@@ -145,7 +126,6 @@ func (f fieldVal) String() string {
 // set to zero.  This function can be useful to clear an existing field value
 // for reuse.
 func (f *fieldVal) Zero() {
-
 	f.n[0] = 0
 	f.n[1] = 0
 	f.n[2] = 0
@@ -163,7 +143,6 @@ func (f *fieldVal) Zero() {
 // f := new(fieldVal).Set(f2).Add(1) so that f = f2 + 1 where f2 is not
 // modified.
 func (f *fieldVal) Set(val *fieldVal) *fieldVal {
-
 	*f = *val
 	return f
 }
@@ -174,7 +153,6 @@ func (f *fieldVal) Set(val *fieldVal) *fieldVal {
 // The field value is returned to support chaining.  This enables syntax such
 // as f := new(fieldVal).SetInt(2).Mul(f2) so that f = 2 * f2.
 func (f *fieldVal) SetInt(ui uint) *fieldVal {
-
 	f.Zero()
 	f.n[0] = uint32(ui)
 	return f
@@ -185,13 +163,9 @@ func (f *fieldVal) SetInt(ui uint) *fieldVal {
 // The field value is returned to support chaining.  This enables syntax like:
 // f := new(fieldVal).SetBytes(byteArray).Mul(f2) so that f = ba * f2.
 func (f *fieldVal) SetBytes(b *[32]byte) *fieldVal {
-
 	// Pack the 256 total bits across the 10 uint32 words with a max of
-
 	// 26-bits per word.  This could be done with a couple of for loops,
-
 	// but this unrolled version is significantly faster.  Benchmarks show
-
 	// this is about 34 times faster than the variant which uses loops.
 	f.n[0] = uint32(b[31]) | uint32(b[30])<<8 | uint32(b[29])<<16 |
 		(uint32(b[28])&twoBitsMask)<<24
@@ -222,13 +196,9 @@ func (f *fieldVal) SetBytes(b *[32]byte) *fieldVal {
 // The field value is returned to support chaining.  This enables syntax like:
 // f := new(fieldVal).SetByteSlice(byteSlice)
 func (f *fieldVal) SetByteSlice(b []byte) *fieldVal {
-
 	var b32 [32]byte
-
 	for i := 0; i < len(b); i++ {
-
 		if i < 32 {
-
 			b32[i+(32-len(b))] = b[i]
 		}
 	}
@@ -240,9 +210,7 @@ func (f *fieldVal) SetByteSlice(b []byte) *fieldVal {
 // The field value is returned to support chaining.  This enables syntax like:
 // f := new(fieldVal).SetHex("0abc").Add(1) so that f = 0x0abc + 1
 func (f *fieldVal) SetHex(hexString string) *fieldVal {
-
 	if len(hexString)%2 != 0 {
-
 		hexString = "0" + hexString
 	}
 	bytes, _ := hex.DecodeString(hexString)
@@ -253,63 +221,34 @@ func (f *fieldVal) SetHex(hexString string) *fieldVal {
 // performs fast modular reduction over the secp256k1 prime by making use of the
 // special form of the prime.
 func (f *fieldVal) Normalize() *fieldVal {
-
 	// The field representation leaves 6 bits of overflow in each word so
-
 	// intermediate calculations can be performed without needing to
-
 	// propagate the carry to each higher word during the calculations.  In
-
 	// order to normalize, we need to "compact" the full 256-bit value to
-
 	// the right while propagating any carries through to the high order
-
 	// word.
-
 	//
-
 	// Since this field is doing arithmetic modulo the secp256k1 prime, we
-
 	// also need to perform modular reduction over the prime.
-
 	//
-
 	// Per [HAC] section 14.3.4: Reduction method of moduli of special form,
-
 	// when the modulus is of the special form m = b^t - c, highly efficient
-
 	// reduction can be achieved.
-
 	//
-
 	// The secp256k1 prime is equivalent to 2^256 - 4294968273, so it fits
-
 	// this criteria.
-
 	//
-
 	// 4294968273 in field representation (base 2^26) is:
-
 	// n[0] = 977
-
 	// n[1] = 64
-
 	// That is to say (2^26 * 64) + 977 = 4294968273
-
 	//
-
 	// The algorithm presented in the referenced section typically repeats
-
 	// until the quotient is zero.  However, due to our field representation
-
 	// we already know to within one reduction how many times we would need
-
 	// to repeat as it's the uppermost bits of the high order word.  Thus we
-
 	// can simply multiply the magnitude by the field representation of the
-
 	// prime and do a single iteration.  After this step there might be an
-
 	// additional carry to bit 256 (bit 22 of the high order word).
 	t9 := f.n[9]
 	m := t9 >> fieldMSBBits
@@ -333,65 +272,37 @@ func (f *fieldVal) Normalize() *fieldVal {
 	t7 = t7 & fieldBaseMask
 	t9 = (t8 >> fieldBase) + t9
 	t8 = t8 & fieldBaseMask
-
 	// At this point, the magnitude is guaranteed to be one, however, the
-
 	// value could still be greater than the prime if there was either a
-
 	// carry through to bit 256 (bit 22 of the higher order word) or the
-
 	// value is greater than or equal to the field characteristic.  The
-
 	// following determines if either or these conditions are true and does
-
 	// the final reduction in constant time.
-
 	//
-
 	// Note that the if/else statements here intentionally do the bitwise
-
 	// operators even when it won't change the value to ensure constant time
-
 	// between the branches.  Also note that 'm' will be zero when neither
-
 	// of the aforementioned conditions are true and the value will not be
-
 	// changed when 'm' is zero.
 	m = 1
-
 	if t9 == fieldMSBMask {
-
 		m &= 1
-
 	} else {
-
 		m &= 0
 	}
-
 	if t2&t3&t4&t5&t6&t7&t8 == fieldBaseMask {
-
 		m &= 1
-
 	} else {
-
 		m &= 0
 	}
-
 	if ((t0+977)>>fieldBase + t1 + 64) > fieldBaseMask {
-
 		m &= 1
-
 	} else {
-
 		m &= 0
 	}
-
 	if t9>>fieldMSBBits != 0 {
-
 		m |= 1
-
 	} else {
-
 		m |= 0
 	}
 	t0 = t0 + m*977
@@ -414,7 +325,6 @@ func (f *fieldVal) Normalize() *fieldVal {
 	t9 = (t8 >> fieldBase) + t9
 	t8 = t8 & fieldBaseMask
 	t9 = t9 & fieldMSBMask // Remove potential multiple of 2^256.
-
 	// Finally, set the normalized and reduced words.
 	f.n[0] = t0
 	f.n[1] = t1
@@ -437,13 +347,9 @@ func (f *fieldVal) Normalize() *fieldVal {
 // The field value must be normalized for this function to return the correct
 // result.
 func (f *fieldVal) PutBytes(b *[32]byte) {
-
 	// Unpack the 256 total bits from the 10 uint32 words with a max of
-
 	// 26-bits per word.  This could be done with a couple of for loops,
-
 	// but this unrolled version is a bit faster.  Benchmarks show this is
-
 	// about 10 times faster than the variant which uses loops.
 	b[31] = byte(f.n[0] & eightBitsMask)
 	b[30] = byte((f.n[0] >> 8) & eightBitsMask)
@@ -486,7 +392,6 @@ func (f *fieldVal) PutBytes(b *[32]byte) {
 // The field value must be normalized for this function to return correct
 // result.
 func (f *fieldVal) Bytes() *[32]byte {
-
 	b := new([32]byte)
 	f.PutBytes(b)
 	return b
@@ -494,9 +399,7 @@ func (f *fieldVal) Bytes() *[32]byte {
 
 // IsZero returns whether or not the field value is equal to zero.
 func (f *fieldVal) IsZero() bool {
-
 	// The value can only be zero if no bits are set in any of the words.
-
 	// This is a constant time implementation.
 	bits := f.n[0] | f.n[1] | f.n[2] | f.n[3] | f.n[4] |
 		f.n[5] | f.n[6] | f.n[7] | f.n[8] | f.n[9]
@@ -507,7 +410,6 @@ func (f *fieldVal) IsZero() bool {
 // The field value must be normalized for this function to return correct
 // result.
 func (f *fieldVal) IsOdd() bool {
-
 	// Only odd numbers have the bottom bit set.
 	return f.n[0]&1 == 1
 }
@@ -516,11 +418,8 @@ func (f *fieldVal) IsOdd() bool {
 // field values being compared must be normalized for this function to return
 // the correct result.
 func (f *fieldVal) Equals(val *fieldVal) bool {
-
 	// Xor only sets bits when they are different, so the two field values
-
 	// can only be the same if no bits are set after xoring each word.
-
 	// This is a constant time implementation.
 	bits := (f.n[0] ^ val.n[0]) | (f.n[1] ^ val.n[1]) | (f.n[2] ^ val.n[2]) |
 		(f.n[3] ^ val.n[3]) | (f.n[4] ^ val.n[4]) | (f.n[5] ^ val.n[5]) |
@@ -534,41 +433,23 @@ func (f *fieldVal) Equals(val *fieldVal) bool {
 // The field value is returned to support chaining.  This enables syntax like:
 // f.NegateVal(f2).AddInt(1) so that f = -f2 + 1.
 func (f *fieldVal) NegateVal(val *fieldVal, magnitude uint32) *fieldVal {
-
 	// Negation in the field is just the prime minus the value.  However,
-
 	// in order to allow negation against a field value without having to
-
 	// normalize/reduce it first, multiply by the magnitude (that is how
-
 	// "far" away it is from the normalized value) to adjust.  Also, since
-
 	// negating a value pushes it one more order of magnitude away from the
-
 	// normalized range, add 1 to compensate.
-
 	//
-
 	// For some intuition here, imagine you're performing mod 12 arithmetic
-
 	// (picture a clock) and you are negating the number 7.  So you start at
-
 	// 12 (which is of course 0 under mod 12) and count backwards (left on
-
 	// the clock) 7 times to arrive at 5.  Notice this is just 12-7 = 5.
-
 	// Now, assume you're starting with 19, which is a number that is
-
 	// already larger than the modulus and congruent to 7 (mod 12).  When a
-
 	// value is already in the desired range, its magnitude is 1.  Since 19
-
 	// is an additional "step", its magnitude (mod 12) is 2.  Since any
-
 	// multiple of the modulus is conguent to zero (mod m), the answer can
-
 	// be shortcut by simply mulplying the magnitude by the modulus and
-
 	// subtracting.  Keeping with the example, this would be (2*12)-19 = 5.
 	f.n[0] = (magnitude+1)*fieldPrimeWordZero - val.n[0]
 	f.n[1] = (magnitude+1)*fieldPrimeWordOne - val.n[1]
@@ -588,7 +469,6 @@ func (f *fieldVal) NegateVal(val *fieldVal, magnitude uint32) *fieldVal {
 // The field value is returned to support chaining.  This enables syntax like:
 // f.Negate().AddInt(1) so that f = -f + 1.
 func (f *fieldVal) Negate(magnitude uint32) *fieldVal {
-
 	return f.NegateVal(f, magnitude)
 }
 
@@ -598,11 +478,8 @@ func (f *fieldVal) Negate(magnitude uint32) *fieldVal {
 // The field value is returned to support chaining.  This enables syntax like:
 // f.AddInt(1).Add(f2) so that f = f + 1 + f2.
 func (f *fieldVal) AddInt(ui uint) *fieldVal {
-
 	// Since the field representation intentionally provides overflow bits,
-
 	// it's ok to use carryless addition as the carry bit is safely part of
-
 	// the word and will be normalized out.
 	f.n[0] += uint32(ui)
 	return f
@@ -613,13 +490,9 @@ func (f *fieldVal) AddInt(ui uint) *fieldVal {
 // The field value is returned to support chaining.  This enables syntax like:
 // f.Add(f2).AddInt(1) so that f = f + f2 + 1.
 func (f *fieldVal) Add(val *fieldVal) *fieldVal {
-
 	// Since the field representation intentionally provides overflow bits,
-
 	// it's ok to use carryless addition as the carry bit is safely part of
-
 	// each word and will be normalized out.  This could obviously be done
-
 	// in a loop, but the unrolled version is faster.
 	f.n[0] += val.n[0]
 	f.n[1] += val.n[1]
@@ -638,13 +511,9 @@ func (f *fieldVal) Add(val *fieldVal) *fieldVal {
 // The field value is returned to support chaining.  This enables syntax like:
 // f3.Add2(f, f2).AddInt(1) so that f3 = f + f2 + 1.
 func (f *fieldVal) Add2(val *fieldVal, val2 *fieldVal) *fieldVal {
-
 	// Since the field representation intentionally provides overflow bits,
-
 	// it's ok to use carryless addition as the carry bit is safely part of
-
 	// each word and will be normalized out.  This could obviously be done
-
 	// in a loop, but the unrolled version is faster.
 	f.n[0] = val.n[0] + val2.n[0]
 	f.n[1] = val.n[1] + val2.n[1]
@@ -666,17 +535,11 @@ func (f *fieldVal) Add2(val *fieldVal, val2 *fieldVal) *fieldVal {
 // The field value is returned to support chaining.  This enables syntax like:
 // f.MulInt(2).Add(f2) so that f = 2 * f + f2.
 func (f *fieldVal) MulInt(val uint) *fieldVal {
-
 	// Since each word of the field representation can hold up to
-
 	// fieldOverflowBits extra bits which will be normalized out, it's safe
-
 	// to multiply each word without using a larger type or carry
-
 	// propagation so long as the values won't overflow a uint32.  This
-
 	// could obviously be done in a loop, but the unrolled version is
-
 	// faster.
 	ui := uint32(val)
 	f.n[0] *= ui
@@ -700,7 +563,6 @@ func (f *fieldVal) MulInt(val uint) *fieldVal {
 // The field value is returned to support chaining.  This enables syntax like:
 // f.Mul(f2).AddInt(1) so that f = (f * f2) + 1.
 func (f *fieldVal) Mul(val *fieldVal) *fieldVal {
-
 	return f.Mul2(f, val)
 }
 
@@ -712,30 +574,23 @@ func (f *fieldVal) Mul(val *fieldVal) *fieldVal {
 // The field value is returned to support chaining.  This enables syntax like:
 // f3.Mul2(f, f2).AddInt(1) so that f3 = (f * f2) + 1.
 func (f *fieldVal) Mul2(val *fieldVal, val2 *fieldVal) *fieldVal {
-
 	// This could be done with a couple of for loops and an array to store
-
 	// the intermediate terms, but this unrolled version is significantly
-
 	// faster.
-
 	// Terms for 2^(fieldBase*0).
 	m := uint64(val.n[0]) * uint64(val2.n[0])
 	t0 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*1).
 	m = (m >> fieldBase) +
 		uint64(val.n[0])*uint64(val2.n[1]) +
 		uint64(val.n[1])*uint64(val2.n[0])
 	t1 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*2).
 	m = (m >> fieldBase) +
 		uint64(val.n[0])*uint64(val2.n[2]) +
 		uint64(val.n[1])*uint64(val2.n[1]) +
 		uint64(val.n[2])*uint64(val2.n[0])
 	t2 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*3).
 	m = (m >> fieldBase) +
 		uint64(val.n[0])*uint64(val2.n[3]) +
@@ -743,7 +598,6 @@ func (f *fieldVal) Mul2(val *fieldVal, val2 *fieldVal) *fieldVal {
 		uint64(val.n[2])*uint64(val2.n[1]) +
 		uint64(val.n[3])*uint64(val2.n[0])
 	t3 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*4).
 	m = (m >> fieldBase) +
 		uint64(val.n[0])*uint64(val2.n[4]) +
@@ -752,7 +606,6 @@ func (f *fieldVal) Mul2(val *fieldVal, val2 *fieldVal) *fieldVal {
 		uint64(val.n[3])*uint64(val2.n[1]) +
 		uint64(val.n[4])*uint64(val2.n[0])
 	t4 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*5).
 	m = (m >> fieldBase) +
 		uint64(val.n[0])*uint64(val2.n[5]) +
@@ -762,7 +615,6 @@ func (f *fieldVal) Mul2(val *fieldVal, val2 *fieldVal) *fieldVal {
 		uint64(val.n[4])*uint64(val2.n[1]) +
 		uint64(val.n[5])*uint64(val2.n[0])
 	t5 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*6).
 	m = (m >> fieldBase) +
 		uint64(val.n[0])*uint64(val2.n[6]) +
@@ -773,7 +625,6 @@ func (f *fieldVal) Mul2(val *fieldVal, val2 *fieldVal) *fieldVal {
 		uint64(val.n[5])*uint64(val2.n[1]) +
 		uint64(val.n[6])*uint64(val2.n[0])
 	t6 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*7).
 	m = (m >> fieldBase) +
 		uint64(val.n[0])*uint64(val2.n[7]) +
@@ -785,7 +636,6 @@ func (f *fieldVal) Mul2(val *fieldVal, val2 *fieldVal) *fieldVal {
 		uint64(val.n[6])*uint64(val2.n[1]) +
 		uint64(val.n[7])*uint64(val2.n[0])
 	t7 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*8).
 	m = (m >> fieldBase) +
 		uint64(val.n[0])*uint64(val2.n[8]) +
@@ -798,7 +648,6 @@ func (f *fieldVal) Mul2(val *fieldVal, val2 *fieldVal) *fieldVal {
 		uint64(val.n[7])*uint64(val2.n[1]) +
 		uint64(val.n[8])*uint64(val2.n[0])
 	t8 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*9).
 	m = (m >> fieldBase) +
 		uint64(val.n[0])*uint64(val2.n[9]) +
@@ -812,7 +661,6 @@ func (f *fieldVal) Mul2(val *fieldVal, val2 *fieldVal) *fieldVal {
 		uint64(val.n[8])*uint64(val2.n[1]) +
 		uint64(val.n[9])*uint64(val2.n[0])
 	t9 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*10).
 	m = (m >> fieldBase) +
 		uint64(val.n[1])*uint64(val2.n[9]) +
@@ -825,7 +673,6 @@ func (f *fieldVal) Mul2(val *fieldVal, val2 *fieldVal) *fieldVal {
 		uint64(val.n[8])*uint64(val2.n[2]) +
 		uint64(val.n[9])*uint64(val2.n[1])
 	t10 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*11).
 	m = (m >> fieldBase) +
 		uint64(val.n[2])*uint64(val2.n[9]) +
@@ -837,7 +684,6 @@ func (f *fieldVal) Mul2(val *fieldVal, val2 *fieldVal) *fieldVal {
 		uint64(val.n[8])*uint64(val2.n[3]) +
 		uint64(val.n[9])*uint64(val2.n[2])
 	t11 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*12).
 	m = (m >> fieldBase) +
 		uint64(val.n[3])*uint64(val2.n[9]) +
@@ -848,7 +694,6 @@ func (f *fieldVal) Mul2(val *fieldVal, val2 *fieldVal) *fieldVal {
 		uint64(val.n[8])*uint64(val2.n[4]) +
 		uint64(val.n[9])*uint64(val2.n[3])
 	t12 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*13).
 	m = (m >> fieldBase) +
 		uint64(val.n[4])*uint64(val2.n[9]) +
@@ -858,7 +703,6 @@ func (f *fieldVal) Mul2(val *fieldVal, val2 *fieldVal) *fieldVal {
 		uint64(val.n[8])*uint64(val2.n[5]) +
 		uint64(val.n[9])*uint64(val2.n[4])
 	t13 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*14).
 	m = (m >> fieldBase) +
 		uint64(val.n[5])*uint64(val2.n[9]) +
@@ -867,7 +711,6 @@ func (f *fieldVal) Mul2(val *fieldVal, val2 *fieldVal) *fieldVal {
 		uint64(val.n[8])*uint64(val2.n[6]) +
 		uint64(val.n[9])*uint64(val2.n[5])
 	t14 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*15).
 	m = (m >> fieldBase) +
 		uint64(val.n[6])*uint64(val2.n[9]) +
@@ -875,81 +718,49 @@ func (f *fieldVal) Mul2(val *fieldVal, val2 *fieldVal) *fieldVal {
 		uint64(val.n[8])*uint64(val2.n[7]) +
 		uint64(val.n[9])*uint64(val2.n[6])
 	t15 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*16).
 	m = (m >> fieldBase) +
 		uint64(val.n[7])*uint64(val2.n[9]) +
 		uint64(val.n[8])*uint64(val2.n[8]) +
 		uint64(val.n[9])*uint64(val2.n[7])
 	t16 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*17).
 	m = (m >> fieldBase) +
 		uint64(val.n[8])*uint64(val2.n[9]) +
 		uint64(val.n[9])*uint64(val2.n[8])
 	t17 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*18).
 	m = (m >> fieldBase) + uint64(val.n[9])*uint64(val2.n[9])
 	t18 := m & fieldBaseMask
-
 	// What's left is for 2^(fieldBase*19).
 	t19 := m >> fieldBase
-
 	// At this point, all of the terms are grouped into their respective
-
 	// base.
-
 	//
-
 	// Per [HAC] section 14.3.4: Reduction method of moduli of special form,
-
 	// when the modulus is of the special form m = b^t - c, highly efficient
-
 	// reduction can be achieved per the provided algorithm.
-
 	//
-
 	// The secp256k1 prime is equivalent to 2^256 - 4294968273, so it fits
-
 	// this criteria.
-
 	//
-
 	// 4294968273 in field representation (base 2^26) is:
-
 	// n[0] = 977
-
 	// n[1] = 64
-
 	// That is to say (2^26 * 64) + 977 = 4294968273
-
 	//
-
 	// Since each word is in base 26, the upper terms (t10 and up) start
-
 	// at 260 bits (versus the final desired range of 256 bits), so the
-
 	// field representation of 'c' from above needs to be adjusted for the
-
 	// extra 4 bits by multiplying it by 2^4 = 16.  4294968273 * 16 =
-
 	// 68719492368.  Thus, the adjusted field representation of 'c' is:
-
 	// n[0] = 977 * 16 = 15632
-
 	// n[1] = 64 * 16 = 1024
-
 	// That is to say (2^26 * 1024) + 15632 = 68719492368
-
 	//
-
 	// To reduce the final term, t19, the entire 'c' value is needed instead
-
 	// of only n[0] because there are no more terms left to handle n[1].
-
 	// This means there might be some magnitude left in the upper bits that
-
 	// is handled below.
 	m = t0 + t10*15632
 	t0 = m & fieldBaseMask
@@ -972,33 +783,19 @@ func (f *fieldVal) Mul2(val *fieldVal, val2 *fieldVal) *fieldVal {
 	m = (m >> fieldBase) + t9 + t18*1024 + t19*68719492368
 	t9 = m & fieldMSBMask
 	m = m >> fieldMSBBits
-
 	// At this point, if the magnitude is greater than 0, the overall value
-
 	// is greater than the max possible 256-bit value.  In particular, it is
-
 	// "how many times larger" than the max value it is.
-
 	//
-
 	// The algorithm presented in [HAC] section 14.3.4 repeats until the
-
 	// quotient is zero.  However, due to the above, we already know at
-
 	// least how many times we would need to repeat as it's the value
-
 	// currently in m.  Thus we can simply multiply the magnitude by the
-
 	// field representation of the prime and do a single iteration.  Notice
-
 	// that nothing will be changed when the magnitude is zero, so we could
-
 	// skip this in that case, however always running regardless allows it
-
 	// to run in constant time.  The final result will be in the range
-
 	// 0 <= result <= prime + (2^64 - c), so it is guaranteed to have a
-
 	// magnitude of 1, but it is denormalized.
 	d := t0 + m*977
 	f.n[0] = uint32(d & fieldBaseMask)
@@ -1022,7 +819,6 @@ func (f *fieldVal) Mul2(val *fieldVal, val2 *fieldVal) *fieldVal {
 // The field value is returned to support chaining.  This enables syntax like:
 // f.Square().Mul(f2) so that f = f^2 * f2.
 func (f *fieldVal) Square() *fieldVal {
-
 	return f.SquareVal(f)
 }
 
@@ -1033,47 +829,37 @@ func (f *fieldVal) Square() *fieldVal {
 // The field value is returned to support chaining.  This enables syntax like:
 // f3.SquareVal(f).Mul(f) so that f3 = f^2 * f = f^3.
 func (f *fieldVal) SquareVal(val *fieldVal) *fieldVal {
-
 	// This could be done with a couple of for loops and an array to store
-
 	// the intermediate terms, but this unrolled version is significantly
-
 	// faster.
-
 	// Terms for 2^(fieldBase*0).
 	m := uint64(val.n[0]) * uint64(val.n[0])
 	t0 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*1).
 	m = (m >> fieldBase) + 2*uint64(val.n[0])*uint64(val.n[1])
 	t1 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*2).
 	m = (m >> fieldBase) +
 		2*uint64(val.n[0])*uint64(val.n[2]) +
 		uint64(val.n[1])*uint64(val.n[1])
 	t2 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*3).
 	m = (m >> fieldBase) +
 		2*uint64(val.n[0])*uint64(val.n[3]) +
 		2*uint64(val.n[1])*uint64(val.n[2])
 	t3 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*4).
 	m = (m >> fieldBase) +
 		2*uint64(val.n[0])*uint64(val.n[4]) +
 		2*uint64(val.n[1])*uint64(val.n[3]) +
 		uint64(val.n[2])*uint64(val.n[2])
 	t4 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*5).
 	m = (m >> fieldBase) +
 		2*uint64(val.n[0])*uint64(val.n[5]) +
 		2*uint64(val.n[1])*uint64(val.n[4]) +
 		2*uint64(val.n[2])*uint64(val.n[3])
 	t5 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*6).
 	m = (m >> fieldBase) +
 		2*uint64(val.n[0])*uint64(val.n[6]) +
@@ -1081,7 +867,6 @@ func (f *fieldVal) SquareVal(val *fieldVal) *fieldVal {
 		2*uint64(val.n[2])*uint64(val.n[4]) +
 		uint64(val.n[3])*uint64(val.n[3])
 	t6 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*7).
 	m = (m >> fieldBase) +
 		2*uint64(val.n[0])*uint64(val.n[7]) +
@@ -1089,7 +874,6 @@ func (f *fieldVal) SquareVal(val *fieldVal) *fieldVal {
 		2*uint64(val.n[2])*uint64(val.n[5]) +
 		2*uint64(val.n[3])*uint64(val.n[4])
 	t7 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*8).
 	m = (m >> fieldBase) +
 		2*uint64(val.n[0])*uint64(val.n[8]) +
@@ -1098,7 +882,6 @@ func (f *fieldVal) SquareVal(val *fieldVal) *fieldVal {
 		2*uint64(val.n[3])*uint64(val.n[5]) +
 		uint64(val.n[4])*uint64(val.n[4])
 	t8 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*9).
 	m = (m >> fieldBase) +
 		2*uint64(val.n[0])*uint64(val.n[9]) +
@@ -1107,7 +890,6 @@ func (f *fieldVal) SquareVal(val *fieldVal) *fieldVal {
 		2*uint64(val.n[3])*uint64(val.n[6]) +
 		2*uint64(val.n[4])*uint64(val.n[5])
 	t9 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*10).
 	m = (m >> fieldBase) +
 		2*uint64(val.n[1])*uint64(val.n[9]) +
@@ -1116,7 +898,6 @@ func (f *fieldVal) SquareVal(val *fieldVal) *fieldVal {
 		2*uint64(val.n[4])*uint64(val.n[6]) +
 		uint64(val.n[5])*uint64(val.n[5])
 	t10 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*11).
 	m = (m >> fieldBase) +
 		2*uint64(val.n[2])*uint64(val.n[9]) +
@@ -1124,7 +905,6 @@ func (f *fieldVal) SquareVal(val *fieldVal) *fieldVal {
 		2*uint64(val.n[4])*uint64(val.n[7]) +
 		2*uint64(val.n[5])*uint64(val.n[6])
 	t11 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*12).
 	m = (m >> fieldBase) +
 		2*uint64(val.n[3])*uint64(val.n[9]) +
@@ -1132,98 +912,63 @@ func (f *fieldVal) SquareVal(val *fieldVal) *fieldVal {
 		2*uint64(val.n[5])*uint64(val.n[7]) +
 		uint64(val.n[6])*uint64(val.n[6])
 	t12 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*13).
 	m = (m >> fieldBase) +
 		2*uint64(val.n[4])*uint64(val.n[9]) +
 		2*uint64(val.n[5])*uint64(val.n[8]) +
 		2*uint64(val.n[6])*uint64(val.n[7])
 	t13 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*14).
 	m = (m >> fieldBase) +
 		2*uint64(val.n[5])*uint64(val.n[9]) +
 		2*uint64(val.n[6])*uint64(val.n[8]) +
 		uint64(val.n[7])*uint64(val.n[7])
 	t14 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*15).
 	m = (m >> fieldBase) +
 		2*uint64(val.n[6])*uint64(val.n[9]) +
 		2*uint64(val.n[7])*uint64(val.n[8])
 	t15 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*16).
 	m = (m >> fieldBase) +
 		2*uint64(val.n[7])*uint64(val.n[9]) +
 		uint64(val.n[8])*uint64(val.n[8])
 	t16 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*17).
 	m = (m >> fieldBase) + 2*uint64(val.n[8])*uint64(val.n[9])
 	t17 := m & fieldBaseMask
-
 	// Terms for 2^(fieldBase*18).
 	m = (m >> fieldBase) + uint64(val.n[9])*uint64(val.n[9])
 	t18 := m & fieldBaseMask
-
 	// What's left is for 2^(fieldBase*19).
 	t19 := m >> fieldBase
-
 	// At this point, all of the terms are grouped into their respective
-
 	// base.
-
 	//
-
 	// Per [HAC] section 14.3.4: Reduction method of moduli of special form,
-
 	// when the modulus is of the special form m = b^t - c, highly efficient
-
 	// reduction can be achieved per the provided algorithm.
-
 	//
-
 	// The secp256k1 prime is equivalent to 2^256 - 4294968273, so it fits
-
 	// this criteria.
-
 	//
-
 	// 4294968273 in field representation (base 2^26) is:
-
 	// n[0] = 977
-
 	// n[1] = 64
-
 	// That is to say (2^26 * 64) + 977 = 4294968273
-
 	//
-
 	// Since each word is in base 26, the upper terms (t10 and up) start
-
 	// at 260 bits (versus the final desired range of 256 bits), so the
-
 	// field representation of 'c' from above needs to be adjusted for the
-
 	// extra 4 bits by multiplying it by 2^4 = 16.  4294968273 * 16 =
-
 	// 68719492368.  Thus, the adjusted field representation of 'c' is:
-
 	// n[0] = 977 * 16 = 15632
-
 	// n[1] = 64 * 16 = 1024
-
 	// That is to say (2^26 * 1024) + 15632 = 68719492368
-
 	//
-
 	// To reduce the final term, t19, the entire 'c' value is needed instead
-
 	// of only n[0] because there are no more terms left to handle n[1].
-
 	// This means there might be some magnitude left in the upper bits that
-
 	// is handled below.
 	m = t0 + t10*15632
 	t0 = m & fieldBaseMask
@@ -1246,33 +991,19 @@ func (f *fieldVal) SquareVal(val *fieldVal) *fieldVal {
 	m = (m >> fieldBase) + t9 + t18*1024 + t19*68719492368
 	t9 = m & fieldMSBMask
 	m = m >> fieldMSBBits
-
 	// At this point, if the magnitude is greater than 0, the overall value
-
 	// is greater than the max possible 256-bit value.  In particular, it is
-
 	// "how many times larger" than the max value it is.
-
 	//
-
 	// The algorithm presented in [HAC] section 14.3.4 repeats until the
-
 	// quotient is zero.  However, due to the above, we already know at
-
 	// least how many times we would need to repeat as it's the value
-
 	// currently in m.  Thus we can simply multiply the magnitude by the
-
 	// field representation of the prime and do a single iteration.  Notice
-
 	// that nothing will be changed when the magnitude is zero, so we could
-
 	// skip this in that case, however always running regardless allows it
-
 	// to run in constant time.  The final result will be in the range
-
 	// 0 <= result <= prime + (2^64 - c), so it is guaranteed to have a
-
 	// magnitude of 1, but it is denormalized.
 	n := t0 + m*977
 	f.n[0] = uint32(n & fieldBaseMask)
@@ -1294,31 +1025,18 @@ func (f *fieldVal) SquareVal(val *fieldVal) *fieldVal {
 // The field value is returned to support chaining.  This enables syntax like:
 // f.Inverse().Mul(f2) so that f = f^-1 * f2.
 func (f *fieldVal) Inverse() *fieldVal {
-
 	// Fermat's little theorem states that for a nonzero number a and prime
-
 	// prime p, a^(p-1) = 1 (mod p).  Since the multipliciative inverse is
-
 	// a*b = 1 (mod p), it follows that b = a*a^(p-2) = a^(p-1) = 1 (mod p).
-
 	// Thus, a^(p-2) is the multiplicative inverse.
-
 	//
-
 	// In order to efficiently compute a^(p-2), p-2 needs to be split into
-
 	// a sequence of squares and multipications that minimizes the number of
-
 	// multiplications needed (since they are more costly than squarings).
-
 	// Intermediate results are saved and reused as well.
-
 	//
-
 	// The secp256k1 prime - 2 is 2^256 - 4294968275.
-
 	//
-
 	// This has a cost of 258 field squarings and 33 field multiplications.
 	var a2, a3, a4, a10, a11, a21, a42, a45, a63, a1019, a1023 fieldVal
 	a2.SquareVal(f)

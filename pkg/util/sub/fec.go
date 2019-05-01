@@ -40,7 +40,6 @@ func padData(data []byte) (out []byte) {
 	out = append(data, make([]byte, padLen)...)
 	return
 }
-
 func rsEncode(data []byte) (chunks [][]byte) {
 	// First we must pad the data
 	data = padData(data)
@@ -65,7 +64,6 @@ func rsEncode(data []byte) (chunks [][]byte) {
 	}
 	return
 }
-
 func rsDecode(chunks [][]byte) (data []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {

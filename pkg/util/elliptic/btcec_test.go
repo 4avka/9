@@ -9,19 +9,12 @@ import (
 
 // isJacobianOnS256Curve returns boolean if the point (x,y,z) is on the secp256k1 curve.
 func isJacobianOnS256Curve(
-
 	x, y, z *fieldVal) bool {
-
 	// Elliptic curve equation for secp256k1 is: y^2 = x^3 + 7
-
 	// In Jacobian coordinates, Y = y/z^3 and X = x/z^2
-
 	// Thus:
-
 	// (y/z^3)^2 = (x/z^2)^3 + 7
-
 	// y^2/z^6 = x^3/z^6 + 7
-
 	// y^2 = x^3 + 7*z^6
 	var y2, z2, x3, result fieldVal
 	y2.SquareVal(y).Normalize()
@@ -33,9 +26,7 @@ func isJacobianOnS256Curve(
 
 // TestAddJacobian tests addition of points projected in Jacobian coordinates.
 func TestAddJacobian(
-
 	t *testing.T) {
-
 	tests := []struct {
 		x1, y1, z1 string // Coordinates (in hex) of first point to add
 		x2, y2, z2 string // Coordinates (in hex) of second point to add
@@ -221,9 +212,7 @@ func TestAddJacobian(
 		},
 	}
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		// Convert hex to field values.
 		x1 := new(fieldVal).SetHex(test.x1)
 		y1 := new(fieldVal).SetHex(test.y1)
@@ -235,23 +224,17 @@ func TestAddJacobian(
 		y3 := new(fieldVal).SetHex(test.y3)
 		z3 := new(fieldVal).SetHex(test.z3)
 		// Ensure the test data is using points that are actually on the curve (or the point at infinity).
-
 		if !z1.IsZero() && !isJacobianOnS256Curve(x1, y1, z1) {
-
 			t.Errorf("#%d first point is not on the curve -- "+
 				"invalid test data", i)
 			continue
 		}
-
 		if !z2.IsZero() && !isJacobianOnS256Curve(x2, y2, z2) {
-
 			t.Errorf("#%d second point is not on the curve -- "+
 				"invalid test data", i)
 			continue
 		}
-
 		if !z3.IsZero() && !isJacobianOnS256Curve(x3, y3, z3) {
-
 			t.Errorf("#%d expected point is not on the curve -- "+
 				"invalid test data", i)
 			continue
@@ -260,9 +243,7 @@ func TestAddJacobian(
 		rx, ry, rz := new(fieldVal), new(fieldVal), new(fieldVal)
 		S256().addJacobian(x1, y1, z1, x2, y2, z2, rx, ry, rz)
 		// Ensure result matches expected.
-
 		if !rx.Equals(x3) || !ry.Equals(y3) || !rz.Equals(z3) {
-
 			t.Errorf("#%d wrong result\ngot: (%v, %v, %v)\n"+
 				"want: (%v, %v, %v)", i, rx, ry, rz, x3, y3, z3)
 			continue
@@ -272,9 +253,7 @@ func TestAddJacobian(
 
 // TestAddAffine tests addition of points in affine coordinates.
 func TestAddAffine(
-
 	t *testing.T) {
-
 	tests := []struct {
 		x1, y1 string // Coordinates (in hex) of first point to add
 		x2, y2 string // Coordinates (in hex) of second point to add
@@ -331,31 +310,23 @@ func TestAddAffine(
 		},
 	}
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		// Convert hex to field values.
 		x1, y1 := fromHex(test.x1), fromHex(test.y1)
 		x2, y2 := fromHex(test.x2), fromHex(test.y2)
 		x3, y3 := fromHex(test.x3), fromHex(test.y3)
 		// Ensure the test data is using points that are actually on the curve (or the point at infinity).
-
 		if !(x1.Sign() == 0 && y1.Sign() == 0) && !S256().IsOnCurve(x1, y1) {
-
 			t.Errorf("#%d first point is not on the curve -- "+
 				"invalid test data", i)
 			continue
 		}
-
 		if !(x2.Sign() == 0 && y2.Sign() == 0) && !S256().IsOnCurve(x2, y2) {
-
 			t.Errorf("#%d second point is not on the curve -- "+
 				"invalid test data", i)
 			continue
 		}
-
 		if !(x3.Sign() == 0 && y3.Sign() == 0) && !S256().IsOnCurve(x3, y3) {
-
 			t.Errorf("#%d expected point is not on the curve -- "+
 				"invalid test data", i)
 			continue
@@ -363,9 +334,7 @@ func TestAddAffine(
 		// Add the two points.
 		rx, ry := S256().Add(x1, y1, x2, y2)
 		// Ensure result matches expected.
-
 		if rx.Cmp(x3) != 00 || ry.Cmp(y3) != 0 {
-
 			t.Errorf("#%d wrong result\ngot: (%x, %x)\n"+
 				"want: (%x, %x)", i, rx, ry, x3, y3)
 			continue
@@ -375,9 +344,7 @@ func TestAddAffine(
 
 // TestDoubleJacobian tests doubling of points projected in Jacobian coordinates.
 func TestDoubleJacobian(
-
 	t *testing.T) {
-
 	tests := []struct {
 		x1, y1, z1 string // Coordinates (in hex) of point to double
 		x3, y3, z3 string // Coordinates (in hex) of expected point
@@ -420,9 +387,7 @@ func TestDoubleJacobian(
 		},
 	}
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		// Convert hex to field values.
 		x1 := new(fieldVal).SetHex(test.x1)
 		y1 := new(fieldVal).SetHex(test.y1)
@@ -431,16 +396,12 @@ func TestDoubleJacobian(
 		y3 := new(fieldVal).SetHex(test.y3)
 		z3 := new(fieldVal).SetHex(test.z3)
 		// Ensure the test data is using points that are actually on the curve (or the point at infinity).
-
 		if !z1.IsZero() && !isJacobianOnS256Curve(x1, y1, z1) {
-
 			t.Errorf("#%d first point is not on the curve -- "+
 				"invalid test data", i)
 			continue
 		}
-
 		if !z3.IsZero() && !isJacobianOnS256Curve(x3, y3, z3) {
-
 			t.Errorf("#%d expected point is not on the curve -- "+
 				"invalid test data", i)
 			continue
@@ -449,9 +410,7 @@ func TestDoubleJacobian(
 		rx, ry, rz := new(fieldVal), new(fieldVal), new(fieldVal)
 		S256().doubleJacobian(x1, y1, z1, rx, ry, rz)
 		// Ensure result matches expected.
-
 		if !rx.Equals(x3) || !ry.Equals(y3) || !rz.Equals(z3) {
-
 			t.Errorf("#%d wrong result\ngot: (%v, %v, %v)\n"+
 				"want: (%v, %v, %v)", i, rx, ry, rz, x3, y3, z3)
 			continue
@@ -461,9 +420,7 @@ func TestDoubleJacobian(
 
 // TestDoubleAffine tests doubling of points in affine coordinates.
 func TestDoubleAffine(
-
 	t *testing.T) {
-
 	tests := []struct {
 		x1, y1 string // Coordinates (in hex) of point to double
 		x3, y3 string // Coordinates (in hex) of expected point
@@ -503,23 +460,17 @@ func TestDoubleAffine(
 		},
 	}
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		// Convert hex to field values.
 		x1, y1 := fromHex(test.x1), fromHex(test.y1)
 		x3, y3 := fromHex(test.x3), fromHex(test.y3)
 		// Ensure the test data is using points that are actually on the curve (or the point at infinity).
-
 		if !(x1.Sign() == 0 && y1.Sign() == 0) && !S256().IsOnCurve(x1, y1) {
-
 			t.Errorf("#%d first point is not on the curve -- "+
 				"invalid test data", i)
 			continue
 		}
-
 		if !(x3.Sign() == 0 && y3.Sign() == 0) && !S256().IsOnCurve(x3, y3) {
-
 			t.Errorf("#%d expected point is not on the curve -- "+
 				"invalid test data", i)
 			continue
@@ -527,9 +478,7 @@ func TestDoubleAffine(
 		// Double the point.
 		rx, ry := S256().Double(x1, y1)
 		// Ensure result matches expected.
-
 		if rx.Cmp(x3) != 00 || ry.Cmp(y3) != 0 {
-
 			t.Errorf("#%d wrong result\ngot: (%x, %x)\n"+
 				"want: (%x, %x)", i, rx, ry, x3, y3)
 			continue
@@ -537,13 +486,9 @@ func TestDoubleAffine(
 	}
 }
 func TestOnCurve(
-
 	t *testing.T) {
-
 	s256 := S256()
-
 	if !s256.IsOnCurve(s256.Params().Gx, s256.Params().Gy) {
-
 		t.Errorf("FAIL S256")
 	}
 }
@@ -584,69 +529,46 @@ var s256BaseMultTests = []baseMultTest{
 
 //TODO: test different curves as well?
 func TestBaseMult(
-
 	t *testing.T) {
-
 	s256 := S256()
-
 	for i, e := range s256BaseMultTests {
-
 		k, ok := new(big.Int).SetString(e.k, 16)
-
 		if !ok {
-
 			t.Errorf("%d: bad value for k: %s", i, e.k)
 		}
 		x, y := s256.ScalarBaseMult(k.Bytes())
-
 		if fmt.Sprintf("%X", x) != e.x || fmt.Sprintf("%X", y) != e.y {
-
 			t.Errorf("%d: bad output for k=%s: got (%X, %X), want (%s, %s)", i, e.k, x, y, e.x, e.y)
 		}
-
 		if testing.Short() && i > 5 {
-
 			break
 		}
 	}
 }
 func TestBaseMultVerify(
-
 	t *testing.T) {
-
 	s256 := S256()
-
 	for bytes := 1; bytes < 40; bytes++ {
-
 		for i := 0; i < 30; i++ {
-
 			data := make([]byte, bytes)
 			_, err := rand.Read(data)
-
 			if err != nil {
-
 				t.Errorf("failed to read random data for %d", i)
 				continue
 			}
 			x, y := s256.ScalarBaseMult(data)
 			xWant, yWant := s256.ScalarMult(s256.Gx, s256.Gy, data)
-
 			if x.Cmp(xWant) != 0 || y.Cmp(yWant) != 0 {
-
 				t.Errorf("%d: bad output for %X: got (%X, %X), want (%X, %X)", i, data, x, y, xWant, yWant)
 			}
-
 			if testing.Short() && i > 2 {
-
 				break
 			}
 		}
 	}
 }
 func TestScalarMult(
-
 	t *testing.T) {
-
 	tests := []struct {
 		x  string
 		y  string
@@ -672,58 +594,43 @@ func TestScalarMult(
 		},
 	}
 	s256 := S256()
-
 	for i, test := range tests {
-
 		x, _ := new(big.Int).SetString(test.x, 16)
 		y, _ := new(big.Int).SetString(test.y, 16)
 		k, _ := new(big.Int).SetString(test.k, 16)
 		xWant, _ := new(big.Int).SetString(test.rx, 16)
 		yWant, _ := new(big.Int).SetString(test.ry, 16)
 		xGot, yGot := s256.ScalarMult(x, y, k.Bytes())
-
 		if xGot.Cmp(xWant) != 0 || yGot.Cmp(yWant) != 0 {
-
 			t.Fatalf("%d: bad output: got (%X, %X), want (%X, %X)", i, xGot, yGot, xWant, yWant)
 		}
 	}
 }
 func TestScalarMultRand(
-
 	t *testing.T) {
-
 	// Strategy for this test:
-
 	// Get a random exponent from the generator point at first This creates a new point which is used in the next iteration Use another random exponent on the new point. We use BaseMult to verify by multiplying the previous exponent and the new random exponent together (mod N)
 	s256 := S256()
 	x, y := s256.Gx, s256.Gy
 	exponent := big.NewInt(1)
-
 	for i := 0; i < 1024; i++ {
-
 		data := make([]byte, 32)
 		_, err := rand.Read(data)
-
 		if err != nil {
-
 			t.Fatalf("failed to read random data at %d", i)
 			break
 		}
 		x, y = s256.ScalarMult(x, y, data)
 		exponent.Mul(exponent, new(big.Int).SetBytes(data))
 		xWant, yWant := s256.ScalarBaseMult(exponent.Bytes())
-
 		if x.Cmp(xWant) != 0 || y.Cmp(yWant) != 0 {
-
 			t.Fatalf("%d: bad output for %X: got (%X, %X), want (%X, %X)", i, data, x, y, xWant, yWant)
 			break
 		}
 	}
 }
 func TestSplitK(
-
 	t *testing.T) {
-
 	tests := []struct {
 		k      string
 		k1, k2 string
@@ -773,36 +680,24 @@ func TestSplitK(
 		},
 	}
 	s256 := S256()
-
 	for i, test := range tests {
-
 		k, ok := new(big.Int).SetString(test.k, 16)
-
 		if !ok {
-
 			t.Errorf("%d: bad value for k: %s", i, test.k)
 		}
 		k1, k2, k1Sign, k2Sign := s256.splitK(k.Bytes())
 		k1str := fmt.Sprintf("%064x", k1)
-
 		if test.k1 != k1str {
-
 			t.Errorf("%d: bad k1: got %v, want %v", i, k1str, test.k1)
 		}
 		k2str := fmt.Sprintf("%064x", k2)
-
 		if test.k2 != k2str {
-
 			t.Errorf("%d: bad k2: got %v, want %v", i, k2str, test.k2)
 		}
-
 		if test.s1 != k1Sign {
-
 			t.Errorf("%d: bad k1 sign: got %d, want %d", i, k1Sign, test.s1)
 		}
-
 		if test.s2 != k2Sign {
-
 			t.Errorf("%d: bad k2 sign: got %d, want %d", i, k2Sign, test.s2)
 		}
 		k1Int := new(big.Int).SetBytes(k1)
@@ -814,26 +709,18 @@ func TestSplitK(
 		gotK := new(big.Int).Mul(k2Int, s256.lambda)
 		gotK.Add(k1Int, gotK)
 		gotK.Mod(gotK, s256.N)
-
 		if k.Cmp(gotK) != 0 {
-
 			t.Errorf("%d: bad k: got %X, want %X", i, gotK.Bytes(), k.Bytes())
 		}
 	}
 }
 func TestSplitKRand(
-
 	t *testing.T) {
-
 	s256 := S256()
-
 	for i := 0; i < 1024; i++ {
-
 		bytesK := make([]byte, 32)
 		_, err := rand.Read(bytesK)
-
 		if err != nil {
-
 			t.Fatalf("failed to read random data at %d", i)
 			break
 		}
@@ -848,9 +735,7 @@ func TestSplitKRand(
 		gotK := new(big.Int).Mul(k2Int, s256.lambda)
 		gotK.Add(k1Int, gotK)
 		gotK.Mod(gotK, s256.N)
-
 		if k.Cmp(gotK) != 0 {
-
 			t.Errorf("%d: bad k: got %X, want %X", i, gotK.Bytes(), k.Bytes())
 		}
 	}
@@ -858,64 +743,44 @@ func TestSplitKRand(
 
 // Test this curve's usage with the ecdsa package.
 func testKeyGeneration(
-
 	t *testing.T, c *KoblitzCurve, tag string) {
-
 	priv, err := NewPrivateKey(c)
-
 	if err != nil {
-
 		t.Errorf("%s: error: %s", tag, err)
 		return
 	}
-
 	if !c.IsOnCurve(priv.PublicKey.X, priv.PublicKey.Y) {
-
 		t.Errorf("%s: public key invalid: %s", tag, err)
 	}
 }
 func TestKeyGeneration(
-
 	t *testing.T) {
-
 	testKeyGeneration(t, S256(), "S256")
 }
 func testSignAndVerify(
-
 	t *testing.T, c *KoblitzCurve, tag string) {
-
 	priv, _ := NewPrivateKey(c)
 	pub := priv.PubKey()
 	hashed := []byte("testing")
 	sig, err := priv.Sign(hashed)
-
 	if err != nil {
-
 		t.Errorf("%s: error signing: %s", tag, err)
 		return
 	}
-
 	if !sig.Verify(hashed, pub) {
-
 		t.Errorf("%s: Verify failed", tag)
 	}
 	hashed[0] ^= 0xff
-
 	if sig.Verify(hashed, pub) {
-
 		t.Errorf("%s: Verify always works!", tag)
 	}
 }
 func TestSignAndVerify(
-
 	t *testing.T) {
-
 	testSignAndVerify(t, S256(), "S256")
 }
 func TestNAF(
-
 	t *testing.T) {
-
 	tests := []string{
 		"6df2b5d30854069ccdec40ae022f5c948936324a4e9ebed8eb82cfd5a6b6d766",
 		"b776e53fb55f6b006a270d42d64ec2b1",
@@ -926,57 +791,39 @@ func TestNAF(
 	negOne := big.NewInt(-1)
 	one := big.NewInt(1)
 	two := big.NewInt(2)
-
 	for i, test := range tests {
-
 		want, _ := new(big.Int).SetString(test, 16)
 		nafPos, nafNeg := NAF(want.Bytes())
 		got := big.NewInt(0)
 		// Check that the NAF representation comes up with the right number
-
 		for i := 0; i < len(nafPos); i++ {
-
 			bytePos := nafPos[i]
 			byteNeg := nafNeg[i]
-
 			for j := 7; j >= 0; j-- {
-
 				got.Mul(got, two)
-
 				if bytePos&0x80 == 0x80 {
-
 					got.Add(got, one)
-
 				} else if byteNeg&0x80 == 0x80 {
-
 					got.Add(got, negOne)
 				}
 				bytePos <<= 1
 				byteNeg <<= 1
 			}
 		}
-
 		if got.Cmp(want) != 0 {
-
 			t.Errorf("%d: Failed NAF got %X want %X", i, got, want)
 		}
 	}
 }
 func TestNAFRand(
-
 	t *testing.T) {
-
 	negOne := big.NewInt(-1)
 	one := big.NewInt(1)
 	two := big.NewInt(2)
-
 	for i := 0; i < 1024; i++ {
-
 		data := make([]byte, 32)
 		_, err := rand.Read(data)
-
 		if err != nil {
-
 			t.Fatalf("failed to read random data at %d", i)
 			break
 		}
@@ -984,31 +831,21 @@ func TestNAFRand(
 		want := new(big.Int).SetBytes(data)
 		got := big.NewInt(0)
 		// Check that the NAF representation comes up with the right number
-
 		for i := 0; i < len(nafPos); i++ {
-
 			bytePos := nafPos[i]
 			byteNeg := nafNeg[i]
-
 			for j := 7; j >= 0; j-- {
-
 				got.Mul(got, two)
-
 				if bytePos&0x80 == 0x80 {
-
 					got.Add(got, one)
-
 				} else if byteNeg&0x80 == 0x80 {
-
 					got.Add(got, negOne)
 				}
 				bytePos <<= 1
 				byteNeg <<= 1
 			}
 		}
-
 		if got.Cmp(want) != 0 {
-
 			t.Errorf("%d: Failed NAF got %X want %X", i, got, want)
 		}
 	}
