@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"git.parallelcoin.io/dev/9/pkg/util/tcell"
-	"git.parallelcoin.io/dev/tview"
+	"git.parallelcoin.io/dev/9/pkg/util/tview"
 )
 
 func main() {

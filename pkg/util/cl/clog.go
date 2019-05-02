@@ -198,9 +198,10 @@ func init() {
 	wg.Add(1)
 	worker := func() {
 		var outbuf string
+		var messagesBuffered int
 		// var lastprint int64
-		var t, s string
 		for {
+			var t, s string
 			select {
 			case <-Quit:
 				ShuttingDown = true
@@ -298,12 +299,14 @@ func init() {
 				if color {
 					t = colorstring.Color("[light_gray]" + t + "[dark_gray]")
 				}
-				if len(outbuf) < 120 {
+				if messagesBuffered < 0 {
 					//  || time.Now().Unix() > lastprint+int64(time.Second) {
 					outbuf += t + s
+					messagesBuffered++
 				} else {
 					fmt.Fprint(Writer, outbuf+t+s)
 					outbuf = ""
+					messagesBuffered = 0
 					// lastprint = time.Now().Unix()
 				}
 			}

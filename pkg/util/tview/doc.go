@@ -36,7 +36,7 @@ world!":
   package main
 
   import (
-  	"git.parallelcoin.io/dev/tview"
+  	"git.parallelcoin.io/dev/9/pkg/util/tview"
   )
 
   func main() {
