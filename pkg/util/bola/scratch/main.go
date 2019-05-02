@@ -2,70 +2,71 @@ package main
 
 import (
 	"fmt"
-	"os"
+	"runtime"
 	"time"
 )
 
-var packetchan = make(chan int, 32)
-var incomingchan = make(chan int, 32)
-var returnchan = make(chan int, 32)
+const queuesize = 1000000
+
+var queue = make(chan int, 1)
+var finished = make(chan struct{})
+var readyreceive = make(chan struct{})
+var factors = make([][]int, queuesize)
 
 func main() {
-	go pusher()
-	go incomer()
-	go returner()
-	select {}
-}
-
-func pusher() {
-	counter := 0
-	done := false
-	for !done {
-		packetchan <- counter
-		fmt.Println(counter, "-> packetchan")
-		time.Sleep(time.Second)
-		counter++
-		if counter > 3 {
-			incomingchan = nil
-			returnchan = nil
-			os.Exit(0)
+	fmt.Println(runtime.NumCPU())
+	timenow := time.Now()
+	go reception()
+	go emitter()
+	<-finished
+	comptime := time.Now().Sub(timenow) / queuesize
+	// println("highest common factor for numbers between 2 and", queuesize)
+	// println()
+	for i, x := range factors {
+		if len(x) == 0 {
+			continue
 		}
+		// if i == 1 {
+		// 	println("prime numbers:")
+		print(i, ": ")
+		for _, y := range x {
+			print(y, " ")
+		}
+		println()
+		// }
+		// time.Sleep(time.Millisecond * 200)
 	}
+	fmt.Println(int(comptime), "ns/op")
 }
 
-func incomer() {
-	counter := 0
-	bundled := []int{}
-	done := false
-	for !done {
-		select {
-		case packet := <-packetchan:
-			if counter == 3 {
-				fmt.Println("-> packetchan {", bundled, "}")
-				counter = 0
-				bundled = []int{}
-			} else {
-				fmt.Println("packetchan <-", packet)
-				bundled = append(bundled, packet)
-				returnchan <- packet
-				fmt.Println(packet, "-> returnchan")
-				counter++
+func ranger(max int) (o []int) {
+	for i := 2; i < max; i++ {
+		o = append(o, i)
+	}
+	return
+}
+
+func emitter() {
+	<-readyreceive
+	// print("receiver is ready, emitting:")
+	for _, x := range ranger(queuesize) {
+		// print(x, ",")
+		queue <- x
+	}
+	// println("finished emitting")
+	finished <- struct{}{}
+	// println()
+}
+
+func reception() {
+	// println("reception opening")
+	readyreceive <- struct{}{}
+	for x := range queue {
+		for i := queuesize; i > 0; i-- {
+			if x%i == 0 && i != x {
+				factors[i] = append(factors[i], x)
+				break
 			}
-		default:
-		}
-	}
-}
-
-func returner() {
-	counter := 0
-	done := false
-	for !done {
-		select {
-		case ret := <-returnchan:
-			fmt.Println("returnchan <-", ret)
-			incomingchan <- ret
-			fmt.Println(ret, "-> incomingchan")
-			counter++
 		}
 	}
 }
