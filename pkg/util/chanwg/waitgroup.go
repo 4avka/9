@@ -20,7 +20,6 @@ func New(bufsize int) *WaitGroup {
 					done = true
 					close(wg.ops)
 				}
-			default:
 			}
 		}
 
