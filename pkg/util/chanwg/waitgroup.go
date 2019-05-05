@@ -1,30 +1,9 @@
 package chanwg
 
 type WaitGroup struct {
+	started bool
 	workers int
 	ops     chan int
-}
-
-func New(bufsize int) *WaitGroup {
-	wg := &WaitGroup{
-		ops: make(chan int, bufsize),
-	}
-	go func() {
-		// wait loop doesn't start until something is put into the ops chan
-		done := false
-		for !done {
-			select {
-			case op := <-wg.ops:
-				wg.workers += op
-				if wg.workers < 1 {
-					done = true
-					close(wg.ops)
-				}
-			}
-		}
-
-	}()
-	return wg
 }
 
 // Add adds a non-negative number
@@ -32,12 +11,31 @@ func (wg *WaitGroup) Add(delta int) {
 	if delta < 0 {
 		return
 	}
-	wg.ops <- delta
+	if wg.started {
+		wg.ops <- delta
+	} else {
+		wg.ops = make(chan int)
+		go func() {
+			done := false
+			for !done {
+				select {
+				case op := <-wg.ops:
+					wg.workers += op
+					if wg.workers < 1 {
+						done = true
+						close(wg.ops)
+					}
+				}
+			}
+
+		}()
+		wg.ops <- delta
+		wg.started = true
+	}
 }
 
 // Done subtracts a non-negative value from the workers count
 func (wg *WaitGroup) Done(delta int) {
-	// println("worker finished")
 	if delta < 0 {
 		return
 	}
