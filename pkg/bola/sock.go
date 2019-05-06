@@ -15,7 +15,8 @@ const (
 )
 
 type Packet struct {
-	ShardNumber byte
-	Size        uint16
 	UUID        uint32
+	ShardNumber byte
+	Payload     []byte
+	Checksum    uint64
 }

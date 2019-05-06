@@ -18,4 +18,10 @@ Instead, since the intent of this library is for the implementation of low laten
 
 The use of this library is extremely straightforward. You feed in arbitrary data, of up to `required` pieces, maximum shard size of 64kb (thus `required*2<<16` max data payload size, and 11 bytes overhead for checksum each piece), and it returns an array of shards of the specified number, the first `required` number are the original message, plus padding, the remainder up to `total` size, and each shard has its shard number as a 1 byte prefix and at the beginning of shard 0 is the total payload length covered by the checksum at the end.
 
-Thus, this implementation is quite opinionated, and makes the tradeoff in favour of low processing cost over redundant data overhead, as it is intended to provide the minimum cost of latency.
+In addition, the checksum covers an initial 32 bit UUID prefix that allows related shards to be identified quickly without error detection, this is provided by the decoder, as is correcting shard order.
+
+Thus, this implementation is quite opinionated, and makes the tradeoff in favour of low processing cost over redundant data overhead, as it is intended to provide the minimum cost of latency. It also does not regenerate any shards that aren't needed to get the payload back out of enough pieces, it basically eliminates all of the extra work that various error detection methods use and provides 100% reliable and fast recovery given `required` pieces arrive with their checksum correct.
+
+## Caveats
+
+Note that there is no accounting for spoofing attempts with the data payload format implemented herein. It is assumed that the network layer will include some form of spoofing protection, the simplest and likely to be used is a pre-shared key - only authorised clients will have this key and thus attempted spoofed packets will not pass the error correction as the incorrect cypher will produce garbage. This feature will also secure the content of the packets. Initially it was going to be encryption *inside* the packets but using it outside the packets provides spoofing protection inherently against nodes without access to the secret.

@@ -1,6 +1,10 @@
 package fek
 
 import (
+	"crypto/rand"
+	"encoding/binary"
+	"fmt"
+
 	"github.com/templexxx/reedsolomon"
 )
 
@@ -32,8 +36,10 @@ func New(required, total int) *RS {
 	return &RS{rsc, required, total}
 }
 
-// Encode returns a slice of the shards, each with first byte containing the
-// shard number. Detecting their corruption requires
+// Encode returns a slice of the shards, each with the same initial 4 byte UUID,
+// the shard number, payload, and final 8 byte HighwayHash checksum
+// By including a UUID, consumers of this library can identify shards of the same
+// original packet without verifying the packet (that is all done in decode)
 func (r *RS) Encode(data []byte) [][]byte {
 	padded := PadData(data, r.required, r.total)
 	splitted := Split(padded, r.required, r.total)
@@ -49,21 +55,47 @@ func (r *RS) Encode(data []byte) [][]byte {
 	if err != nil {
 		return nil
 	}
+	UUID := make([]byte, 4)
+	_, err = rand.Read(UUID)
+	if err != nil {
+		// this is an event indicating the apocalypse is in process
+		panic(err)
+	}
 	for i, x := range splitted {
-		splitted[i] = append([]byte{byte(i)}, x...)
+		splitted[i] = append(UUID, append([]byte{byte(i)}, x...)...)
 		splitted[i] = AppendChecksum(splitted[i])
 	}
 	return splitted
 }
 
-// Decode da de daa
+// Decode reverses the transformation from Encode. The shards must have the same
+// UUID prefix or the bundle will be rejected.
 func (r *RS) Decode(shards [][]byte) (out []byte) {
 	bytes := make(map[int][]byte)
 	shardLens := make([]int, r.total)
 	var ok bool
+	var uuid uint32
 	for i, x := range shards {
+		fmt.Println(x)
 		if shards[i], ok = VerifyChecksum(x); ok {
-			bytes[int(shards[i][0])] = shards[i][1:]
+			if len(shards[i]) < 6 {
+				// A minimal payload of 1 byte takes 6 bytes, if the shard is
+				// smaller than this the following code will cause bounds errors
+				return nil
+			}
+			uuidb := shards[i][:4]
+			shardnum := shards[i][4]
+			payload := shards[i][5:]
+			// the first 4 bytes of each shard should be the same
+			u := binary.LittleEndian.Uint32(uuidb)
+			if i == 0 {
+				uuid = u
+			} else if u != uuid {
+
+				// UUID does not match, these can't be from the same set
+				return nil
+			}
+			bytes[int(shardnum)] = payload
 		}
 	}
 	for i, x := range bytes {
