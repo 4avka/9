@@ -1,16 +1,15 @@
 package fek
+
 import (
 	"github.com/templexxx/reedsolomon"
 )
-const (
-	ShardsTotal    = 9
-	ShardsRequired = 3
-)
+
 type RS struct {
 	*reedsolomon.RS
 	required int
 	total    int
 }
+
 func Split(data []byte, required, total int) [][]byte {
 	b := make([][]byte, total)
 	shardSize := len(data) / required
@@ -52,10 +51,12 @@ func (r *RS) Encode(data []byte) [][]byte {
 	}
 	for i, x := range splitted {
 		splitted[i] = append([]byte{byte(i)}, x...)
-		// splitted[i] = AppendChecksum(splitted[i])
+		splitted[i] = AppendChecksum(splitted[i])
 	}
 	return splitted
 }
+
+// Decode da de daa
 func (r *RS) Decode(shards [][]byte) (out []byte) {
 	bytes := make(map[int][]byte)
 	shardLens := make([]int, r.total)

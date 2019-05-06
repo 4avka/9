@@ -1,6 +1,7 @@
+// Package fek is a Reed Solomon 9/3 forward error correction, intended to be 
+// sent as 9 pieces where 3 uncorrupted parts allows assembly of the message
 package fek
 
-// Reed Solomon 9/3 forward error correction, intended to be sent as 9 pieces where 3 uncorrupted parts allows assembly of the message
 import (
 	"encoding/binary"
 )

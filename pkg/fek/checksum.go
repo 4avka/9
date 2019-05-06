@@ -6,9 +6,9 @@ import (
 
 var Zerokey = make([]byte, 32)
 
-func GetChecksum(in []byte) []byte {
-	return Uint64ToBytes(highwayhash.Sum64(in, Zerokey))
-}
+// func GetChecksum(in []byte) []byte {
+// 	return Uint64ToBytes(highwayhash.Sum64(in, Zerokey))
+// }
 
 func AppendChecksum(in []byte) []byte {
 	return append(in, Uint64ToBytes(highwayhash.Sum64(in, Zerokey))...)
@@ -28,7 +28,7 @@ func VerifyChecksum(in []byte) (out []byte, verified bool) {
 	return
 }
 
-// Uint64ToBytes - returns a byte slice from uint64 - required because Murmur3 takes bytes as input but returns uint32
+// Uint64ToBytes - returns a byte slice from uint64 - required because highwayhash takes bytes as input but returns uint32
 func Uint64ToBytes(input uint64) (out []byte) {
 	out = make([]byte, 8)
 	for i := range out {
