@@ -121,7 +121,7 @@ func (r *RS) Encode(data []byte) [][]byte {
 }
 
 // Decode reverses the transformation from Encode. The shards must have the same
-// UUID prefix or the bundle will be rejected.
+// UUID prefix or they will be rejected
 func (r *RS) Decode(shards [][]byte) (out []byte) {
 	bytes := make(map[int][]byte)
 	shardLens := make([]int, r.total)
