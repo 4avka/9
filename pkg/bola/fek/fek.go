@@ -70,6 +70,8 @@ func (r *RS) Decode(shards [][]byte) (out []byte) {
 	}
 	work := make([][]byte, len(shards))
 	var erasedShards [][]byte
+	// correct shards have their shard number read and placed in correct order
+	// in another working slice
 	for i := range shards {
 		if !erased[i] {
 			work[shards[i][0]] = shards[i][1:]
@@ -80,9 +82,13 @@ func (r *RS) Decode(shards [][]byte) (out []byte) {
 	counter := 0
 	missing := []int{}
 	found := []int{}
+	// reattach the empty shards to the lost positions in the working slice
 	for i := range shards {
 		if work[i] == nil {
-			missing = append(missing, i)
+			// only the data shards need reconstruction
+			if i <= r.required {
+				missing = append(missing, i)
+			}
 			shards[i] = erasedShards[counter]
 			counter++
 		} else {
@@ -90,16 +96,22 @@ func (r *RS) Decode(shards [][]byte) (out []byte) {
 			found = append(found, i)
 		}
 	}
-	err := r.Reconst(shards, found[:r.required], missing)
+	// If we didn't get the required number we can't possibly recover the data
+	if len(found) < r.required {
+		return
+	}
+	err := r.Reconst(shards, found, missing)
 	if err != nil {
 		return nil
 	}
+	// join the recovered shards
 	for i, x := range shards {
 		if i > r.required {
 			break
 		}
 		out = append(out, x...)
 	}
+	// decode length prefix and remove padding
 	dl, prefixLen := binary.Uvarint(out)
 	return out[prefixLen : prefixLen+int(dl)]
 }
@@ -221,7 +233,6 @@ func UUIDtoUint32(uuid []byte) uint32 {
 		u := make([]byte, 4)
 		copy(u, uuid)
 	}
-	// _ = uuid[3]
 	return binary.LittleEndian.Uint32(uuid)
 }
 
