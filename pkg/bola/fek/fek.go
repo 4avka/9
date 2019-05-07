@@ -1,10 +1,14 @@
 package fek
 
 import (
+	"crypto/rand"
 	"encoding/binary"
 
+	"github.com/minio/highwayhash"
 	"github.com/templexxx/reedsolomon"
 )
+
+var Zerokey = make([]byte, 32)
 
 type RS struct {
 	*reedsolomon.RS
@@ -21,15 +25,32 @@ func New(required, total int) *RS {
 	return &RS{rsc, required, total}
 }
 
-func (r *RS) Encode(data []byte) [][]byte {
-	return nil
+func (r *RS) Encode(uuid []byte, data []byte) [][]byte {
+	padded := r.pad(data)
+	splitted := r.split(padded)
+	var have, missing []int
+	for i := 0; i < r.total; i++ {
+		if i < r.required {
+			have = append(have, i)
+		} else {
+			missing = append(missing, i)
+		}
+	}
+	err := r.Reconst(splitted, have, missing)
+	if err != nil {
+		return nil
+	}
+	for i := range splitted {
+		splitted[i] = AppendChecksum(append(uuid, append([]byte{byte(i)}, splitted[i]...)...))
+	}
+	return splitted
 }
 
 func (r *RS) Decode(shards [][]byte) []byte {
 	return nil
 }
 
-// pad takes a piece of data and pads it according to the total set in RS
+// pad takes a piece of data and pads it according to the total required by RS
 func (r *RS) pad(data []byte) (out []byte) {
 	dataLen := len(data)
 	prefixBytes := make([]byte, 8)
@@ -82,6 +103,56 @@ func (r *RS) join(shards [][]byte) (out []byte) {
 	// as is resultant from Decode (it only regenerates the data shards)
 	for i := 0; i < r.required; i++ {
 		out = append(out, shards[i]...)
+	}
+	return
+}
+
+// GetUUID returns a cryptographically secure 8 byte UUID
+func GetUUID() []byte {
+	uuid := make([]byte, 4)
+	n, e := rand.Read(uuid)
+	if n != 4 || e != nil {
+		panic(e)
+	}
+	return uuid
+}
+
+// UUIDtoUint64 converts the UUID to a comparable uint64
+func UUIDtoUint32(uuid []byte) uint32 {
+	if len(uuid) != 4 {
+		u := make([]byte, 4)
+		copy(u, uuid)
+	}
+	return binary.LittleEndian.Uint32(uuid)
+}
+
+func Uint32toUUID(uuid uint32) (out []byte) {
+	out = make([]byte, 4)
+	binary.LittleEndian.PutUint32(out, uuid)
+	return
+}
+
+func AppendChecksum(in []byte) []byte {
+	return append(in, Uint64ToBytes(highwayhash.Sum64(in, Zerokey))...)
+}
+
+// Uint64ToBytes - returns a byte slice from uint64 - required because highwayhash takes bytes as input but returns uint32
+func Uint64ToBytes(input uint64) (out []byte) {
+	out = make([]byte, 8)
+	for i := range out {
+		out[i] = byte(input >> uint(i*8))
+	}
+	return
+}
+
+// BytesToUint64 - converts 4 byte slice to uint32
+func BytesToUint64(bytes []byte) (out uint64) {
+	_ = bytes[7]
+	// We are taking off the seatbelt here for performance reasons. We know that
+	// the hash is uint64 thus we won't check it is right. Uint64() will panic
+	// either way if the slice is not at least 8 bytes
+	for i, x := range bytes {
+		out += uint64(x) << uint(i*8)
 	}
 	return
 }
