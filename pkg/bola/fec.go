@@ -219,7 +219,8 @@ func PadData(data []byte, required, total int) []byte {
 // prefix and slicing off the extra bytes
 func UnpadData(data []byte) (out []byte) {
 	prefixBytes := data[:2]
-	payloadLen := binary.LittleEndian.Uint16(prefixBytes) //PutUint16(prefixBytes, uint16(dataLen))
+	payloadLen := binary.LittleEndian.Uint16(prefixBytes)
+	//PutUint16(prefixBytes, uint16(dataLen))
 	if len(data) < int(payloadLen) {
 		// return empty slice to indicate error, payload is truncated
 		return nil
