@@ -35,4 +35,4 @@ especially to conserve on heap allocations, to further minimise its cost.
 
 > ### footnote
 > \* and no such thing as politically correct to the apolitical. See LICENCE for 
-more info
+> more info
