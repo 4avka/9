@@ -41,33 +41,25 @@ func TestCodec(t *testing.T) {
 	t.Log("original")
 	t.Log(len(testData), testData)
 	uuid := GetUUID()
-	shards := rs.Encode(uuid, testData)
+	frags := rs.Encode(uuid, testData)
 	t.Log("encoded")
-	for i := range shards {
-		t.Log(len(shards[i]), shards[i][:4], shards[i][4:5],
-			shards[i][5:len(shards[i])-8],
-			shards[i][len(shards[i])-8:])
+	for i := range frags {
+		// frags[i] = AppendChecksum(frags[i])
+		t.Log(len(frags[i]), frags[i][:4], frags[i][4:5],
+			frags[i][5:len(frags[i])-8],
+			frags[i][len(frags[i])-8:])
 	}
-	// puncture the heck out of the shards
-	shards[0][6] = 0
-	shards[1][6] = 0
-	shards[2][6] = 0
-	shards[4][6] = 0
-	shards[6][6] = 0
-	shards[8][6] = 0
-	// reverse the order of the shards
-	for i := 0; i < len(shards)/2; i++ {
-		shards[i], shards[8-i] = shards[8-i], shards[i]
+	// puncture the heck out of the frags and jumble them
+	frags = [][]byte{frags[5], frags[3], frags[7]}
+	t.Log("damaged and jumbled")
+	for i := range frags {
+		t.Log(len(frags[i][5:len(frags[i])-8]), frags[i][5:len(frags[i])-8])
 	}
-	t.Log("damaged and reversed")
-	for i := range shards {
-		t.Log(len(shards[i]), shards[i])
-	}
-	result := rs.Decode(shards)
-	t.Log("reconstituted with only 3 valid pieces")
-	for i := range shards {
-		t.Log(len(shards[i]), shards[i])
-	}
+	result := rs.Decode(frags)
+	// t.Log("reconstituted with only 3 valid pieces")
+	// for i := range frags {
+	// 	t.Log(len(frags[i][1:]), frags[i][1:])
+	// }
 	t.Log("result")
 	t.Log(len(result), result)
 	if bytes.Compare(testData, result) != 0 {

@@ -35,3 +35,21 @@ Stealing solutions is impractical as the node delivers only the block header, an
 Thus, the main way an attack can take place on this protocol is the prevention of correct decoding of packets, by injecting valid but wrong-payload bearing shards, making the reception of packets more unpredictable. Reed Solomon encoding has the limitation that all shards must be in order and if an attacker could construct a valid shard, or two, it can prevent the correct decoding and dropping of the packet, and loss, potentially, of a solution thereby.
 
 Thus, the necessary security is prevention of the ability to construct valid but incorrect packets that break the decoding process. The lifetime of these packets' value is about 1 second, which is way shorter than 52 bits of cryptographic security can be reversed without formidable resources located close to the target.
+
+## Architecture Overview
+
+Bola uses a buffered channel to collect incoming packets in a FIFO queue (channel buffers are FIFO) and a worker consumes the packets, pulling through the queue looking for matching packet UUIDs.
+
+The master thread is a reception, and it spawns the bundlers for each distinct source (by its ip/port) and tracks their traffic and terminates the worker when inbound traffic ceases for some number of seconds.
+
+Bundlers are not initialised and then stopped, they are instead paused and retargeted, and then after they are idle for some amount of time it frees the worker as it isn't needed and is consuming memory.
+
+The receiver increments a counter for every packet it receives, which can be safely queried by the bundler thread (what about multiple, and mutex on the bundle slice).
+
+The bundlers increment a counter indicating the number of times a packet has been picked off the main queue, which the receiver can later use to determine if it needs increase the buffer size, up to a set maximum buffer size set by the caller optionally when initializing.
+
+The bundles are collected in a buffered packet slice channel (with buffer size proportional to the packet buffer), and in this way multiple workers can pick a bundle for checking until range completes, then ranging over the main buffer with a packet plucked off the packet channel.
+
+Buffer sizes should be configurable by the user but also potentially be associated with the number of intended worker nodes that will communicate over the channel.
+
+The workers only need relatively small Bolas, but the node needs to really have one thread for each worker to get maximum responsiveness, so the dispatcher on the full node has big Bolas. The value will be a per-connection based coefficient, which sets the number of buffers per connection, which will depend on the workload, and the number of nodes. 

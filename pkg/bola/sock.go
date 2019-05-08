@@ -10,8 +10,8 @@ const (
 	maxMessageSize = 3072
 	// default channel buffer sizes for Base
 	baseChanBufs = 128
-	// latency maximum
-	latencyMax = time.Millisecond * 250
+	// timeout for bundles
+	timeout = time.Millisecond * 250
 )
 
 type Packet struct {
