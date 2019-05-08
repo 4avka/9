@@ -3,9 +3,7 @@ package fek
 import (
 	"crypto/rand"
 	"encoding/binary"
-	"fmt"
 
-	"github.com/minio/highwayhash"
 	"github.com/templexxx/reedsolomon"
 )
 
@@ -17,13 +15,12 @@ type RS struct {
 	total    int
 }
 
-func New(required, total int) *RS {
+func New(required, total int) (out *RS) {
 	rsc, err := reedsolomon.New(required, total-required)
-	if err != nil {
-		// Only error condition is total < 0 && total > 256
-		return nil
+	if err == nil {
+		out = &RS{rsc, required, total}
 	}
-	return &RS{rsc, required, total}
+	return
 }
 
 // Encode takes a uuid and a slice of bytes, pads, splits, generates parity
@@ -33,7 +30,7 @@ func New(required, total int) *RS {
 // checksum, which will be used by the decoder to erase invalid frags. The
 // shard number prefix is used to put the frags in their correct position for
 // decoding
-func (r *RS) Encode(uuid []byte, data []byte) [][]byte {
+func (r *RS) Encode(uuid []byte, data []byte) (out [][]byte) {
 	padded := r.pad(data)
 	splitted := r.split(padded)
 	var have, missing []int
@@ -45,16 +42,16 @@ func (r *RS) Encode(uuid []byte, data []byte) [][]byte {
 		}
 	}
 	err := r.Reconst(splitted, have, missing)
-	if err != nil {
-		return nil
+	if err == nil {
+		for i := range splitted {
+			// append uuid and shard number to front of each shard and append checksum
+			splitted[i] =
+				append(uuid, append([]byte{byte(i)}, splitted[i]...)...)
+			// AppendChecksum()
+		}
+		out = splitted
 	}
-	for i := range splitted {
-		// append uuid and shard number to front of each shard and append checksum
-		splitted[i] =
-			append(uuid, append([]byte{byte(i)}, splitted[i]...)...)
-		// AppendChecksum()
-	}
-	return splitted
+	return
 }
 
 // Decode takes a set of frags which are assumed to have the same 4 byte UUID
@@ -65,8 +62,10 @@ func (r *RS) Encode(uuid []byte, data []byte) [][]byte {
 // are, and only in this way they validate.
 func (r *RS) Decode(frags [][]byte) (out []byte) {
 	// erased := make([]bool, len(frags))
+	success := false
 	shardLen, lastLen := 0, 0
 	for i := range frags {
+		success = false
 		// Next remove the UUID prefix
 		shardLen = len(frags[i])
 		if shardLen > 6 {
@@ -74,55 +73,50 @@ func (r *RS) Decode(frags [][]byte) (out []byte) {
 			shardLen = len(frags[i])
 		}
 		// check the shard length isn't changed
-		if i > 0 && lastLen != shardLen {
-			// This is a fatal condition, as the frags must be equal sized
-			return nil
-		}
+		success = i <= 1 || lastLen == shardLen
 		lastLen = shardLen
 	}
-	work := make([][]byte, r.total)
-	// correct frags have their shard number read and placed in correct order
-	// full length working slice, so we can just read them off into the
-	// assignment into the work slice position
-	found := []int{}
-	for i := range frags {
-		work[frags[i][0]] = frags[i][1:shardLen]
-		found = append(found, int(frags[i][0]))
-	}
-	// the length from above includes the shard number byte
-	shardLen--
-	// If we didn't get the required number we can't possibly recover the data
-	if len(found) < r.required {
-		return
-	}
-	missing := []int{}
-	// populate the remaining empty slices with the same length
-	for i := range work {
-		if work[i] == nil {
-			// only the data frags need reconstruction
-			if i <= r.required {
-				missing = append(missing, i)
+	if success {
+		work := make([][]byte, r.total)
+		// correct frags have their shard number read and placed in correct order
+		// full length working slice, so we can just read them off into the
+		// assignment into the work slice position
+		found := []int{}
+		for i := range frags {
+			work[frags[i][0]] = frags[i][1:shardLen]
+			found = append(found, int(frags[i][0]))
+		}
+		// the length from above includes the shard number byte
+		shardLen--
+		// If we didn't get the required number we can't possibly recover the data
+		if len(found) >= r.required {
+			missing := []int{}
+			// populate the remaining empty slices with the same length
+			for i := range work {
+				if work[i] == nil {
+					// only the data frags need reconstruction
+					if i <= r.required {
+						missing = append(missing, i)
+					}
+					work[i] = make([]byte, shardLen)
+				}
 			}
-			work[i] = make([]byte, shardLen)
+			err := r.Reconst(work,
+				found,
+				missing)
+			if err == nil {
+				out = make([]byte, 0, shardLen*r.required)
+				// join the recovered frags
+				for i := 0; i <= r.required; i++ {
+					out = append(out, work[i]...)
+				}
+				// decode length prefix and remove padding
+				dl, prefixLen := binary.Uvarint(out)
+				out = out[prefixLen : prefixLen+int(dl)]
+			}
 		}
 	}
-	fmt.Println(found, missing)
-	err := r.Reconst(work,
-		found,
-		missing)
-	if err != nil {
-		return nil
-	}
-	// join the recovered frags
-	for i, x := range work {
-		if i > r.required {
-			break
-		}
-		out = append(out, x...)
-	}
-	// decode length prefix and remove padding
-	dl, prefixLen := binary.Uvarint(out)
-	return out[prefixLen : prefixLen+int(dl)]
+	return
 }
 
 // pad takes a piece of data and pads it according to the total and required by
@@ -147,13 +141,13 @@ func (r *RS) pad(data []byte) (out []byte) {
 }
 
 // unpad takes a padded piece of data and returns the unpadded content
-func (r *RS) unpad(data []byte) []byte {
+func (r *RS) unpad(data []byte) (out []byte) {
 	dl, prefixLen := binary.Uvarint(data)
 	dataLen := int(dl)
-	if len(data) < dataLen+prefixLen {
-		return nil
+	if len(data) >= dataLen+prefixLen {
+		out = data[prefixLen : dataLen+prefixLen]
 	}
-	return data[prefixLen : dataLen+prefixLen]
+	return
 }
 
 // split returns a slice of byte slices split into r.required pieces
@@ -186,67 +180,67 @@ func (r *RS) join(frags [][]byte) (out []byte) {
 }
 
 // GetUUID returns a cryptographically secure 8 byte UUID
-func GetUUID() []byte {
+func GetUUID() (out []byte) {
 	uuid := make([]byte, 4)
 	n, e := rand.Read(uuid)
-	if n != 4 || e != nil {
-		panic(e)
-	}
-	return uuid
-}
-
-func AppendChecksum(in []byte) []byte {
-	return append(in, Uint64ToBytes(highwayhash.Sum64(in, Zerokey))...)
-}
-
-// DetectAndEraseIfError checks that the appended 64 bit checksum is correct
-// If it is incorrect, an empty slice same size as the payload will be returned
-// which is what the decoder needs
-func DetectAndEraseIfError(in []byte) (out []byte, erased bool) {
-	l := len(in)
-	if l > 8 {
-		var checksum uint64
-		out, checksum = in[:l-8], BytesToUint64(in[l-8:])
-		computed := highwayhash.Sum64(out, Zerokey)
-		if computed != checksum {
-			erased = true
-			// zero out slice (this should be compiled to a single memset op)
-			for i := range out {
-				out[i] = 0
-			}
-		}
+	if n == 4 || e == nil {
+		out = uuid
 	}
 	return
 }
 
-// Uint64ToBytes - returns a byte slice from uint64 - required because highwayhash takes bytes as input but returns uint32
-func Uint64ToBytes(input uint64) (out []byte) {
-	out = make([]byte, 8)
-	for i := range out {
-		out[i] = byte(input >> uint(i*8))
-	}
-	return
-}
+// func AppendChecksum(in []byte) []byte {
+// 	return append(in, Uint64ToBytes(highwayhash.Sum64(in, Zerokey))...)
+// }
 
-// BytesToUint64 - converts 4 byte slice to uint32
-func BytesToUint64(bytes []byte) (out uint64) {
-	for i, x := range bytes {
-		out += uint64(x) << uint(i*8)
-	}
-	return
-}
+// // DetectAndEraseIfError checks that the appended 64 bit checksum is correct
+// // If it is incorrect, an empty slice same size as the payload will be returned
+// // which is what the decoder needs
+// func DetectAndEraseIfError(in []byte) (out []byte, erased bool) {
+// 	l := len(in)
+// 	if l > 8 {
+// 		var checksum uint64
+// 		out, checksum = in[:l-8], BytesToUint64(in[l-8:])
+// 		computed := highwayhash.Sum64(out, Zerokey)
+// 		if computed != checksum {
+// 			erased = true
+// 			// zero out slice (this should be compiled to a single memset op)
+// 			for i := range out {
+// 				out[i] = 0
+// 			}
+// 		}
+// 	}
+// 	return
+// }
 
-// UUIDtoUint64 converts the UUID to a comparable uint64
-func UUIDtoUint32(uuid []byte) uint32 {
-	if len(uuid) != 4 {
-		u := make([]byte, 4)
-		copy(u, uuid)
-	}
-	return binary.LittleEndian.Uint32(uuid)
-}
+// // Uint64ToBytes - returns a byte slice from uint64 - required because highwayhash takes bytes as input but returns uint32
+// func Uint64ToBytes(input uint64) (out []byte) {
+// 	out = make([]byte, 8)
+// 	for i := range out {
+// 		out[i] = byte(input >> uint(i*8))
+// 	}
+// 	return
+// }
 
-func Uint32toUUID(uuid uint32) (out []byte) {
-	out = make([]byte, 4)
-	binary.LittleEndian.PutUint32(out, uuid)
-	return
-}
+// // BytesToUint64 - converts 4 byte slice to uint32
+// func BytesToUint64(bytes []byte) (out uint64) {
+// 	for i, x := range bytes {
+// 		out += uint64(x) << uint(i*8)
+// 	}
+// 	return
+// }
+
+// // UUIDtoUint64 converts the UUID to a comparable uint64
+// func UUIDtoUint32(uuid []byte) uint32 {
+// 	if len(uuid) != 4 {
+// 		u := make([]byte, 4)
+// 		copy(u, uuid)
+// 	}
+// 	return binary.LittleEndian.Uint32(uuid)
+// }
+
+// func Uint32toUUID(uuid uint32) (out []byte) {
+// 	out = make([]byte, 4)
+// 	binary.LittleEndian.PutUint32(out, uuid)
+// 	return
+// }
