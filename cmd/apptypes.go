@@ -119,6 +119,20 @@ func (r *App) UnmarshalJSON(data []byte) error {
 type AppGenerator func(ctx *App)
 type AppGenerators []AppGenerator
 
+func (r *RowGenerators) RunAll(row *Row) {
+	for _, x := range *r {
+		x(row)
+	}
+}
+
+func (r *CommandGenerators) RunAll() *Command {
+	c := &Command{}
+	for _, x := range *r {
+		x(c)
+	}
+	return c
+}
+
 func (r *AppGenerators) RunAll(app *App) {
 	for _, x := range *r {
 		x(app)

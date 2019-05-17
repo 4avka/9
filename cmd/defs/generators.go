@@ -12,8 +12,24 @@ import (
 	"time"
 
 	"git.parallelcoin.io/dev/9/cmd/nine"
+	"git.parallelcoin.io/dev/9/pkg/util"
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
+
+// DataDir is the folder all servers and apps in this suite use to store
+// configuration and working data
+var DataDir string = filepath.Dir(util.AppDataDir("9", false))
+
+// Networks is the list of network types the node and wallet can connect to
+var Networks = []string{"mainnet", "testnet", "simnet", "regtestnet"}
+
+// NetParams stores the information required to set the parameters for the network
+var NetParams = map[string]*nine.Params{
+	"mainnet":    &nine.MainNetParams,
+	"testnet":    &nine.TestNet3Params,
+	"simnet":     &nine.SimNetParams,
+	"regtestnet": &nine.RegressionNetParams,
+}
 
 // NewApp generates a new App using a collection of generator functions passed to it
 func NewApp(name string, g ...AppGenerator) (out *App) {
@@ -820,122 +836,24 @@ func (r *AppGenerators) RunAll(app *App) {
 	return
 }
 
-// getValue returns the value contained in a Cats
-func (r *Cats) getValue(cat, item string) (out *interface{}) {
-	if r == nil {
-		return
-	} else if C, ok := (*r)[cat]; !ok {
-		return
-	} else if cc, ok := C[item]; !ok {
-		return
-	} else {
-		o := cc.Value.Get()
-		return &o
-	}
-}
-
-// Str returns the pointer to a value in the category map
-func (r *Cats) Str(cat, item string) (out *string) {
-	cv := r.getValue(cat, item)
-	if cv == nil {
-		return
-	}
-	CC := *cv
-	if ci, ok := CC.(string); !ok {
-		return
-	} else {
-		return &ci
-	}
-}
-
-// Tags returns the pointer to a value in the category map
-func (r *Cats) Tags(cat, item string) (out *[]string) {
-	cv := r.getValue(cat, item)
-	if cv == nil {
-		return
-	}
-	CC := *cv
-	if ci, ok := CC.([]string); !ok {
-		return
-	} else {
-		return &ci
-	}
-}
-
-// Map returns the pointer to a value in the category map
-func (r *Cats) Map(cat, item string) (out *nine.Mapstringstring) {
-	cv := r.getValue(cat, item)
-	if cv == nil {
-		return
-	}
-	CC := *cv
-	if ci, ok := CC.(nine.Mapstringstring); !ok {
-		return
-	} else {
-		return &ci
-	}
-}
-
-// Int returns the pointer to a value in the category map
-func (r *Cats) Int(cat, item string) (out *int) {
-	cv := r.getValue(cat, item)
-	if cv == nil {
-		return
-	}
-	CC := *cv
-	if ci, ok := CC.(int); !ok {
-		return
-	} else {
-		return &ci
-	}
-}
-
-// Bool returns the pointer to a value in the category map
-func (r *Cats) Bool(cat, item string) (out *bool) {
-	cv := r.getValue(cat, item)
-	if cv == nil {
-		return
-	}
-	CC := *cv
-	if ci, ok := CC.(bool); !ok {
-		return
-	} else {
-		return &ci
-	}
-}
-
-// Float returns the pointer to a value in the category map
-func (r *Cats) Float(cat, item string) (out *float64) {
-	cv := r.getValue(cat, item)
-	if cv == nil {
-		return
-	}
-	CC := *cv
-	if ci, ok := CC.(float64); !ok {
-		return
-	} else {
-		return &ci
-	}
-}
-
-// Duration returns the pointer to a value in the category map
-func (r *Cats) Duration(cat, item string) (out *time.Duration) {
-	cv := r.getValue(cat, item)
-	if cv == nil {
-		return
-	}
-	CC := *cv
-	if ci, ok := CC.(time.Duration); !ok {
-		return
-	} else {
-		return &ci
-	}
-}
-
 // RunAll runs a collection of CatGenerators on a Cat
 func (r *CatGenerators) RunAll(cat Cat) {
 	for _, x := range *r {
 		x(&cat)
 	}
 	return
+}
+
+func (r *RowGenerators) RunAll(row *Row) {
+	for _, x := range *r {
+		x(row)
+	}
+}
+
+func (r *CommandGenerators) RunAll() *Command {
+	c := &Command{}
+	for _, x := range *r {
+		x(c)
+	}
+	return c
 }

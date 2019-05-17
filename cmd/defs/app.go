@@ -114,9 +114,3 @@ type Optional []string
 // Precedent is a set of possible valid items that match preferentially
 // to the item in a Command
 type Precedent []string
-
-// Iface is an abstract container that simplifies handling interface
-// variables
-type Iface struct {
-	Data *interface{}
-}
