@@ -1,9 +1,10 @@
-package defs
+package app
 
 import (
 	"regexp"
 
 	"git.parallelcoin.io/dev/9/cmd/nine"
+	"git.parallelcoin.io/dev/9/pkg/ifc"
 )
 
 type App struct {
@@ -28,10 +29,10 @@ type Row struct {
 	Name     string
 	Type     string
 	Opts     []string
-	Value    *Iface
-	Default  *Iface
-	Min      *Iface
-	Max      *Iface
+	Value    *ifc.Iface
+	Default  *ifc.Iface
+	Min      *ifc.Iface
+	Max      *ifc.Iface
 	Init     func(*Row)
 	Get      func() interface{}
 	Put      func(interface{}) bool

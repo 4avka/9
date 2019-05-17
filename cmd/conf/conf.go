@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"git.parallelcoin.io/dev/9/cmd/defs"
+	"git.parallelcoin.io/dev/9/cmd/app"
 	"git.parallelcoin.io/dev/tcell"
 	"git.parallelcoin.io/dev/tview"
 )
@@ -19,30 +19,10 @@ const menutitle = "ⓟ parallelcoin 9 configuration CLI"
 var iteminput *tview.InputField
 var toggle *tview.Table
 
-func MainColor() tcell.Color {
-	return tcell.NewRGBColor(64, 64, 64)
-}
-
-func DimColor() tcell.Color {
-	return tcell.NewRGBColor(48, 48, 48)
-}
-
-func PrelightColor() tcell.Color {
-	return tcell.NewRGBColor(32, 32, 32)
-}
-
-func TextColor() tcell.Color {
-	return tcell.NewRGBColor(216, 216, 216)
-}
-
-func BackgroundColor() tcell.Color {
-	return tcell.NewRGBColor(16, 16, 16)
-}
-
-func Run(args []string, tokens Tokens, app *defs.App) int {
+// Run the menu system
+func Run(args []string, tokens app.Tokens, ap *app.App) int {
 	var cattable *tview.Table
 	var cattablewidth int
-
 	var activepage *tview.Flex
 	var inputhandler func(event *tcell.EventKey) *tcell.EventKey
 	var cat, itemname string
@@ -72,7 +52,7 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 	launchtable, launchtablewidth := genMenu(launchmenutexts...)
 	prelightTable(launchtable)
 
-	catstable, catstablewidth := genMenu(app.Cats.GetSortedKeys()...)
+	catstable, catstablewidth := genMenu(ap.Cats.GetSortedKeys()...)
 	prelightTable(catstable)
 
 	menuflex := tview.NewFlex().
@@ -157,7 +137,7 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 			tapp.SetFocus(roottable)
 		})
 		resetform.AddButton("reset to factory settings", func() {
-			for _, x := range app.Cats {
+			for _, x := range ap.Cats {
 				for _, z := range x {
 					z.Init(z)
 				}
@@ -275,15 +255,15 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 		case 1:
 			tapp.Stop()
 			fmt.Println("starting up", launchmenutexts[y-1])
-			app.Commands[launchmenutexts[y-1]].Handler(args, tokens, app)
+			ap.Commands[launchmenutexts[y-1]].Handler(args, tokens, ap)
 		case 2:
 			tapp.Stop()
 			fmt.Println("starting up", launchmenutexts[y-1])
-			app.Commands[launchmenutexts[y-1]].Handler(args, tokens, app)
+			ap.Commands[launchmenutexts[y-1]].Handler(args, tokens, ap)
 		case 3:
 			tapp.Stop()
 			fmt.Println("starting up", launchmenutexts[y-1])
-			app.Commands[launchmenutexts[y-1]].Handler(args, tokens, app)
+			ap.Commands[launchmenutexts[y-1]].Handler(args, tokens, ap)
 		}
 	})
 	launchtable.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
@@ -297,7 +277,7 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 	})
 
 	saveConfig := func() {
-		ddir, ok := app.Cats["app"]["datadir"].Get().(string)
+		ddir, ok := ap.Cats["app"]["datadir"].Get().(string)
 		if ok {
 			configFile := CleanAndExpandPath(filepath.Join(
 				ddir, "config"), "")
@@ -307,7 +287,7 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 			if err != nil {
 				panic(err)
 			}
-			j, e := json.MarshalIndent(app, "", "\t")
+			j, e := json.MarshalIndent(ap, "", "\t")
 			if e != nil {
 				panic(e)
 			}
@@ -318,7 +298,7 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 		}
 	}
 
-	var genPage func(cat, item string, active bool, app *App,
+	var genPage func(cat, item string, active bool, ap *app.App,
 		editoreventhandler func(event *tcell.EventKey) *tcell.EventKey, idx int) (out *tview.Flex)
 
 	inputhandler = func(event *tcell.EventKey) *tcell.EventKey {
@@ -327,7 +307,7 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 			menuflex.
 				RemoveItem(coverbox).
 				RemoveItem(activepage)
-			activepage = genPage(cat, itemname, false, app, inputhandler, 0)
+			activepage = genPage(cat, itemname, false, ap, inputhandler, 0)
 			menuflex.AddItem(activepage, 0, 1, true)
 			prelightTable(roottable)
 			activatedTable(catstable)
@@ -338,9 +318,9 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 		return event
 	}
 
-	genPage = func(cat, item string, active bool, app *App,
+	genPage = func(cat, item string, active bool, ap *app.App,
 		editoreventhandler func(event *tcell.EventKey) *tcell.EventKey, idx int) (out *tview.Flex) {
-		currow := app.Cats[cat][item]
+		currow := ap.Cats[cat][item]
 		var darkness, lightness tcell.Color
 		if active {
 			darkness = MainColor()
@@ -440,8 +420,8 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 					iteminput.SetText(strings.TrimSpace(outstring))
 				}
 			}
-			var canceller func(rw *Row) func(event *tcell.EventKey) *tcell.EventKey
-			canceller = func(rw *Row) func(event *tcell.EventKey) *tcell.EventKey {
+			var canceller func(rw *app.Row) func(event *tcell.EventKey) *tcell.EventKey
+			canceller = func(rw *app.Row) func(event *tcell.EventKey) *tcell.EventKey {
 				return func(event *tcell.EventKey) *tcell.EventKey {
 					switch {
 					case event.Key() == tcell.KeyCtrlU:
@@ -464,7 +444,7 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 						RemoveItem(coverbox).
 						RemoveItem(activepage)
 					itemname = item
-					activepage = genPage(cat, itemname, false, app, canceller(rw), 0)
+					activepage = genPage(cat, itemname, false, ap, canceller(rw), 0)
 					menuflex.AddItem(activepage, 0, 1, true)
 					prelightTable(roottable)
 					activatedTable(catstable)
@@ -514,7 +494,7 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 						RemoveItem(coverbox).
 						RemoveItem(activepage)
 					itemname = item
-					activepage = genPage(cat, itemname, false, app, inputhandler, 0)
+					activepage = genPage(cat, itemname, false, ap, inputhandler, 0)
 					menuflex.AddItem(activepage, 0, 1, true)
 					prelightTable(roottable)
 					activatedTable(catstable)
@@ -556,7 +536,7 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 				case 0:
 					rw.Put(false)
 					itemname = item
-					activepage = genPage(cat, itemname, false, app, inputhandler, y)
+					activepage = genPage(cat, itemname, false, ap, inputhandler, y)
 					menuflex.AddItem(activepage, 0, 1, true)
 					prelightTable(roottable)
 					activatedTable(catstable)
@@ -565,7 +545,7 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 				case 1:
 					rw.Put(true)
 					itemname = item
-					activepage = genPage(cat, itemname, false, app, inputhandler, y)
+					activepage = genPage(cat, itemname, false, ap, inputhandler, y)
 					menuflex.AddItem(activepage, 0, 1, true)
 					prelightTable(roottable)
 					activatedTable(catstable)
@@ -609,7 +589,7 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 				rw.Put(currow.Opts[y])
 				saveConfig()
 				itemname = item
-				activepage = genPage(cat, itemname, false, app, inputhandler, y)
+				activepage = genPage(cat, itemname, false, ap, inputhandler, y)
 				menuflex.AddItem(activepage, 0, 1, true)
 				prelightTable(roottable)
 				activatedTable(catstable)
@@ -735,7 +715,7 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 							RemoveItem(coverbox).
 							RemoveItem(activepage)
 						itemname = item
-						activepage = genPage(cat, itemname, true, app, inputhandler, idx)
+						activepage = genPage(cat, itemname, true, ap, inputhandler, idx)
 						menuflex.AddItem(activepage, 0, 1, true)
 						lastTable(roottable)
 						prelightTable(catstable)
@@ -748,7 +728,7 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 							RemoveItem(coverbox).
 							RemoveItem(activepage)
 						itemname = item
-						activepage = genPage(cat, itemname, true, app, inputhandler, len(rwv))
+						activepage = genPage(cat, itemname, true, ap, inputhandler, len(rwv))
 						menuflex.AddItem(activepage, 0, 1, true)
 						lastTable(roottable)
 						prelightTable(catstable)
@@ -774,7 +754,7 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 								RemoveItem(coverbox).
 								RemoveItem(activepage)
 							itemname = item
-							activepage = genPage(cat, itemname, true, app, inputhandler, y)
+							activepage = genPage(cat, itemname, true, ap, inputhandler, y)
 							menuflex.AddItem(activepage, 0, 1, true)
 							lastTable(roottable)
 							prelightTable(catstable)
@@ -797,7 +777,7 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 						RemoveItem(coverbox).
 						RemoveItem(activepage)
 					itemname = item
-					activepage = genPage(cat, itemname, false, app, inputhandler, y)
+					activepage = genPage(cat, itemname, false, ap, inputhandler, y)
 					menuflex.AddItem(activepage, 0, 1, true)
 					prelightTable(roottable)
 					activatedTable(catstable)
@@ -810,7 +790,7 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 						RemoveItem(coverbox).
 						RemoveItem(activepage)
 					itemname = item
-					activepage = genPage(cat, itemname, false, app, inputhandler, y)
+					activepage = genPage(cat, itemname, false, ap, inputhandler, y)
 					menuflex.AddItem(activepage, 0, 1, true)
 					prelightTable(roottable)
 					activatedTable(catstable)
@@ -833,7 +813,7 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 								RemoveItem(coverbox).
 								RemoveItem(activepage)
 							itemname = item
-							activepage = genPage(cat, itemname, true, app, inputhandler, y)
+							activepage = genPage(cat, itemname, true, ap, inputhandler, y)
 							menuflex.AddItem(activepage, 0, 1, true)
 							lastTable(roottable)
 							prelightTable(catstable)
@@ -883,8 +863,8 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 				AddItem(coverbox, 0, 1, true)
 			return
 		}
-		cat = app.Cats.GetSortedKeys()[y-1]
-		ckeys := app.Cats[cat].GetSortedKeys()
+		cat = ap.Cats.GetSortedKeys()[y-1]
+		ckeys := ap.Cats[cat].GetSortedKeys()
 		var catkeys []string
 		for _, x := range ckeys {
 			if !(cat == "app" && x == "datadir") {
@@ -909,13 +889,13 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 				prelightTable(catstable)
 				activatedTable(cattable)
 				var catkeys []string
-				for _, x := range app.Cats[cat].GetSortedKeys() {
+				for _, x := range ap.Cats[cat].GetSortedKeys() {
 					if !(cat == "app" && x == "datadir") {
 						catkeys = append(catkeys, x)
 					}
 				}
 				itemname = catkeys[y-1]
-				activepage = genPage(cat, itemname, true, app, inputhandler, 0)
+				activepage = genPage(cat, itemname, true, ap, inputhandler, 0)
 				menuflex.AddItem(activepage, 0, 1, true)
 
 				tapp.SetFocus(activepage)
@@ -929,13 +909,13 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 				menuflex.AddItem(coverbox, 0, 1, false)
 			} else {
 				var catkeys []string
-				for _, x := range app.Cats[cat].GetSortedKeys() {
+				for _, x := range ap.Cats[cat].GetSortedKeys() {
 					if !(cat == "app" && x == "datadir") {
 						catkeys = append(catkeys, x)
 					}
 				}
 				itemname = catkeys[y-1]
-				activepage = genPage(cat, itemname, false, app, nil, y)
+				activepage = genPage(cat, itemname, false, ap, nil, y)
 				menuflex.AddItem(activepage, 0, 1, true)
 			}
 		})
@@ -953,13 +933,13 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 				prelightTable(catstable)
 				activatedTable(cattable)
 				var catkeys []string
-				for _, x := range app.Cats[cat].GetSortedKeys() {
+				for _, x := range ap.Cats[cat].GetSortedKeys() {
 					if !(cat == "app" && x == "datadir") {
 						catkeys = append(catkeys, x)
 					}
 				}
 				itemname = catkeys[y-1]
-				activepage = genPage(cat, itemname, true, app, inputhandler, 0)
+				activepage = genPage(cat, itemname, true, ap, inputhandler, 0)
 				menuflex.AddItem(activepage, 0, 1, true)
 
 				tapp.SetFocus(activepage)
@@ -998,7 +978,7 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 			activatedTable(catstable)
 			activateTable(cattable)
 			if !(cat == "" || itemname == "") {
-				activepage = genPage(cat, itemname, false, app, nil, y)
+				activepage = genPage(cat, itemname, false, ap, nil, y)
 				menuflex.RemoveItem(coverbox)
 				menuflex.AddItem(activepage, 0, 1, true)
 			}
@@ -1029,7 +1009,7 @@ func Run(args []string, tokens Tokens, app *defs.App) int {
 			activatedTable(catstable)
 			activateTable(cattable)
 			if !(cat == "" || itemname == "") {
-				activepage = genPage(cat, itemname, false, app, nil, y)
+				activepage = genPage(cat, itemname, false, ap, nil, y)
 				menuflex.RemoveItem(coverbox)
 				menuflex.AddItem(activepage, 0, 1, true)
 			}

@@ -1,4 +1,4 @@
-package defs
+package app
 
 import (
 	"encoding/json"
@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"git.parallelcoin.io/dev/9/cmd/nine"
+	"git.parallelcoin.io/dev/9/pkg/ifc"
 	"git.parallelcoin.io/dev/9/pkg/util"
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
@@ -156,7 +157,7 @@ func File(name string, g ...RowGenerator) CatGenerator {
 			cc.Name = name
 			cc.Type = "string"
 			cc.Validate = Valid.File
-			cc.Value = NewIface()
+			cc.Value = ifc.NewIface()
 			cc.Get = func() interface{} {
 				return cc.Value.Get()
 			}
@@ -185,7 +186,7 @@ func Dir(name string, g ...RowGenerator) CatGenerator {
 			cc.Name = name
 			cc.Type = "string"
 			cc.Validate = Valid.Dir
-			cc.Value = NewIface()
+			cc.Value = ifc.NewIface()
 			cc.Get = func() interface{} {
 				return cc.Value.Get()
 			}
@@ -214,7 +215,7 @@ func Port(name string, g ...RowGenerator) CatGenerator {
 			cc.Name = name
 			cc.Type = "port"
 			cc.Validate = Valid.Port
-			cc.Value = NewIface()
+			cc.Value = ifc.NewIface()
 			cc.Get = func() interface{} {
 				return cc.Value.Get()
 			}
@@ -245,8 +246,8 @@ func Enable(name string, g ...RowGenerator) CatGenerator {
 				return cc.Value.Get()
 			}
 			cc.Validate = Valid.Bool
-			cc.Value = NewIface().Put(false)
-			cc.Default = NewIface().Put(false)
+			cc.Value = ifc.NewIface().Put(false)
+			cc.Default = ifc.NewIface().Put(false)
 			cc.Put = func(in interface{}) bool {
 				valid := cc.Validate(cc, in)
 				if valid {
@@ -274,8 +275,8 @@ func Enabled(name string, g ...RowGenerator) CatGenerator {
 				return cc.Value.Get()
 			}
 			cc.Validate = Valid.Bool
-			cc.Value = NewIface().Put(true)
-			cc.Default = NewIface().Put(true)
+			cc.Value = ifc.NewIface().Put(true)
+			cc.Default = ifc.NewIface().Put(true)
 			cc.Put = func(in interface{}) bool {
 				valid := cc.Validate(cc, in)
 				if valid {
@@ -303,7 +304,7 @@ func Int(name string, g ...RowGenerator) CatGenerator {
 				return cc.Value.Get()
 			}
 			cc.Validate = Valid.Int
-			cc.Value = NewIface()
+			cc.Value = ifc.NewIface()
 			cc.Put = func(in interface{}) bool {
 				valid := cc.Validate(cc, in)
 				if valid {
@@ -330,7 +331,7 @@ func Tag(name string, g ...RowGenerator) CatGenerator {
 				return cc.Value.Get()
 			}
 			cc.Validate = Valid.Tag
-			cc.Value = NewIface()
+			cc.Value = ifc.NewIface()
 			cc.Put = func(in interface{}) bool {
 				valid := cc.Validate(cc, in)
 				if valid {
@@ -357,7 +358,7 @@ func Tags(name string, g ...RowGenerator) CatGenerator {
 				return cc.Value.Get()
 			}
 			cc.Validate = Valid.Tags
-			cc.Value = NewIface()
+			cc.Value = ifc.NewIface()
 			cc.Put = func(in interface{}) bool {
 				valid := cc.Validate(cc, in)
 				if valid {
@@ -384,7 +385,7 @@ func Addr(name string, defPort int, g ...RowGenerator) CatGenerator {
 				return cc.Value.Get()
 			}
 			cc.Validate = GenAddr(name, defPort)
-			cc.Value = NewIface()
+			cc.Value = ifc.NewIface()
 			cc.Put = func(in interface{}) bool {
 				valid := cc.Validate(cc, in)
 				if valid {
@@ -414,7 +415,7 @@ func Addrs(name string, defPort int, g ...RowGenerator) CatGenerator {
 				return cc.Value.Get()
 			}
 			cc.Validate = GenAddrs(name, defPort)
-			cc.Value = NewIface()
+			cc.Value = ifc.NewIface()
 			cc.Put = func(in interface{}) bool {
 				valid := cc.Validate(cc, in)
 				if valid {
@@ -443,7 +444,7 @@ func Level(g ...RowGenerator) CatGenerator {
 				return cc.Value.Get()
 			}
 			cc.Validate = Valid.Level
-			cc.Value = NewIface()
+			cc.Value = ifc.NewIface()
 			cc.Put = func(in interface{}) bool {
 				valid := cc.Validate(cc, in)
 				if valid {
@@ -472,7 +473,7 @@ func Algo(name string, g ...RowGenerator) CatGenerator {
 				return cc.Value.Get()
 			}
 			cc.Validate = Valid.Algo
-			cc.Value = NewIface()
+			cc.Value = ifc.NewIface()
 			cc.Put = func(in interface{}) bool {
 				valid := cc.Validate(cc, in)
 				if valid {
@@ -499,7 +500,7 @@ func Float(name string, g ...RowGenerator) CatGenerator {
 				return cc.Value.Get()
 			}
 			cc.Validate = Valid.Float
-			cc.Value = NewIface()
+			cc.Value = ifc.NewIface()
 			cc.Put = func(in interface{}) bool {
 				valid := cc.Validate(cc, in)
 				if valid {
@@ -527,7 +528,7 @@ func Duration(name string, g ...RowGenerator) CatGenerator {
 				return cc.Value.Get()
 			}
 			cc.Validate = Valid.Duration
-			cc.Value = NewIface()
+			cc.Value = ifc.NewIface()
 			cc.Put = func(in interface{}) bool {
 				valid := cc.Validate(cc, in)
 				if valid {
@@ -556,7 +557,7 @@ func Net(name string, g ...RowGenerator) CatGenerator {
 				return cc.Value.Get()
 			}
 			cc.Validate = Valid.Net
-			cc.Value = NewIface()
+			cc.Value = ifc.NewIface()
 			cc.Put = func(in interface{}) bool {
 				valid := cc.Validate(cc, in)
 				if valid {
@@ -583,7 +584,7 @@ func Usage(usage string) RowGenerator {
 // Default sets the default value for a config item
 func Default(in interface{}) RowGenerator {
 	return func(ctx *Row) {
-		ctx.Default = NewIface()
+		ctx.Default = ifc.NewIface()
 		switch I := in.(type) {
 		case string:
 			if ctx.Validate(ctx, I) {

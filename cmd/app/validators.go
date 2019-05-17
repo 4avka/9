@@ -1,4 +1,4 @@
-package defs
+package app
 
 import (
 	"fmt"
@@ -11,6 +11,7 @@ import (
 
 	"git.parallelcoin.io/dev/9/cmd/nine"
 	"git.parallelcoin.io/dev/9/pkg/chain/fork"
+	"git.parallelcoin.io/dev/9/pkg/ifc"
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
 
@@ -170,7 +171,7 @@ var Valid = struct {
 			if r != nil {
 				r.String = fmt.Sprint(ss)
 				if r.Value == nil {
-					r.Value = NewIface()
+					r.Value = ifc.NewIface()
 				}
 				r.Value.Put(ss)
 				r.App.SaveConfig()
@@ -196,7 +197,7 @@ var Valid = struct {
 			if r != nil {
 				r.String = fmt.Sprint(ss)
 				if r.Value == nil {
-					r.Value = NewIface()
+					r.Value = ifc.NewIface()
 				}
 				r.Value.Put(ss)
 				r.App.SaveConfig()

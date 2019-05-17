@@ -1,4 +1,4 @@
-package defs
+package app
 
 import (
 	"git.parallelcoin.io/dev/9/cmd/nine"

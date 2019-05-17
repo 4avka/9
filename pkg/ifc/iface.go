@@ -1,4 +1,4 @@
-package defs
+package ifc
 
 // Iface is an abstract container that simplifies handling interface
 // variables
