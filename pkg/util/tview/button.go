@@ -6,7 +6,7 @@ import (
 
 // Button is labeled box that triggers an action when selected.
 //
-// See https://git.parallelcoin.io/dev/tview/wiki/Button for an example.
+// See https://git.parallelcoin.io/dev/9/pkg/util/tview/wiki/Button for an example.
 type Button struct {
 	*Box
 

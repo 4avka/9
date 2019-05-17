@@ -7,7 +7,7 @@ import (
 // Checkbox implements a simple box for boolean values which can be checked and
 // unchecked.
 //
-// See https://git.parallelcoin.io/dev/tview/wiki/Checkbox for an example.
+// See https://git.parallelcoin.io/dev/9/pkg/util/tview/wiki/Checkbox for an example.
 type Checkbox struct {
 	*Box
 

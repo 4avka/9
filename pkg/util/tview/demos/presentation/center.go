@@ -1,6 +1,6 @@
 package main
 
-import "git.parallelcoin.io/dev/tview"
+import "git.parallelcoin.io/dev/9/pkg/util/tview"
 
 // Center returns a new primitive which shows the provided primitive in its
 // center, given the provided primitive's size.

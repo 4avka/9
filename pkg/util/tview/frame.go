@@ -15,7 +15,7 @@ type frameText struct {
 // Frame is a wrapper which adds a border around another primitive. The top area
 // (header) and the bottom area (footer) may also contain text.
 //
-// See https://git.parallelcoin.io/dev/tview/wiki/Frame for an example.
+// See https://git.parallelcoin.io/dev/9/pkg/util/tview/wiki/Frame for an example.
 type Frame struct {
 	*Box
 

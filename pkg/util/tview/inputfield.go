@@ -28,7 +28,7 @@ import (
 //   - Ctrl-W: Delete the last word before the cursor.
 //   - Ctrl-U: Delete the entire line.
 //
-// See https://git.parallelcoin.io/dev/tview/wiki/InputField for an example.
+// See https://git.parallelcoin.io/dev/9/pkg/util/tview/wiki/InputField for an example.
 type InputField struct {
 	*Box
 

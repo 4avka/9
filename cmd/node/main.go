@@ -22,11 +22,26 @@ const blockDbNamePrefix = "blocks"
 var StateCfg = &nine.StateConfig{}
 var Cfg = &nine.Config{}
 
-// winServiceMain is only invoked on Windows.  It detects when pod is running as a service and reacts accordingly.
-var winServiceMain func() (bool, error)
+// // winServiceMain is only invoked on Windows.  It detects when pod is running as a service and reacts accordingly.
+// var winServiceMain func() (bool, error)
 
 // Main is the real main function for pod.  It is necessary to work around the fact that deferred functions do not run when os.Exit() is called.  The optional serverChan parameter is mainly used by the service code to be notified with the server once it is setup so it can gracefully stop it when requested from the service control manager.
 func Main(serverChan chan<- *server) (err error) {
+
+	// // Call serviceMain on Windows to handle running as a service.  When
+	// // the return isService flag is true, exit now since we ran as a
+	// // service.  Otherwise, just fall through to normal operation.
+	// if runtime.GOOS == "windows" {
+	// 	isService, err := winServiceMain()
+	// 	if err != nil {
+	// 		fmt.Println(err)
+	// 		os.Exit(1)
+	// 	}
+	// 	if isService {
+	// 		os.Exit(0)
+	// 	}
+	// }
+
 	shutdownChan := make(chan struct{})
 	interrupt.AddHandler(
 		func() {

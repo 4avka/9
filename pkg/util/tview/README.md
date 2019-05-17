@@ -1,7 +1,7 @@
 # Rich Interactive Widgets for Terminal UIs
 
-[![Godoc Reference](https://img.shields.io/badge/godoc-reference-blue.svg)](https://godoc.org/git.parallelcoin.io/dev/tview)
-[![Go Report](https://img.shields.io/badge/go%20report-A%2B-brightgreen.svg)](https://goreportcard.com/report/git.parallelcoin.io/dev/tview)
+[![Godoc Reference](https://img.shields.io/badge/godoc-reference-blue.svg)](https://godoc.org/git.parallelcoin.io/dev/9/pkg/util/tview)
+[![Go Report](https://img.shields.io/badge/go%20report-A%2B-brightgreen.svg)](https://goreportcard.com/report/git.parallelcoin.io/dev/9/pkg/util/tview)
 
 This Go package provides commonly needed components for terminal based user interfaces.
 
@@ -23,7 +23,7 @@ They come with lots of customization options and can be easily extended to fit y
 ## Installation
 
 ```bash
-go get git.parallelcoin.io/dev/tview
+go get git.parallelcoin.io/dev/9/pkg/util/tview
 ```
 
 ## Hello World
@@ -34,7 +34,7 @@ This basic example creates a box titled "Hello, World!" and displays it in your 
 package main
 
 import (
-	"git.parallelcoin.io/dev/tview"
+	"git.parallelcoin.io/dev/9/pkg/util/tview"
 )
 
 func main() {
@@ -45,17 +45,17 @@ func main() {
 }
 ```
 
-Check out the [GitHub Wiki](https://git.parallelcoin.io/dev/tview/wiki) for more examples along with screenshots. Or try the examples in the "demos" subdirectory.
+Check out the [GitHub Wiki](https://git.parallelcoin.io/dev/9/pkg/util/tview/wiki) for more examples along with screenshots. Or try the examples in the "demos" subdirectory.
 
 For a presentation highlighting this package, compile and run the program found in the "demos/presentation" subdirectory.
 
 ## Documentation
 
-Refer to https://godoc.org/git.parallelcoin.io/dev/tview for the package's documentation.
+Refer to https://godoc.org/git.parallelcoin.io/dev/9/pkg/util/tview for the package's documentation.
 
 ## Dependencies
 
-This package is based on [git.parallelcoin.io/dev/tview](https://git.parallelcoin.io/dev/tview) (and its dependencies) as well as on [github.com/rivo/uniseg](https://github.com/rivo/uniseg).
+This package is based on [git.parallelcoin.io/dev/9/pkg/util/tview](https://git.parallelcoin.io/dev/9/pkg/util/tview) (and its dependencies) as well as on [github.com/rivo/uniseg](https://github.com/rivo/uniseg).
 
 ## Your Feedback
 
@@ -72,7 +72,7 @@ Add your issue here on GitHub. Feel free to get in touch if you have any questio
 - v0.17 (2018-06-20)
   - Added `TreeView`.
 - v0.15 (2018-05-02)
-  - `Flex` and `Grid` don't clear their background per default, thus allowing for custom modals. See the [Wiki](https://git.parallelcoin.io/dev/tview/wiki/Modal) for an example.
+  - `Flex` and `Grid` don't clear their background per default, thus allowing for custom modals. See the [Wiki](https://git.parallelcoin.io/dev/9/pkg/util/tview/wiki/Modal) for an example.
 - v0.14 (2018-04-13)
   - Added an `Escape()` function which keep strings like color or region tags from being recognized as such.
   - Added `ANSIWriter()` and `TranslateANSI()` which convert ANSI escape sequences to `tview` color tags.

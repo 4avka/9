@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"git.parallelcoin.io/dev/9/pkg/util/tcell"
-	"git.parallelcoin.io/dev/tview"
+	"git.parallelcoin.io/dev/9/pkg/util/tview"
 )
 
 const textView1 = `[green]func[white] [yellow]main[white]() {
@@ -60,7 +60,7 @@ const textView2 = `[green]package[white] main
     [red]"strconv"[white]
 
     [red]"git.parallelcoin.io/dev/9/pkg/util/tcell"[white]
-    [red]"git.parallelcoin.io/dev/tview"[white]
+    [red]"git.parallelcoin.io/dev/9/pkg/util/tview"[white]
 )
 
 [green]func[white] [yellow]main[white]() {

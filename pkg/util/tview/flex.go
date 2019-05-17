@@ -23,7 +23,7 @@ type flexItem struct {
 // distributed along that dimension depends on their layout settings, which is
 // either a fixed length or a proportional length. See AddItem() for details.
 //
-// See https://git.parallelcoin.io/dev/tview/wiki/Flex for an example.
+// See https://git.parallelcoin.io/dev/9/pkg/util/tview/wiki/Flex for an example.
 type Flex struct {
 	*Box
 

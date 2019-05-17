@@ -36,7 +36,7 @@ world!":
   package main
 
   import (
-  	"git.parallelcoin.io/dev/tview"
+  	"git.parallelcoin.io/dev/9/pkg/util/tview"
   )
 
   func main() {
@@ -172,7 +172,7 @@ therefore available for all widgets, too.
 All widgets also implement the Primitive interface. There is also the Focusable
 interface which is used to override functions in subclassing types.
 
-The tview package is based on https://git.parallelcoin.io/dev/tview. It uses types
+The tview package is based on https://git.parallelcoin.io/dev/9/pkg/util/tview. It uses types
 and constants from that package (e.g. colors and keyboard values).
 
 This package does not process mouse input (yet).

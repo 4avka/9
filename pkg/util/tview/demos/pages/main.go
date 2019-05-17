@@ -4,7 +4,7 @@ package main
 import (
 	"fmt"
 
-	"git.parallelcoin.io/dev/tview"
+	"git.parallelcoin.io/dev/9/pkg/util/tview"
 )
 
 const pageCount = 5

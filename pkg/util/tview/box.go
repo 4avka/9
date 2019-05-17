@@ -11,7 +11,7 @@ import (
 // Note that all classes which subclass from Box will also have access to its
 // functions.
 //
-// See https://git.parallelcoin.io/dev/tview/wiki/Box for an example.
+// See https://git.parallelcoin.io/dev/9/pkg/util/tview/wiki/Box for an example.
 type Box struct {
 	// The position of the rect.
 	x, y, width, height int

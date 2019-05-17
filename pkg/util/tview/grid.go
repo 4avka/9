@@ -27,7 +27,7 @@ type gridItem struct {
 // and "l" keys) while the grid has focus and none of its contained primitives
 // do.
 //
-// See https://git.parallelcoin.io/dev/tview/wiki/Grid for an example.
+// See https://git.parallelcoin.io/dev/9/pkg/util/tview/wiki/Grid for an example.
 type Grid struct {
 	*Box
 

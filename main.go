@@ -1,14 +1,36 @@
 package main
 
 import (
+	"fmt"
+	"os"
+	"runtime"
+	"runtime/debug"
+	"time"
+
 	. "git.parallelcoin.io/dev/9/cmd"
 	"git.parallelcoin.io/dev/9/cmd/node"
 	"git.parallelcoin.io/dev/9/cmd/node/mempool"
-	"os"
-	"time"
+	"git.parallelcoin.io/dev/9/pkg/util/limits"
 )
 
 func main() {
+	// Use all processor cores. Use only half because most processors have two threads per core
+	numcores := runtime.NumCPU() / 2
+	if numcores < 1 {
+		numcores = 1
+	}
+	runtime.GOMAXPROCS(numcores)
+	// Block and transaction processing can cause bursty allocations.  This
+	// limits the garbage collector from excessively overallocating during
+	// bursts.  This value was arrived at with the help of profiling live
+	// usage.
+	debug.SetGCPercent(10)
+
+	// Up some limits.
+	if err := limits.SetLimits(); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to set limits: %v\n", err)
+		os.Exit(1)
+	}
 	app := NineApp()
 	rv := app.Parse(os.Args)
 	os.Exit(rv)

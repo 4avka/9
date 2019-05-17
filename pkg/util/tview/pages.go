@@ -16,7 +16,7 @@ type page struct {
 // root primitive. It allows to easily switch the visibility of the contained
 // primitives.
 //
-// See https://git.parallelcoin.io/dev/tview/wiki/Pages for an example.
+// See https://git.parallelcoin.io/dev/9/pkg/util/tview/wiki/Pages for an example.
 type Pages struct {
 	*Box
 

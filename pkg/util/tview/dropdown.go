@@ -15,7 +15,7 @@ type dropDownOption struct {
 // DropDown implements a selection widget whose options become visible in a
 // drop-down list when activated.
 //
-// See https://git.parallelcoin.io/dev/tview/wiki/DropDown for an example.
+// See https://git.parallelcoin.io/dev/9/pkg/util/tview/wiki/DropDown for an example.
 type DropDown struct {
 	*Box
 

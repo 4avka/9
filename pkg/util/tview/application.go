@@ -302,7 +302,7 @@ func (a *Application) Suspend(f func()) bool {
 		panic(err)
 	}
 	a.screenReplacement <- screen
-	// One key event will get lost, see https://git.parallelcoin.io/dev/tview/issues/194
+	// One key event will get lost, see https://git.parallelcoin.io/dev/9/pkg/util/tview/issues/194
 
 	// Continue application loop.
 	return true

@@ -2,7 +2,6 @@ package walletmain
 
 import (
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -243,7 +242,7 @@ func startChainRPC(certs []byte) (*chain.RPCClient, error) {
 	// 	"attempting RPC client connection to %v, TLS: %s",
 	// 	*cfg.RPCConnect, fmt.Sprint(!*cfg.NoTLS),
 	// }
-	spew.Dump(cfg)
+	// spew.Dump(cfg)
 	rpcc, err := chain.NewRPCClient(
 		ActiveNet.Params,
 		*cfg.RPCConnect,
