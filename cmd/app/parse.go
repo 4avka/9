@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"git.parallelcoin.io/dev/9/cmd/def"
 	"git.parallelcoin.io/dev/9/cmd/node"
 	"git.parallelcoin.io/dev/9/pkg/util"
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
@@ -14,11 +15,11 @@ import (
 
 var datadir = new(string)
 
-func (app *App) Parse(args []string) int {
-	// parse commandline
-	cmd, tokens := app.ParseCLI(args)
+// Parse commandline
+func Parse(ap *def.App, args []string) int {
+	cmd, tokens := ParseCLI(ap, args)
 	if cmd == nil {
-		cmd = app.Commands["help"]
+		cmd = ap.Commands["help"]
 	}
 	// get datadir from cli args if given
 	if dd, ok := tokens["datadir"]; ok {
@@ -26,41 +27,41 @@ func (app *App) Parse(args []string) int {
 		pwd, _ := os.Getwd()
 		*datadir = filepath.Join(pwd, *datadir)
 		dd.Value = *datadir
-		app.Cats["app"]["datadir"].Value.Put(*datadir)
+		ap.Cats["ap"]["datadir"].Value.Put(*datadir)
 		DataDir = *datadir
 	} else {
 		ddd := util.AppDataDir("9", false)
-		app.Cats["app"]["datadir"].Put(ddd)
+		ap.Cats["ap"]["datadir"].Put(ddd)
 		datadir = &ddd
 		DataDir = *datadir
 	}
-	// for i, x := range app.Cats {
+	// for i, x := range ap.Cats {
 	// 	for j := range x {
-	// 		// if i == "app" && j == "datadir" {
+	// 		// if i == "ap" && j == "datadir" {
 	// 		// 	break
 	// 		// }
-	// 		app.Cats[i][j].Init(app.Cats[i][j])
+	// 		ap.Cats[i][j].Init(ap.Cats[i][j])
 	// 	}
 	// }
 
 	// // set AppDataDir for running as node
-	// aa := CleanAndExpandPath(filepath.Join(
+	// aa := util.CleanAndExpandPath(filepath.Join(
 	// 	*datadir,
 	// 	cmd.Name),
 	// 	*datadir)
-	// app.Config.AppDataDir, app.Config.LogDir = &aa, &aa
+	// ap.Config.AppDataDir, ap.Config.LogDir = &aa, &aa
 
-	configFile := CleanAndExpandPath(filepath.Join(
+	configFile := util.CleanAndExpandPath(filepath.Join(
 		*datadir, "config"), *datadir)
-	// *app.Config.ConfigFile = configFile
-	if !FileExists(configFile) {
-		if EnsureDir(configFile) {
+	// *ap.Config.ConfigFile = configFile
+	if !util.FileExists(configFile) {
+		if util.EnsureDir(configFile) {
 		}
 		fh, err := os.Create(configFile)
 		if err != nil {
 			panic(err)
 		}
-		j, e := json.MarshalIndent(app, "", "\t")
+		j, e := json.MarshalIndent(ap, "", "\t")
 		if e != nil {
 			panic(e)
 		}
@@ -73,50 +74,50 @@ func (app *App) Parse(args []string) int {
 	if err != nil {
 		panic(err)
 	}
-	e := json.Unmarshal(conf, app)
+	e := json.Unmarshal(conf, ap)
 	if e != nil {
 		panic(e)
 	}
 	// now we can initialise the App
-	for i, x := range app.Cats {
+	for i, x := range ap.Cats {
 		for j := range x {
-			temp := app.Cats[i][j]
-			temp.App = app
-			app.Cats[i][j] = temp
+			temp := ap.Cats[i][j]
+			temp.App = ap
+			ap.Cats[i][j] = temp
 		}
 	}
-	app.Config = MakeConfig(app)
-	app.Config.ActiveNetParams = node.ActiveNetParams
+	ap.Config = MakeConfig(ap)
+	ap.Config.ActiveNetParams = node.ActiveNetParams
 
-	if app.Config.LogLevel != nil {
-		cl.Register.SetAllLevels(*app.Config.LogLevel)
+	if ap.Config.LogLevel != nil {
+		cl.Register.SetAllLevels(*ap.Config.LogLevel)
 	}
 	// run as configured
 	r := cmd.Handler(
 		args,
 		tokens,
-		app)
+		ap)
 	return r
 }
 
-func (app *App) ParseCLI(args []string) (cmd *Command, tokens Tokens) {
-	cmd = new(Command)
+func ParseCLI(ap *def.App, args []string) (cmd *def.Command, tokens def.Tokens) {
+	cmd = new(def.Command)
 	// collect set of items in commandline
 	if len(args) < 2 {
 		fmt.Print("No args given, printing help:\n\n")
 		args = append(args, "h")
 	}
 	commandsFound := make(map[string]int)
-	tokens = make(Tokens)
+	tokens = make(def.Tokens)
 	for _, x := range args[1:] {
-		for i, y := range app.Commands {
+		for i, y := range ap.Commands {
 			if y.RE.MatchString(x) {
 				if _, ok := commandsFound[i]; ok {
-					tokens[i] = Token{x, *y}
+					tokens[i] = def.Token{x, *y}
 					commandsFound[i]++
 					break
 				} else {
-					tokens[i] = Token{x, *y}
+					tokens[i] = def.Token{x, *y}
 					commandsFound[i] = 1
 					break
 				}
@@ -124,14 +125,14 @@ func (app *App) ParseCLI(args []string) (cmd *Command, tokens Tokens) {
 		}
 	}
 	var withHandlersNames []string
-	withHandlers := make(Commands)
+	withHandlers := make(def.Commands)
 	for i := range commandsFound {
-		if app.Commands[i].Handler != nil {
-			withHandlers[i] = app.Commands[i]
+		if ap.Commands[i].Handler != nil {
+			withHandlers[i] = ap.Commands[i]
 			withHandlersNames = append(withHandlersNames, i)
 		}
 	}
-	invoked := make(Commands)
+	invoked := make(def.Commands)
 	for i, x := range withHandlers {
 		invoked[i] = x
 	}
@@ -143,7 +144,7 @@ func (app *App) ParseCLI(args []string) (cmd *Command, tokens Tokens) {
 	if len(withHandlersNames) > 1 {
 		var common [][]string
 		for _, x := range withHandlersNames {
-			i := intersection(withHandlersNames, withHandlers[x].Precedent)
+			i := util.Intersection(withHandlersNames, withHandlers[x].Precedent)
 			common = append(common, i)
 		}
 		for _, x := range common {
@@ -153,17 +154,17 @@ func (app *App) ParseCLI(args []string) (cmd *Command, tokens Tokens) {
 				}
 			}
 		}
-		resolved = uniq(resolved)
+		resolved = util.Uniq(resolved)
 		if len(resolved) > 1 {
-			withHandlers = make(Commands)
+			withHandlers = make(def.Commands)
 			common = [][]string{}
 			withHandlersNames = resolved
 			resolved = []string{}
 			for _, x := range withHandlersNames {
-				withHandlers[x] = app.Commands[x]
+				withHandlers[x] = ap.Commands[x]
 			}
 			for _, x := range withHandlersNames {
-				i := intersection(withHandlersNames, withHandlers[x].Precedent)
+				i := util.Intersection(withHandlersNames, withHandlers[x].Precedent)
 				common = append(common, i)
 			}
 			for _, x := range common {
@@ -173,7 +174,7 @@ func (app *App) ParseCLI(args []string) (cmd *Command, tokens Tokens) {
 					}
 				}
 			}
-			resolved = uniq(resolved)
+			resolved = util.Uniq(resolved)
 		}
 	} else if len(withHandlersNames) == 1 {
 		resolved = []string{withHandlersNames[0]}
@@ -186,6 +187,6 @@ func (app *App) ParseCLI(args []string) (cmd *Command, tokens Tokens) {
 		fmt.Println(err)
 		return nil, tokens
 	}
-	*cmd = *app.Commands[resolved[0]]
+	*cmd = *ap.Commands[resolved[0]]
 	return cmd, tokens
 }

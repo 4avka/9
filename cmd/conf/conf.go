@@ -9,7 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"git.parallelcoin.io/dev/9/cmd/app"
+	"git.parallelcoin.io/dev/9/cmd/def"
+	"git.parallelcoin.io/dev/9/pkg/util"
 	"git.parallelcoin.io/dev/tcell"
 	"git.parallelcoin.io/dev/tview"
 )
@@ -20,7 +21,7 @@ var iteminput *tview.InputField
 var toggle *tview.Table
 
 // Run the menu system
-func Run(args []string, tokens app.Tokens, ap *app.App) int {
+func Run(args []string, tokens def.Tokens, ap *def.App) int {
 	var cattable *tview.Table
 	var cattablewidth int
 	var activepage *tview.Flex
@@ -279,9 +280,9 @@ func Run(args []string, tokens app.Tokens, ap *app.App) int {
 	saveConfig := func() {
 		ddir, ok := ap.Cats["app"]["datadir"].Get().(string)
 		if ok {
-			configFile := CleanAndExpandPath(filepath.Join(
+			configFile := util.CleanAndExpandPath(filepath.Join(
 				ddir, "config"), "")
-			if EnsureDir(configFile) {
+			if util.EnsureDir(configFile) {
 			}
 			fh, err := os.Create(configFile)
 			if err != nil {
@@ -298,7 +299,7 @@ func Run(args []string, tokens app.Tokens, ap *app.App) int {
 		}
 	}
 
-	var genPage func(cat, item string, active bool, ap *app.App,
+	var genPage func(cat, item string, active bool, ap *def.App,
 		editoreventhandler func(event *tcell.EventKey) *tcell.EventKey, idx int) (out *tview.Flex)
 
 	inputhandler = func(event *tcell.EventKey) *tcell.EventKey {
@@ -318,7 +319,7 @@ func Run(args []string, tokens app.Tokens, ap *app.App) int {
 		return event
 	}
 
-	genPage = func(cat, item string, active bool, ap *app.App,
+	genPage = func(cat, item string, active bool, ap *def.App,
 		editoreventhandler func(event *tcell.EventKey) *tcell.EventKey, idx int) (out *tview.Flex) {
 		currow := ap.Cats[cat][item]
 		var darkness, lightness tcell.Color
@@ -346,10 +347,9 @@ func Run(args []string, tokens app.Tokens, ap *app.App) int {
 			SetTextColor(lightness).
 			SetBorderPadding(1, 0, 1, 1).
 			SetBackgroundColor(darkness)
-		def := currow.Default
 		defstring := ""
-		if def != nil {
-			defstring = fmt.Sprintf("default value: %v", def.Get())
+		if currow.Default != nil {
+			defstring = fmt.Sprintf("default value: %v", currow.Default.Get())
 		} else {
 			defstring = "" //"this value has no default"
 		}
@@ -420,8 +420,8 @@ func Run(args []string, tokens app.Tokens, ap *app.App) int {
 					iteminput.SetText(strings.TrimSpace(outstring))
 				}
 			}
-			var canceller func(rw *app.Row) func(event *tcell.EventKey) *tcell.EventKey
-			canceller = func(rw *app.Row) func(event *tcell.EventKey) *tcell.EventKey {
+			var canceller func(rw *def.Row) func(event *tcell.EventKey) *tcell.EventKey
+			canceller = func(rw *def.Row) func(event *tcell.EventKey) *tcell.EventKey {
 				return func(event *tcell.EventKey) *tcell.EventKey {
 					switch {
 					case event.Key() == tcell.KeyCtrlU:

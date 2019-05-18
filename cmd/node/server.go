@@ -25,7 +25,6 @@ import (
 	indexers "git.parallelcoin.io/dev/9/pkg/chain/index"
 	"git.parallelcoin.io/dev/9/pkg/chain/mining"
 	cpuminer "git.parallelcoin.io/dev/9/pkg/chain/mining/cpu"
-	controller "git.parallelcoin.io/dev/9/pkg/chain/mining/dispatch"
 	netsync "git.parallelcoin.io/dev/9/pkg/chain/sync"
 	txscript "git.parallelcoin.io/dev/9/pkg/chain/tx/script"
 	"git.parallelcoin.io/dev/9/pkg/chain/wire"
@@ -109,23 +108,23 @@ type removeNodeMsg struct {
 // server provides a bitcoin server for handling communications to and from bitcoin peers.
 type server struct {
 	// The following variables must only be used atomically. Putting the uint64s first makes them 64-bit aligned for 32-bit systems.
-	bytesReceived        uint64 // Total bytes received from all peers since start.
-	bytesSent            uint64 // Total bytes sent by all peers since start.
-	started              int32
-	shutdown             int32
-	shutdownSched        int32
-	startupTime          int64
-	chainParams          *chaincfg.Params
-	addrManager          *addrmgr.AddrManager
-	connManager          *connmgr.ConnManager
-	sigCache             *txscript.SigCache
-	hashCache            *txscript.HashCache
-	rpcServers           []*rpcServer
-	syncManager          *netsync.SyncManager
-	chain                *blockchain.BlockChain
-	txMemPool            *mempool.TxPool
-	cpuMiner             *cpuminer.CPUMiner
-	minerController      *controller.Controller
+	bytesReceived uint64 // Total bytes received from all peers since start.
+	bytesSent     uint64 // Total bytes sent by all peers since start.
+	started       int32
+	shutdown      int32
+	shutdownSched int32
+	startupTime   int64
+	chainParams   *chaincfg.Params
+	addrManager   *addrmgr.AddrManager
+	connManager   *connmgr.ConnManager
+	sigCache      *txscript.SigCache
+	hashCache     *txscript.HashCache
+	rpcServers    []*rpcServer
+	syncManager   *netsync.SyncManager
+	chain         *blockchain.BlockChain
+	txMemPool     *mempool.TxPool
+	cpuMiner      *cpuminer.CPUMiner
+	// minerController      *controller.Controller
 	modifyRebroadcastInv chan interface{}
 	newPeers             chan *serverPeer
 	donePeers            chan *serverPeer

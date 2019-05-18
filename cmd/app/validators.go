@@ -9,15 +9,17 @@ import (
 	"strings"
 	"time"
 
+	"git.parallelcoin.io/dev/9/cmd/def"
 	"git.parallelcoin.io/dev/9/cmd/nine"
 	"git.parallelcoin.io/dev/9/pkg/chain/fork"
 	"git.parallelcoin.io/dev/9/pkg/ifc"
+	"git.parallelcoin.io/dev/9/pkg/util"
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
 
 // GenAddr returns a validator with a set default port assumed if one is not present
-func GenAddr(name string, port int) func(r *Row, in interface{}) bool {
-	return func(r *Row, in interface{}) bool {
+func GenAddr(name string, port int) func(r *def.Row, in interface{}) bool {
+	return func(r *def.Row, in interface{}) bool {
 		var s *string
 		switch I := in.(type) {
 		case string:
@@ -69,8 +71,8 @@ func GenAddr(name string, port int) func(r *Row, in interface{}) bool {
 }
 
 // GenAddrs returns a validator with a set default port assumed if one is not present
-func GenAddrs(name string, port int) func(r *Row, in interface{}) bool {
-	return func(r *Row, in interface{}) bool {
+func GenAddrs(name string, port int) func(r *def.Row, in interface{}) bool {
+	return func(r *def.Row, in interface{}) bool {
 		var s []string
 		existing, ok := r.Value.Get().([]string)
 		if !ok {
@@ -150,13 +152,13 @@ func getAlgoOptions() (options []string) {
 }
 
 // Valid is a collection of validator functions for the different types used
-// in a configuration. These functions optionally can accept a *Row and with
+// in a configuration. These functions optionally can accept a *def.Row and with
 // this they assign the validated, parsed value into the Value slot.
 var Valid = struct {
 	File, Dir, Port, Bool, Int, Tag, Tags, Algo, Float, Duration, Net,
-	Level func(*Row, interface{}) bool
+	Level func(*def.Row, interface{}) bool
 }{
-	File: func(r *Row, in interface{}) bool {
+	File: func(r *def.Row, in interface{}) bool {
 		var s *string
 		switch I := in.(type) {
 		case string:
@@ -167,7 +169,32 @@ var Valid = struct {
 			return false
 		}
 		if len(*s) > 0 {
-			ss := CleanAndExpandPath(*s, *datadir)
+			ss := util.CleanAndExpandPath(*s, *datadir)
+			if r != nil {
+				r.String = fmt.Sprint(ss)
+				if r.Value == nil {
+					r.Value = ifc.NewIface()
+				}
+				r.Value.Put(ss)
+				r.App.SaveConfig()
+				return true
+			}
+			return false
+		}
+		return false
+	},
+	Dir: func(r *def.Row, in interface{}) bool {
+		var s *string
+		switch I := in.(type) {
+		case string:
+			s = &I
+		case *string:
+			s = I
+		default:
+			return false
+		}
+		if len(*s) > 0 {
+			ss := util.CleanAndExpandPath(*s, *datadir)
 			if r != nil {
 				r.String = fmt.Sprint(ss)
 				if r.Value == nil {
@@ -182,33 +209,7 @@ var Valid = struct {
 		}
 		return false
 	},
-	Dir: func(r *Row, in interface{}) bool {
-		var s *string
-		switch I := in.(type) {
-		case string:
-			s = &I
-		case *string:
-			s = I
-		default:
-			return false
-		}
-		if len(*s) > 0 {
-			ss := CleanAndExpandPath(*s, *datadir)
-			if r != nil {
-				r.String = fmt.Sprint(ss)
-				if r.Value == nil {
-					r.Value = ifc.NewIface()
-				}
-				r.Value.Put(ss)
-				r.App.SaveConfig()
-				return true
-			} else {
-				return false
-			}
-		}
-		return false
-	},
-	Port: func(r *Row, in interface{}) bool {
+	Port: func(r *def.Row, in interface{}) bool {
 		var s string
 		var ii int
 		isString := false
@@ -243,7 +244,7 @@ var Valid = struct {
 		}
 		return true
 	},
-	Bool: func(r *Row, in interface{}) bool {
+	Bool: func(r *def.Row, in interface{}) bool {
 		var sb string
 		var b bool
 		switch I := in.(type) {
@@ -282,7 +283,7 @@ var Valid = struct {
 		}
 		return true
 	},
-	Int: func(r *Row, in interface{}) bool {
+	Int: func(r *def.Row, in interface{}) bool {
 		var s string
 		var ii int
 		isString := false
@@ -315,7 +316,7 @@ var Valid = struct {
 		}
 		return true
 	},
-	Tag: func(r *Row, in interface{}) bool {
+	Tag: func(r *def.Row, in interface{}) bool {
 		var s string
 		switch I := in.(type) {
 		case string:
@@ -336,7 +337,7 @@ var Valid = struct {
 		}
 		return true
 	},
-	Tags: func(r *Row, in interface{}) bool {
+	Tags: func(r *def.Row, in interface{}) bool {
 		var s []string
 		existing, ok := r.Value.Get().([]string)
 		if !ok {
@@ -384,7 +385,7 @@ var Valid = struct {
 		}
 		return true
 	},
-	Algo: func(r *Row, in interface{}) bool {
+	Algo: func(r *def.Row, in interface{}) bool {
 		var s string
 		switch I := in.(type) {
 		case string:
@@ -412,7 +413,7 @@ var Valid = struct {
 		}
 		return true
 	},
-	Float: func(r *Row, in interface{}) bool {
+	Float: func(r *def.Row, in interface{}) bool {
 		var s string
 		var f float64
 		isString := false
@@ -444,7 +445,7 @@ var Valid = struct {
 		}
 		return true
 	},
-	Duration: func(r *Row, in interface{}) bool {
+	Duration: func(r *def.Row, in interface{}) bool {
 		var s string
 		var t time.Duration
 		isString := false
@@ -476,7 +477,7 @@ var Valid = struct {
 		}
 		return true
 	},
-	Net: func(r *Row, in interface{}) bool {
+	Net: func(r *def.Row, in interface{}) bool {
 		var sn string
 		switch I := in.(type) {
 		case string:
@@ -500,7 +501,7 @@ var Valid = struct {
 		}
 		return found
 	},
-	Level: func(r *Row, in interface{}) bool {
+	Level: func(r *def.Row, in interface{}) bool {
 		var sl string
 		switch I := in.(type) {
 		case string:

@@ -7,14 +7,21 @@ import (
 	"runtime/debug"
 	"time"
 
-	. "git.parallelcoin.io/dev/9/cmd"
+	"git.parallelcoin.io/dev/9/cmd/app"
+	. "git.parallelcoin.io/dev/9/cmd/app"
+	"git.parallelcoin.io/dev/9/cmd/def"
 	"git.parallelcoin.io/dev/9/cmd/node"
 	"git.parallelcoin.io/dev/9/cmd/node/mempool"
 	"git.parallelcoin.io/dev/9/pkg/util/limits"
 )
 
 func main() {
-	// Use all processor cores. Use only half because most processors have two threads per core
+	// Use all processor cores. Use only half because most processors have
+	// two threads per core, and cache lines will suffer contention with
+	// more. Ryzens, in particular, run best on the *core* number of threads
+	// as two threads share a cache line. In fact for process heavy loads they
+	// work better with cores-1
+	// TODO: expose this setting in the configuration
 	numcores := runtime.NumCPU() / 2
 	if numcores < 1 {
 		numcores = 1
@@ -22,8 +29,8 @@ func main() {
 	runtime.GOMAXPROCS(numcores)
 	// Block and transaction processing can cause bursty allocations.  This
 	// limits the garbage collector from excessively overallocating during
-	// bursts.  This value was arrived at with the help of profiling live
-	// usage.
+	// bursts.
+	// This value was arrived at with the help of profiling live usage.
 	debug.SetGCPercent(10)
 
 	// Up some limits.
@@ -31,17 +38,16 @@ func main() {
 		fmt.Fprintf(os.Stderr, "failed to set limits: %v\n", err)
 		os.Exit(1)
 	}
-	app := NineApp()
-	rv := app.Parse(os.Args)
+	rv := app.Parse(nineApp(), os.Args)
 	os.Exit(rv)
 }
 
-var NineApp = func() *App {
+var nineApp = func() *def.App {
 	return NewApp("9",
 		Version("v0.9.0"),
 		Tagline("all in one everything for parallelcoin"),
 		About("full node, wallet, combined shell, RPC client for the parallelcoin blockchain"),
-		DefaultRunner(func(ctx *App) int { return 0 }),
+		DefaultRunner(func(ctx *def.App) int { return 0 }),
 		Cmd("help",
 			Pattern("^(h|help)$"),
 			Short("show help text and quit"),
@@ -58,25 +64,25 @@ var NineApp = func() *App {
 			Precs("help"),
 			Handler(Conf),
 		),
-		Cmd("new",
-			Pattern("^(N|new)$"),
-			Short("create new configuration with optional basename and count for testnets"),
-			Detail(`	<word> is the basename for the data directories
-		<integer> is the number of numbered data directories to create`),
-			Opts("word", "integer"),
-			Precs("help"),
-			Handler(New),
-		),
-		Cmd("copy",
-			Pattern("^(cp|copy)$"),
-			Short("create a set of testnet configurations based on a datadir"),
-			Detail(`	<datadir> is the base to work from
-		<word> is a basename
-		<integer> is a number for how many to create`),
-			Opts("datadir", "word", "integer"),
-			Precs("help"),
-			Handler(Copy),
-		),
+		// Cmd("new",
+		// 	Pattern("^(N|new)$"),
+		// 	Short("create new configuration with optional basename and count for testnets"),
+		// 	Detail(`	<word> is the basename for the data directories
+		// <integer> is the number of numbered data directories to create`),
+		// 	Opts("word", "integer"),
+		// 	Precs("help"),
+		// 	Handler(app.New),
+		// ),
+		// Cmd("copy",
+		// 	Pattern("^(cp|copy)$"),
+		// 	Short("create a set of testnet configurations based on a datadir"),
+		// 	Detail(`	<datadir> is the base to work from
+		// <word> is a basename
+		// <integer> is a number for how many to create`),
+		// 	Opts("datadir", "word", "integer"),
+		// 	Precs("help"),
+		// 	Handler(Copy),
+		// ),
 		Cmd("list",
 			Pattern("^(l|list|listcommands)$"),
 			Short("lists commands available at the RPC endpoint"),
@@ -142,15 +148,15 @@ var NineApp = func() *App {
 			Precs("help"),
 			Handler(GUI),
 		),
-		Cmd("test",
-			Pattern("^(t|test)$"),
-			Short("run multiple full nodes from given <datadir> logging optionally to <datadir>"),
-			Detail(`	<datadir> indicates the basename to search for as the path to the test configurations
-				<log> indicates to write logs to the individual data directories instead of print to stdout`),
-			Opts("word", "log"),
-			Precs("help"),
-			Handler(TestHandler),
-		),
+		// Cmd("test",
+		// 	Pattern("^(t|test)$"),
+		// 	Short("run multiple full nodes from given <datadir> logging optionally to <datadir>"),
+		// 	Detail(`	<datadir> indicates the basename to search for as the path to the test configurations
+		// 		<log> indicates to write logs to the individual data directories instead of print to stdout`),
+		// 	Opts("word", "log"),
+		// 	Precs("help"),
+		// 	Handler(TestHandler),
+		// ),
 		Cmd("create",
 			Pattern("^(cr|create)$"),
 			Short("runs the create new wallet prompt"),
@@ -166,7 +172,7 @@ var NineApp = func() *App {
 		<integer> sets the number of keys to generate (append a number to the filename)`),
 			Opts("word", "integer"),
 			Precs("help"),
-			Handler(func(args []string, tokens Tokens, app *App) int { return 0 }),
+			Handler(func(args []string, tokens def.Tokens, app *def.App) int { return 0 }),
 		),
 		Cmd("genca",
 			Pattern("^genca$"),
@@ -174,7 +180,7 @@ var NineApp = func() *App {
 			Detail(`	<word> sets the name of the CA signing key file to output`),
 			Opts("word"),
 			Precs("help"),
-			Handler(func(args []string, tokens Tokens, app *App) int { return 0 }),
+			Handler(func(args []string, tokens def.Tokens, app *def.App) int { return 0 }),
 		),
 		Cmd("log",
 			Pattern("^(L|log)$"),
@@ -182,7 +188,7 @@ var NineApp = func() *App {
 			Detail(`	<datadir> sets the data directory where the wallet will be stored`),
 			Opts(),
 			Precs("help", "node", "wallet", "shell", "test"),
-			Handler(func(args []string, tokens Tokens, app *App) int { return 0 }),
+			Handler(func(args []string, tokens def.Tokens, app *def.App) int { return 0 }),
 		),
 		Cmd("datadir",
 			Pattern("^(([A-Za-z][:])|[\\~/.]+.*)$"),
@@ -190,7 +196,7 @@ var NineApp = func() *App {
 			Detail(`	<datadir> sets the data directory where the wallet will be stored`),
 			Opts(),
 			Precs("help", "node", "ctl", "wallet", "conf", "test", "new", "copy", "shell", "create"),
-			Handler(func(args []string, tokens Tokens, app *App) int { return 0 }),
+			Handler(func(args []string, tokens def.Tokens, app *def.App) int { return 0 }),
 		),
 		Cmd("integer",
 			Pattern("^[0-9]+$"),
@@ -198,7 +204,7 @@ var NineApp = func() *App {
 			Detail(""),
 			Opts(),
 			Precs("help"),
-			Handler(func(args []string, tokens Tokens, app *App) int { return 0 }),
+			Handler(func(args []string, tokens def.Tokens, app *def.App) int { return 0 }),
 		),
 		Cmd("float",
 			Pattern("^([0-9]+[.][0-9]+)$"),
@@ -206,7 +212,7 @@ var NineApp = func() *App {
 			Detail(""),
 			Opts(),
 			Precs("help"),
-			Handler(func(args []string, tokens Tokens, app *App) int { return 0 }),
+			Handler(func(args []string, tokens def.Tokens, app *def.App) int { return 0 }),
 		),
 		// Cmd("word",
 		// 	Pattern("^([a-zA-Z0-9][a-zA-Z0-9._-]+)$"),
@@ -214,7 +220,7 @@ var NineApp = func() *App {
 		// 	Detail(""),
 		// 	Opts(),
 		// 	Precs("help", "node", "ctl", "wallet", "conf", "test", "new", "copy", "shell", "create"),
-		// 	Handler(func(args []string, tokens Tokens, app *App) int { return 0 }),
+		// 	Handler(func(args []string, tokens def.Tokens, app *def.App) int { return 0 }),
 		// ),
 		Group("app",
 			Dir("appdatadir",

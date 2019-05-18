@@ -1,4 +1,4 @@
-package cmd
+package util
 
 import (
 	"net"
@@ -6,8 +6,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-
-	"git.parallelcoin.io/dev/9/pkg/util"
 )
 
 // MinUint32 is a helper function to return the minimum of two uint32s. This avoids a math import and the need to cast to floats.
@@ -44,7 +42,7 @@ func FileExists(filePath string) bool {
 // CleanAndExpandPath expands environment variables and leading ~ in the passed path, cleans the result, and returns it.
 func CleanAndExpandPath(path, datadir string) string {
 	// Expand initial ~ to OS specific home directory.
-	homeDir := filepath.Dir(util.AppDataDir("9", false))
+	homeDir := filepath.Dir(AppDataDir("9", false))
 	if strings.HasPrefix(path, "~") {
 		return strings.Replace(path, "~", homeDir, 1)
 
@@ -93,7 +91,7 @@ func RemoveDuplicateAddresses(addrs []string) []string {
 	return result
 }
 
-func intersection(a, b []string) (out []string) {
+func Intersection(a, b []string) (out []string) {
 	for _, x := range a {
 		for _, y := range b {
 			if x == y {
@@ -104,7 +102,7 @@ func intersection(a, b []string) (out []string) {
 	return
 }
 
-func uniq(elements []string) []string {
+func Uniq(elements []string) []string {
 	// Use map to record duplicates as we find them.
 	encountered := map[string]bool{}
 	result := []string{}

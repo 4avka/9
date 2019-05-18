@@ -1,16 +1,15 @@
 package app
 
 import (
-	"encoding/json"
 	"fmt"
 	"math/rand"
-	"os"
 	"path/filepath"
 	"reflect"
 	"regexp"
 	"strconv"
 	"time"
 
+	"git.parallelcoin.io/dev/9/cmd/def"
 	"git.parallelcoin.io/dev/9/cmd/nine"
 	"git.parallelcoin.io/dev/9/pkg/ifc"
 	"git.parallelcoin.io/dev/9/pkg/util"
@@ -33,15 +32,15 @@ var NetParams = map[string]*nine.Params{
 }
 
 // NewApp generates a new App using a collection of generator functions passed to it
-func NewApp(name string, g ...AppGenerator) (out *App) {
-	gen := AppGenerators(g)
-	out = &App{
+func NewApp(name string, g ...def.AppGenerator) (out *def.App) {
+	gen := def.AppGenerators(g)
+	out = &def.App{
 		Name:     name,
-		Cats:     make(Cats),
-		Commands: make(Commands),
+		Cats:     make(def.Cats),
+		Commands: make(def.Commands),
 	}
 	gen.RunAll(out)
-	// set ref to App in each Row
+	// set ref to App in each def.Row
 	for _, x := range out.Cats {
 		for _, y := range x {
 			y.App = out
@@ -53,8 +52,8 @@ func NewApp(name string, g ...AppGenerator) (out *App) {
 // which is made from
 
 // Version fills the Version field of an App
-func Version(ver string) AppGenerator {
-	return func(ctx *App) {
+func Version(ver string) def.AppGenerator {
+	return func(ctx *def.App) {
 		ctx.Version = func() string {
 			return ver
 		}
@@ -62,86 +61,86 @@ func Version(ver string) AppGenerator {
 }
 
 // Tagline is a short text describing the application
-func Tagline(ver string) AppGenerator {
-	return func(ctx *App) {
+func Tagline(ver string) def.AppGenerator {
+	return func(ctx *def.App) {
 		ctx.Tagline = ver
 	}
 }
 
 // About is a longer text describing the application
-func About(ver string) AppGenerator {
-	return func(ctx *App) {
+func About(ver string) def.AppGenerator {
+	return func(ctx *def.App) {
 		ctx.About = ver
 	}
 }
 
 // DefaultRunner is the command that runs when no parameters are given
-func DefaultRunner(fn func(ctx *App) int) AppGenerator {
-	return func(ctx *App) {
+func DefaultRunner(fn func(ctx *def.App) int) def.AppGenerator {
+	return func(ctx *def.App) {
 		ctx.Default = fn
 	}
 }
 
 // Group is a collection of categories and bundles each category
-func Group(name string, g ...CatGenerator) AppGenerator {
-	G := CatGenerators(g)
-	return func(ctx *App) {
-		ctx.Cats[name] = make(Cat)
+func Group(name string, g ...def.CatGenerator) def.AppGenerator {
+	G := def.CatGenerators(g)
+	return func(ctx *def.App) {
+		ctx.Cats[name] = make(def.Cat)
 		G.RunAll(ctx.Cats[name])
 	}
 }
 
 // Cmd is a collection of subcommands
-func Cmd(name string, g ...CommandGenerator) AppGenerator {
-	G := CommandGenerators(g)
-	return func(ctx *App) {
+func Cmd(name string, g ...def.CommandGenerator) def.AppGenerator {
+	G := def.CommandGenerators(g)
+	return func(ctx *def.App) {
 		ctx.Commands[name] = G.RunAll()
 	}
 }
 
-// Command Item Generators
+// def.Command Item Generators
 
 // Pattern is the regular expression pattern that matches the CLI args for each
-// Command item
-func Pattern(patt string) CommandGenerator {
-	return func(ctx *Command) {
+// def.Command item
+func Pattern(patt string) def.CommandGenerator {
+	return func(ctx *def.Command) {
 		ctx.Pattern = patt
 		ctx.RE = regexp.MustCompile(ctx.Pattern)
 	}
 }
 
-// Short is the short help text for a Command
-func Short(usage string) CommandGenerator {
-	return func(ctx *Command) {
+// Short is the short help text for a def.Command
+func Short(usage string) def.CommandGenerator {
+	return func(ctx *def.Command) {
 		ctx.Short = usage
 	}
 }
 
-// Detail is the long help text for a Command
-func Detail(usage string) CommandGenerator {
-	return func(ctx *Command) {
+// Detail is the long help text for a def.Command
+func Detail(usage string) def.CommandGenerator {
+	return func(ctx *def.Command) {
 		ctx.Detail = usage
 	}
 }
 
-// Opts is the collection of valid options for a Command
-func Opts(opts ...string) CommandGenerator {
-	return func(ctx *Command) {
+// Opts is the collection of valid options for a def.Command
+func Opts(opts ...string) def.CommandGenerator {
+	return func(ctx *def.Command) {
 		ctx.Opts = opts
 	}
 }
 
 // Precs is the collection of tags for items that are preferentially selected when
 // an two or more items are specified (for example, help always overrides everything)
-func Precs(precs ...string) CommandGenerator {
-	return func(ctx *Command) {
+func Precs(precs ...string) def.CommandGenerator {
+	return func(ctx *def.Command) {
 		ctx.Precedent = precs
 	}
 }
 
 // Handler is the function that is called when a command is selected
-func Handler(hnd func(args []string, tokens Tokens, app *App) int) CommandGenerator {
-	return func(ctx *Command) {
+func Handler(hnd func(args []string, tokens def.Tokens, app *def.App) int) def.CommandGenerator {
+	return func(ctx *def.Command) {
 		ctx.Handler = hnd
 	}
 }
@@ -149,11 +148,11 @@ func Handler(hnd func(args []string, tokens Tokens, app *App) int) CommandGenera
 // Group Item Generators
 
 // File is an item storing a filename
-func File(name string, g ...RowGenerator) CatGenerator {
-	G := RowGenerators(g)
-	return func(ctx *Cat) {
-		c := &Row{}
-		c.Init = func(cc *Row) {
+func File(name string, g ...def.RowGenerator) def.CatGenerator {
+	G := def.RowGenerators(g)
+	return func(ctx *def.Cat) {
+		c := &def.Row{}
+		c.Init = func(cc *def.Row) {
 			cc.Name = name
 			cc.Type = "string"
 			cc.Validate = Valid.File
@@ -178,11 +177,11 @@ func File(name string, g ...RowGenerator) CatGenerator {
 }
 
 // Dir is an item storing a directory specification
-func Dir(name string, g ...RowGenerator) CatGenerator {
-	G := RowGenerators(g)
-	return func(ctx *Cat) {
-		c := &Row{}
-		c.Init = func(cc *Row) {
+func Dir(name string, g ...def.RowGenerator) def.CatGenerator {
+	G := def.RowGenerators(g)
+	return func(ctx *def.Cat) {
+		c := &def.Row{}
+		c.Init = func(cc *def.Row) {
 			cc.Name = name
 			cc.Type = "string"
 			cc.Validate = Valid.Dir
@@ -207,11 +206,11 @@ func Dir(name string, g ...RowGenerator) CatGenerator {
 }
 
 // Port is a 16 bit sized number that represents a network port number
-func Port(name string, g ...RowGenerator) CatGenerator {
-	G := RowGenerators(g)
-	return func(ctx *Cat) {
-		c := &Row{}
-		c.Init = func(cc *Row) {
+func Port(name string, g ...def.RowGenerator) def.CatGenerator {
+	G := def.RowGenerators(g)
+	return func(ctx *def.Cat) {
+		c := &def.Row{}
+		c.Init = func(cc *def.Row) {
 			cc.Name = name
 			cc.Type = "port"
 			cc.Validate = Valid.Port
@@ -235,11 +234,11 @@ func Port(name string, g ...RowGenerator) CatGenerator {
 }
 
 // Enable is a boolean item that is false by default
-func Enable(name string, g ...RowGenerator) CatGenerator {
-	G := RowGenerators(g)
-	return func(ctx *Cat) {
-		c := &Row{}
-		c.Init = func(cc *Row) {
+func Enable(name string, g ...def.RowGenerator) def.CatGenerator {
+	G := def.RowGenerators(g)
+	return func(ctx *def.Cat) {
+		c := &def.Row{}
+		c.Init = func(cc *def.Row) {
 			cc.Name = name
 			cc.Type = "bool"
 			cc.Get = func() interface{} {
@@ -264,11 +263,11 @@ func Enable(name string, g ...RowGenerator) CatGenerator {
 }
 
 // Enabled is an boolean item that is true by default
-func Enabled(name string, g ...RowGenerator) CatGenerator {
-	G := RowGenerators(g)
-	return func(ctx *Cat) {
-		c := &Row{}
-		c.Init = func(cc *Row) {
+func Enabled(name string, g ...def.RowGenerator) def.CatGenerator {
+	G := def.RowGenerators(g)
+	return func(ctx *def.Cat) {
+		c := &def.Row{}
+		c.Init = func(cc *def.Row) {
 			cc.Name = name
 			cc.Type = "bool"
 			cc.Get = func() interface{} {
@@ -293,11 +292,11 @@ func Enabled(name string, g ...RowGenerator) CatGenerator {
 }
 
 // Int stores an integer number (signed integer width of current platform's processor)
-func Int(name string, g ...RowGenerator) CatGenerator {
-	G := RowGenerators(g)
-	return func(ctx *Cat) {
-		c := &Row{}
-		c.Init = func(cc *Row) {
+func Int(name string, g ...def.RowGenerator) def.CatGenerator {
+	G := def.RowGenerators(g)
+	return func(ctx *def.Cat) {
+		c := &def.Row{}
+		c.Init = func(cc *def.Row) {
 			cc.Name = name
 			cc.Type = "int"
 			cc.Get = func() interface{} {
@@ -320,11 +319,11 @@ func Int(name string, g ...RowGenerator) CatGenerator {
 }
 
 // Tag is basically just a string that can store any string value
-func Tag(name string, g ...RowGenerator) CatGenerator {
-	G := RowGenerators(g)
-	return func(ctx *Cat) {
-		c := &Row{}
-		c.Init = func(cc *Row) {
+func Tag(name string, g ...def.RowGenerator) def.CatGenerator {
+	G := def.RowGenerators(g)
+	return func(ctx *def.Cat) {
+		c := &def.Row{}
+		c.Init = func(cc *def.Row) {
 			cc.Name = name
 			cc.Type = "string"
 			cc.Get = func() interface{} {
@@ -347,11 +346,11 @@ func Tag(name string, g ...RowGenerator) CatGenerator {
 }
 
 // Tags is a collection of strings containing arbitrary content
-func Tags(name string, g ...RowGenerator) CatGenerator {
-	G := RowGenerators(g)
-	return func(ctx *Cat) {
-		c := &Row{}
-		c.Init = func(cc *Row) {
+func Tags(name string, g ...def.RowGenerator) def.CatGenerator {
+	G := def.RowGenerators(g)
+	return func(ctx *def.Cat) {
+		c := &def.Row{}
+		c.Init = func(cc *def.Row) {
 			cc.Name = name
 			cc.Type = "stringslice"
 			cc.Get = func() interface{} {
@@ -374,11 +373,11 @@ func Tags(name string, g ...RowGenerator) CatGenerator {
 }
 
 // Addr is a network address specification for dialing
-func Addr(name string, defPort int, g ...RowGenerator) CatGenerator {
-	G := RowGenerators(g)
-	return func(ctx *Cat) {
-		c := &Row{}
-		c.Init = func(cc *Row) {
+func Addr(name string, defPort int, g ...def.RowGenerator) def.CatGenerator {
+	G := def.RowGenerators(g)
+	return func(ctx *def.Cat) {
+		c := &def.Row{}
+		c.Init = func(cc *def.Row) {
 			cc.Name = name
 			cc.Type = "string"
 			cc.Get = func() interface{} {
@@ -404,11 +403,11 @@ func Addr(name string, defPort int, g ...RowGenerator) CatGenerator {
 }
 
 // Addrs is a collection of addresses
-func Addrs(name string, defPort int, g ...RowGenerator) CatGenerator {
-	G := RowGenerators(g)
-	return func(ctx *Cat) {
-		c := &Row{}
-		c.Init = func(cc *Row) {
+func Addrs(name string, defPort int, g ...def.RowGenerator) def.CatGenerator {
+	G := def.RowGenerators(g)
+	return func(ctx *def.Cat) {
+		c := &def.Row{}
+		c.Init = func(cc *def.Row) {
 			cc.Name = name
 			cc.Type = "stringslice"
 			cc.Get = func() interface{} {
@@ -431,12 +430,12 @@ func Addrs(name string, defPort int, g ...RowGenerator) CatGenerator {
 }
 
 // Level is debug logging level specification one of a set of predefined values
-func Level(g ...RowGenerator) CatGenerator {
-	G := RowGenerators(g)
+func Level(g ...def.RowGenerator) def.CatGenerator {
+	G := def.RowGenerators(g)
 	const lvl = "level"
-	return func(ctx *Cat) {
-		c := &Row{}
-		c.Init = func(cc *Row) {
+	return func(ctx *def.Cat) {
+		c := &def.Row{}
+		c.Init = func(cc *def.Row) {
 			cc.Name = lvl
 			cc.Type = "options"
 			cc.Opts = cl.GetLevelOpts()
@@ -461,11 +460,11 @@ func Level(g ...RowGenerator) CatGenerator {
 
 // Algo is a multi-item select that contains all of the different block-algorithms
 // available to mine with, as well as algorithmic selectors
-func Algo(name string, g ...RowGenerator) CatGenerator {
-	G := RowGenerators(g)
-	return func(ctx *Cat) {
-		c := &Row{}
-		c.Init = func(cc *Row) {
+func Algo(name string, g ...def.RowGenerator) def.CatGenerator {
+	G := def.RowGenerators(g)
+	return func(ctx *def.Cat) {
+		c := &def.Row{}
+		c.Init = func(cc *def.Row) {
 			cc.Name = name
 			cc.Type = "options"
 			cc.Opts = getAlgoOptions()
@@ -489,11 +488,11 @@ func Algo(name string, g ...RowGenerator) CatGenerator {
 }
 
 // Float is a floating point number, 64 bits by default (same as JSON spec)
-func Float(name string, g ...RowGenerator) CatGenerator {
-	G := RowGenerators(g)
-	return func(ctx *Cat) {
-		c := &Row{}
-		c.Init = func(cc *Row) {
+func Float(name string, g ...def.RowGenerator) def.CatGenerator {
+	G := def.RowGenerators(g)
+	return func(ctx *def.Cat) {
+		c := &def.Row{}
+		c.Init = func(cc *def.Row) {
 			cc.Name = name
 			cc.Type = "float"
 			cc.Get = func() interface{} {
@@ -517,11 +516,11 @@ func Float(name string, g ...RowGenerator) CatGenerator {
 
 // Duration is a time library duration specification for an amount of time.
 // The value is a 64 bit integer being the number of nanoseconds for a period of time
-func Duration(name string, g ...RowGenerator) CatGenerator {
-	G := RowGenerators(g)
-	return func(ctx *Cat) {
-		c := &Row{}
-		c.Init = func(cc *Row) {
+func Duration(name string, g ...def.RowGenerator) def.CatGenerator {
+	G := def.RowGenerators(g)
+	return func(ctx *def.Cat) {
+		c := &def.Row{}
+		c.Init = func(cc *def.Row) {
 			cc.Name = name
 			cc.Type = "duration"
 			cc.Get = func() interface{} {
@@ -545,11 +544,11 @@ func Duration(name string, g ...RowGenerator) CatGenerator {
 
 // Net is the various types of network a blockchain server can connect to - test, main
 // and so forth
-func Net(name string, g ...RowGenerator) CatGenerator {
-	G := RowGenerators(g)
-	return func(ctx *Cat) {
-		c := &Row{}
-		c.Init = func(cc *Row) {
+func Net(name string, g ...def.RowGenerator) def.CatGenerator {
+	G := def.RowGenerators(g)
+	return func(ctx *def.Cat) {
+		c := &def.Row{}
+		c.Init = func(cc *def.Row) {
 			cc.Name = name
 			cc.Type = "options"
 			cc.Opts = Networks
@@ -575,15 +574,15 @@ func Net(name string, g ...RowGenerator) CatGenerator {
 // which is populated by
 
 // Usage populates the usage field for information about a config item
-func Usage(usage string) RowGenerator {
-	return func(ctx *Row) {
+func Usage(usage string) def.RowGenerator {
+	return func(ctx *def.Row) {
 		ctx.Usage = usage + " " + ctx.Usage
 	}
 }
 
 // Default sets the default value for a config item
-func Default(in interface{}) RowGenerator {
-	return func(ctx *Row) {
+func Default(in interface{}) def.RowGenerator {
+	return func(ctx *def.Row) {
 		ctx.Default = ifc.NewIface()
 		switch I := in.(type) {
 		case string:
@@ -645,12 +644,12 @@ func Default(in interface{}) RowGenerator {
 }
 
 // Min attaches to the validator a test that enforces a minimum
-func Min(min int) RowGenerator {
-	return func(ctx *Row) {
+func Min(min int) def.RowGenerator {
+	return func(ctx *def.Row) {
 		ctx.Min = ctx.Min.Put(min)
 		v := ctx.Validate
 		var e error
-		ctx.Validate = func(r *Row, in interface{}) bool {
+		ctx.Validate = func(r *def.Row, in interface{}) bool {
 			n := min
 			switch I := in.(type) {
 			case int:
@@ -679,12 +678,12 @@ func Min(min int) RowGenerator {
 }
 
 // Max attaches to the validator a test that enforces a maximum
-func Max(max int) RowGenerator {
-	return func(ctx *Row) {
+func Max(max int) def.RowGenerator {
+	return func(ctx *def.Row) {
 		ctx.Max = ctx.Max.Put(max)
 		v := ctx.Validate
 		var e error
-		ctx.Validate = func(r *Row, in interface{}) bool {
+		ctx.Validate = func(r *def.Row, in interface{}) bool {
 			n := max
 			switch I := in.(type) {
 			case int:
@@ -714,7 +713,7 @@ func Max(max int) RowGenerator {
 
 // RandomString generates a random number and converts to base32 for
 // a default random password of some number of characters
-func RandomString(n int) RowGenerator {
+func RandomString(n int) def.RowGenerator {
 	const (
 		letterBytes   = "abcdefghijklmnopqrstuvwxyz234567"
 		letterIdxBits = 6                    // 6 bits to represent a letter index
@@ -722,7 +721,7 @@ func RandomString(n int) RowGenerator {
 		letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
 	)
 	var src = rand.NewSource(time.Now().UnixNano())
-	return func(ctx *Row) {
+	return func(ctx *def.Row) {
 		b := make([]byte, n)
 		l := len(letterBytes)
 		// A src.Int63() generates 63 random bits, enough for letterIdxMax characters!
@@ -741,120 +740,4 @@ func RandomString(n int) RowGenerator {
 		sb := string(b)
 		ctx.Value = ctx.Value.Put(sb)
 	}
-}
-
-// SaveConfig writes all the data in Cats the config file at the root of DataDir
-func (app *App) SaveConfig() {
-	if app == nil {
-		return
-	}
-	datadir, ok := app.Cats["app"]["datadir"].Value.Get().(string)
-	if !ok {
-		return
-	}
-	configFile := CleanAndExpandPath(filepath.Join(
-		datadir, "config"), "")
-	if EnsureDir(configFile) {
-	}
-	fh, err := os.Create(configFile)
-	if err != nil {
-		panic(err)
-	}
-	j, e := json.MarshalIndent(app, "", "\t")
-	if e != nil {
-		panic(e)
-	}
-	_, err = fmt.Fprint(fh, string(j))
-	if err != nil {
-		panic(err)
-	}
-}
-
-// MarshalJSON cherrypicks Cats for the values needed to correctly configure it
-// and some extra information to make the JSON output friendly to human editors
-func (r *App) MarshalJSON() ([]byte, error) {
-	out := make(CatsJSON)
-	for i, x := range r.Cats {
-		out[i] = make(CatJSON)
-		for j, y := range x {
-			min, _ := y.Min.Get().(int)
-			max, _ := y.Max.Get().(int)
-			out[i][j] = Line{
-				Value:   y.Value.Get(),
-				Default: y.Default.Get(),
-				Min:     min,
-				Max:     max,
-				Usage:   y.Usage,
-			}
-		}
-	}
-	return json.Marshal(out)
-}
-
-// UnmarshalJSON takes the cherrypicked JSON output of Marshal and puts it back into
-// an App
-func (r *App) UnmarshalJSON(data []byte) error {
-	out := make(CatsJSON)
-	e := json.Unmarshal(data, &out)
-	if e != nil {
-		return e
-	}
-	for i, x := range out {
-		for j, y := range x {
-			R := r.Cats[i][j]
-			if y.Value != nil {
-				switch R.Type {
-				case "int", "port":
-					y.Value = int(y.Value.(float64))
-				case "duration":
-					y.Value = time.Duration(int(y.Value.(float64)))
-				case "stringslice":
-					rt, ok := y.Value.([]string)
-					ro := []string{}
-					if ok {
-						for _, z := range rt {
-							R.Validate(R, z)
-							ro = append(ro, z)
-						}
-						// R.Value.Put(ro)
-					}
-					// break
-				case "float":
-				}
-			}
-			R.Validate(R, y.Value)
-			// R.Value.Put(y.Value)
-		}
-	}
-	return nil
-}
-
-// RunAll triggers AppGenerators to configure an App
-func (r *AppGenerators) RunAll(app *App) {
-	for _, x := range *r {
-		x(app)
-	}
-	return
-}
-
-// RunAll runs a collection of CatGenerators on a Cat
-func (r *CatGenerators) RunAll(cat Cat) {
-	for _, x := range *r {
-		x(&cat)
-	}
-	return
-}
-
-func (r *RowGenerators) RunAll(row *Row) {
-	for _, x := range *r {
-		x(row)
-	}
-}
-
-func (r *CommandGenerators) RunAll() *Command {
-	c := &Command{}
-	for _, x := range *r {
-		x(c)
-	}
-	return c
 }

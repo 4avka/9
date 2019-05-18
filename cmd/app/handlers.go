@@ -1,4 +1,4 @@
-package conf
+package app
 
 import (
 	"errors"
@@ -6,13 +6,13 @@ import (
 	"net"
 	"os"
 	"path/filepath"
-	"runtime"
 	"sort"
 	"strings"
 	"time"
 
-	"git.parallelcoin.io/dev/9/cmd/app"
+	"git.parallelcoin.io/dev/9/cmd/conf"
 	"git.parallelcoin.io/dev/9/cmd/ctl"
+	"git.parallelcoin.io/dev/9/cmd/def"
 	"git.parallelcoin.io/dev/9/cmd/ll"
 	"git.parallelcoin.io/dev/9/cmd/nine"
 	"git.parallelcoin.io/dev/9/cmd/node"
@@ -45,7 +45,7 @@ func optTagList(s []string) (ss string) {
 	return
 }
 
-func getCommands(cmds app.Commands) (s []string) {
+func getCommands(cmds def.Commands) (s []string) {
 	for i := range cmds {
 		s = append(s, i)
 	}
@@ -53,7 +53,7 @@ func getCommands(cmds app.Commands) (s []string) {
 	return
 }
 
-func getTokens(cmds app.Tokens) (s []string) {
+func getTokens(cmds def.Tokens) (s []string) {
 	for _, x := range cmds {
 		s = append(s, x.Value)
 	}
@@ -62,7 +62,7 @@ func getTokens(cmds app.Tokens) (s []string) {
 }
 
 // Help prints out help information based on the contents of the commandline
-func Help(args []string, tokens app.Tokens, ap *app.App) int {
+func Help(args []string, tokens def.Tokens, ap *def.App) int {
 	fmt.Println(ap.Name, ap.Version(), "-", ap.Tagline)
 	fmt.Println()
 	fmt.Println("help with", ap.Name)
@@ -110,28 +110,28 @@ func Help(args []string, tokens app.Tokens, ap *app.App) int {
 }
 
 // Conf runs the configuration menu system
-func Conf(args []string, tokens app.Tokens, ap *app.App) int {
+func Conf(args []string, tokens def.Tokens, ap *def.App) int {
 	var r int
 	for r = 2; r == 2; {
-		r = Run(args, tokens, ap)
+		r = conf.Run(args, tokens, ap)
 	}
 	return r
 }
 
 // // New ???
-// func New(args []string, tokens app.Tokens, ap *app.App) int {
+// func New(args []string, tokens def.Tokens, ap *def.App) int {
 // 	fmt.Println("running New", args, getTokens(tokens))
 // 	return 0
 // }
 
 // // Copy duplicates a configuration to create new one(s) based on it
-// func Copy(args []string, tokens app.Tokens, ap *app.App) int {
+// func Copy(args []string, tokens def.Tokens, ap *def.App) int {
 // 	fmt.Println("running Copy", args, getTokens(tokens))
 // 	return 0
 // }
 
 // List prints the available commands for ctl
-func List(args []string, tokens app.Tokens, ap *app.App) int {
+func List(args []string, tokens def.Tokens, ap *def.App) int {
 	if j := validateProxyListeners(ap); j != 0 {
 		return j
 	}
@@ -144,7 +144,7 @@ func List(args []string, tokens app.Tokens, ap *app.App) int {
 
 // Ctl sends RPC commands input in the command line arguments and prints the result
 // back to stdout
-func Ctl(args []string, tokens app.Tokens, ap *app.App) int {
+func Ctl(args []string, tokens def.Tokens, ap *def.App) int {
 	cl.Register.SetAllLevels(*ap.Config.LogLevel)
 	setAppDataDir(ap, "ctl")
 	if j := validateProxyListeners(ap); j != 0 {
@@ -166,7 +166,7 @@ func Ctl(args []string, tokens app.Tokens, ap *app.App) int {
 }
 
 // Node launches the full node
-func Node(args []string, tokens app.Tokens, ap *app.App) int {
+func Node(args []string, tokens def.Tokens, ap *def.App) int {
 	node.StateCfg = ap.Config.State
 	node.Cfg = ap.Config
 	cl.Register.SetAllLevels(*ap.Config.LogLevel)
@@ -192,13 +192,13 @@ func Node(args []string, tokens app.Tokens, ap *app.App) int {
 }
 
 // Wallet launches the wallet server
-func Wallet(args []string, tokens app.Tokens, ap *app.App) int {
+func Wallet(args []string, tokens def.Tokens, ap *def.App) int {
 	setAppDataDir(ap, "wallet")
 	netDir := walletmain.NetworkDir(*ap.Config.AppDataDir,
 		ap.Config.ActiveNetParams.Params)
 	wdb := netDir // + "/wallet.db"
 	log <- cl.Debug{"opening wallet:", wdb}
-	if !FileExists(wdb) {
+	if !util.FileExists(wdb) {
 		if e := walletmain.CreateWallet(
 			ap.Config, ap.Config.ActiveNetParams, wdb); e != nil {
 			panic("could not create wallet " + e.Error())
@@ -214,14 +214,14 @@ func Wallet(args []string, tokens app.Tokens, ap *app.App) int {
 
 // Shell runs a combined full node and wallet server for use in the common standard
 // configuration provided by many bitcoin and bitcoin fork servers
-func Shell(args []string, tokens app.Tokens, ap *app.App) int {
+func Shell(args []string, tokens def.Tokens, ap *def.App) int {
 	setAppDataDir(ap, "node")
 	netDir := walletmain.NetworkDir(
 		filepath.Join(*ap.Config.DataDir, "wallet"),
 		ap.Config.ActiveNetParams.Params)
 	wdb := netDir // + "/wallet.db"
 	log <- cl.Debug{"opening wallet:", wdb}
-	if !FileExists(wdb) {
+	if !util.FileExists(wdb) {
 		if e := walletmain.CreateWallet(
 			ap.Config, ap.Config.ActiveNetParams, wdb); e != nil {
 			panic("could not create wallet " + e.Error())
@@ -236,7 +236,7 @@ func Shell(args []string, tokens app.Tokens, ap *app.App) int {
 }
 
 // Test runs a testnet based on a set of configuration directories
-func Test(args []string, tokens app.Tokens, ap *app.App) int {
+func Test(args []string, tokens def.Tokens, ap *def.App) int {
 	cl.Register.SetAllLevels(*ap.Config.LogLevel)
 	fmt.Println("running Test", args, getTokens(tokens))
 	return 0
@@ -244,12 +244,12 @@ func Test(args []string, tokens app.Tokens, ap *app.App) int {
 
 // Create generates a set of configurations that are set to connect to each other
 // in a testnet
-func Create(args []string, tokens app.Tokens, ap *app.App) int {
+func Create(args []string, tokens def.Tokens, ap *def.App) int {
 	netDir := walletmain.NetworkDir(
 		filepath.Join(*ap.Config.DataDir, "wallet"),
 		ap.Config.ActiveNetParams.Params)
 	wdb := netDir // + "/wallet.db"
-	if !FileExists(wdb) {
+	if !util.FileExists(wdb) {
 		if e := walletmain.CreateWallet(
 			ap.Config, ap.Config.ActiveNetParams, wdb); e != nil {
 			panic("could not create wallet " + e.Error())
@@ -262,153 +262,40 @@ func Create(args []string, tokens app.Tokens, ap *app.App) int {
 }
 
 // // TestHandler ???
-// func TestHandler(args []string, tokens app.Tokens, ap *app.App) int {
+// func TestHandler(args []string, tokens def.Tokens, ap *def.App) int {
 // 	return 0
 // }
 
 // GUI runs a shell in the background and a GUI interface for wallet and node
-func GUI(args []string, tokens app.Tokens, ap *app.App) int {
+func GUI(args []string, tokens def.Tokens, ap *def.App) int {
 	return 0
 }
 
 // Mine runs the standalone miner
-func Mine(args []string, tokens app.Tokens, ap *app.App) int {
+func Mine(args []string, tokens def.Tokens, ap *def.App) int {
 	return 0
 }
 
 // GenCerts generates TLS certificates
-func GenCerts(args []string, tokens app.Tokens, ap *app.App) int {
+func GenCerts(args []string, tokens def.Tokens, ap *def.App) int {
 	return 0
 }
 
 // GenCA creates a signing key that GenCerts will use if present to sign keys that
 // it can be used to certify for multiple nodes connected to each other
 // (wallet/node and RPC)
-func GenCA(args []string, tokens app.Tokens, ap *app.App) int {
+func GenCA(args []string, tokens def.Tokens, ap *def.App) int {
 	return 0
 }
 
-// MinUint32 is a helper function to return the minimum of two uint32s. This avoids a math import and the need to cast to floats.
-func MinUint32(a, b uint32) uint32 {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func isWindows() bool {
-	return runtime.GOOS == "windows"
-}
-
-// EnsureDir checks a file could be written to a path, creates the directories as needed
-func EnsureDir(fileName string) bool {
-	dirName := filepath.Dir(fileName)
-	if _, serr := os.Stat(dirName); serr != nil {
-		merr := os.MkdirAll(dirName, os.ModePerm)
-		if merr != nil {
-			panic(merr)
-		}
-		return true
-	}
-	return false
-}
-
-// FileExists reports whether the named file or directory exists.
-func FileExists(filePath string) bool {
-	_, err := os.Stat(filePath)
-	return err == nil
-}
-
-// CleanAndExpandPath expands environment variables and leading ~ in the passed path, cleans the result, and returns it.
-func CleanAndExpandPath(path, datadir string) string {
-	// Expand initial ~ to OS specific home directory.
-	homeDir := filepath.Dir(util.AppDataDir("9", false))
-	if strings.HasPrefix(path, "~") {
-		return strings.Replace(path, "~", homeDir, 1)
-
-	}
-	if strings.HasPrefix(path, "./") {
-		// explicitly prefix is this must be a relative path
-		pwd, _ := os.Getwd()
-		return filepath.Join(pwd, path)
-	} else if !strings.HasPrefix(path, "/") && !strings.HasPrefix(path, "\\") {
-		if path != datadir {
-			return filepath.Join(datadir, path)
-		}
-	}
-	// NOTE: The os.ExpandEnv doesn't work with Windows-style %VARIABLE%, but they variables can still be expanded via POSIX-style $VARIABLE.
-	path = filepath.Clean(os.ExpandEnv(path))
-	return path
-}
-
-// NormalizeAddress returns addr with the passed default port appended if there is not already a port specified.
-func NormalizeAddress(addr, defaultPort string) string {
-	_, _, err := net.SplitHostPort(addr)
-	if err != nil {
-		return net.JoinHostPort(addr, defaultPort)
-	}
-	return addr
-}
-
-// NormalizeAddresses returns a new slice with all the passed peer addresses normalized with the given default port, and all duplicates removed.
-func NormalizeAddresses(addrs []string, defaultPort string) []string {
-	for i, addr := range addrs {
-		addrs[i] = NormalizeAddress(addr, defaultPort)
-	}
-	return RemoveDuplicateAddresses(addrs)
-}
-
-// RemoveDuplicateAddresses returns a new slice with all duplicate entries in addrs removed.
-func RemoveDuplicateAddresses(addrs []string) []string {
-	result := make([]string, 0, len(addrs))
-	seen := map[string]struct{}{}
-	for _, val := range addrs {
-		if _, ok := seen[val]; !ok {
-			result = append(result, val)
-			seen[val] = struct{}{}
-		}
-	}
-	return result
-}
-
-func intersection(a, b []string) (out []string) {
-	for _, x := range a {
-		for _, y := range b {
-			if x == y {
-				out = append(out, x)
-			}
-		}
-	}
-	return
-}
-
-func uniq(elements []string) []string {
-	// Use map to record duplicates as we find them.
-	encountered := map[string]bool{}
-	result := []string{}
-
-	for v := range elements {
-		if encountered[elements[v]] == true {
-			// Do not add duplicate.
-		} else {
-			// Record this element as an encountered element.
-			encountered[elements[v]] = true
-			// Append to result slice.
-			result = append(result, elements[v])
-		}
-	}
-	// Return the new slice.
-	return result
-}
-
-func setAppDataDir(ap *app.App, name string) {
+func setAppDataDir(ap *def.App, name string) {
 	if ap != nil {
 		if ap.Config != nil {
 			if ap.Config.AppDataDir == nil {
 				ap.Config.AppDataDir = new(string)
 				// set AppDataDir for running as node
 				*ap.Config.AppDataDir =
-					CleanAndExpandPath(
+					util.CleanAndExpandPath(
 						filepath.Join(*ap.Config.DataDir, name),
 						*ap.Config.DataDir)
 			}
@@ -420,7 +307,7 @@ func setAppDataDir(ap *app.App, name string) {
 	}
 }
 
-func validateWhitelists(ap *app.App) int {
+func validateWhitelists(ap *def.App) int {
 	// Validate any given whitelisted IP addresses and networks.
 	if ap.Config.Whitelists != nil {
 		var ip net.IP
@@ -456,7 +343,7 @@ func validateWhitelists(ap *app.App) int {
 	return 0
 }
 
-func validateProxyListeners(ap *app.App) int {
+func validateProxyListeners(ap *def.App) int {
 	// if proxy is not enabled, empty the proxy field as node sees presence as a
 	// on switch
 	if ap.Config.Proxy != nil {
@@ -482,7 +369,7 @@ func validateProxyListeners(ap *app.App) int {
 	return 0
 }
 
-func validatePasswords(ap *app.App) int {
+func validatePasswords(ap *def.App) int {
 
 	// Check to make sure limited and admin users don't have the same username
 	if *ap.Config.Username != "" && *ap.Config.Username == *ap.Config.LimitUser {
@@ -502,7 +389,7 @@ func validatePasswords(ap *app.App) int {
 	return 0
 }
 
-func validateRPCCredentials(ap *app.App) int {
+func validateRPCCredentials(ap *def.App) int {
 	// The RPC server is disabled if no username or password is provided.
 	if (*ap.Config.Username == "" || *ap.Config.Password == "") &&
 		(*ap.Config.LimitUser == "" || *ap.Config.LimitPass == "") {
@@ -524,7 +411,7 @@ func validateRPCCredentials(ap *app.App) int {
 	return 0
 }
 
-func validateBlockLimits(ap *app.App) int {
+func validateBlockLimits(ap *def.App) int {
 	// Validate the the minrelaytxfee.
 	// log <- cl.Debug{"checking min relay tx fee"}
 	var err error
@@ -537,13 +424,13 @@ func validateBlockLimits(ap *app.App) int {
 		return 1
 	}
 	// Limit the block priority and minimum block sizes to max block size.
-	*ap.Config.BlockPrioritySize = int(MinUint32(
+	*ap.Config.BlockPrioritySize = int(util.MinUint32(
 		uint32(*ap.Config.BlockPrioritySize),
 		uint32(*ap.Config.BlockMaxSize)))
-	*ap.Config.BlockMinSize = int(MinUint32(
+	*ap.Config.BlockMinSize = int(util.MinUint32(
 		uint32(*ap.Config.BlockMinSize),
 		uint32(*ap.Config.BlockMaxSize)))
-	*ap.Config.BlockMinWeight = int(MinUint32(
+	*ap.Config.BlockMinWeight = int(util.MinUint32(
 		uint32(*ap.Config.BlockMinWeight),
 		uint32(*ap.Config.BlockMaxWeight)))
 	switch {
@@ -564,7 +451,7 @@ func validateBlockLimits(ap *app.App) int {
 	return 0
 }
 
-func validateUAComments(ap *app.App) int {
+func validateUAComments(ap *def.App) int {
 	// Look for illegal characters in the user agent comments.
 	// log <- cl.Debug{"checking user agent comments"}
 	if ap.Config.UserAgentComments != nil {
@@ -581,7 +468,7 @@ func validateUAComments(ap *app.App) int {
 	return 0
 }
 
-func validateMiner(ap *app.App) int {
+func validateMiner(ap *def.App) int {
 	// Check mining addresses are valid and saved parsed versions.
 	// log <- cl.Debug{"checking mining addresses"}
 	if ap.Config.MiningAddrs != nil {
@@ -628,7 +515,7 @@ func validateMiner(ap *app.App) int {
 	return 0
 }
 
-func validateCheckpoints(ap *app.App) int {
+func validateCheckpoints(ap *def.App) int {
 	var err error
 	// Check the checkpoints for syntax errors.
 	// log <- cl.Debug{"checking the checkpoints"}
@@ -645,8 +532,8 @@ func validateCheckpoints(ap *app.App) int {
 	return 0
 }
 
-func validateDialers(ap *app.App) int {
-	// if !*app.Config.Onion && *app.Config.OnionProxy != "" {
+func validateDialers(ap *def.App) int {
+	// if !*Config.Onion && *Config.OnionProxy != "" {
 	// 	// log <- cl.Error{"cannot enable tor proxy without an address specified"}
 	// 	return 1
 	// }
@@ -742,7 +629,7 @@ func validateDialers(ap *app.App) int {
 	return 0
 }
 
-func validateAddresses(ap *app.App) int {
+func validateAddresses(ap *def.App) int {
 	// TODO: simplify this to a boolean and one slice for config fercryinoutloud
 	if ap.Config.AddPeers != nil && ap.Config.ConnectPeers != nil {
 		fmt.Println("ERROR:", cl.Ine(),
