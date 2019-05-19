@@ -26,7 +26,7 @@ var Cfg = &nine.Config{}
 // var winServiceMain func() (bool, error)
 
 // Main is the real main function for pod.  It is necessary to work around the fact that deferred functions do not run when os.Exit() is called.  The optional serverChan parameter is mainly used by the service code to be notified with the server once it is setup so it can gracefully stop it when requested from the service control manager.
-func Main(serverChan chan<- *server) (err error) {
+func Main(serverChan chan<- *server, started chan struct{}) (err error) {
 
 	// // Call serviceMain on Windows to handle running as a service.  When
 	// // the return isService flag is true, exit now since we ran as a
@@ -157,6 +157,8 @@ func Main(serverChan chan<- *server) (err error) {
 	if serverChan != nil {
 		serverChan <- server
 	}
+	close(started)
+	log <- cl.Info{"blockchain node is now started"}
 	// Wait until the interrupt signal is received from an OS signal or shutdown is requested through one of the subsystems such as the RPC server.
 	<-interrupt.HandlersDone
 	return nil

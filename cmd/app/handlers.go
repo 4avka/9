@@ -185,9 +185,8 @@ func Node(args []string, tokens def.Tokens, ap *def.App) int {
 		return 1
 	}
 	// run the node!
-	if node.Main(nil) != nil {
-		return 1
-	}
+	ap.Started = make(chan struct{})
+	go node.Main(nil, ap.Started)
 	return 0
 }
 
@@ -227,7 +226,9 @@ func Shell(args []string, tokens def.Tokens, ap *def.App) int {
 			panic("could not create wallet " + e.Error())
 		}
 	} else {
-		go Node(args, tokens, ap)
+		Node(args, tokens, ap)
+		<-ap.Started
+		log <- cl.Info{"starting wallet server"}
 		if e := walletmain.Main(ap.Config, ap.Config.ActiveNetParams, netDir); e != nil {
 			return 1
 		}

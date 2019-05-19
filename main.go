@@ -38,7 +38,8 @@ func main() {
 		fmt.Fprintf(os.Stderr, "failed to set limits: %v\n", err)
 		os.Exit(1)
 	}
-	rv := app.Parse(nineApp(), os.Args)
+	ap := nineApp()
+	rv := app.Parse(ap, os.Args)
 	os.Exit(rv)
 }
 

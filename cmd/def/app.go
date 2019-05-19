@@ -7,6 +7,7 @@ import (
 	"git.parallelcoin.io/dev/9/pkg/ifc"
 )
 
+// App contains all the configuration and subcommand definitions for an app
 type App struct {
 	Name     string
 	Tagline  string
@@ -16,9 +17,10 @@ type App struct {
 	Cats     Cats
 	Commands Commands
 	Config   *nine.Config
+	Started  chan struct{}
 }
 
-// ApppGenerator is a function that configures an App
+// AppGenerator is a function that configures an App
 type AppGenerator func(ctx *App)
 
 // AppGenerators is a collection of AppGenerators

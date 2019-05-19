@@ -27,17 +27,17 @@ func Parse(ap *def.App, args []string) int {
 		pwd, _ := os.Getwd()
 		*datadir = filepath.Join(pwd, *datadir)
 		dd.Value = *datadir
-		ap.Cats["ap"]["datadir"].Value.Put(*datadir)
+		ap.Cats["app"]["datadir"].Value.Put(*datadir)
 		DataDir = *datadir
 	} else {
 		ddd := util.AppDataDir("9", false)
-		ap.Cats["ap"]["datadir"].Put(ddd)
+		ap.Cats["app"]["datadir"].Put(ddd)
 		datadir = &ddd
 		DataDir = *datadir
 	}
 	// for i, x := range ap.Cats {
 	// 	for j := range x {
-	// 		// if i == "ap" && j == "datadir" {
+	// 		// if i == "app" && j == "datadir" {
 	// 		// 	break
 	// 		// }
 	// 		ap.Cats[i][j].Init(ap.Cats[i][j])
@@ -88,7 +88,6 @@ func Parse(ap *def.App, args []string) int {
 	}
 	ap.Config = MakeConfig(ap)
 	ap.Config.ActiveNetParams = node.ActiveNetParams
-
 	if ap.Config.LogLevel != nil {
 		cl.Register.SetAllLevels(*ap.Config.LogLevel)
 	}
