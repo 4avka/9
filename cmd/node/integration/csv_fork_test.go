@@ -303,7 +303,7 @@ func createCSVOutput(
 }
 
 // spendCSVOutput spends an output previously created by the createCSVOutput
-// function. The sigScript is a trivial push of OP_TRUE followed by the
+// function. The sigScript is a trivial push of OpTrue followed by the
 // redeemScript to pass P2SH evaluation.
 func spendCSVOutput(
 	redeemScript []byte, csvUTXO *wire.OutPoint,
@@ -317,7 +317,7 @@ func spendCSVOutput(
 	})
 	tx.AddTxOut(targetOutput)
 	b := txscript.NewScriptBuilder().
-		AddOp(txscript.OP_TRUE).
+		AddOp(txscript.OpTrue).
 		AddData(redeemScript)
 	sigScript, err := b.Script()
 

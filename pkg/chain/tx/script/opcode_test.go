@@ -42,7 +42,7 @@ func TestOpcodeDisasm(
 	oneBytes := []byte{0x01}
 	oneStr := "01"
 	expectedStrings := [256]string{0x00: "0", 0x4f: "-1",
-		0x50: "OP_RESERVED", 0x61: "OP_NOP", 0x62: "OP_VER",
+		0x50: "OpReserved", 0x61: "OP_NOP", 0x62: "OP_VER",
 		0x63: "OP_IF", 0x64: "OP_NOTIF", 0x65: "OP_VERIF",
 		0x66: "OP_VERNOTIF", 0x67: "OP_ELSE", 0x68: "OP_ENDIF",
 		0x69: "OP_VERIFY", 0x6a: "OP_RETURN", 0x6b: "OP_TOALTSTACK",
@@ -85,19 +85,19 @@ func TestOpcodeDisasm(
 		case opcodeVal >= 0x01 && opcodeVal < 0x4c:
 			data = bytes.Repeat(oneBytes, opcodeVal)
 			expectedStr = strings.Repeat(oneStr, opcodeVal)
-		// OP_PUSHDATA1.
+		// OpPushData1.
 		case opcodeVal == 0x4c:
 			data = bytes.Repeat(oneBytes, 1)
 			expectedStr = strings.Repeat(oneStr, 1)
-		// OP_PUSHDATA2.
+		// OpPushData2.
 		case opcodeVal == 0x4d:
 			data = bytes.Repeat(oneBytes, 2)
 			expectedStr = strings.Repeat(oneStr, 2)
-		// OP_PUSHDATA4.
+		// OpPushData4.
 		case opcodeVal == 0x4e:
 			data = bytes.Repeat(oneBytes, 3)
 			expectedStr = strings.Repeat(oneStr, 3)
-		// OP_1 through OP_16 display the numbers themselves.
+		// Op1 through Op16 display the numbers themselves.
 		case opcodeVal >= 0x51 && opcodeVal <= 0x60:
 			val := byte(opcodeVal - (0x51 - 1))
 			data = []byte{val}
@@ -135,7 +135,7 @@ func TestOpcodeDisasm(
 
 	// Now, replace the relevant fields and test the full disassembly.
 	expectedStrings[0x00] = "OpZero"
-	expectedStrings[0x4f] = "OP_1NEGATE"
+	expectedStrings[0x4f] = "Op1Negate"
 
 	for opcodeVal, expectedStr := range expectedStrings {
 
@@ -148,22 +148,22 @@ func TestOpcodeDisasm(
 			data = bytes.Repeat(oneBytes, opcodeVal)
 			expectedStr = fmt.Sprintf("OpData%d 0x%s", opcodeVal,
 				strings.Repeat(oneStr, opcodeVal))
-		// OP_PUSHDATA1.
+		// OpPushData1.
 		case opcodeVal == 0x4c:
 			data = bytes.Repeat(oneBytes, 1)
-			expectedStr = fmt.Sprintf("OP_PUSHDATA1 0x%02x 0x%s",
+			expectedStr = fmt.Sprintf("OpPushData1 0x%02x 0x%s",
 				len(data), strings.Repeat(oneStr, 1))
-		// OP_PUSHDATA2.
+		// OpPushData2.
 		case opcodeVal == 0x4d:
 			data = bytes.Repeat(oneBytes, 2)
-			expectedStr = fmt.Sprintf("OP_PUSHDATA2 0x%04x 0x%s",
+			expectedStr = fmt.Sprintf("OpPushData2 0x%04x 0x%s",
 				len(data), strings.Repeat(oneStr, 2))
-		// OP_PUSHDATA4.
+		// OpPushData4.
 		case opcodeVal == 0x4e:
 			data = bytes.Repeat(oneBytes, 3)
-			expectedStr = fmt.Sprintf("OP_PUSHDATA4 0x%08x 0x%s",
+			expectedStr = fmt.Sprintf("OpPushData4 0x%08x 0x%s",
 				len(data), strings.Repeat(oneStr, 3))
-		// OP_1 through OP_16.
+		// Op1 through Op16.
 		case opcodeVal >= 0x51 && opcodeVal <= 0x60:
 			val := byte(opcodeVal - (0x51 - 1))
 			data = []byte{val}

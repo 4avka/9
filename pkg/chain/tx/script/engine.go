@@ -141,8 +141,8 @@ func (vm *Engine) executeOpcode(pop *parsedOpcode) error {
 		return scriptError(ErrReservedOpcode, str)
 	}
 
-	// Note that this includes OP_RESERVED which counts as a push operation.
-	if pop.opcode.value > OP_16 {
+	// Note that this includes OpReserved which counts as a push operation.
+	if pop.opcode.value > Op16 {
 
 		vm.numOps++
 
@@ -167,7 +167,7 @@ func (vm *Engine) executeOpcode(pop *parsedOpcode) error {
 
 	// Ensure all executed data push opcodes use the minimal encoding when the minimal data verification flag is set.
 	if vm.dstack.verifyMinimalData && vm.isBranchExecuting() &&
-		pop.opcode.value >= 0 && pop.opcode.value <= OP_PUSHDATA4 {
+		pop.opcode.value >= 0 && pop.opcode.value <= OpPushData4 {
 
 		if err := pop.checkMinimalDataPush(); err != nil {
 

@@ -957,9 +957,9 @@ func ExtractCoinbaseHeight(
 		return 0, nil
 	}
 
-	if opcode >= txscript.OP_1 && opcode <= txscript.OP_16 {
+	if opcode >= txscript.Op1 && opcode <= txscript.Op16 {
 
-		return int32(opcode - (txscript.OP_1 - 1)), nil
+		return int32(opcode - (txscript.Op1 - 1)), nil
 	}
 
 	// Otherwise, the opcode is the length of the following bytes which encode in the block height.

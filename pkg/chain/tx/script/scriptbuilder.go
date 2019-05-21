@@ -23,8 +23,8 @@ func (e ErrScriptNotCanonical) Error() string {
 // ScriptBuilder provides a facility for building custom scripts.  It allows you to push opcodes, ints, and data while respecting canonical encoding.  In general it does not ensure the script will execute correctly, however any data pushes which would exceed the maximum allowed script engine limits and are therefore guaranteed not to execute will not be pushed and will result in the Script function returning an error.
 // For example, the following would build a 2-of-3 multisig script for usage in a pay-to-script-hash (although in this situation MultiSigScript() would be a better choice to generate the script):
 // 	builder := txscript.NewScriptBuilder()
-// 	builder.AddOp(txscript.OP_2).AddData(pubKey1).AddData(pubKey2)
-// 	builder.AddData(pubKey3).AddOp(txscript.OP_3)
+// 	builder.AddOp(txscript.Op2).AddData(pubKey1).AddData(pubKey2)
+// 	builder.AddData(pubKey3).AddOp(txscript.Op3)
 // 	builder.AddOp(txscript.OP_CHECKMULTISIG)
 // 	script, err := builder.Script()
 // 	if err != nil {
@@ -94,7 +94,7 @@ func canonicalDataSize(
 
 		return 1
 	}
-	if dataLen < OP_PUSHDATA1 {
+	if dataLen < OpPushData1 {
 
 		return 1 + dataLen
 	} else if dataLen <= 0xff {
@@ -119,32 +119,32 @@ func (b *ScriptBuilder) addData(data []byte) *ScriptBuilder {
 		return b
 	} else if dataLen == 1 && data[0] <= 16 {
 
-		b.script = append(b.script, (OP_1-1)+data[0])
+		b.script = append(b.script, (Op1-1)+data[0])
 		return b
 	} else if dataLen == 1 && data[0] == 0x81 {
 
-		b.script = append(b.script, byte(OP_1NEGATE))
+		b.script = append(b.script, byte(Op1Negate))
 		return b
 	}
 
 	// Use one of the OpData# opcodes if the length of the data is small enough so the data push instruction is only a single byte. Otherwise, choose the smallest possible OP_PUSHDATA# opcode that can represent the length of the data.
-	if dataLen < OP_PUSHDATA1 {
+	if dataLen < OpPushData1 {
 
 		b.script = append(b.script, byte((OpData1-1)+dataLen))
 	} else if dataLen <= 0xff {
 
-		b.script = append(b.script, OP_PUSHDATA1, byte(dataLen))
+		b.script = append(b.script, OpPushData1, byte(dataLen))
 	} else if dataLen <= 0xffff {
 
 		buf := make([]byte, 2)
 		binary.LittleEndian.PutUint16(buf, uint16(dataLen))
-		b.script = append(b.script, OP_PUSHDATA2)
+		b.script = append(b.script, OpPushData2)
 		b.script = append(b.script, buf...)
 	} else {
 
 		buf := make([]byte, 4)
 		binary.LittleEndian.PutUint32(buf, uint32(dataLen))
-		b.script = append(b.script, OP_PUSHDATA4)
+		b.script = append(b.script, OpPushData4)
 		b.script = append(b.script, buf...)
 	}
 
@@ -213,7 +213,7 @@ func (b *ScriptBuilder) AddInt64(val int64) *ScriptBuilder {
 		return b
 	}
 
-	// Fast path for small integers and OP_1NEGATE.
+	// Fast path for small integers and Op1Negate.
 	if val == 0 {
 
 		b.script = append(b.script, OpZero)
@@ -221,7 +221,7 @@ func (b *ScriptBuilder) AddInt64(val int64) *ScriptBuilder {
 	}
 	if val == -1 || (val >= 1 && val <= 16) {
 
-		b.script = append(b.script, byte((OP_1-1)+val))
+		b.script = append(b.script, byte((Op1-1)+val))
 		return b
 	}
 	return b.AddData(scriptNum(val).Bytes())

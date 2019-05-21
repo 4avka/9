@@ -117,72 +117,72 @@ func TestCheckPkScriptStandard(
 	}{
 		{
 			"key1 and key2",
-			txscript.NewScriptBuilder().AddOp(txscript.OP_2).
+			txscript.NewScriptBuilder().AddOp(txscript.Op2).
 				AddData(pubKeys[0]).AddData(pubKeys[1]).
-				AddOp(txscript.OP_2).AddOp(txscript.OP_CHECKMULTISIG),
+				AddOp(txscript.Op2).AddOp(txscript.OP_CHECKMULTISIG),
 			true,
 		},
 		{
 			"key1 or key2",
-			txscript.NewScriptBuilder().AddOp(txscript.OP_1).
+			txscript.NewScriptBuilder().AddOp(txscript.Op1).
 				AddData(pubKeys[0]).AddData(pubKeys[1]).
-				AddOp(txscript.OP_2).AddOp(txscript.OP_CHECKMULTISIG),
+				AddOp(txscript.Op2).AddOp(txscript.OP_CHECKMULTISIG),
 			true,
 		},
 		{
 			"escrow",
-			txscript.NewScriptBuilder().AddOp(txscript.OP_2).
+			txscript.NewScriptBuilder().AddOp(txscript.Op2).
 				AddData(pubKeys[0]).AddData(pubKeys[1]).
 				AddData(pubKeys[2]).
-				AddOp(txscript.OP_3).AddOp(txscript.OP_CHECKMULTISIG),
+				AddOp(txscript.Op3).AddOp(txscript.OP_CHECKMULTISIG),
 			true,
 		},
 		{
 			"one of four",
-			txscript.NewScriptBuilder().AddOp(txscript.OP_1).
+			txscript.NewScriptBuilder().AddOp(txscript.Op1).
 				AddData(pubKeys[0]).AddData(pubKeys[1]).
 				AddData(pubKeys[2]).AddData(pubKeys[3]).
-				AddOp(txscript.OP_4).AddOp(txscript.OP_CHECKMULTISIG),
+				AddOp(txscript.Op4).AddOp(txscript.OP_CHECKMULTISIG),
 			false,
 		},
 		{
 			"malformed1",
-			txscript.NewScriptBuilder().AddOp(txscript.OP_3).
+			txscript.NewScriptBuilder().AddOp(txscript.Op3).
 				AddData(pubKeys[0]).AddData(pubKeys[1]).
-				AddOp(txscript.OP_2).AddOp(txscript.OP_CHECKMULTISIG),
+				AddOp(txscript.Op2).AddOp(txscript.OP_CHECKMULTISIG),
 			false,
 		},
 		{
 			"malformed2",
-			txscript.NewScriptBuilder().AddOp(txscript.OP_2).
+			txscript.NewScriptBuilder().AddOp(txscript.Op2).
 				AddData(pubKeys[0]).AddData(pubKeys[1]).
-				AddOp(txscript.OP_3).AddOp(txscript.OP_CHECKMULTISIG),
+				AddOp(txscript.Op3).AddOp(txscript.OP_CHECKMULTISIG),
 			false,
 		},
 		{
 			"malformed3",
 			txscript.NewScriptBuilder().AddOp(txscript.OpZero).
 				AddData(pubKeys[0]).AddData(pubKeys[1]).
-				AddOp(txscript.OP_2).AddOp(txscript.OP_CHECKMULTISIG),
+				AddOp(txscript.Op2).AddOp(txscript.OP_CHECKMULTISIG),
 			false,
 		},
 		{
 			"malformed4",
-			txscript.NewScriptBuilder().AddOp(txscript.OP_1).
+			txscript.NewScriptBuilder().AddOp(txscript.Op1).
 				AddData(pubKeys[0]).AddData(pubKeys[1]).
 				AddOp(txscript.OpZero).AddOp(txscript.OP_CHECKMULTISIG),
 			false,
 		},
 		{
 			"malformed5",
-			txscript.NewScriptBuilder().AddOp(txscript.OP_1).
+			txscript.NewScriptBuilder().AddOp(txscript.Op1).
 				AddData(pubKeys[0]).AddData(pubKeys[1]).
 				AddOp(txscript.OP_CHECKMULTISIG),
 			false,
 		},
 		{
 			"malformed6",
-			txscript.NewScriptBuilder().AddOp(txscript.OP_1).
+			txscript.NewScriptBuilder().AddOp(txscript.Op1).
 				AddData(pubKeys[0]).AddData(pubKeys[1]),
 			false,
 		},
@@ -423,7 +423,7 @@ func TestCheckTransactionStandard(
 				TxIn:    []*wire.TxIn{&dummyTxIn},
 				TxOut: []*wire.TxOut{{
 					Value:    100000000,
-					PkScript: []byte{txscript.OP_TRUE},
+					PkScript: []byte{txscript.OpTrue},
 				}},
 				LockTime: 0,
 			},

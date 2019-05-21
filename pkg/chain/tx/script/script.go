@@ -35,11 +35,11 @@ const (
 	MaxScriptElementSize  = 520 // Max bytes pushable to the stack.
 )
 
-// isSmallInt returns whether or not the opcode is considered a small integer, which is an OpZero, or OP_1 through OP_16.
+// isSmallInt returns whether or not the opcode is considered a small integer, which is an OpZero, or Op1 through Op16.
 func isSmallInt(
 	op *opcode) bool {
 
-	if op.value == OpZero || (op.value >= OP_1 && op.value <= OP_16) {
+	if op.value == OpZero || (op.value >= Op1 && op.value <= Op16) {
 
 		return true
 	}
@@ -166,9 +166,9 @@ func isPushOnly(
 
 	for _, pop := range pops {
 
-		// All opcodes up to OP_16 are data push instructions. NOTE: This does consider OP_RESERVED to be a data push instruction, but execution of OP_RESERVED will fail anyways and matches the behavior required by consensus.
+		// All opcodes up to Op16 are data push instructions. NOTE: This does consider OpReserved to be a data push instruction, but execution of OpReserved will fail anyways and matches the behavior required by consensus.
 
-		if pop.opcode.value > OP_16 {
+		if pop.opcode.value > Op16 {
 
 			return false
 		}
@@ -203,7 +203,7 @@ func parseScriptTemplate(
 
 		switch {
 
-		// No additional data.  Note that some of the opcodes, notably OP_1NEGATE, OpZero, and OP_[1-16] represent the data themselves.
+		// No additional data.  Note that some of the opcodes, notably Op1Negate, OpZero, and OP_[1-16] represent the data themselves.
 		case op.length == 1:
 			i++
 		// Data pushes of specific lengths -- OpData[1-75].
@@ -345,23 +345,23 @@ func canonicalPush(
 	opcode := pop.opcode.value
 	data := pop.data
 	dataLen := len(pop.data)
-	if opcode > OP_16 {
+	if opcode > Op16 {
 
 		return true
 	}
-	if opcode < OP_PUSHDATA1 && opcode > OpZero && (dataLen == 1 && data[0] <= 16) {
+	if opcode < OpPushData1 && opcode > OpZero && (dataLen == 1 && data[0] <= 16) {
 
 		return false
 	}
-	if opcode == OP_PUSHDATA1 && dataLen < OP_PUSHDATA1 {
+	if opcode == OpPushData1 && dataLen < OpPushData1 {
 
 		return false
 	}
-	if opcode == OP_PUSHDATA2 && dataLen <= 0xff {
+	if opcode == OpPushData2 && dataLen <= 0xff {
 
 		return false
 	}
-	if opcode == OP_PUSHDATA4 && dataLen <= 0xffff {
+	if opcode == OpPushData4 && dataLen <= 0xffff {
 
 		return false
 	}
@@ -678,7 +678,7 @@ func asSmallInt(
 
 		return 0
 	}
-	return int(op.value - (OP_1 - 1))
+	return int(op.value - (Op1 - 1))
 }
 
 // getSigOpCount is the implementation function for counting the number of signature operations in the script provided by pops. If precise mode is requested then we attempt to count the number of operations for a multisig op. Otherwise we use the maximum.
@@ -698,12 +698,12 @@ func getSigOpCount(
 		case OP_CHECKMULTISIG:
 			fallthrough
 		case OP_CHECKMULTISIGVERIFY:
-			// If we are being precise then look for familiar patterns for multisig, for now all we recognize is OP_1 - OP_16 to signify the number of pubkeys. Otherwise, we use the max of 20.
+			// If we are being precise then look for familiar patterns for multisig, for now all we recognize is Op1 - Op16 to signify the number of pubkeys. Otherwise, we use the max of 20.
 
 			if precise && i > 0 &&
 
-				pops[i-1].opcode.value >= OP_1 &&
-				pops[i-1].opcode.value <= OP_16 {
+				pops[i-1].opcode.value >= Op1 &&
+				pops[i-1].opcode.value <= Op16 {
 
 				nSigs += asSmallInt(pops[i-1].opcode)
 			} else {

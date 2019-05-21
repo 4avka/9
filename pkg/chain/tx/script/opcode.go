@@ -24,7 +24,10 @@ type opcode struct {
 		*parsedOpcode, *Engine) error
 }
 
-// These constants are the values of the official opcodes used on the btc wiki, in bitcoin core and in most if not all other references and software related to handling DUO scripts.
+// These constants are the values of the official opcodes used on the btc wiki, in bitcoin core and in
+// most if not all other references and software related to handling BTC scripts.
+// Since anyway these opcodes are not used directly in their mnemonic form
+// and we aren't living in the 70s, these are all re-named in standard Go case format
 const (
 	OpZero                 = 0x00 // 0
 	OpFalse                = 0x00 // 0 - AKA OpZero
@@ -45,86 +48,86 @@ const (
 	OpData15               = 0x0f // 15
 	OpData16               = 0x10 // 16
 	OpData17               = 0x11 // 17
-	OpData18             = 0x12 // 18
-	OpData19             = 0x13 // 19
-	OpData20             = 0x14 // 20
-	OpData21             = 0x15 // 21
-	OpData22             = 0x16 // 22
-	OpData23             = 0x17 // 23
-	OpData24             = 0x18 // 24
-	OpData25             = 0x19 // 25
-	OpData26             = 0x1a // 26
-	OpData27             = 0x1b // 27
-	OpData28             = 0x1c // 28
-	OpData29             = 0x1d // 29
-	OpData30             = 0x1e // 30
-	OpData31             = 0x1f // 31
-	OpData32             = 0x20 // 32
-	OpData33             = 0x21 // 33
-	OpData34             = 0x22 // 34
-	OpData35             = 0x23 // 35
-	OpData36             = 0x24 // 36
-	OpData37             = 0x25 // 37
-	OpData38             = 0x26 // 38
-	OpData39             = 0x27 // 39
-	OpData40             = 0x28 // 40
-	OpData41             = 0x29 // 41
-	OpData42             = 0x2a // 42
-	OpData43             = 0x2b // 43
-	OpData44             = 0x2c // 44
-	OpData45             = 0x2d // 45
-	OpData46             = 0x2e // 46
-	OpData47             = 0x2f // 47
-	OpData48             = 0x30 // 48
-	OpData49             = 0x31 // 49
-	OpData50             = 0x32 // 50
-	OpData51             = 0x33 // 51
-	OpData52             = 0x34 // 52
-	OpData53             = 0x35 // 53
-	OpData54             = 0x36 // 54
-	OpData55             = 0x37 // 55
-	OpData56             = 0x38 // 56
-	OpData57             = 0x39 // 57
-	OpData58             = 0x3a // 58
-	OpData59             = 0x3b // 59
-	OpData60             = 0x3c // 60
-	OpData61             = 0x3d // 61
-	OpData62             = 0x3e // 62
-	OpData63             = 0x3f // 63
-	OpData64             = 0x40 // 64
-	OpData65             = 0x41 // 65
-	OpData66             = 0x42 // 66
-	OpData67             = 0x43 // 67
-	OpData68             = 0x44 // 68
-	OpData69             = 0x45 // 69
-	OpData70             = 0x46 // 70
-	OpData71             = 0x47 // 71
-	OpData72             = 0x48 // 72
-	OpData73             = 0x49 // 73
-	OpData74             = 0x4a // 74
-	OpData75             = 0x4b // 75
-	OP_PUSHDATA1           = 0x4c // 76
-	OP_PUSHDATA2           = 0x4d // 77
-	OP_PUSHDATA4           = 0x4e // 78
-	OP_1NEGATE             = 0x4f // 79
-	OP_RESERVED            = 0x50 // 80
-	OP_1                   = 0x51 // 81 - AKA OP_TRUE
-	OP_TRUE                = 0x51 // 81
-	OP_2                   = 0x52 // 82
-	OP_3                   = 0x53 // 83
-	OP_4                   = 0x54 // 84
-	OP_5                   = 0x55 // 85
-	OP_6                   = 0x56 // 86
-	OP_7                   = 0x57 // 87
-	OP_8                   = 0x58 // 88
-	OP_9                   = 0x59 // 89
-	OP_10                  = 0x5a // 90
-	OP_11                  = 0x5b // 91
-	OP_12                  = 0x5c // 92
-	OP_13                  = 0x5d // 93
-	OP_14                  = 0x5e // 94
-	OP_15                  = 0x5f // 95
-	OP_16                  = 0x60 // 96
+	OpData18               = 0x12 // 18
+	OpData19               = 0x13 // 19
+	OpData20               = 0x14 // 20
+	OpData21               = 0x15 // 21
+	OpData22               = 0x16 // 22
+	OpData23               = 0x17 // 23
+	OpData24               = 0x18 // 24
+	OpData25               = 0x19 // 25
+	OpData26               = 0x1a // 26
+	OpData27               = 0x1b // 27
+	OpData28               = 0x1c // 28
+	OpData29               = 0x1d // 29
+	OpData30               = 0x1e // 30
+	OpData31               = 0x1f // 31
+	OpData32               = 0x20 // 32
+	OpData33               = 0x21 // 33
+	OpData34               = 0x22 // 34
+	OpData35               = 0x23 // 35
+	OpData36               = 0x24 // 36
+	OpData37               = 0x25 // 37
+	OpData38               = 0x26 // 38
+	OpData39               = 0x27 // 39
+	OpData40               = 0x28 // 40
+	OpData41               = 0x29 // 41
+	OpData42               = 0x2a // 42
+	OpData43               = 0x2b // 43
+	OpData44               = 0x2c // 44
+	OpData45               = 0x2d // 45
+	OpData46               = 0x2e // 46
+	OpData47               = 0x2f // 47
+	OpData48               = 0x30 // 48
+	OpData49               = 0x31 // 49
+	OpData50               = 0x32 // 50
+	OpData51               = 0x33 // 51
+	OpData52               = 0x34 // 52
+	OpData53               = 0x35 // 53
+	OpData54               = 0x36 // 54
+	OpData55               = 0x37 // 55
+	OpData56               = 0x38 // 56
+	OpData57               = 0x39 // 57
+	OpData58               = 0x3a // 58
+	OpData59               = 0x3b // 59
+	OpData60               = 0x3c // 60
+	OpData61               = 0x3d // 61
+	OpData62               = 0x3e // 62
+	OpData63               = 0x3f // 63
+	OpData64               = 0x40 // 64
+	OpData65               = 0x41 // 65
+	OpData66               = 0x42 // 66
+	OpData67               = 0x43 // 67
+	OpData68               = 0x44 // 68
+	OpData69               = 0x45 // 69
+	OpData70               = 0x46 // 70
+	OpData71               = 0x47 // 71
+	OpData72               = 0x48 // 72
+	OpData73               = 0x49 // 73
+	OpData74               = 0x4a // 74
+	OpData75               = 0x4b // 75
+	OpPushData1            = 0x4c // 76
+	OpPushData2            = 0x4d // 77
+	OpPushData4            = 0x4e // 78
+	Op1Negate              = 0x4f // 79
+	OpReserved             = 0x50 // 80
+	Op1                    = 0x51 // 81 - AKA OpTrue
+	OpTrue                 = 0x51 // 81
+	Op2                    = 0x52 // 82
+	Op3                    = 0x53 // 83
+	Op4                    = 0x54 // 84
+	Op5                    = 0x55 // 85
+	Op6                    = 0x56 // 86
+	Op7                    = 0x57 // 87
+	Op8                    = 0x58 // 88
+	Op9                    = 0x59 // 89
+	Op10                   = 0x5a // 90
+	Op11                   = 0x5b // 91
+	Op12                   = 0x5c // 92
+	Op13                   = 0x5d // 93
+	Op14                   = 0x5e // 94
+	Op15                   = 0x5f // 95
+	Op16                   = 0x60 // 96
 	OP_NOP                 = 0x61 // 97
 	OP_VER                 = 0x62 // 98
 	OP_IF                  = 0x63 // 99
@@ -299,103 +302,103 @@ const (
 var opcodeArray = [256]opcode{
 
 	// Data push opcodes.
-	OpFalse:      {OpFalse, "OpZero", 1, opcodeFalse},
-	OpData1:      {OpData1, "OpData1", 2, opcodePushData},
-	OpData2:      {OpData2, "OpData2", 3, opcodePushData},
-	OpData3:      {OpData3, "OpData3", 4, opcodePushData},
-	OpData4:      {OpData4, "OpData4", 5, opcodePushData},
-	OpData5:      {OpData5, "OpData5", 6, opcodePushData},
-	OpData6:      {OpData6, "OpData6", 7, opcodePushData},
-	OpData7:      {OpData7, "OpData7", 8, opcodePushData},
-	OpData8:      {OpData8, "OpData8", 9, opcodePushData},
-	OpData9:      {OpData9, "OpData9", 10, opcodePushData},
-	OpData10:     {OpData10, "OpData10", 11, opcodePushData},
-	OpData11:     {OpData11, "OpData11", 12, opcodePushData},
-	OpData12:     {OpData12, "OpData12", 13, opcodePushData},
-	OpData13:     {OpData13, "OpData13", 14, opcodePushData},
-	OpData14:     {OpData14, "OpData14", 15, opcodePushData},
-	OpData15:     {OpData15, "OpData15", 16, opcodePushData},
-	OpData16:     {OpData16, "OpData16", 17, opcodePushData},
-	OpData17:     {OpData17, "OpData17", 18, opcodePushData},
-	OpData18:   {OpData18, "OpData18", 19, opcodePushData},
-	OpData19:   {OpData19, "OpData19", 20, opcodePushData},
-	OpData20:   {OpData20, "OpData20", 21, opcodePushData},
-	OpData21:   {OpData21, "OpData21", 22, opcodePushData},
-	OpData22:   {OpData22, "OpData22", 23, opcodePushData},
-	OpData23:   {OpData23, "OpData23", 24, opcodePushData},
-	OpData24:   {OpData24, "OpData24", 25, opcodePushData},
-	OpData25:   {OpData25, "OpData25", 26, opcodePushData},
-	OpData26:   {OpData26, "OpData26", 27, opcodePushData},
-	OpData27:   {OpData27, "OpData27", 28, opcodePushData},
-	OpData28:   {OpData28, "OpData28", 29, opcodePushData},
-	OpData29:   {OpData29, "OpData29", 30, opcodePushData},
-	OpData30:   {OpData30, "OpData30", 31, opcodePushData},
-	OpData31:   {OpData31, "OpData31", 32, opcodePushData},
-	OpData32:   {OpData32, "OpData32", 33, opcodePushData},
-	OpData33:   {OpData33, "OpData33", 34, opcodePushData},
-	OpData34:   {OpData34, "OpData34", 35, opcodePushData},
-	OpData35:   {OpData35, "OpData35", 36, opcodePushData},
-	OpData36:   {OpData36, "OpData36", 37, opcodePushData},
-	OpData37:   {OpData37, "OpData37", 38, opcodePushData},
-	OpData38:   {OpData38, "OpData38", 39, opcodePushData},
-	OpData39:   {OpData39, "OpData39", 40, opcodePushData},
-	OpData40:   {OpData40, "OpData40", 41, opcodePushData},
-	OpData41:   {OpData41, "OpData41", 42, opcodePushData},
-	OpData42:   {OpData42, "OpData42", 43, opcodePushData},
-	OpData43:   {OpData43, "OpData43", 44, opcodePushData},
-	OpData44:   {OpData44, "OpData44", 45, opcodePushData},
-	OpData45:   {OpData45, "OpData45", 46, opcodePushData},
-	OpData46:   {OpData46, "OpData46", 47, opcodePushData},
-	OpData47:   {OpData47, "OpData47", 48, opcodePushData},
-	OpData48:   {OpData48, "OpData48", 49, opcodePushData},
-	OpData49:   {OpData49, "OpData49", 50, opcodePushData},
-	OpData50:   {OpData50, "OpData50", 51, opcodePushData},
-	OpData51:   {OpData51, "OpData51", 52, opcodePushData},
-	OpData52:   {OpData52, "OpData52", 53, opcodePushData},
-	OpData53:   {OpData53, "OpData53", 54, opcodePushData},
-	OpData54:   {OpData54, "OpData54", 55, opcodePushData},
-	OpData55:   {OpData55, "OpData55", 56, opcodePushData},
-	OpData56:   {OpData56, "OpData56", 57, opcodePushData},
-	OpData57:   {OpData57, "OpData57", 58, opcodePushData},
-	OpData58:   {OpData58, "OpData58", 59, opcodePushData},
-	OpData59:   {OpData59, "OpData59", 60, opcodePushData},
-	OpData60:   {OpData60, "OpData60", 61, opcodePushData},
-	OpData61:   {OpData61, "OpData61", 62, opcodePushData},
-	OpData62:   {OpData62, "OpData62", 63, opcodePushData},
-	OpData63:   {OpData63, "OpData63", 64, opcodePushData},
-	OpData64:   {OpData64, "OpData64", 65, opcodePushData},
-	OpData65:   {OpData65, "OpData65", 66, opcodePushData},
-	OpData66:   {OpData66, "OpData66", 67, opcodePushData},
-	OpData67:   {OpData67, "OpData67", 68, opcodePushData},
-	OpData68:   {OpData68, "OpData68", 69, opcodePushData},
-	OpData69:   {OpData69, "OpData69", 70, opcodePushData},
-	OpData70:   {OpData70, "OpData70", 71, opcodePushData},
-	OpData71:   {OpData71, "OpData71", 72, opcodePushData},
-	OpData72:   {OpData72, "OpData72", 73, opcodePushData},
-	OpData73:   {OpData73, "OpData73", 74, opcodePushData},
-	OpData74:   {OpData74, "OpData74", 75, opcodePushData},
-	OpData75:   {OpData75, "OpData75", 76, opcodePushData},
-	OP_PUSHDATA1: {OP_PUSHDATA1, "OP_PUSHDATA1", -1, opcodePushData},
-	OP_PUSHDATA2: {OP_PUSHDATA2, "OP_PUSHDATA2", -2, opcodePushData},
-	OP_PUSHDATA4: {OP_PUSHDATA4, "OP_PUSHDATA4", -4, opcodePushData},
-	OP_1NEGATE:   {OP_1NEGATE, "OP_1NEGATE", 1, opcode1Negate},
-	OP_RESERVED:  {OP_RESERVED, "OP_RESERVED", 1, opcodeReserved},
-	OP_TRUE:      {OP_TRUE, "OP_1", 1, opcodeN},
-	OP_2:         {OP_2, "OP_2", 1, opcodeN},
-	OP_3:         {OP_3, "OP_3", 1, opcodeN},
-	OP_4:         {OP_4, "OP_4", 1, opcodeN},
-	OP_5:         {OP_5, "OP_5", 1, opcodeN},
-	OP_6:         {OP_6, "OP_6", 1, opcodeN},
-	OP_7:         {OP_7, "OP_7", 1, opcodeN},
-	OP_8:         {OP_8, "OP_8", 1, opcodeN},
-	OP_9:         {OP_9, "OP_9", 1, opcodeN},
-	OP_10:        {OP_10, "OP_10", 1, opcodeN},
-	OP_11:        {OP_11, "OP_11", 1, opcodeN},
-	OP_12:        {OP_12, "OP_12", 1, opcodeN},
-	OP_13:        {OP_13, "OP_13", 1, opcodeN},
-	OP_14:        {OP_14, "OP_14", 1, opcodeN},
-	OP_15:        {OP_15, "OP_15", 1, opcodeN},
-	OP_16:        {OP_16, "OP_16", 1, opcodeN},
+	OpFalse:     {OpFalse, "OpZero", 1, opcodeFalse},
+	OpData1:     {OpData1, "OpData1", 2, opcodePushData},
+	OpData2:     {OpData2, "OpData2", 3, opcodePushData},
+	OpData3:     {OpData3, "OpData3", 4, opcodePushData},
+	OpData4:     {OpData4, "OpData4", 5, opcodePushData},
+	OpData5:     {OpData5, "OpData5", 6, opcodePushData},
+	OpData6:     {OpData6, "OpData6", 7, opcodePushData},
+	OpData7:     {OpData7, "OpData7", 8, opcodePushData},
+	OpData8:     {OpData8, "OpData8", 9, opcodePushData},
+	OpData9:     {OpData9, "OpData9", 10, opcodePushData},
+	OpData10:    {OpData10, "OpData10", 11, opcodePushData},
+	OpData11:    {OpData11, "OpData11", 12, opcodePushData},
+	OpData12:    {OpData12, "OpData12", 13, opcodePushData},
+	OpData13:    {OpData13, "OpData13", 14, opcodePushData},
+	OpData14:    {OpData14, "OpData14", 15, opcodePushData},
+	OpData15:    {OpData15, "OpData15", 16, opcodePushData},
+	OpData16:    {OpData16, "OpData16", 17, opcodePushData},
+	OpData17:    {OpData17, "OpData17", 18, opcodePushData},
+	OpData18:    {OpData18, "OpData18", 19, opcodePushData},
+	OpData19:    {OpData19, "OpData19", 20, opcodePushData},
+	OpData20:    {OpData20, "OpData20", 21, opcodePushData},
+	OpData21:    {OpData21, "OpData21", 22, opcodePushData},
+	OpData22:    {OpData22, "OpData22", 23, opcodePushData},
+	OpData23:    {OpData23, "OpData23", 24, opcodePushData},
+	OpData24:    {OpData24, "OpData24", 25, opcodePushData},
+	OpData25:    {OpData25, "OpData25", 26, opcodePushData},
+	OpData26:    {OpData26, "OpData26", 27, opcodePushData},
+	OpData27:    {OpData27, "OpData27", 28, opcodePushData},
+	OpData28:    {OpData28, "OpData28", 29, opcodePushData},
+	OpData29:    {OpData29, "OpData29", 30, opcodePushData},
+	OpData30:    {OpData30, "OpData30", 31, opcodePushData},
+	OpData31:    {OpData31, "OpData31", 32, opcodePushData},
+	OpData32:    {OpData32, "OpData32", 33, opcodePushData},
+	OpData33:    {OpData33, "OpData33", 34, opcodePushData},
+	OpData34:    {OpData34, "OpData34", 35, opcodePushData},
+	OpData35:    {OpData35, "OpData35", 36, opcodePushData},
+	OpData36:    {OpData36, "OpData36", 37, opcodePushData},
+	OpData37:    {OpData37, "OpData37", 38, opcodePushData},
+	OpData38:    {OpData38, "OpData38", 39, opcodePushData},
+	OpData39:    {OpData39, "OpData39", 40, opcodePushData},
+	OpData40:    {OpData40, "OpData40", 41, opcodePushData},
+	OpData41:    {OpData41, "OpData41", 42, opcodePushData},
+	OpData42:    {OpData42, "OpData42", 43, opcodePushData},
+	OpData43:    {OpData43, "OpData43", 44, opcodePushData},
+	OpData44:    {OpData44, "OpData44", 45, opcodePushData},
+	OpData45:    {OpData45, "OpData45", 46, opcodePushData},
+	OpData46:    {OpData46, "OpData46", 47, opcodePushData},
+	OpData47:    {OpData47, "OpData47", 48, opcodePushData},
+	OpData48:    {OpData48, "OpData48", 49, opcodePushData},
+	OpData49:    {OpData49, "OpData49", 50, opcodePushData},
+	OpData50:    {OpData50, "OpData50", 51, opcodePushData},
+	OpData51:    {OpData51, "OpData51", 52, opcodePushData},
+	OpData52:    {OpData52, "OpData52", 53, opcodePushData},
+	OpData53:    {OpData53, "OpData53", 54, opcodePushData},
+	OpData54:    {OpData54, "OpData54", 55, opcodePushData},
+	OpData55:    {OpData55, "OpData55", 56, opcodePushData},
+	OpData56:    {OpData56, "OpData56", 57, opcodePushData},
+	OpData57:    {OpData57, "OpData57", 58, opcodePushData},
+	OpData58:    {OpData58, "OpData58", 59, opcodePushData},
+	OpData59:    {OpData59, "OpData59", 60, opcodePushData},
+	OpData60:    {OpData60, "OpData60", 61, opcodePushData},
+	OpData61:    {OpData61, "OpData61", 62, opcodePushData},
+	OpData62:    {OpData62, "OpData62", 63, opcodePushData},
+	OpData63:    {OpData63, "OpData63", 64, opcodePushData},
+	OpData64:    {OpData64, "OpData64", 65, opcodePushData},
+	OpData65:    {OpData65, "OpData65", 66, opcodePushData},
+	OpData66:    {OpData66, "OpData66", 67, opcodePushData},
+	OpData67:    {OpData67, "OpData67", 68, opcodePushData},
+	OpData68:    {OpData68, "OpData68", 69, opcodePushData},
+	OpData69:    {OpData69, "OpData69", 70, opcodePushData},
+	OpData70:    {OpData70, "OpData70", 71, opcodePushData},
+	OpData71:    {OpData71, "OpData71", 72, opcodePushData},
+	OpData72:    {OpData72, "OpData72", 73, opcodePushData},
+	OpData73:    {OpData73, "OpData73", 74, opcodePushData},
+	OpData74:    {OpData74, "OpData74", 75, opcodePushData},
+	OpData75:    {OpData75, "OpData75", 76, opcodePushData},
+	OpPushData1: {OpPushData1, "OpPushData1", -1, opcodePushData},
+	OpPushData2: {OpPushData2, "OpPushData2", -2, opcodePushData},
+	OpPushData4: {OpPushData4, "OpPushData4", -4, opcodePushData},
+	Op1Negate:   {Op1Negate, "Op1Negate", 1, opcode1Negate},
+	OpReserved:  {OpReserved, "OpReserved", 1, opcodeReserved},
+	OpTrue:      {OpTrue, "Op1", 1, opcodeN},
+	Op2:         {Op2, "Op2", 1, opcodeN},
+	Op3:         {Op3, "Op3", 1, opcodeN},
+	Op4:         {Op4, "Op4", 1, opcodeN},
+	Op5:         {Op5, "Op5", 1, opcodeN},
+	Op6:         {Op6, "Op6", 1, opcodeN},
+	Op7:         {Op7, "Op7", 1, opcodeN},
+	Op8:         {Op8, "Op8", 1, opcodeN},
+	Op9:         {Op9, "Op9", 1, opcodeN},
+	Op10:        {Op10, "Op10", 1, opcodeN},
+	Op11:        {Op11, "Op11", 1, opcodeN},
+	Op12:        {Op12, "Op12", 1, opcodeN},
+	Op13:        {Op13, "Op13", 1, opcodeN},
+	Op14:        {Op14, "Op14", 1, opcodeN},
+	Op15:        {Op15, "Op15", 1, opcodeN},
+	Op16:        {Op16, "Op16", 1, opcodeN},
 
 	// Control opcodes.
 	OP_NOP:                 {OP_NOP, "OP_NOP", 1, opcodeNop},
@@ -577,24 +580,24 @@ var opcodeArray = [256]opcode{
 
 // opcodeOnelineRepls defines opcode names which are replaced when doing a one-line disassembly.  This is done to match the output of the reference implementation while not changing the opcode names in the nicer full disassembly.
 var opcodeOnelineRepls = map[string]string{
-	"OP_1NEGATE": "-1",
-	"OpZero":     "0",
-	"OP_1":       "1",
-	"OP_2":       "2",
-	"OP_3":       "3",
-	"OP_4":       "4",
-	"OP_5":       "5",
-	"OP_6":       "6",
-	"OP_7":       "7",
-	"OP_8":       "8",
-	"OP_9":       "9",
-	"OP_10":      "10",
-	"OP_11":      "11",
-	"OP_12":      "12",
-	"OP_13":      "13",
-	"OP_14":      "14",
-	"OP_15":      "15",
-	"OP_16":      "16",
+	"Op1Negate": "-1",
+	"OpZero":    "0",
+	"Op1":       "1",
+	"Op2":       "2",
+	"Op3":       "3",
+	"Op4":       "4",
+	"Op5":       "5",
+	"Op6":       "6",
+	"Op7":       "7",
+	"Op8":       "8",
+	"Op9":       "9",
+	"Op10":      "10",
+	"Op11":      "11",
+	"Op12":      "12",
+	"Op13":      "13",
+	"Op14":      "14",
+	"Op15":      "15",
+	"Op16":      "16",
 }
 
 // parsedOpcode represents an opcode that has been parsed and includes any potential data associated with it.
@@ -676,7 +679,7 @@ func (pop *parsedOpcode) isConditional() bool {
 	}
 }
 
-// checkMinimalDataPush returns whether or not the current data push uses the smallest possible opcode to represent it.  For example, the value 15 could be pushed with OpData1 15 (among other variations); however, OP_15 is a single opcode that represents the same value and is only a single byte versus two bytes.
+// checkMinimalDataPush returns whether or not the current data push uses the smallest possible opcode to represent it.  For example, the value 15 could be pushed with OpData1 15 (among other variations); however, Op15 is a single opcode that represents the same value and is only a single byte versus two bytes.
 func (pop *parsedOpcode) checkMinimalDataPush() error {
 
 	data := pop.data
@@ -689,9 +692,9 @@ func (pop *parsedOpcode) checkMinimalDataPush() error {
 		return scriptError(ErrMinimalData, str)
 	} else if dataLen == 1 && data[0] >= 1 && data[0] <= 16 {
 
-		if opcode != OP_1+data[0]-1 {
+		if opcode != Op1+data[0]-1 {
 
-			// Should have used OP_1 .. OP_16
+			// Should have used Op1 .. Op16
 			str := fmt.Sprintf("data push of the value %d encoded "+
 				"with opcode %s instead of OP_%d", data[0],
 				pop.opcode.name, data[0])
@@ -699,10 +702,10 @@ func (pop *parsedOpcode) checkMinimalDataPush() error {
 		}
 	} else if dataLen == 1 && data[0] == 0x81 {
 
-		if opcode != OP_1NEGATE {
+		if opcode != Op1Negate {
 
 			str := fmt.Sprintf("data push of the value -1 encoded "+
-				"with opcode %s instead of OP_1NEGATE",
+				"with opcode %s instead of Op1Negate",
 				pop.opcode.name)
 			return scriptError(ErrMinimalData, str)
 		}
@@ -718,19 +721,19 @@ func (pop *parsedOpcode) checkMinimalDataPush() error {
 		}
 	} else if dataLen <= 255 {
 
-		if opcode != OP_PUSHDATA1 {
+		if opcode != OpPushData1 {
 
 			str := fmt.Sprintf("data push of %d bytes encoded "+
-				"with opcode %s instead of OP_PUSHDATA1",
+				"with opcode %s instead of OpPushData1",
 				dataLen, pop.opcode.name)
 			return scriptError(ErrMinimalData, str)
 		}
 	} else if dataLen <= 65535 {
 
-		if opcode != OP_PUSHDATA2 {
+		if opcode != OpPushData2 {
 
 			str := fmt.Sprintf("data push of %d bytes encoded "+
-				"with opcode %s instead of OP_PUSHDATA2",
+				"with opcode %s instead of OpPushData2",
 				dataLen, pop.opcode.name)
 			return scriptError(ErrMinimalData, str)
 		}
@@ -741,7 +744,7 @@ func (pop *parsedOpcode) checkMinimalDataPush() error {
 // print returns a human-readable string representation of the opcode for use in script disassembly.
 func (pop *parsedOpcode) print(oneline bool) string {
 
-	// The reference implementation one-line disassembly replaces opcodes which represent values (e.g. OpZero through OP_16 and OP_1NEGATE) with the raw value.  However, when not doing a one-line dissassembly, we prefer to show the actual opcode names.  Thus, only replace the opcodes in question when the oneline flag is set.
+	// The reference implementation one-line disassembly replaces opcodes which represent values (e.g. OpZero through Op16 and Op1Negate) with the raw value.  However, when not doing a one-line dissassembly, we prefer to show the actual opcode names.  Thus, only replace the opcodes in question when the oneline flag is set.
 	opcodeName := pop.opcode.name
 	if oneline {
 
@@ -897,7 +900,7 @@ func opcodeN(
 	op *parsedOpcode, vm *Engine) error {
 
 	// The opcodes are all defined consecutively, so the numeric value is the difference.
-	vm.dstack.PushInt(scriptNum((op.opcode.value - (OP_1 - 1))))
+	vm.dstack.PushInt(scriptNum((op.opcode.value - (Op1 - 1))))
 	return nil
 }
 
@@ -2415,14 +2418,14 @@ var OpcodeByName = make(map[string]byte)
 
 func init() {
 
-	// Initialize the opcode name to value map using the contents of the opcode array.  Also add entries for "OpFalse", "OP_TRUE", and "OP_NOP2" since they are aliases for "OpZero", "OP_1", and "OP_CHECKLOCKTIMEVERIFY" respectively.
+	// Initialize the opcode name to value map using the contents of the opcode array.  Also add entries for "OpFalse", "OpTrue", and "OP_NOP2" since they are aliases for "OpZero", "Op1", and "OP_CHECKLOCKTIMEVERIFY" respectively.
 
 	for _, op := range opcodeArray {
 
 		OpcodeByName[op.name] = op.value
 	}
 	OpcodeByName["OpFalse"] = OpFalse
-	OpcodeByName["OP_TRUE"] = OP_TRUE
+	OpcodeByName["OpTrue"] = OpTrue
 	OpcodeByName["OP_NOP2"] = OP_CHECKLOCKTIMEVERIFY
 	OpcodeByName["OP_NOP3"] = OP_CHECKSEQUENCEVERIFY
 }

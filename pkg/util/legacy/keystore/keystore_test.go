@@ -101,7 +101,7 @@ func TestScriptAddressSerializer(
 	t *testing.T) {
 
 	fakeWallet := &Store{net: (*netParams)(tstNetParams)}
-	script := []byte{txscript.OP_TRUE, txscript.OP_DUP,
+	script := []byte{txscript.OpTrue, txscript.OP_DUP,
 		txscript.OP_DROP}
 	addr, err := newScriptAddress(fakeWallet, script, makeBS(0))
 
@@ -1129,7 +1129,7 @@ func TestImportScript(
 		return
 	}
 
-	script := []byte{txscript.OP_TRUE, txscript.OP_DUP,
+	script := []byte{txscript.OpTrue, txscript.OP_DUP,
 		txscript.OP_DROP}
 	importHeight := int32(50)
 	stamp := makeBS(importHeight)

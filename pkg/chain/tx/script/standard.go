@@ -98,7 +98,7 @@ func isMultiSig(
 
 	// The absolute minimum is 1 pubkey:
 
-	// OpZero/OP_1-16 <pubkey> OP_1 OP_CHECKMULTISIG
+	// OpZero/Op1-16 <pubkey> Op1 OP_CHECKMULTISIG
 	l := len(pops)
 	if l < 4 {
 
@@ -148,7 +148,7 @@ func isNullData(
 	return l == 2 &&
 		pops[0].opcode.value == OP_RETURN &&
 		(isSmallInt(pops[1].opcode) || pops[1].opcode.value <=
-			OP_PUSHDATA4) &&
+			OpPushData4) &&
 		len(pops[1].data) <= MaxDataCarrierSize
 }
 
@@ -287,7 +287,7 @@ func CalcScriptInfo(
 			si.ExpectedInputs += shInputs
 		}
 		si.SigOps = getSigOpCount(shPops, true)
-		// All entries pushed to stack (or are OP_RESERVED and exec will fail).
+		// All entries pushed to stack (or are OpReserved and exec will fail).
 		si.NumInputs = len(sigPops)
 
 	// If segwit is active, and this is a regular p2wkh output, then we'll treat the script as a p2pkh output in essence.
@@ -331,7 +331,7 @@ func CalcScriptInfo(
 		si.NumInputs = len(witness)
 	default:
 		si.SigOps = getSigOpCount(pkPops, true)
-		// All entries pushed to stack (or are OP_RESERVED and exec will fail).
+		// All entries pushed to stack (or are OpReserved and exec will fail).
 		si.NumInputs = len(sigPops)
 	}
 	return si, nil
@@ -347,7 +347,7 @@ func CalcMultiSigStats(
 		return 0, 0, err
 	}
 
-	// A multi-signature script is of the pattern:  NUM_SIGS PUBKEY PUBKEY PUBKEY... NUM_PUBKEYS OP_CHECKMULTISIG Therefore the number of signatures is the oldest item on the stack and the number of pubkeys is the 2nd to last.  Also, the absolute minimum for a multi-signature script is 1 pubkey, so at least 4 items must be on the stack per:  OP_1 PUBKEY OP_1 OP_CHECKMULTISIG
+	// A multi-signature script is of the pattern:  NUM_SIGS PUBKEY PUBKEY PUBKEY... NUM_PUBKEYS OP_CHECKMULTISIG Therefore the number of signatures is the oldest item on the stack and the number of pubkeys is the 2nd to last.  Also, the absolute minimum for a multi-signature script is 1 pubkey, so at least 4 items must be on the stack per:  Op1 PUBKEY Op1 OP_CHECKMULTISIG
 	if len(pops) < 4 {
 
 		str := fmt.Sprintf("script %x is not a multisig script", script)
@@ -486,7 +486,7 @@ func MultiSigScript(
 	return builder.Script()
 }
 
-// PushedData returns an array of byte slices containing any pushed data found in the passed script.  This includes OpZero, but not OP_1 - OP_16.
+// PushedData returns an array of byte slices containing any pushed data found in the passed script.  This includes OpZero, but not Op1 - Op16.
 func PushedData(
 	script []byte) ([][]byte, error) {
 

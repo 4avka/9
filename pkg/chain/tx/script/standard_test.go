@@ -1160,7 +1160,7 @@ func TestNullDataScript(
 			class:    NullDataTy,
 		},
 		{
-			name: "data of size before OP_PUSHDATA1 is needed",
+			name: "data of size before OpPushData1 is needed",
 			data: hexToBytes("0102030405060708090a0b0c0d0e0f10111" +
 				"2131415161718"),
 			expected: mustParseShortForm("RETURN 0x18 0x01020304" +

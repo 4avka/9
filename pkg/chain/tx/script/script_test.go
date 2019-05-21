@@ -14,11 +14,11 @@ func TestParseOpcode(
 
 	// Deep copy the array and make one of the opcodes invalid by setting it to the wrong length.
 	fakeArray := opcodeArray
-	fakeArray[OP_PUSHDATA4] = opcode{value: OP_PUSHDATA4,
-		name: "OP_PUSHDATA4", length: -8, opfunc: opcodePushData}
+	fakeArray[OpPushData4] = opcode{value: OpPushData4,
+		name: "OpPushData4", length: -8, opfunc: opcodePushData}
 
 	// This script would be fine if -8 was a valid length.
-	_, err := parseScriptTemplate([]byte{OP_PUSHDATA4, 0x1, 0x00, 0x00,
+	_, err := parseScriptTemplate([]byte{OpPushData4, 0x1, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x00, 0x00}, &fakeArray)
 	if err == nil {
 
@@ -1852,137 +1852,137 @@ func TestUnparsingInvalidOpcodes(
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_PUSHDATA1",
+			name: "OpPushData1",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_PUSHDATA1],
+				opcode: &opcodeArray[OpPushData1],
 				data:   []byte{0, 1, 2, 3, 4},
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_PUSHDATA2",
+			name: "OpPushData2",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_PUSHDATA2],
+				opcode: &opcodeArray[OpPushData2],
 				data:   []byte{0, 1, 2, 3, 4},
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_PUSHDATA4",
+			name: "OpPushData4",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_PUSHDATA1],
+				opcode: &opcodeArray[OpPushData1],
 				data:   []byte{0, 1, 2, 3, 4},
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_1NEGATE",
+			name: "Op1Negate",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_1NEGATE],
+				opcode: &opcodeArray[Op1Negate],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_1NEGATE long",
+			name: "Op1Negate long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_1NEGATE],
+				opcode: &opcodeArray[Op1Negate],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_RESERVED",
+			name: "OpReserved",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_RESERVED],
+				opcode: &opcodeArray[OpReserved],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_RESERVED long",
+			name: "OpReserved long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_RESERVED],
+				opcode: &opcodeArray[OpReserved],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_TRUE",
+			name: "OpTrue",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_TRUE],
+				opcode: &opcodeArray[OpTrue],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_TRUE long",
+			name: "OpTrue long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_TRUE],
+				opcode: &opcodeArray[OpTrue],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_2",
+			name: "Op2",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_2],
+				opcode: &opcodeArray[Op2],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_2 long",
+			name: "Op2 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_2],
+				opcode: &opcodeArray[Op2],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_2",
+			name: "Op2",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_2],
+				opcode: &opcodeArray[Op2],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_2 long",
+			name: "Op2 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_2],
+				opcode: &opcodeArray[Op2],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_3",
+			name: "Op3",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_3],
+				opcode: &opcodeArray[Op3],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_3 long",
+			name: "Op3 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_3],
+				opcode: &opcodeArray[Op3],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_4",
+			name: "Op4",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_4],
+				opcode: &opcodeArray[Op4],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_4 long",
+			name: "Op4 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_4],
+				opcode: &opcodeArray[Op4],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
@@ -2004,177 +2004,177 @@ func TestUnparsingInvalidOpcodes(
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_6",
+			name: "Op6",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_6],
+				opcode: &opcodeArray[Op6],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_6 long",
+			name: "Op6 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_6],
+				opcode: &opcodeArray[Op6],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_7",
+			name: "Op7",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_7],
+				opcode: &opcodeArray[Op7],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_7 long",
+			name: "Op7 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_7],
+				opcode: &opcodeArray[Op7],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_8",
+			name: "Op8",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_8],
+				opcode: &opcodeArray[Op8],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_8 long",
+			name: "Op8 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_8],
+				opcode: &opcodeArray[Op8],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_9",
+			name: "Op9",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_9],
+				opcode: &opcodeArray[Op9],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_9 long",
+			name: "Op9 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_9],
+				opcode: &opcodeArray[Op9],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_10",
+			name: "Op10",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_10],
+				opcode: &opcodeArray[Op10],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_10 long",
+			name: "Op10 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_10],
+				opcode: &opcodeArray[Op10],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_11",
+			name: "Op11",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_11],
+				opcode: &opcodeArray[Op11],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_11 long",
+			name: "Op11 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_11],
+				opcode: &opcodeArray[Op11],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_12",
+			name: "Op12",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_12],
+				opcode: &opcodeArray[Op12],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_12 long",
+			name: "Op12 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_12],
+				opcode: &opcodeArray[Op12],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_13",
+			name: "Op13",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_13],
+				opcode: &opcodeArray[Op13],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_13 long",
+			name: "Op13 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_13],
+				opcode: &opcodeArray[Op13],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_14",
+			name: "Op14",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_14],
+				opcode: &opcodeArray[Op14],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_14 long",
+			name: "Op14 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_14],
+				opcode: &opcodeArray[Op14],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_15",
+			name: "Op15",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_15],
+				opcode: &opcodeArray[Op15],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_15 long",
+			name: "Op15 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_15],
+				opcode: &opcodeArray[Op15],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_16",
+			name: "Op16",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_16],
+				opcode: &opcodeArray[Op16],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_16 long",
+			name: "Op16 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_16],
+				opcode: &opcodeArray[Op16],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
@@ -4081,7 +4081,7 @@ func TestRemoveOpcodeByData(
 		{
 			// padded to keep it canonical.
 			name: "simple case (pushdata1)",
-			before: append(append([]byte{OP_PUSHDATA1, 76},
+			before: append(append([]byte{OpPushData1, 76},
 				bytes.Repeat([]byte{0}, 72)...),
 				[]byte{1, 2, 3, 4}...),
 			remove: []byte{1, 2, 3, 4},
@@ -4089,23 +4089,23 @@ func TestRemoveOpcodeByData(
 		},
 		{
 			name: "simple case (pushdata1 miss)",
-			before: append(append([]byte{OP_PUSHDATA1, 76},
+			before: append(append([]byte{OpPushData1, 76},
 				bytes.Repeat([]byte{0}, 72)...),
 				[]byte{1, 2, 3, 4}...),
 			remove: []byte{1, 2, 3, 5},
-			after: append(append([]byte{OP_PUSHDATA1, 76},
+			after: append(append([]byte{OpPushData1, 76},
 				bytes.Repeat([]byte{0}, 72)...),
 				[]byte{1, 2, 3, 4}...),
 		},
 		{
 			name:   "simple case (pushdata1 miss noncanonical)",
-			before: []byte{OP_PUSHDATA1, 4, 1, 2, 3, 4},
+			before: []byte{OpPushData1, 4, 1, 2, 3, 4},
 			remove: []byte{1, 2, 3, 4},
-			after:  []byte{OP_PUSHDATA1, 4, 1, 2, 3, 4},
+			after:  []byte{OpPushData1, 4, 1, 2, 3, 4},
 		},
 		{
 			name: "simple case (pushdata2)",
-			before: append(append([]byte{OP_PUSHDATA2, 0, 1},
+			before: append(append([]byte{OpPushData2, 0, 1},
 				bytes.Repeat([]byte{0}, 252)...),
 				[]byte{1, 2, 3, 4}...),
 			remove: []byte{1, 2, 3, 4},
@@ -4113,24 +4113,24 @@ func TestRemoveOpcodeByData(
 		},
 		{
 			name: "simple case (pushdata2 miss)",
-			before: append(append([]byte{OP_PUSHDATA2, 0, 1},
+			before: append(append([]byte{OpPushData2, 0, 1},
 				bytes.Repeat([]byte{0}, 252)...),
 				[]byte{1, 2, 3, 4}...),
 			remove: []byte{1, 2, 3, 4, 5},
-			after: append(append([]byte{OP_PUSHDATA2, 0, 1},
+			after: append(append([]byte{OpPushData2, 0, 1},
 				bytes.Repeat([]byte{0}, 252)...),
 				[]byte{1, 2, 3, 4}...),
 		},
 		{
 			name:   "simple case (pushdata2 miss noncanonical)",
-			before: []byte{OP_PUSHDATA2, 4, 0, 1, 2, 3, 4},
+			before: []byte{OpPushData2, 4, 0, 1, 2, 3, 4},
 			remove: []byte{1, 2, 3, 4},
-			after:  []byte{OP_PUSHDATA2, 4, 0, 1, 2, 3, 4},
+			after:  []byte{OpPushData2, 4, 0, 1, 2, 3, 4},
 		},
 		{
 			// This is padded to make the push canonical.
 			name: "simple case (pushdata4)",
-			before: append(append([]byte{OP_PUSHDATA4, 0, 0, 1, 0},
+			before: append(append([]byte{OpPushData4, 0, 0, 1, 0},
 				bytes.Repeat([]byte{0}, 65532)...),
 				[]byte{1, 2, 3, 4}...),
 			remove: []byte{1, 2, 3, 4},
@@ -4138,17 +4138,17 @@ func TestRemoveOpcodeByData(
 		},
 		{
 			name:   "simple case (pushdata4 miss noncanonical)",
-			before: []byte{OP_PUSHDATA4, 4, 0, 0, 0, 1, 2, 3, 4},
+			before: []byte{OpPushData4, 4, 0, 0, 0, 1, 2, 3, 4},
 			remove: []byte{1, 2, 3, 4},
-			after:  []byte{OP_PUSHDATA4, 4, 0, 0, 0, 1, 2, 3, 4},
+			after:  []byte{OpPushData4, 4, 0, 0, 0, 1, 2, 3, 4},
 		},
 		{
 			// This is padded to make the push canonical.
 			name: "simple case (pushdata4 miss)",
-			before: append(append([]byte{OP_PUSHDATA4, 0, 0, 1, 0},
+			before: append(append([]byte{OpPushData4, 0, 0, 1, 0},
 				bytes.Repeat([]byte{0}, 65532)...), []byte{1, 2, 3, 4}...),
 			remove: []byte{1, 2, 3, 4, 5},
-			after: append(append([]byte{OP_PUSHDATA4, 0, 0, 1, 0},
+			after: append(append([]byte{OpPushData4, 0, 0, 1, 0},
 				bytes.Repeat([]byte{0}, 65532)...), []byte{1, 2, 3, 4}...),
 		},
 		{
@@ -4159,13 +4159,13 @@ func TestRemoveOpcodeByData(
 		},
 		{
 			name:   "invalid length (instruction)",
-			before: []byte{OP_PUSHDATA1},
+			before: []byte{OpPushData1},
 			remove: []byte{1, 2, 3, 4},
 			err:    scriptError(ErrMalformedPush, ""),
 		},
 		{
 			name:   "invalid length (data)",
-			before: []byte{OP_PUSHDATA1, 255, 254},
+			before: []byte{OpPushData1, 255, 254},
 			remove: []byte{1, 2, 3, 4},
 			err:    scriptError(ErrMalformedPush, ""),
 		},

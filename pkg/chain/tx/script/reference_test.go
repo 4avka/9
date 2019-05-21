@@ -101,12 +101,12 @@ func parseShortForm(
 				continue
 			}
 			ops[opcodeName] = opcodeValue
-			// The opcodes named OP_# can't have the OP_ prefix stripped or they would conflict with the plain numbers.  Also, since OpFalse and OP_TRUE are aliases for the OpZero, and OP_1, respectively, they have the same value, so detect those by name and allow them.
+			// The opcodes named OP_# can't have the OP_ prefix stripped or they would conflict with the plain numbers.  Also, since OpFalse and OpTrue are aliases for the OpZero, and Op1, respectively, they have the same value, so detect those by name and allow them.
 
-			if (opcodeName == "OpFalse" || opcodeName == "OP_TRUE") ||
+			if (opcodeName == "OpFalse" || opcodeName == "OpTrue") ||
 
-				(opcodeValue != OpZero && (opcodeValue < OP_1 ||
-					opcodeValue > OP_16)) {
+				(opcodeValue != OpZero && (opcodeValue < Op1 ||
+					opcodeValue > Op16)) {
 
 				ops[strings.TrimPrefix(opcodeName, "OP_")] = opcodeValue
 			}

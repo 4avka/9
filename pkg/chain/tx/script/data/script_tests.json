@@ -119,21 +119,21 @@
         "7 EQUAL",
         "P2SH,STRICTENC",
         "OK",
-        "0x4c is OP_PUSHDATA1"
+        "0x4c is OpPushData1"
     ],
     [
         "0x4d 0x0100 0x08",
         "8 EQUAL",
         "P2SH,STRICTENC",
         "OK",
-        "0x4d is OP_PUSHDATA2"
+        "0x4d is OpPushData2"
     ],
     [
         "0x4e 0x01000000 0x09",
         "9 EQUAL",
         "P2SH,STRICTENC",
         "OK",
-        "0x4e is OP_PUSHDATA4"
+        "0x4e is OpPushData4"
     ],
     [
         "0x4c 0x00",
@@ -2762,28 +2762,28 @@
         "0x51 EQUAL",
         "",
         "OK",
-        "OP_1  pushes 0x01"
+        "Op1  pushes 0x01"
     ],
     [
         "0x01 0x02",
         "0x52 EQUAL",
         "",
         "OK",
-        "OP_2  pushes 0x02"
+        "Op2  pushes 0x02"
     ],
     [
         "0x01 0x03",
         "0x53 EQUAL",
         "",
         "OK",
-        "OP_3  pushes 0x03"
+        "Op3  pushes 0x03"
     ],
     [
         "0x01 0x04",
         "0x54 EQUAL",
         "",
         "OK",
-        "OP_4  pushes 0x04"
+        "Op4  pushes 0x04"
     ],
     [
         "0x01 0x05",
@@ -2797,77 +2797,77 @@
         "0x56 EQUAL",
         "",
         "OK",
-        "OP_6  pushes 0x06"
+        "Op6  pushes 0x06"
     ],
     [
         "0x01 0x07",
         "0x57 EQUAL",
         "",
         "OK",
-        "OP_7  pushes 0x07"
+        "Op7  pushes 0x07"
     ],
     [
         "0x01 0x08",
         "0x58 EQUAL",
         "",
         "OK",
-        "OP_8  pushes 0x08"
+        "Op8  pushes 0x08"
     ],
     [
         "0x01 0x09",
         "0x59 EQUAL",
         "",
         "OK",
-        "OP_9  pushes 0x09"
+        "Op9  pushes 0x09"
     ],
     [
         "0x01 0x0a",
         "0x5a EQUAL",
         "",
         "OK",
-        "OP_10 pushes 0x0a"
+        "Op10 pushes 0x0a"
     ],
     [
         "0x01 0x0b",
         "0x5b EQUAL",
         "",
         "OK",
-        "OP_11 pushes 0x0b"
+        "Op11 pushes 0x0b"
     ],
     [
         "0x01 0x0c",
         "0x5c EQUAL",
         "",
         "OK",
-        "OP_12 pushes 0x0c"
+        "Op12 pushes 0x0c"
     ],
     [
         "0x01 0x0d",
         "0x5d EQUAL",
         "",
         "OK",
-        "OP_13 pushes 0x0d"
+        "Op13 pushes 0x0d"
     ],
     [
         "0x01 0x0e",
         "0x5e EQUAL",
         "",
         "OK",
-        "OP_14 pushes 0x0e"
+        "Op14 pushes 0x0e"
     ],
     [
         "0x01 0x0f",
         "0x5f EQUAL",
         "",
         "OK",
-        "OP_15 pushes 0x0f"
+        "Op15 pushes 0x0f"
     ],
     [
         "0x01 0x10",
         "0x60 EQUAL",
         "",
         "OK",
-        "OP_16 pushes 0x10"
+        "Op16 pushes 0x10"
     ],
     [
         "Equivalency of different numeric encodings"
@@ -2971,28 +2971,28 @@
         "",
         "MINIMALDATA",
         "OK",
-        "OP_1  equiv"
+        "Op1  equiv"
     ],
     [
         "0 IF 0x01 0x02 ENDIF 1",
         "",
         "MINIMALDATA",
         "OK",
-        "OP_2  equiv"
+        "Op2  equiv"
     ],
     [
         "0 IF 0x01 0x03 ENDIF 1",
         "",
         "MINIMALDATA",
         "OK",
-        "OP_3  equiv"
+        "Op3  equiv"
     ],
     [
         "0 IF 0x01 0x04 ENDIF 1",
         "",
         "MINIMALDATA",
         "OK",
-        "OP_4  equiv"
+        "Op4  equiv"
     ],
     [
         "0 IF 0x01 0x05 ENDIF 1",
@@ -3006,77 +3006,77 @@
         "",
         "MINIMALDATA",
         "OK",
-        "OP_6  equiv"
+        "Op6  equiv"
     ],
     [
         "0 IF 0x01 0x07 ENDIF 1",
         "",
         "MINIMALDATA",
         "OK",
-        "OP_7  equiv"
+        "Op7  equiv"
     ],
     [
         "0 IF 0x01 0x08 ENDIF 1",
         "",
         "MINIMALDATA",
         "OK",
-        "OP_8  equiv"
+        "Op8  equiv"
     ],
     [
         "0 IF 0x01 0x09 ENDIF 1",
         "",
         "MINIMALDATA",
         "OK",
-        "OP_9  equiv"
+        "Op9  equiv"
     ],
     [
         "0 IF 0x01 0x0a ENDIF 1",
         "",
         "MINIMALDATA",
         "OK",
-        "OP_10 equiv"
+        "Op10 equiv"
     ],
     [
         "0 IF 0x01 0x0b ENDIF 1",
         "",
         "MINIMALDATA",
         "OK",
-        "OP_11 equiv"
+        "Op11 equiv"
     ],
     [
         "0 IF 0x01 0x0c ENDIF 1",
         "",
         "MINIMALDATA",
         "OK",
-        "OP_12 equiv"
+        "Op12 equiv"
     ],
     [
         "0 IF 0x01 0x0d ENDIF 1",
         "",
         "MINIMALDATA",
         "OK",
-        "OP_13 equiv"
+        "Op13 equiv"
     ],
     [
         "0 IF 0x01 0x0e ENDIF 1",
         "",
         "MINIMALDATA",
         "OK",
-        "OP_14 equiv"
+        "Op14 equiv"
     ],
     [
         "0 IF 0x01 0x0f ENDIF 1",
         "",
         "MINIMALDATA",
         "OK",
-        "OP_15 equiv"
+        "Op15 equiv"
     ],
     [
         "0 IF 0x01 0x10 ENDIF 1",
         "",
         "MINIMALDATA",
         "OK",
-        "OP_16 equiv"
+        "Op16 equiv"
     ],
     [
         "Numeric minimaldata rules are only applied when a stack item is numerically evaluated; the push itself is allowed"
@@ -5048,7 +5048,7 @@
         "RESERVED",
         "P2SH,STRICTENC",
         "BAD_OPCODE",
-        "OP_RESERVED is reserved"
+        "OpReserved is reserved"
     ],
     [
         "1",
@@ -5570,7 +5570,7 @@
         "HASH160 0x14 0xece424a6bb6ddf4db592c0faed60685047a361b1 EQUAL",
         "P2SH,STRICTENC",
         "BAD_OPCODE",
-        "OP_RESERVED in P2SH should fail"
+        "OpReserved in P2SH should fail"
     ],
     [
         "0 0x01 VER",
@@ -5601,14 +5601,14 @@
         "DROP 1",
         "MINIMALDATA",
         "MINIMALDATA",
-        "-1 minimally represented by OP_1NEGATE"
+        "-1 minimally represented by Op1Negate"
     ],
     [
         "0x01 0x01",
         "DROP 1",
         "MINIMALDATA",
         "MINIMALDATA",
-        "1 to 16 minimally represented by OP_1 to OP_16"
+        "1 to 16 minimally represented by Op1 to Op16"
     ],
     [
         "0x01 0x02",

@@ -210,7 +210,7 @@ func TestScriptCompression(
 			name:         "requires 2 size bytes - data push 200 bytes",
 			uncompressed: append(hexToBytes("4cc8"), bytes.Repeat([]byte{0x00}, 200)...),
 			// [0x80, 0x50] = 208 as a variable length quantity
-			// [0x4c, 0xc8] = OP_PUSHDATA1 200
+			// [0x4c, 0xc8] = OpPushData1 200
 			compressed: append(hexToBytes("80504cc8"), bytes.Repeat([]byte{0x00}, 200)...),
 		},
 	}
