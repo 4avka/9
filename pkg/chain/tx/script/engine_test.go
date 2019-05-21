@@ -58,8 +58,8 @@ func TestBadPC(
 			t.Errorf("Failed to create script: %v", err)
 		}
 		// set to after all scripts
-		vm.scriptIdx = test.script
-		vm.scriptOff = test.off
+		vm.scriptIdx.Store(int64(test.script))
+		vm.scriptOff.Store(int64(test.off))
 		_, err = vm.Step()
 
 		if err == nil {

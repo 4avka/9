@@ -15,9 +15,9 @@ const (
 	// of a transaction input script that redeems a compressed P2PKH output.
 	// It is calculated as:
 	//
-	//   - OP_DATA_73
+	//   - OpData73
 	//   - 72 bytes DER signature + 1 byte sighash
-	//   - OP_DATA_33
+	//   - OpData33
 	//   - 33 bytes serialized compressed pubkey
 	RedeemP2PKHSigScriptSize = 1 + 73 + 1 + 33
 
@@ -26,7 +26,7 @@ const (
 	//
 	//   - OP_DUP
 	//   - OP_HASH160
-	//   - OP_DATA_20
+	//   - OpData20
 	//   - 20 bytes pubkey hash
 	//   - OP_EQUALVERIFY
 	//   - OP_CHECKSIG
@@ -54,8 +54,8 @@ const (
 	// P2WPKHPkScriptSize is the size of a transaction output script that
 	// pays to a witness pubkey hash. It is calculated as:
 	//
-	//   - OP_0
-	//   - OP_DATA_20
+	//   - OpZero
+	//   - OpData20
 	//   - 20 bytes pubkey hash
 	P2WPKHPkScriptSize = 1 + 1 + 20
 
@@ -87,7 +87,7 @@ const (
 	// (P2SH-P2WPKH). It is calculated as:
 	//
 	//   - 1 byte compact int encoding value 22
-	//   - OP_0
+	//   - OpZero
 	//   - 1 byte compact int encoding value 20
 	//   - 20 byte key hash
 	RedeemNestedP2WPKHScriptSize = 1 + 1 + 1 + 20

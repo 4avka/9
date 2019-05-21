@@ -952,7 +952,7 @@ func ExtractCoinbaseHeight(
 	// Detect the case when the block height is a small integer encoded with as single byte.
 	opcode := int(sigScript[0])
 
-	if opcode == txscript.OP_0 {
+	if opcode == txscript.OpZero {
 
 		return 0, nil
 	}

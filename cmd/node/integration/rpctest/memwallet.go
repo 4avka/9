@@ -361,7 +361,7 @@ func (m *memWallet) fundTx(tx *wire.MsgTx, amt util.Amount,
 	feeRate util.Amount, change bool) error {
 	const (
 		// spendSize is the largest number of bytes of a sigScript
-		// which spends a p2pkh output: OP_DATA_73 <sig> OP_DATA_33 <pubkey>
+		// which spends a p2pkh output: OpData73 <sig> OpData33 <pubkey>
 		spendSize = 1 + 73 + 1 + 33
 	)
 	var (

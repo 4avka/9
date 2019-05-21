@@ -86,7 +86,7 @@ func CalcPriority(
 
 	// The constant overhead for a txin is 41 bytes since the previous outpoint is 36 bytes + 4 bytes for the sequence + 1 byte the signature script length.
 
-	// A compressed pubkey pay-to-script-hash redemption with a maximum len signature is of the form: [OP_DATA_73 <73-byte sig> + OP_DATA_35 + {OP_DATA_33 <33 byte compresed pubkey> + OP_CHECKSIG}]
+	// A compressed pubkey pay-to-script-hash redemption with a maximum len signature is of the form: [OpData73 <73-byte sig> + OpData35 + {OpData33 <33 byte compresed pubkey> + OP_CHECKSIG}]
 
 	// Thus 1 + 73 + 1 + 1 + 33 + 1 = 110
 	overhead := 0

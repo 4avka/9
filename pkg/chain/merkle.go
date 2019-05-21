@@ -17,7 +17,7 @@ var (
 	// WitnessMagicBytes is the prefix marker within the public key script of a coinbase output to indicate that this output holds the witness commitment for a block.
 	WitnessMagicBytes = []byte{
 		txscript.OP_RETURN,
-		txscript.OP_DATA_36,
+		txscript.OpData36,
 		0xaa,
 		0x21,
 		0xa9,

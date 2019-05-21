@@ -115,8 +115,8 @@ func signMultiSig(
 	tx *wire.MsgTx, idx int, subScript []byte, hashType SigHashType,
 	addresses []util.Address, nRequired int, kdb KeyDB) ([]byte, bool) {
 
-	// We start with a single OP_FALSE to work around the (now standard) but in the reference implementation that causes a spurious pop at the end of OP_CHECKMULTISIG.
-	builder := NewScriptBuilder().AddOp(OP_FALSE)
+	// We start with a single OpFalse to work around the (now standard) but in the reference implementation that causes a spurious pop at the end of OP_CHECKMULTISIG.
+	builder := NewScriptBuilder().AddOp(OpFalse)
 	signed := 0
 
 	for _, addr := range addresses {
@@ -345,7 +345,7 @@ sigLoop:
 	}
 
 	// Extra opcode to handle the extra arg consumed (due to previous bugs in the reference implementation).
-	builder := NewScriptBuilder().AddOp(OP_FALSE)
+	builder := NewScriptBuilder().AddOp(OpFalse)
 	doneSigs := 0
 
 	// This assumes that addresses are in the same order as in the script.
@@ -371,20 +371,18 @@ sigLoop:
 
 	for i := doneSigs; i < nRequired; i++ {
 
-		builder.AddOp(OP_0)
+		builder.AddOp(OpZero)
 	}
 	script, _ := builder.Script()
 	return script
 }
 
 // KeyDB is an interface type provided to SignTxOutput, it encapsulates any user state required to get the private keys for an address.
-
 type KeyDB interface {
 	GetKey(util.Address) (*ec.PrivateKey, bool, error)
 }
 
 // KeyClosure implements KeyDB with a closure.
-
 type KeyClosure func(util.Address) (*ec.PrivateKey, bool, error)
 
 // GetKey implements KeyDB by returning the result of calling the closure.
@@ -395,13 +393,11 @@ func (kc KeyClosure) GetKey(address util.Address) (*ec.PrivateKey,
 }
 
 // ScriptDB is an interface type provided to SignTxOutput, it encapsulates any user state required to get the scripts for an pay-to-script-hash address.
-
 type ScriptDB interface {
 	GetScript(util.Address) ([]byte, error)
 }
 
 // ScriptClosure implements ScriptDB with a closure.
-
 type ScriptClosure func(util.Address) ([]byte, error)
 
 // GetScript implements ScriptDB by returning the result of calling the closure.

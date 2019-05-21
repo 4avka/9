@@ -14,7 +14,6 @@ const (
 	MaxDataCarrierSize = 80
 
 	// StandardVerifyFlags are the script flags which are used when executing transaction scripts to enforce additional checks which are required for the script to be considered standard.  These checks help reduce issues related to transaction malleability as well as allow pay-to-script hash transactions.  Note these flags are different than what is required for the consensus rules in that they are more strict.
-
 	// TODO: This definition does not belong here.  It belongs in a policy package.
 	StandardVerifyFlags = ScriptBip16 |
 		ScriptVerifyDERSignatures |
@@ -35,7 +34,6 @@ const (
 )
 
 // ScriptClass is an enumeration for the list of standard types of script.
-
 type ScriptClass byte
 
 // Classes of script payment known about in the blockchain.
@@ -89,7 +87,7 @@ func isPubkeyHash(
 	return len(pops) == 5 &&
 		pops[0].opcode.value == OP_DUP &&
 		pops[1].opcode.value == OP_HASH160 &&
-		pops[2].opcode.value == OP_DATA_20 &&
+		pops[2].opcode.value == OpData20 &&
 		pops[3].opcode.value == OP_EQUALVERIFY &&
 		pops[4].opcode.value == OP_CHECKSIG
 }
@@ -100,7 +98,7 @@ func isMultiSig(
 
 	// The absolute minimum is 1 pubkey:
 
-	// OP_0/OP_1-16 <pubkey> OP_1 OP_CHECKMULTISIG
+	// OpZero/OP_1-16 <pubkey> OP_1 OP_CHECKMULTISIG
 	l := len(pops)
 	if l < 4 {
 
@@ -224,7 +222,6 @@ func expectedInputs(
 }
 
 // ScriptInfo houses information about a script pair that is determined by CalcScriptInfo.
-
 type ScriptInfo struct {
 
 	// PkScriptClass is the class of the public key script and is equivalent to calling GetScriptClass on it.
@@ -374,7 +371,7 @@ func payToPubKeyHashScript(
 func payToWitnessPubKeyHashScript(
 	pubKeyHash []byte) ([]byte, error) {
 
-	return NewScriptBuilder().AddOp(OP_0).AddData(pubKeyHash).Script()
+	return NewScriptBuilder().AddOp(OpZero).AddData(pubKeyHash).Script()
 }
 
 // payToScriptHashScript creates a new script to pay a transaction output to a script hash. It is expected that the input is a valid hash.
@@ -389,7 +386,7 @@ func payToScriptHashScript(
 func payToWitnessScriptHashScript(
 	scriptHash []byte) ([]byte, error) {
 
-	return NewScriptBuilder().AddOp(OP_0).AddData(scriptHash).Script()
+	return NewScriptBuilder().AddOp(OpZero).AddData(scriptHash).Script()
 }
 
 // payToPubkeyScript creates a new script to pay a transaction output to a public key. It is expected that the input is a valid pubkey.
@@ -489,7 +486,7 @@ func MultiSigScript(
 	return builder.Script()
 }
 
-// PushedData returns an array of byte slices containing any pushed data found in the passed script.  This includes OP_0, but not OP_1 - OP_16.
+// PushedData returns an array of byte slices containing any pushed data found in the passed script.  This includes OpZero, but not OP_1 - OP_16.
 func PushedData(
 	script []byte) ([][]byte, error) {
 
@@ -505,7 +502,7 @@ func PushedData(
 		if pop.data != nil {
 
 			data = append(data, pop.data)
-		} else if pop.opcode.value == OP_0 {
+		} else if pop.opcode.value == OpZero {
 
 			data = append(data, nil)
 		}
@@ -531,7 +528,7 @@ func ExtractPkScriptAddrs(
 	switch scriptClass {
 
 	case PubKeyHashTy:
-		// A pay-to-pubkey-hash script is of the form:  OP_DUP OP_HASH160 <hash> OP_EQUALVERIFY OP_CHECKSIG Therefore the pubkey hash is the 3rd item on the stack. Skip the pubkey hash if it's invalid for some reason.
+		// A pay-to-pubkey-hash script is of the form:  OP_ OP_HASH160 <hash> OP_EQUALVERIFY OP_CHECKSIG Therefore the pubkey hash is the 3rd item on the stack. Skip the pubkey hash if it's invalid for some reason.
 		requiredSigs = 1
 		addr, err := util.NewAddressPubKeyHash(pops[2].data,
 			chainParams)
@@ -541,7 +538,7 @@ func ExtractPkScriptAddrs(
 			addrs = append(addrs, addr)
 		}
 	case WitnessV0PubKeyHashTy:
-		// A pay-to-witness-pubkey-hash script is of the form:  OP_0 <20-byte hash> Therefore, the pubkey hash is the second item on the stack. Skip the pubkey hash if it's invalid for some reason.
+		// A pay-to-witness-pubkey-hash script is of the form:  OpZero <20-byte hash> Therefore, the pubkey hash is the second item on the stack. Skip the pubkey hash if it's invalid for some reason.
 		requiredSigs = 1
 		addr, err := util.NewAddressWitnessPubKeyHash(pops[1].data,
 			chainParams)
@@ -570,7 +567,7 @@ func ExtractPkScriptAddrs(
 			addrs = append(addrs, addr)
 		}
 	case WitnessV0ScriptHashTy:
-		// A pay-to-witness-script-hash script is of the form:  OP_0 <32-byte hash> Therefore, the script hash is the second item on the stack. Skip the script hash if it's invalid for some reason.
+		// A pay-to-witness-script-hash script is of the form:  OpZero <32-byte hash> Therefore, the script hash is the second item on the stack. Skip the script hash if it's invalid for some reason.
 		requiredSigs = 1
 		addr, err := util.NewAddressWitnessScriptHash(pops[1].data,
 			chainParams)
@@ -605,7 +602,6 @@ func ExtractPkScriptAddrs(
 }
 
 // AtomicSwapDataPushes houses the data pushes found in atomic swap contracts.
-
 type AtomicSwapDataPushes struct {
 	RecipientHash160 [20]byte
 	RefundHash160    [20]byte
@@ -634,18 +630,18 @@ func ExtractAtomicSwapDataPushes(
 		canonicalPush(pops[2]) &&
 		pops[3].opcode.value == OP_EQUALVERIFY &&
 		pops[4].opcode.value == OP_SHA256 &&
-		pops[5].opcode.value == OP_DATA_32 &&
+		pops[5].opcode.value == OpData32 &&
 		pops[6].opcode.value == OP_EQUALVERIFY &&
 		pops[7].opcode.value == OP_DUP &&
 		pops[8].opcode.value == OP_HASH160 &&
-		pops[9].opcode.value == OP_DATA_20 &&
+		pops[9].opcode.value == OpData20 &&
 		pops[10].opcode.value == OP_ELSE &&
 		canonicalPush(pops[11]) &&
 		pops[12].opcode.value == OP_CHECKLOCKTIMEVERIFY &&
 		pops[13].opcode.value == OP_DROP &&
 		pops[14].opcode.value == OP_DUP &&
 		pops[15].opcode.value == OP_HASH160 &&
-		pops[16].opcode.value == OP_DATA_20 &&
+		pops[16].opcode.value == OpData20 &&
 		pops[17].opcode.value == OP_ENDIF &&
 		pops[18].opcode.value == OP_EQUALVERIFY &&
 		pops[19].opcode.value == OP_CHECKSIG

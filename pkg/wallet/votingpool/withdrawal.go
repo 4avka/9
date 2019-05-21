@@ -1294,8 +1294,8 @@ func signMultiSigUTXO(
 
 	// Construct the unlocking script.
 
-	// Start with an OP_0 because of the bug in bitcoind, then add nRequired signatures.
-	unlockingScript := txscript.NewScriptBuilder().AddOp(txscript.OP_FALSE)
+	// Start with an OpZero because of the bug in bitcoind, then add nRequired signatures.
+	unlockingScript := txscript.NewScriptBuilder().AddOp(txscript.OpFalse)
 
 	for _, sig := range sigs[:nRequired] {
 
@@ -1367,7 +1367,7 @@ func calculateTxSize(
 
 	for i, txin := range msgtx.TxIn {
 
-		// 1 byte for the OP_FALSE opcode, then 73+1 bytes for each signature
+		// 1 byte for the OpFalse opcode, then 73+1 bytes for each signature
 		// with their OP_DATA opcode and finally the redeem script + 1 byte
 		// for its OP_PUSHDATA opcode and N bytes for the redeem script's size.
 		// Notice that we use 73 as the signature length as that's the maximum

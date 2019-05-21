@@ -12,7 +12,6 @@ const (
 )
 
 // ErrScriptNotCanonical identifies a non-canonical script.  The caller can use a type assertion to detect this error type.
-
 type ErrScriptNotCanonical string
 
 // Error implements the error interface.
@@ -29,12 +28,10 @@ func (e ErrScriptNotCanonical) Error() string {
 // 	builder.AddOp(txscript.OP_CHECKMULTISIG)
 // 	script, err := builder.Script()
 // 	if err != nil {
-
 // 		// Handle the error.
 // 		return
 // 	}
 // 	fmt.Printf("Final multi-sig script: %x\n", script)
-
 type ScriptBuilder struct {
 	script []byte
 	err    error
@@ -110,7 +107,7 @@ func canonicalDataSize(
 	return 5 + dataLen
 }
 
-// addData is the internal function that actually pushes the passed data to the end of the script.  It automatically chooses canonical opcodes depending on the length of the data.  A zero length buffer will lead to a push of empty data onto the stack (OP_0).  No data limits are enforced with this function.
+// addData is the internal function that actually pushes the passed data to the end of the script.  It automatically chooses canonical opcodes depending on the length of the data.  A zero length buffer will lead to a push of empty data onto the stack (OpZero).  No data limits are enforced with this function.
 func (b *ScriptBuilder) addData(data []byte) *ScriptBuilder {
 
 	dataLen := len(data)
@@ -118,7 +115,7 @@ func (b *ScriptBuilder) addData(data []byte) *ScriptBuilder {
 	// When the data consists of a single number that can be represented by one of the "small integer" opcodes, use that opcode instead of a data push opcode followed by the number.
 	if dataLen == 0 || dataLen == 1 && data[0] == 0 {
 
-		b.script = append(b.script, OP_0)
+		b.script = append(b.script, OpZero)
 		return b
 	} else if dataLen == 1 && data[0] <= 16 {
 
@@ -130,10 +127,10 @@ func (b *ScriptBuilder) addData(data []byte) *ScriptBuilder {
 		return b
 	}
 
-	// Use one of the OP_DATA_# opcodes if the length of the data is small enough so the data push instruction is only a single byte. Otherwise, choose the smallest possible OP_PUSHDATA# opcode that can represent the length of the data.
+	// Use one of the OpData# opcodes if the length of the data is small enough so the data push instruction is only a single byte. Otherwise, choose the smallest possible OP_PUSHDATA# opcode that can represent the length of the data.
 	if dataLen < OP_PUSHDATA1 {
 
-		b.script = append(b.script, byte((OP_DATA_1-1)+dataLen))
+		b.script = append(b.script, byte((OpData1-1)+dataLen))
 	} else if dataLen <= 0xff {
 
 		b.script = append(b.script, OP_PUSHDATA1, byte(dataLen))
@@ -166,7 +163,7 @@ func (b *ScriptBuilder) AddFullData(data []byte) *ScriptBuilder {
 	return b.addData(data)
 }
 
-// AddData pushes the passed data to the end of the script.  It automatically chooses canonical opcodes depending on the length of the data.  A zero length buffer will lead to a push of empty data onto the stack (OP_0) and any push of data greater than MaxScriptElementSize will not modify the script since that is not allowed by the script engine.  Also, the script will not be modified if pushing the data would cause the script to exceed the maximum allowed script engine size.
+// AddData pushes the passed data to the end of the script.  It automatically chooses canonical opcodes depending on the length of the data.  A zero length buffer will lead to a push of empty data onto the stack (OpZero) and any push of data greater than MaxScriptElementSize will not modify the script since that is not allowed by the script engine.  Also, the script will not be modified if pushing the data would cause the script to exceed the maximum allowed script engine size.
 func (b *ScriptBuilder) AddData(data []byte) *ScriptBuilder {
 
 	if b.err != nil {
@@ -219,7 +216,7 @@ func (b *ScriptBuilder) AddInt64(val int64) *ScriptBuilder {
 	// Fast path for small integers and OP_1NEGATE.
 	if val == 0 {
 
-		b.script = append(b.script, OP_0)
+		b.script = append(b.script, OpZero)
 		return b
 	}
 	if val == -1 || (val >= 1 && val <= 16) {

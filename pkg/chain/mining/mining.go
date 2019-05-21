@@ -763,7 +763,7 @@ mempoolLoop:
 		var witnessPreimage [64]byte
 		copy(witnessPreimage[:32], witnessMerkleRoot[:])
 		copy(witnessPreimage[32:], witnessNonce[:])
-		// The witness commitment itself is the double-sha256 of the witness preimage generated above. With the commitment generated, the witness script for the output is: OP_RETURN OP_DATA_36 {0xaa21a9ed || witnessCommitment}. The leading prefix is referred to as the "witness magic bytes".
+		// The witness commitment itself is the double-sha256 of the witness preimage generated above. With the commitment generated, the witness script for the output is: OP_RETURN OpData36 {0xaa21a9ed || witnessCommitment}. The leading prefix is referred to as the "witness magic bytes".
 		witnessCommitment = chainhash.DoubleHashB(witnessPreimage[:])
 		witnessScript := append(blockchain.WitnessMagicBytes, witnessCommitment...)
 		// Finally, create the OP_RETURN carrying witness commitment output as an additional output within the coinbase.

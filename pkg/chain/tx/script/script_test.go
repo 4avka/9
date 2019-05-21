@@ -36,1817 +36,1817 @@ func TestUnparsingInvalidOpcodes(
 		expectedErr error
 	}{
 		{
-			name: "OP_FALSE",
+			name: "OpFalse",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_FALSE],
+				opcode: &opcodeArray[OpFalse],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_FALSE long",
+			name: "OpFalse long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_FALSE],
+				opcode: &opcodeArray[OpFalse],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_1 short",
+			name: "OpData1 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_1],
+				opcode: &opcodeArray[OpData1],
 				data:   nil,
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_1",
+			name: "OpData1",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_1],
+				opcode: &opcodeArray[OpData1],
 				data:   make([]byte, 1),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_1 long",
+			name: "OpData1 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_1],
+				opcode: &opcodeArray[OpData1],
 				data:   make([]byte, 2),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_2 short",
+			name: "OpData2 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_2],
+				opcode: &opcodeArray[OpData2],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_2",
+			name: "OpData2",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_2],
+				opcode: &opcodeArray[OpData2],
 				data:   make([]byte, 2),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_2 long",
+			name: "OpData2 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_2],
+				opcode: &opcodeArray[OpData2],
 				data:   make([]byte, 3),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_3 short",
+			name: "OpData3 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_3],
+				opcode: &opcodeArray[OpData3],
 				data:   make([]byte, 2),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_3",
+			name: "OpData3",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_3],
+				opcode: &opcodeArray[OpData3],
 				data:   make([]byte, 3),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_3 long",
+			name: "OpData3 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_3],
+				opcode: &opcodeArray[OpData3],
 				data:   make([]byte, 4),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_4 short",
+			name: "OpData4 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_4],
+				opcode: &opcodeArray[OpData4],
 				data:   make([]byte, 3),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_4",
+			name: "OpData4",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_4],
+				opcode: &opcodeArray[OpData4],
 				data:   make([]byte, 4),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_4 long",
+			name: "OpData4 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_4],
+				opcode: &opcodeArray[OpData4],
 				data:   make([]byte, 5),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_5 short",
+			name: "OpData5 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_5],
+				opcode: &opcodeArray[OpData5],
 				data:   make([]byte, 4),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_5",
+			name: "OpData5",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_5],
+				opcode: &opcodeArray[OpData5],
 				data:   make([]byte, 5),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_5 long",
+			name: "OpData5 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_5],
+				opcode: &opcodeArray[OpData5],
 				data:   make([]byte, 6),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_6 short",
+			name: "OpData6 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_6],
+				opcode: &opcodeArray[OpData6],
 				data:   make([]byte, 5),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_6",
+			name: "OpData6",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_6],
+				opcode: &opcodeArray[OpData6],
 				data:   make([]byte, 6),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_6 long",
+			name: "OpData6 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_6],
+				opcode: &opcodeArray[OpData6],
 				data:   make([]byte, 7),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_7 short",
+			name: "OpData7 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_7],
+				opcode: &opcodeArray[OpData7],
 				data:   make([]byte, 6),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_7",
+			name: "OpData7",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_7],
+				opcode: &opcodeArray[OpData7],
 				data:   make([]byte, 7),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_7 long",
+			name: "OpData7 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_7],
+				opcode: &opcodeArray[OpData7],
 				data:   make([]byte, 8),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_8 short",
+			name: "OpData8 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_8],
+				opcode: &opcodeArray[OpData8],
 				data:   make([]byte, 7),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_8",
+			name: "OpData8",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_8],
+				opcode: &opcodeArray[OpData8],
 				data:   make([]byte, 8),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_8 long",
+			name: "OpData8 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_8],
+				opcode: &opcodeArray[OpData8],
 				data:   make([]byte, 9),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_9 short",
+			name: "OpData9 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_9],
+				opcode: &opcodeArray[OpData9],
 				data:   make([]byte, 8),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_9",
+			name: "OpData9",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_9],
+				opcode: &opcodeArray[OpData9],
 				data:   make([]byte, 9),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_9 long",
+			name: "OpData9 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_9],
+				opcode: &opcodeArray[OpData9],
 				data:   make([]byte, 10),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_10 short",
+			name: "OpData10 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_10],
+				opcode: &opcodeArray[OpData10],
 				data:   make([]byte, 9),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_10",
+			name: "OpData10",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_10],
+				opcode: &opcodeArray[OpData10],
 				data:   make([]byte, 10),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_10 long",
+			name: "OpData10 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_10],
+				opcode: &opcodeArray[OpData10],
 				data:   make([]byte, 11),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_11 short",
+			name: "OpData11 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_11],
+				opcode: &opcodeArray[OpData11],
 				data:   make([]byte, 10),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_11",
+			name: "OpData11",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_11],
+				opcode: &opcodeArray[OpData11],
 				data:   make([]byte, 11),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_11 long",
+			name: "OpData11 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_11],
+				opcode: &opcodeArray[OpData11],
 				data:   make([]byte, 12),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_12 short",
+			name: "OpData12 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_12],
+				opcode: &opcodeArray[OpData12],
 				data:   make([]byte, 11),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_12",
+			name: "OpData12",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_12],
+				opcode: &opcodeArray[OpData12],
 				data:   make([]byte, 12),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_12 long",
+			name: "OpData12 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_12],
+				opcode: &opcodeArray[OpData12],
 				data:   make([]byte, 13),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_13 short",
+			name: "OpData13 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_13],
+				opcode: &opcodeArray[OpData13],
 				data:   make([]byte, 12),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_13",
+			name: "OpData13",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_13],
+				opcode: &opcodeArray[OpData13],
 				data:   make([]byte, 13),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_13 long",
+			name: "OpData13 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_13],
+				opcode: &opcodeArray[OpData13],
 				data:   make([]byte, 14),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_14 short",
+			name: "OpData14 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_14],
+				opcode: &opcodeArray[OpData14],
 				data:   make([]byte, 13),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_14",
+			name: "OpData14",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_14],
+				opcode: &opcodeArray[OpData14],
 				data:   make([]byte, 14),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_14 long",
+			name: "OpData14 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_14],
+				opcode: &opcodeArray[OpData14],
 				data:   make([]byte, 15),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_15 short",
+			name: "OpData15 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_15],
+				opcode: &opcodeArray[OpData15],
 				data:   make([]byte, 14),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_15",
+			name: "OpData15",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_15],
+				opcode: &opcodeArray[OpData15],
 				data:   make([]byte, 15),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_15 long",
+			name: "OpData15 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_15],
+				opcode: &opcodeArray[OpData15],
 				data:   make([]byte, 16),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_16 short",
+			name: "OpData16 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_16],
+				opcode: &opcodeArray[OpData16],
 				data:   make([]byte, 15),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_16",
+			name: "OpData16",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_16],
+				opcode: &opcodeArray[OpData16],
 				data:   make([]byte, 16),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_16 long",
+			name: "OpData16 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_16],
+				opcode: &opcodeArray[OpData16],
 				data:   make([]byte, 17),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_17 short",
+			name: "OpData17 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_17],
+				opcode: &opcodeArray[OpData17],
 				data:   make([]byte, 16),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_17",
+			name: "OpData17",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_17],
+				opcode: &opcodeArray[OpData17],
 				data:   make([]byte, 17),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_17 long",
+			name: "OpData17 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_17],
+				opcode: &opcodeArray[OpData17],
 				data:   make([]byte, 18),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_18 short",
+			name: "OpData18 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_18],
+				opcode: &opcodeArray[OpData18],
 				data:   make([]byte, 17),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_18",
+			name: "OpData18",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_18],
+				opcode: &opcodeArray[OpData18],
 				data:   make([]byte, 18),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_18 long",
+			name: "OpData18 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_18],
+				opcode: &opcodeArray[OpData18],
 				data:   make([]byte, 19),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_19 short",
+			name: "OpData19 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_19],
+				opcode: &opcodeArray[OpData19],
 				data:   make([]byte, 18),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_19",
+			name: "OpData19",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_19],
+				opcode: &opcodeArray[OpData19],
 				data:   make([]byte, 19),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_19 long",
+			name: "OpData19 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_19],
+				opcode: &opcodeArray[OpData19],
 				data:   make([]byte, 20),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_20 short",
+			name: "OpData20 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_20],
+				opcode: &opcodeArray[OpData20],
 				data:   make([]byte, 19),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_20",
+			name: "OpData20",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_20],
+				opcode: &opcodeArray[OpData20],
 				data:   make([]byte, 20),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_20 long",
+			name: "OpData20 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_20],
+				opcode: &opcodeArray[OpData20],
 				data:   make([]byte, 21),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_21 short",
+			name: "OpData21 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_21],
+				opcode: &opcodeArray[OpData21],
 				data:   make([]byte, 20),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_21",
+			name: "OpData21",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_21],
+				opcode: &opcodeArray[OpData21],
 				data:   make([]byte, 21),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_21 long",
+			name: "OpData21 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_21],
+				opcode: &opcodeArray[OpData21],
 				data:   make([]byte, 22),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_22 short",
+			name: "OpData22 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_22],
+				opcode: &opcodeArray[OpData22],
 				data:   make([]byte, 21),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_22",
+			name: "OpData22",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_22],
+				opcode: &opcodeArray[OpData22],
 				data:   make([]byte, 22),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_22 long",
+			name: "OpData22 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_22],
+				opcode: &opcodeArray[OpData22],
 				data:   make([]byte, 23),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_23 short",
+			name: "OpData23 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_23],
+				opcode: &opcodeArray[OpData23],
 				data:   make([]byte, 22),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_23",
+			name: "OpData23",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_23],
+				opcode: &opcodeArray[OpData23],
 				data:   make([]byte, 23),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_23 long",
+			name: "OpData23 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_23],
+				opcode: &opcodeArray[OpData23],
 				data:   make([]byte, 24),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_24 short",
+			name: "OpData24 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_24],
+				opcode: &opcodeArray[OpData24],
 				data:   make([]byte, 23),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_24",
+			name: "OpData24",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_24],
+				opcode: &opcodeArray[OpData24],
 				data:   make([]byte, 24),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_24 long",
+			name: "OpData24 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_24],
+				opcode: &opcodeArray[OpData24],
 				data:   make([]byte, 25),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_25 short",
+			name: "OpData25 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_25],
+				opcode: &opcodeArray[OpData25],
 				data:   make([]byte, 24),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_25",
+			name: "OpData25",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_25],
+				opcode: &opcodeArray[OpData25],
 				data:   make([]byte, 25),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_25 long",
+			name: "OpData25 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_25],
+				opcode: &opcodeArray[OpData25],
 				data:   make([]byte, 26),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_26 short",
+			name: "OpData26 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_26],
+				opcode: &opcodeArray[OpData26],
 				data:   make([]byte, 25),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_26",
+			name: "OpData26",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_26],
+				opcode: &opcodeArray[OpData26],
 				data:   make([]byte, 26),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_26 long",
+			name: "OpData26 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_26],
+				opcode: &opcodeArray[OpData26],
 				data:   make([]byte, 27),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_27 short",
+			name: "OpData27 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_27],
+				opcode: &opcodeArray[OpData27],
 				data:   make([]byte, 26),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_27",
+			name: "OpData27",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_27],
+				opcode: &opcodeArray[OpData27],
 				data:   make([]byte, 27),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_27 long",
+			name: "OpData27 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_27],
+				opcode: &opcodeArray[OpData27],
 				data:   make([]byte, 28),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_28 short",
+			name: "OpData28 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_28],
+				opcode: &opcodeArray[OpData28],
 				data:   make([]byte, 27),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_28",
+			name: "OpData28",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_28],
+				opcode: &opcodeArray[OpData28],
 				data:   make([]byte, 28),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_28 long",
+			name: "OpData28 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_28],
+				opcode: &opcodeArray[OpData28],
 				data:   make([]byte, 29),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_29 short",
+			name: "OpData29 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_29],
+				opcode: &opcodeArray[OpData29],
 				data:   make([]byte, 28),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_29",
+			name: "OpData29",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_29],
+				opcode: &opcodeArray[OpData29],
 				data:   make([]byte, 29),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_29 long",
+			name: "OpData29 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_29],
+				opcode: &opcodeArray[OpData29],
 				data:   make([]byte, 30),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_30 short",
+			name: "OpData30 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_30],
+				opcode: &opcodeArray[OpData30],
 				data:   make([]byte, 29),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_30",
+			name: "OpData30",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_30],
+				opcode: &opcodeArray[OpData30],
 				data:   make([]byte, 30),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_30 long",
+			name: "OpData30 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_30],
+				opcode: &opcodeArray[OpData30],
 				data:   make([]byte, 31),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_31 short",
+			name: "OpData31 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_31],
+				opcode: &opcodeArray[OpData31],
 				data:   make([]byte, 30),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_31",
+			name: "OpData31",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_31],
+				opcode: &opcodeArray[OpData31],
 				data:   make([]byte, 31),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_31 long",
+			name: "OpData31 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_31],
+				opcode: &opcodeArray[OpData31],
 				data:   make([]byte, 32),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_32 short",
+			name: "OpData32 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_32],
+				opcode: &opcodeArray[OpData32],
 				data:   make([]byte, 31),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_32",
+			name: "OpData32",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_32],
+				opcode: &opcodeArray[OpData32],
 				data:   make([]byte, 32),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_32 long",
+			name: "OpData32 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_32],
+				opcode: &opcodeArray[OpData32],
 				data:   make([]byte, 33),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_33 short",
+			name: "OpData33 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_33],
+				opcode: &opcodeArray[OpData33],
 				data:   make([]byte, 32),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_33",
+			name: "OpData33",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_33],
+				opcode: &opcodeArray[OpData33],
 				data:   make([]byte, 33),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_33 long",
+			name: "OpData33 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_33],
+				opcode: &opcodeArray[OpData33],
 				data:   make([]byte, 34),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_34 short",
+			name: "OpData34 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_34],
+				opcode: &opcodeArray[OpData34],
 				data:   make([]byte, 33),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_34",
+			name: "OpData34",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_34],
+				opcode: &opcodeArray[OpData34],
 				data:   make([]byte, 34),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_34 long",
+			name: "OpData34 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_34],
+				opcode: &opcodeArray[OpData34],
 				data:   make([]byte, 35),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_35 short",
+			name: "OpData35 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_35],
+				opcode: &opcodeArray[OpData35],
 				data:   make([]byte, 34),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_35",
+			name: "OpData35",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_35],
+				opcode: &opcodeArray[OpData35],
 				data:   make([]byte, 35),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_35 long",
+			name: "OpData35 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_35],
+				opcode: &opcodeArray[OpData35],
 				data:   make([]byte, 36),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_36 short",
+			name: "OpData36 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_36],
+				opcode: &opcodeArray[OpData36],
 				data:   make([]byte, 35),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_36",
+			name: "OpData36",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_36],
+				opcode: &opcodeArray[OpData36],
 				data:   make([]byte, 36),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_36 long",
+			name: "OpData36 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_36],
+				opcode: &opcodeArray[OpData36],
 				data:   make([]byte, 37),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_37 short",
+			name: "OpData37 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_37],
+				opcode: &opcodeArray[OpData37],
 				data:   make([]byte, 36),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_37",
+			name: "OpData37",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_37],
+				opcode: &opcodeArray[OpData37],
 				data:   make([]byte, 37),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_37 long",
+			name: "OpData37 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_37],
+				opcode: &opcodeArray[OpData37],
 				data:   make([]byte, 38),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_38 short",
+			name: "OpData38 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_38],
+				opcode: &opcodeArray[OpData38],
 				data:   make([]byte, 37),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_38",
+			name: "OpData38",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_38],
+				opcode: &opcodeArray[OpData38],
 				data:   make([]byte, 38),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_38 long",
+			name: "OpData38 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_38],
+				opcode: &opcodeArray[OpData38],
 				data:   make([]byte, 39),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_39 short",
+			name: "OpData39 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_39],
+				opcode: &opcodeArray[OpData39],
 				data:   make([]byte, 38),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_39",
+			name: "OpData39",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_39],
+				opcode: &opcodeArray[OpData39],
 				data:   make([]byte, 39),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_39 long",
+			name: "OpData39 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_39],
+				opcode: &opcodeArray[OpData39],
 				data:   make([]byte, 40),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_40 short",
+			name: "OpData40 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_40],
+				opcode: &opcodeArray[OpData40],
 				data:   make([]byte, 39),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_40",
+			name: "OpData40",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_40],
+				opcode: &opcodeArray[OpData40],
 				data:   make([]byte, 40),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_40 long",
+			name: "OpData40 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_40],
+				opcode: &opcodeArray[OpData40],
 				data:   make([]byte, 41),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_41 short",
+			name: "OpData41 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_41],
+				opcode: &opcodeArray[OpData41],
 				data:   make([]byte, 40),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_41",
+			name: "OpData41",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_41],
+				opcode: &opcodeArray[OpData41],
 				data:   make([]byte, 41),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_41 long",
+			name: "OpData41 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_41],
+				opcode: &opcodeArray[OpData41],
 				data:   make([]byte, 42),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_42 short",
+			name: "OpData42 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_42],
+				opcode: &opcodeArray[OpData42],
 				data:   make([]byte, 41),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_42",
+			name: "OpData42",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_42],
+				opcode: &opcodeArray[OpData42],
 				data:   make([]byte, 42),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_42 long",
+			name: "OpData42 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_42],
+				opcode: &opcodeArray[OpData42],
 				data:   make([]byte, 43),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_43 short",
+			name: "OpData43 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_43],
+				opcode: &opcodeArray[OpData43],
 				data:   make([]byte, 42),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_43",
+			name: "OpData43",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_43],
+				opcode: &opcodeArray[OpData43],
 				data:   make([]byte, 43),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_43 long",
+			name: "OpData43 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_43],
+				opcode: &opcodeArray[OpData43],
 				data:   make([]byte, 44),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_44 short",
+			name: "OpData44 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_44],
+				opcode: &opcodeArray[OpData44],
 				data:   make([]byte, 43),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_44",
+			name: "OpData44",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_44],
+				opcode: &opcodeArray[OpData44],
 				data:   make([]byte, 44),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_44 long",
+			name: "OpData44 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_44],
+				opcode: &opcodeArray[OpData44],
 				data:   make([]byte, 45),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_45 short",
+			name: "OpData45 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_45],
+				opcode: &opcodeArray[OpData45],
 				data:   make([]byte, 44),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_45",
+			name: "OpData45",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_45],
+				opcode: &opcodeArray[OpData45],
 				data:   make([]byte, 45),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_45 long",
+			name: "OpData45 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_45],
+				opcode: &opcodeArray[OpData45],
 				data:   make([]byte, 46),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_46 short",
+			name: "OpData46 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_46],
+				opcode: &opcodeArray[OpData46],
 				data:   make([]byte, 45),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_46",
+			name: "OpData46",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_46],
+				opcode: &opcodeArray[OpData46],
 				data:   make([]byte, 46),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_46 long",
+			name: "OpData46 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_46],
+				opcode: &opcodeArray[OpData46],
 				data:   make([]byte, 47),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_47 short",
+			name: "OpData47 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_47],
+				opcode: &opcodeArray[OpData47],
 				data:   make([]byte, 46),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_47",
+			name: "OpData47",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_47],
+				opcode: &opcodeArray[OpData47],
 				data:   make([]byte, 47),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_47 long",
+			name: "OpData47 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_47],
+				opcode: &opcodeArray[OpData47],
 				data:   make([]byte, 48),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_48 short",
+			name: "OpData48 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_48],
+				opcode: &opcodeArray[OpData48],
 				data:   make([]byte, 47),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_48",
+			name: "OpData48",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_48],
+				opcode: &opcodeArray[OpData48],
 				data:   make([]byte, 48),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_48 long",
+			name: "OpData48 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_48],
+				opcode: &opcodeArray[OpData48],
 				data:   make([]byte, 49),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_49 short",
+			name: "OpData49 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_49],
+				opcode: &opcodeArray[OpData49],
 				data:   make([]byte, 48),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_49",
+			name: "OpData49",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_49],
+				opcode: &opcodeArray[OpData49],
 				data:   make([]byte, 49),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_49 long",
+			name: "OpData49 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_49],
+				opcode: &opcodeArray[OpData49],
 				data:   make([]byte, 50),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_50 short",
+			name: "OpData50 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_50],
+				opcode: &opcodeArray[OpData50],
 				data:   make([]byte, 49),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_50",
+			name: "OpData50",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_50],
+				opcode: &opcodeArray[OpData50],
 				data:   make([]byte, 50),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_50 long",
+			name: "OpData50 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_50],
+				opcode: &opcodeArray[OpData50],
 				data:   make([]byte, 51),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_51 short",
+			name: "OpData51 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_51],
+				opcode: &opcodeArray[OpData51],
 				data:   make([]byte, 50),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_51",
+			name: "OpData51",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_51],
+				opcode: &opcodeArray[OpData51],
 				data:   make([]byte, 51),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_51 long",
+			name: "OpData51 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_51],
+				opcode: &opcodeArray[OpData51],
 				data:   make([]byte, 52),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_52 short",
+			name: "OpData52 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_52],
+				opcode: &opcodeArray[OpData52],
 				data:   make([]byte, 51),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_52",
+			name: "OpData52",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_52],
+				opcode: &opcodeArray[OpData52],
 				data:   make([]byte, 52),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_52 long",
+			name: "OpData52 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_52],
+				opcode: &opcodeArray[OpData52],
 				data:   make([]byte, 53),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_53 short",
+			name: "OpData53 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_53],
+				opcode: &opcodeArray[OpData53],
 				data:   make([]byte, 52),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_53",
+			name: "OpData53",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_53],
+				opcode: &opcodeArray[OpData53],
 				data:   make([]byte, 53),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_53 long",
+			name: "OpData53 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_53],
+				opcode: &opcodeArray[OpData53],
 				data:   make([]byte, 54),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_54 short",
+			name: "OpData54 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_54],
+				opcode: &opcodeArray[OpData54],
 				data:   make([]byte, 53),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_54",
+			name: "OpData54",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_54],
+				opcode: &opcodeArray[OpData54],
 				data:   make([]byte, 54),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_54 long",
+			name: "OpData54 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_54],
+				opcode: &opcodeArray[OpData54],
 				data:   make([]byte, 55),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_55 short",
+			name: "OpData55 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_55],
+				opcode: &opcodeArray[OpData55],
 				data:   make([]byte, 54),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_55",
+			name: "OpData55",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_55],
+				opcode: &opcodeArray[OpData55],
 				data:   make([]byte, 55),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_55 long",
+			name: "OpData55 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_55],
+				opcode: &opcodeArray[OpData55],
 				data:   make([]byte, 56),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_56 short",
+			name: "OpData56 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_56],
+				opcode: &opcodeArray[OpData56],
 				data:   make([]byte, 55),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_56",
+			name: "OpData56",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_56],
+				opcode: &opcodeArray[OpData56],
 				data:   make([]byte, 56),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_56 long",
+			name: "OpData56 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_56],
+				opcode: &opcodeArray[OpData56],
 				data:   make([]byte, 57),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_57 short",
+			name: "OpData57 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_57],
+				opcode: &opcodeArray[OpData57],
 				data:   make([]byte, 56),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_57",
+			name: "OpData57",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_57],
+				opcode: &opcodeArray[OpData57],
 				data:   make([]byte, 57),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_57 long",
+			name: "OpData57 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_57],
+				opcode: &opcodeArray[OpData57],
 				data:   make([]byte, 58),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_58 short",
+			name: "OpData58 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_58],
+				opcode: &opcodeArray[OpData58],
 				data:   make([]byte, 57),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_58",
+			name: "OpData58",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_58],
+				opcode: &opcodeArray[OpData58],
 				data:   make([]byte, 58),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_58 long",
+			name: "OpData58 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_58],
+				opcode: &opcodeArray[OpData58],
 				data:   make([]byte, 59),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_59 short",
+			name: "OpData59 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_59],
+				opcode: &opcodeArray[OpData59],
 				data:   make([]byte, 58),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_59",
+			name: "OpData59",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_59],
+				opcode: &opcodeArray[OpData59],
 				data:   make([]byte, 59),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_59 long",
+			name: "OpData59 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_59],
+				opcode: &opcodeArray[OpData59],
 				data:   make([]byte, 60),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_60 short",
+			name: "OpData60 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_60],
+				opcode: &opcodeArray[OpData60],
 				data:   make([]byte, 59),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_60",
+			name: "OpData60",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_60],
+				opcode: &opcodeArray[OpData60],
 				data:   make([]byte, 60),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_60 long",
+			name: "OpData60 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_60],
+				opcode: &opcodeArray[OpData60],
 				data:   make([]byte, 61),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_61 short",
+			name: "OpData61 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_61],
+				opcode: &opcodeArray[OpData61],
 				data:   make([]byte, 60),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_61",
+			name: "OpData61",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_61],
+				opcode: &opcodeArray[OpData61],
 				data:   make([]byte, 61),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_61 long",
+			name: "OpData61 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_61],
+				opcode: &opcodeArray[OpData61],
 				data:   make([]byte, 62),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_62 short",
+			name: "OpData62 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_62],
+				opcode: &opcodeArray[OpData62],
 				data:   make([]byte, 61),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_62",
+			name: "OpData62",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_62],
+				opcode: &opcodeArray[OpData62],
 				data:   make([]byte, 62),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_62 long",
+			name: "OpData62 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_62],
+				opcode: &opcodeArray[OpData62],
 				data:   make([]byte, 63),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_63 short",
+			name: "OpData63 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_63],
+				opcode: &opcodeArray[OpData63],
 				data:   make([]byte, 62),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_63",
+			name: "OpData63",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_63],
+				opcode: &opcodeArray[OpData63],
 				data:   make([]byte, 63),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_63 long",
+			name: "OpData63 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_63],
+				opcode: &opcodeArray[OpData63],
 				data:   make([]byte, 64),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_64 short",
+			name: "OpData64 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_64],
+				opcode: &opcodeArray[OpData64],
 				data:   make([]byte, 63),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_64",
+			name: "OpData64",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_64],
+				opcode: &opcodeArray[OpData64],
 				data:   make([]byte, 64),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_64 long",
+			name: "OpData64 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_64],
+				opcode: &opcodeArray[OpData64],
 				data:   make([]byte, 65),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_65 short",
+			name: "OpData65 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_65],
+				opcode: &opcodeArray[OpData65],
 				data:   make([]byte, 64),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_65",
+			name: "OpData65",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_65],
+				opcode: &opcodeArray[OpData65],
 				data:   make([]byte, 65),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_65 long",
+			name: "OpData65 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_65],
+				opcode: &opcodeArray[OpData65],
 				data:   make([]byte, 66),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_66 short",
+			name: "OpData66 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_66],
+				opcode: &opcodeArray[OpData66],
 				data:   make([]byte, 65),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_66",
+			name: "OpData66",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_66],
+				opcode: &opcodeArray[OpData66],
 				data:   make([]byte, 66),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_66 long",
+			name: "OpData66 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_66],
+				opcode: &opcodeArray[OpData66],
 				data:   make([]byte, 67),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_67 short",
+			name: "OpData67 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_67],
+				opcode: &opcodeArray[OpData67],
 				data:   make([]byte, 66),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_67",
+			name: "OpData67",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_67],
+				opcode: &opcodeArray[OpData67],
 				data:   make([]byte, 67),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_67 long",
+			name: "OpData67 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_67],
+				opcode: &opcodeArray[OpData67],
 				data:   make([]byte, 68),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_68 short",
+			name: "OpData68 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_68],
+				opcode: &opcodeArray[OpData68],
 				data:   make([]byte, 67),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_68",
+			name: "OpData68",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_68],
+				opcode: &opcodeArray[OpData68],
 				data:   make([]byte, 68),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_68 long",
+			name: "OpData68 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_68],
+				opcode: &opcodeArray[OpData68],
 				data:   make([]byte, 69),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_69 short",
+			name: "OpData69 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_69],
+				opcode: &opcodeArray[OpData69],
 				data:   make([]byte, 68),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_69",
+			name: "OpData69",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_69],
+				opcode: &opcodeArray[OpData69],
 				data:   make([]byte, 69),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_69 long",
+			name: "OpData69 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_69],
+				opcode: &opcodeArray[OpData69],
 				data:   make([]byte, 70),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_70 short",
+			name: "OpData70 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_70],
+				opcode: &opcodeArray[OpData70],
 				data:   make([]byte, 69),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_70",
+			name: "OpData70",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_70],
+				opcode: &opcodeArray[OpData70],
 				data:   make([]byte, 70),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_70 long",
+			name: "OpData70 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_70],
+				opcode: &opcodeArray[OpData70],
 				data:   make([]byte, 71),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_71 short",
+			name: "OpData71 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_71],
+				opcode: &opcodeArray[OpData71],
 				data:   make([]byte, 70),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_71",
+			name: "OpData71",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_71],
+				opcode: &opcodeArray[OpData71],
 				data:   make([]byte, 71),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_71 long",
+			name: "OpData71 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_71],
+				opcode: &opcodeArray[OpData71],
 				data:   make([]byte, 72),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_72 short",
+			name: "OpData72 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_72],
+				opcode: &opcodeArray[OpData72],
 				data:   make([]byte, 71),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_72",
+			name: "OpData72",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_72],
+				opcode: &opcodeArray[OpData72],
 				data:   make([]byte, 72),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_72 long",
+			name: "OpData72 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_72],
+				opcode: &opcodeArray[OpData72],
 				data:   make([]byte, 73),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_73 short",
+			name: "OpData73 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_73],
+				opcode: &opcodeArray[OpData73],
 				data:   make([]byte, 72),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_73",
+			name: "OpData73",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_73],
+				opcode: &opcodeArray[OpData73],
 				data:   make([]byte, 73),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_73 long",
+			name: "OpData73 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_73],
+				opcode: &opcodeArray[OpData73],
 				data:   make([]byte, 74),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_74 short",
+			name: "OpData74 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_74],
+				opcode: &opcodeArray[OpData74],
 				data:   make([]byte, 73),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_74",
+			name: "OpData74",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_74],
+				opcode: &opcodeArray[OpData74],
 				data:   make([]byte, 74),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_74 long",
+			name: "OpData74 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_74],
+				opcode: &opcodeArray[OpData74],
 				data:   make([]byte, 75),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_75 short",
+			name: "OpData75 short",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_75],
+				opcode: &opcodeArray[OpData75],
 				data:   make([]byte, 74),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DATA_75",
+			name: "OpData75",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_75],
+				opcode: &opcodeArray[OpData75],
 				data:   make([]byte, 75),
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DATA_75 long",
+			name: "OpData75 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DATA_75],
+				opcode: &opcodeArray[OpData75],
 				data:   make([]byte, 76),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
@@ -3893,7 +3893,7 @@ func TestGetWitnessSigOpCount(
 		// A regualr p2wkh witness program. The output being spent should only have a single sig-op counted.
 		{
 			name: "p2wkh",
-			pkScript: mustParseShortForm("OP_0 DATA_20 " +
+			pkScript: mustParseShortForm("OpZero DATA_20 " +
 				"0x365ab47888e150ff46f8d51bce36dcd680f1283f"),
 			witness: wire.TxWitness{
 				hexToBytes("3045022100ee9fe8f9487afa977" +
@@ -4068,15 +4068,15 @@ func TestRemoveOpcodeByData(
 		},
 		{
 			name:   "simple case",
-			before: []byte{OP_DATA_4, 1, 2, 3, 4},
+			before: []byte{OpData4, 1, 2, 3, 4},
 			remove: []byte{1, 2, 3, 4},
 			after:  nil,
 		},
 		{
 			name:   "simple case (miss)",
-			before: []byte{OP_DATA_4, 1, 2, 3, 4},
+			before: []byte{OpData4, 1, 2, 3, 4},
 			remove: []byte{1, 2, 3, 5},
-			after:  []byte{OP_DATA_4, 1, 2, 3, 4},
+			after:  []byte{OpData4, 1, 2, 3, 4},
 		},
 		{
 			// padded to keep it canonical.

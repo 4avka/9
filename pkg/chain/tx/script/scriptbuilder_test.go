@@ -16,9 +16,9 @@ func TestScriptBuilderAddOp(
 		expected []byte
 	}{
 		{
-			name:     "push OP_0",
-			opcodes:  []byte{OP_0},
-			expected: []byte{OP_0},
+			name:     "push OpZero",
+			opcodes:  []byte{OpZero},
+			expected: []byte{OpZero},
 		},
 		{
 			name:     "push OP_1 OP_2",
@@ -98,7 +98,7 @@ func TestScriptBuilderAddInt64(
 		expected []byte
 	}{
 		{name: "push -1", val: -1, expected: []byte{OP_1NEGATE}},
-		{name: "push small int 0", val: 0, expected: []byte{OP_0}},
+		{name: "push small int 0", val: 0, expected: []byte{OpZero}},
 		{name: "push small int 1", val: 1, expected: []byte{OP_1}},
 		{name: "push small int 2", val: 2, expected: []byte{OP_2}},
 		{name: "push small int 3", val: 3, expected: []byte{OP_3}},
@@ -115,26 +115,26 @@ func TestScriptBuilderAddInt64(
 		{name: "push small int 14", val: 14, expected: []byte{OP_14}},
 		{name: "push small int 15", val: 15, expected: []byte{OP_15}},
 		{name: "push small int 16", val: 16, expected: []byte{OP_16}},
-		{name: "push 17", val: 17, expected: []byte{OP_DATA_1, 0x11}},
-		{name: "push 65", val: 65, expected: []byte{OP_DATA_1, 0x41}},
-		{name: "push 127", val: 127, expected: []byte{OP_DATA_1, 0x7f}},
-		{name: "push 128", val: 128, expected: []byte{OP_DATA_2, 0x80, 0}},
-		{name: "push 255", val: 255, expected: []byte{OP_DATA_2, 0xff, 0}},
-		{name: "push 256", val: 256, expected: []byte{OP_DATA_2, 0, 0x01}},
-		{name: "push 32767", val: 32767, expected: []byte{OP_DATA_2, 0xff, 0x7f}},
-		{name: "push 32768", val: 32768, expected: []byte{OP_DATA_3, 0, 0x80, 0}},
-		{name: "push -2", val: -2, expected: []byte{OP_DATA_1, 0x82}},
-		{name: "push -3", val: -3, expected: []byte{OP_DATA_1, 0x83}},
-		{name: "push -4", val: -4, expected: []byte{OP_DATA_1, 0x84}},
-		{name: "push -5", val: -5, expected: []byte{OP_DATA_1, 0x85}},
-		{name: "push -17", val: -17, expected: []byte{OP_DATA_1, 0x91}},
-		{name: "push -65", val: -65, expected: []byte{OP_DATA_1, 0xc1}},
-		{name: "push -127", val: -127, expected: []byte{OP_DATA_1, 0xff}},
-		{name: "push -128", val: -128, expected: []byte{OP_DATA_2, 0x80, 0x80}},
-		{name: "push -255", val: -255, expected: []byte{OP_DATA_2, 0xff, 0x80}},
-		{name: "push -256", val: -256, expected: []byte{OP_DATA_2, 0x00, 0x81}},
-		{name: "push -32767", val: -32767, expected: []byte{OP_DATA_2, 0xff, 0xff}},
-		{name: "push -32768", val: -32768, expected: []byte{OP_DATA_3, 0x00, 0x80, 0x80}},
+		{name: "push 17", val: 17, expected: []byte{OpData1, 0x11}},
+		{name: "push 65", val: 65, expected: []byte{OpData1, 0x41}},
+		{name: "push 127", val: 127, expected: []byte{OpData1, 0x7f}},
+		{name: "push 128", val: 128, expected: []byte{OpData2, 0x80, 0}},
+		{name: "push 255", val: 255, expected: []byte{OpData2, 0xff, 0}},
+		{name: "push 256", val: 256, expected: []byte{OpData2, 0, 0x01}},
+		{name: "push 32767", val: 32767, expected: []byte{OpData2, 0xff, 0x7f}},
+		{name: "push 32768", val: 32768, expected: []byte{OpData3, 0, 0x80, 0}},
+		{name: "push -2", val: -2, expected: []byte{OpData1, 0x82}},
+		{name: "push -3", val: -3, expected: []byte{OpData1, 0x83}},
+		{name: "push -4", val: -4, expected: []byte{OpData1, 0x84}},
+		{name: "push -5", val: -5, expected: []byte{OpData1, 0x85}},
+		{name: "push -17", val: -17, expected: []byte{OpData1, 0x91}},
+		{name: "push -65", val: -65, expected: []byte{OpData1, 0xc1}},
+		{name: "push -127", val: -127, expected: []byte{OpData1, 0xff}},
+		{name: "push -128", val: -128, expected: []byte{OpData2, 0x80, 0x80}},
+		{name: "push -255", val: -255, expected: []byte{OpData2, 0xff, 0x80}},
+		{name: "push -256", val: -256, expected: []byte{OpData2, 0x00, 0x81}},
+		{name: "push -32767", val: -32767, expected: []byte{OpData2, 0xff, 0xff}},
+		{name: "push -32768", val: -32768, expected: []byte{OpData3, 0x00, 0x80, 0x80}},
 	}
 	builder := NewScriptBuilder()
 	t.Logf("Running %d tests", len(tests))
@@ -172,9 +172,9 @@ func TestScriptBuilderAddData(
 		expected []byte
 		useFull  bool // use AddFullData instead of AddData.
 	}{
-		// BIP0062: Pushing an empty byte sequence must use OP_0.
-		{name: "push empty byte sequence", data: nil, expected: []byte{OP_0}},
-		{name: "push 1 byte 0x00", data: []byte{0x00}, expected: []byte{OP_0}},
+		// BIP0062: Pushing an empty byte sequence must use OpZero.
+		{name: "push empty byte sequence", data: nil, expected: []byte{OpZero}},
+		{name: "push 1 byte 0x00", data: []byte{0x00}, expected: []byte{OpZero}},
 		// BIP0062: Pushing a 1-byte sequence of byte 0x01 through 0x10 must use OP_n.
 		{name: "push 1 byte 0x01", data: []byte{0x01}, expected: []byte{OP_1}},
 		{name: "push 1 byte 0x02", data: []byte{0x02}, expected: []byte{OP_2}},
@@ -195,19 +195,19 @@ func TestScriptBuilderAddData(
 		// BIP0062: Pushing the byte 0x81 must use OP_1NEGATE.
 		{name: "push 1 byte 0x81", data: []byte{0x81}, expected: []byte{OP_1NEGATE}},
 		// BIP0062: Pushing any other byte sequence up to 75 bytes must use the normal data push (opcode byte n, with n the number of bytes, followed n bytes of data being pushed).
-		{name: "push 1 byte 0x11", data: []byte{0x11}, expected: []byte{OP_DATA_1, 0x11}},
-		{name: "push 1 byte 0x80", data: []byte{0x80}, expected: []byte{OP_DATA_1, 0x80}},
-		{name: "push 1 byte 0x82", data: []byte{0x82}, expected: []byte{OP_DATA_1, 0x82}},
-		{name: "push 1 byte 0xff", data: []byte{0xff}, expected: []byte{OP_DATA_1, 0xff}},
+		{name: "push 1 byte 0x11", data: []byte{0x11}, expected: []byte{OpData1, 0x11}},
+		{name: "push 1 byte 0x80", data: []byte{0x80}, expected: []byte{OpData1, 0x80}},
+		{name: "push 1 byte 0x82", data: []byte{0x82}, expected: []byte{OpData1, 0x82}},
+		{name: "push 1 byte 0xff", data: []byte{0xff}, expected: []byte{OpData1, 0xff}},
 		{
 			name:     "push data len 17",
 			data:     bytes.Repeat([]byte{0x49}, 17),
-			expected: append([]byte{OP_DATA_17}, bytes.Repeat([]byte{0x49}, 17)...),
+			expected: append([]byte{OpData17}, bytes.Repeat([]byte{0x49}, 17)...),
 		},
 		{
 			name:     "push data len 75",
 			data:     bytes.Repeat([]byte{0x49}, 75),
-			expected: append([]byte{OP_DATA_75}, bytes.Repeat([]byte{0x49}, 75)...),
+			expected: append([]byte{OpData75}, bytes.Repeat([]byte{0x49}, 75)...),
 		},
 		// BIP0062: Pushing 76 to 255 bytes must use OP_PUSHDATA1.
 		{
@@ -316,7 +316,7 @@ func TestExceedMaxScriptSize(
 
 	// Ensure adding an opcode that would exceed the maximum size of the script does not add the data.
 	builder.Reset().AddFullData(make([]byte, MaxScriptSize-3))
-	script, err = builder.AddOp(OP_0).Script()
+	script, err = builder.AddOp(OpZero).Script()
 	if _, ok := err.(ErrScriptNotCanonical); !ok || err == nil {
 
 		t.Fatalf("ScriptBuilder.AddOp unexpected modified script - "+
@@ -396,7 +396,7 @@ func TestErroredScript(
 	}
 
 	// Ensure adding an opcode to a script that has errored doesn't succeed.
-	script, err = builder.AddOp(OP_0).Script()
+	script, err = builder.AddOp(OpZero).Script()
 	if _, ok := err.(ErrScriptNotCanonical); !ok || err == nil {
 
 		t.Fatal("ScriptBuilder.AddOp succeeded on errored script")

@@ -14,7 +14,6 @@ import (
 var Bip16Activation = time.Unix(1333238400, 0)
 
 // SigHashType represents hash type bits at the end of a signature.
-
 type SigHashType uint32
 
 // Hash type bits from the end of a signature.
@@ -36,11 +35,11 @@ const (
 	MaxScriptElementSize  = 520 // Max bytes pushable to the stack.
 )
 
-// isSmallInt returns whether or not the opcode is considered a small integer, which is an OP_0, or OP_1 through OP_16.
+// isSmallInt returns whether or not the opcode is considered a small integer, which is an OpZero, or OP_1 through OP_16.
 func isSmallInt(
 	op *opcode) bool {
 
-	if op.value == OP_0 || (op.value >= OP_1 && op.value <= OP_16) {
+	if op.value == OpZero || (op.value >= OP_1 && op.value <= OP_16) {
 
 		return true
 	}
@@ -53,7 +52,7 @@ func isScriptHash(
 
 	return len(pops) == 3 &&
 		pops[0].opcode.value == OP_HASH160 &&
-		pops[1].opcode.value == OP_DATA_20 &&
+		pops[1].opcode.value == OpData20 &&
 		pops[2].opcode.value == OP_EQUAL
 }
 
@@ -74,8 +73,8 @@ func isWitnessScriptHash(
 	pops []parsedOpcode) bool {
 
 	return len(pops) == 2 &&
-		pops[0].opcode.value == OP_0 &&
-		pops[1].opcode.value == OP_DATA_32
+		pops[0].opcode.value == OpZero &&
+		pops[1].opcode.value == OpData32
 }
 
 // IsPayToWitnessScriptHash returns true if the is in the standard pay-to-witness-script-hash (P2WSH) format, false otherwise.
@@ -107,8 +106,8 @@ func isWitnessPubKeyHash(
 	pops []parsedOpcode) bool {
 
 	return len(pops) == 2 &&
-		pops[0].opcode.value == OP_0 &&
-		pops[1].opcode.value == OP_DATA_20
+		pops[0].opcode.value == OpZero &&
+		pops[1].opcode.value == OpData20
 }
 
 // IsWitnessProgram returns true if the passed script is a valid witness program which is encoded according to the passed witness program version. A witness program must be a small integer (from 0-16), followed by 2-40 bytes of pushed data.
@@ -204,10 +203,10 @@ func parseScriptTemplate(
 
 		switch {
 
-		// No additional data.  Note that some of the opcodes, notably OP_1NEGATE, OP_0, and OP_[1-16] represent the data themselves.
+		// No additional data.  Note that some of the opcodes, notably OP_1NEGATE, OpZero, and OP_[1-16] represent the data themselves.
 		case op.length == 1:
 			i++
-		// Data pushes of specific lengths -- OP_DATA_[1-75].
+		// Data pushes of specific lengths -- OpData[1-75].
 		case op.length > 1:
 
 			if len(script[i:]) < op.length {
@@ -350,7 +349,7 @@ func canonicalPush(
 
 		return true
 	}
-	if opcode < OP_PUSHDATA1 && opcode > OP_0 && (dataLen == 1 && data[0] <= 16) {
+	if opcode < OP_PUSHDATA1 && opcode > OpZero && (dataLen == 1 && data[0] <= 16) {
 
 		return false
 	}
@@ -485,7 +484,7 @@ func calcWitnessSignatureHash(
 		sigHash.Write([]byte{0x19})
 		sigHash.Write([]byte{OP_DUP})
 		sigHash.Write([]byte{OP_HASH160})
-		sigHash.Write([]byte{OP_DATA_20})
+		sigHash.Write([]byte{OpData20})
 		sigHash.Write(subScript[1].data)
 		sigHash.Write([]byte{OP_EQUALVERIFY})
 		sigHash.Write([]byte{OP_CHECKSIG})
@@ -675,7 +674,7 @@ func calcSignatureHash(
 func asSmallInt(
 	op *opcode) int {
 
-	if op.value == OP_0 {
+	if op.value == OpZero {
 
 		return 0
 	}

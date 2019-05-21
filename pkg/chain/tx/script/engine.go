@@ -13,7 +13,6 @@ import (
 )
 
 // ScriptFlags is a bitmask defining additional operations or tests that will be done when executing a script pair.
-
 type ScriptFlags uint32
 
 const (
@@ -40,7 +39,6 @@ const (
 	ScriptVerifyDERSignatures
 
 	// ScriptVerifyLowS defines that signtures are required to comply with the DER format and whose S value is <= order / 2.  This is rule 5
-
 	// of BIP0062.
 	ScriptVerifyLowS
 
@@ -87,7 +85,6 @@ const (
 var halfOrder = new(big.Int).Rsh(ec.S256().N, 1)
 
 // Engine is the virtual machine that executes scripts.
-
 type Engine struct {
 	scripts         [][]parsedOpcode
 	scriptIdx       atomic.Int64
@@ -115,7 +112,7 @@ func (vm *Engine) hasFlag(flag ScriptFlags) bool {
 	return vm.flags&flag == flag
 }
 
-// isBranchExecuting returns whether or not the current conditional branch is actively executing.  For example, when the data stack has an OP_FALSE on it and an OP_IF is encountered, the branch is inactive until an OP_ELSE or OP_ENDIF is encountered.  It properly handles nested conditionals.
+// isBranchExecuting returns whether or not the current conditional branch is actively executing.  For example, when the data stack has an OpFalse on it and an OP_IF is encountered, the branch is inactive until an OP_ELSE or OP_ENDIF is encountered.  It properly handles nested conditionals.
 func (vm *Engine) isBranchExecuting() bool {
 
 	if len(vm.condStack) == 0 {

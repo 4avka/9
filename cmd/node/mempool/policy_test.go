@@ -161,7 +161,7 @@ func TestCheckPkScriptStandard(
 		},
 		{
 			"malformed3",
-			txscript.NewScriptBuilder().AddOp(txscript.OP_0).
+			txscript.NewScriptBuilder().AddOp(txscript.OpZero).
 				AddData(pubKeys[0]).AddData(pubKeys[1]).
 				AddOp(txscript.OP_2).AddOp(txscript.OP_CHECKMULTISIG),
 			false,
@@ -170,7 +170,7 @@ func TestCheckPkScriptStandard(
 			"malformed4",
 			txscript.NewScriptBuilder().AddOp(txscript.OP_1).
 				AddData(pubKeys[0]).AddData(pubKeys[1]).
-				AddOp(txscript.OP_0).AddOp(txscript.OP_CHECKMULTISIG),
+				AddOp(txscript.OpZero).AddOp(txscript.OP_CHECKMULTISIG),
 			false,
 		},
 		{

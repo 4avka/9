@@ -81,7 +81,7 @@ func TestOpcodeDisasm(
 
 		switch {
 
-		// OP_DATA_1 through OP_DATA_65 display the pushed data.
+		// OpData1 through OpData65 display the pushed data.
 		case opcodeVal >= 0x01 && opcodeVal < 0x4c:
 			data = bytes.Repeat(oneBytes, opcodeVal)
 			expectedStr = strings.Repeat(oneStr, opcodeVal)
@@ -134,7 +134,7 @@ func TestOpcodeDisasm(
 	}
 
 	// Now, replace the relevant fields and test the full disassembly.
-	expectedStrings[0x00] = "OP_0"
+	expectedStrings[0x00] = "OpZero"
 	expectedStrings[0x4f] = "OP_1NEGATE"
 
 	for opcodeVal, expectedStr := range expectedStrings {
@@ -143,10 +143,10 @@ func TestOpcodeDisasm(
 
 		switch {
 
-		// OP_DATA_1 through OP_DATA_65 display the opcode followed by the pushed data.
+		// OpData1 through OpData65 display the opcode followed by the pushed data.
 		case opcodeVal >= 0x01 && opcodeVal < 0x4c:
 			data = bytes.Repeat(oneBytes, opcodeVal)
-			expectedStr = fmt.Sprintf("OP_DATA_%d 0x%s", opcodeVal,
+			expectedStr = fmt.Sprintf("OpData%d 0x%s", opcodeVal,
 				strings.Repeat(oneStr, opcodeVal))
 		// OP_PUSHDATA1.
 		case opcodeVal == 0x4c:

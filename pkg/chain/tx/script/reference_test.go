@@ -83,7 +83,7 @@ var shortFormOps map[string]byte
 // The format used for these tests is pretty simple if ad-hoc:
 //   - Opcodes other than the push opcodes and unknown are present as either OP_NAME or just NAME
 //   - Plain numbers are made into push operations
-//   - Numbers beginning with 0x are inserted into the []byte as-is (so 0x14 is OP_DATA_20)
+//   - Numbers beginning with 0x are inserted into the []byte as-is (so 0x14 is OpData20)
 //   - Single quoted strings are pushed as data
 //   - Anything else is an error
 func parseShortForm(
@@ -101,11 +101,11 @@ func parseShortForm(
 				continue
 			}
 			ops[opcodeName] = opcodeValue
-			// The opcodes named OP_# can't have the OP_ prefix stripped or they would conflict with the plain numbers.  Also, since OP_FALSE and OP_TRUE are aliases for the OP_0, and OP_1, respectively, they have the same value, so detect those by name and allow them.
+			// The opcodes named OP_# can't have the OP_ prefix stripped or they would conflict with the plain numbers.  Also, since OpFalse and OP_TRUE are aliases for the OpZero, and OP_1, respectively, they have the same value, so detect those by name and allow them.
 
-			if (opcodeName == "OP_FALSE" || opcodeName == "OP_TRUE") ||
+			if (opcodeName == "OpFalse" || opcodeName == "OP_TRUE") ||
 
-				(opcodeValue != OP_0 && (opcodeValue < OP_1 ||
+				(opcodeValue != OpZero && (opcodeValue < OP_1 ||
 					opcodeValue > OP_16)) {
 
 				ops[strings.TrimPrefix(opcodeName, "OP_")] = opcodeValue
@@ -308,7 +308,7 @@ func createSpendingTx(
 
 	coinbaseTx := wire.NewMsgTx(wire.TxVersion)
 	outPoint := wire.NewOutPoint(&chainhash.Hash{}, ^uint32(0))
-	txIn := wire.NewTxIn(outPoint, []byte{OP_0, OP_0}, nil)
+	txIn := wire.NewTxIn(outPoint, []byte{OpZero, OpZero}, nil)
 	txOut := wire.NewTxOut(outputValue, pkScript)
 	coinbaseTx.AddTxIn(txIn)
 	coinbaseTx.AddTxOut(txOut)

@@ -318,7 +318,7 @@ func TestExtractPkScriptAddrs(
 		},
 		{
 			name:    "script that does not parse",
-			script:  []byte{OP_DATA_45},
+			script:  []byte{OpData45},
 			addrs:   nil,
 			reqSigs: 0,
 			class:   NonStandardTy,
@@ -450,7 +450,7 @@ func TestCalcScriptInfo(
 		{
 			// A v0 p2wkh spend.
 			name:     "p2wkh script",
-			pkScript: "OP_0 DATA_20 0x365ab47888e150ff46f8d51bce36dcd680f1283f",
+			pkScript: "OpZero DATA_20 0x365ab47888e150ff46f8d51bce36dcd680f1283f",
 			witness: []string{
 				"3045022100ee9fe8f9487afa977" +
 					"6647ebcf0883ce0cd37454d7ce19889d34ba2c9" +
