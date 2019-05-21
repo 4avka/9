@@ -1,4 +1,4 @@
-package blockchain
+package chain
 import (
 	"math"
 	chaincfg "git.parallelcoin.io/dev/9/pkg/chain/config"

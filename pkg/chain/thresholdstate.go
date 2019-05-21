@@ -1,4 +1,4 @@
-package blockchain
+package chain
 import (
 	"fmt"
 	chainhash "git.parallelcoin.io/dev/9/pkg/chain/hash"

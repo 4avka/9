@@ -3,9 +3,9 @@
 [![ISC License](http://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org)
 [![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/git.parallelcoin.io/dev/9/blockchain)
 
-Package blockchain implements bitcoin block handling and chain selection rules.
+package chain implements bitcoin block handling and chain selection rules.
 
-The test coverage is currently only around 60%, but will be increasing over time. See `test_coverage.txt` for the gocov coverage report. Alternatively, if you are running a POSIX OS, you can run the `cov_report.sh` script for a real-time report. Package blockchain is licensed under the liberal ISC license.
+The test coverage is currently only around 60%, but will be increasing over time. See `test_coverage.txt` for the gocov coverage report. Alternatively, if you are running a POSIX OS, you can run the `cov_report.sh` script for a real-time report. package chain is licensed under the liberal ISC license.
 There is an associated blog post about the release of this package [here](https://blog.conformal.com/btcchain-the-bitcoin-chain-package-from-bctd/).
 
 This package has intentionally been designed so it can be used as a standalone package for any projects needing to handle processing of blocks into the bitcoin block chain.
@@ -75,4 +75,4 @@ All official release tags are signed by Conformal so users can ensure the code h
 
 ## License
 
-Package blockchain is licensed under the [copyfree](http://copyfree.org) ISC License.
+package chain is licensed under the [copyfree](http://copyfree.org) ISC License.

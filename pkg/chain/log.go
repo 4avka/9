@@ -1,4 +1,4 @@
-package blockchain
+package chain
 
 import (
 	"git.parallelcoin.io/dev/9/cmd/ll"

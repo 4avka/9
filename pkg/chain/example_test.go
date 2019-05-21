@@ -1,4 +1,4 @@
-package blockchain_test
+package chain_test
 
 import (
 	"fmt"
