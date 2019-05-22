@@ -1,11 +1,9 @@
 package app
-
 import (
 	"git.parallelcoin.io/dev/9/cmd/def"
 	"git.parallelcoin.io/dev/9/cmd/nine"
 	"git.parallelcoin.io/dev/9/cmd/node"
 )
-
 // MakeConfig links the configuration from the Cats to the Config used by all of
 // the suite
 func MakeConfig(c *def.App) (out *nine.Config) {

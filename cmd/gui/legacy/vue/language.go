@@ -1,13 +1,9 @@
 package vue
-
 import (
 	"fmt"
-
 	"git.parallelcoin.io/dev/pod/cmd/gui/jdb"
 )
-
 // "github.com/parallelcointeam/pod/rpcclient"
-
 type Language struct {
 	TrueStory               string `json:"truestory"`
 	Wallet                  string `json:"wallet"`
@@ -38,12 +34,8 @@ type Language struct {
 	RequestPaymentsHistory  string `json:"requestpaymentshistory"`
 	Message                 string `json:"message"`
 }
-
 func (l *Language) LanguageData(lang string) {
-
 	if err := jdb.JDB.Read("lang", lang, &l); err != nil {
-
 		fmt.Println("Error", err)
 	}
-
 }

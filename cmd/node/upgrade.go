@@ -1,13 +1,10 @@
 package node
-
 import (
 	"io"
 	"os"
 	"path/filepath"
-
 	cl "git.parallelcoin.io/dev/9/pkg/util/cl"
 )
-
 // dirEmpty returns whether or not the specified directory path is empty.
 func dirEmpty(
 	dirPath string) (bool, error) {
@@ -23,7 +20,6 @@ func dirEmpty(
 	}
 	return len(names) == 0, nil
 }
-
 // doUpgrades performs upgrades to pod as new versions require it.
 func doUpgrades() error {
 	err := upgradeDBPaths()
@@ -32,7 +28,6 @@ func doUpgrades() error {
 	}
 	return upgradeDataPaths()
 }
-
 // oldPodHomeDir returns the OS specific home directory pod used prior to version 0.3.3.  This has since been replaced with util.AppDataDir, but this function is still provided for the automatic upgrade path.
 func oldPodHomeDir() string {
 	// Search for Windows APPDATA first.  This won't exist on POSIX OSes.
@@ -48,7 +43,6 @@ func oldPodHomeDir() string {
 	// In the worst case, use the current directory.
 	return "."
 }
-
 // upgradeDBPathNet moves the database for a specific network from its location prior to pod version 0.2.0 and uses heuristics to ascertain the old database type to rename to the new format.
 func upgradeDBPathNet(
 	oldDbPath, netName string) error {
@@ -79,7 +73,6 @@ func upgradeDBPathNet(
 	}
 	return nil
 }
-
 // upgradeDBPaths moves the databases from their locations prior to pod version 0.2.0 to their new locations.
 func upgradeDBPaths() error {
 	// Prior to version 0.2.0, the databases were in the "db" directory and their names were suffixed by "testnet" and "regtest" for their respective networks.  Check for the old database and update it to the new path introduced with version 0.2.0 accordingly.
@@ -90,7 +83,6 @@ func upgradeDBPaths() error {
 	// Remove the old db directory.
 	return os.RemoveAll(oldDbRoot)
 }
-
 // upgradeDataPaths moves the application data from its location prior to pod version 0.3.3 to its new location.
 func upgradeDataPaths() error {
 	// No need to migrate if the old and new home paths are the same.

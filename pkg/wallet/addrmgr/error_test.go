@@ -1,17 +1,13 @@
 package waddrmgr_test
-
 import (
 	"errors"
 	"fmt"
 	"testing"
-
 	waddrmgr "git.parallelcoin.io/dev/9/pkg/wallet/addrmgr"
 )
-
 // TestErrorCodeStringer tests the stringized output for the ErrorCode type.
 func TestErrorCodeStringer(
 	t *testing.T) {
-
 	tests := []struct {
 		in   waddrmgr.ErrorCode
 		want string
@@ -40,24 +36,18 @@ func TestErrorCodeStringer(
 		{0xffff, "Unknown ErrorCode (65535)"},
 	}
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		result := test.in.String()
-
 		if result != test.want {
-
 			t.Errorf("String #%d\ngot: %s\nwant: %s", i, result,
 				test.want)
 			continue
 		}
 	}
 }
-
 // TestManagerError tests the error output for the ManagerError type.
 func TestManagerError(
 	t *testing.T) {
-
 	tests := []struct {
 		in   waddrmgr.ManagerError
 		want string
@@ -67,7 +57,6 @@ func TestManagerError(
 			waddrmgr.ManagerError{Description: "human-readable error"},
 			"human-readable error",
 		},
-
 		// Encapsulated database error.
 		{
 			waddrmgr.ManagerError{
@@ -79,7 +68,6 @@ func TestManagerError(
 			"failed to store master private key parameters: " +
 				"underlying db error",
 		},
-
 		// Encapsulated key chain error.
 		{
 			waddrmgr.ManagerError{
@@ -91,7 +79,6 @@ func TestManagerError(
 			"failed to derive extended key branch 0: underlying " +
 				"error",
 		},
-
 		// Encapsulated crypto error.
 		{
 			waddrmgr.ManagerError{
@@ -104,26 +91,19 @@ func TestManagerError(
 				"error",
 		},
 	}
-
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		result := test.in.Error()
-
 		if result != test.want {
-
 			t.Errorf("Error #%d\ngot: %s\nwant: %s", i, result,
 				test.want)
 			continue
 		}
 	}
 }
-
 // TestIsError tests the IsError func.
 func TestIsError(
 	t *testing.T) {
-
 	tests := []struct {
 		err  error
 		code waddrmgr.ErrorCode
@@ -157,13 +137,9 @@ func TestIsError(
 			exp:  false,
 		},
 	}
-
 	for i, test := range tests {
-
 		got := waddrmgr.IsError(test.err, test.code)
-
 		if got != test.exp {
-
 			t.Errorf("Test %d: got %v expected %v", i, got, test.exp)
 		}
 	}

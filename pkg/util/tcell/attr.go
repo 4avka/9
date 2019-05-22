@@ -11,13 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package tcell
-
 // AttrMask represents a mask of text attributes, apart from color.
 // Note that support for attributes may vary widely across terminals.
 type AttrMask int
-
 // Attributes are not colors, but affect the display of text.  They can
 // be combined.
 const (
@@ -28,5 +25,4 @@ const (
 	AttrDim
 	AttrNone AttrMask = 0 // Just normal text.
 )
-
 const attrAll = AttrBold | AttrBlink | AttrReverse | AttrUnderline | AttrDim

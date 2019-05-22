@@ -1,5 +1,4 @@
 package app
-
 import (
 	"fmt"
 	"math/rand"
@@ -8,21 +7,17 @@ import (
 	"regexp"
 	"strconv"
 	"time"
-
 	"git.parallelcoin.io/dev/9/cmd/def"
 	"git.parallelcoin.io/dev/9/cmd/nine"
 	"git.parallelcoin.io/dev/9/pkg/ifc"
 	"git.parallelcoin.io/dev/9/pkg/util"
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
-
 // DataDir is the folder all servers and apps in this suite use to store
 // configuration and working data
 var DataDir = filepath.Dir(util.AppDataDir("9", false))
-
 // Networks is the list of network types the node and wallet can connect to
 var Networks = []string{"mainnet", "testnet", "simnet", "regtestnet"}
-
 // NetParams stores the information required to set the parameters for the network
 var NetParams = map[string]*nine.Params{
 	"mainnet":    &nine.MainNetParams,
@@ -30,7 +25,6 @@ var NetParams = map[string]*nine.Params{
 	"simnet":     &nine.SimNetParams,
 	"regtestnet": &nine.RegressionNetParams,
 }
-
 // NewApp generates a new App using a collection of generator functions passed to it
 func NewApp(name string, g ...def.AppGenerator) (out *def.App) {
 	gen := def.AppGenerators(g)
@@ -48,9 +42,7 @@ func NewApp(name string, g ...def.AppGenerator) (out *def.App) {
 	}
 	return
 }
-
 // which is made from
-
 // Version fills the Version field of an App
 func Version(ver string) def.AppGenerator {
 	return func(ctx *def.App) {
@@ -59,28 +51,24 @@ func Version(ver string) def.AppGenerator {
 		}
 	}
 }
-
 // Tagline is a short text describing the application
 func Tagline(ver string) def.AppGenerator {
 	return func(ctx *def.App) {
 		ctx.Tagline = ver
 	}
 }
-
 // About is a longer text describing the application
 func About(ver string) def.AppGenerator {
 	return func(ctx *def.App) {
 		ctx.About = ver
 	}
 }
-
 // DefaultRunner is the command that runs when no parameters are given
 func DefaultRunner(fn func(ctx *def.App) int) def.AppGenerator {
 	return func(ctx *def.App) {
 		ctx.Default = fn
 	}
 }
-
 // Group is a collection of categories and bundles each category
 func Group(name string, g ...def.CatGenerator) def.AppGenerator {
 	G := def.CatGenerators(g)
@@ -89,7 +77,6 @@ func Group(name string, g ...def.CatGenerator) def.AppGenerator {
 		G.RunAll(ctx.Cats[name])
 	}
 }
-
 // Cmd is a collection of subcommands
 func Cmd(name string, g ...def.CommandGenerator) def.AppGenerator {
 	G := def.CommandGenerators(g)
@@ -97,9 +84,7 @@ func Cmd(name string, g ...def.CommandGenerator) def.AppGenerator {
 		ctx.Commands[name] = G.RunAll()
 	}
 }
-
 // def.Command Item Generators
-
 // Pattern is the regular expression pattern that matches the CLI args for each
 // def.Command item
 func Pattern(patt string) def.CommandGenerator {
@@ -109,28 +94,24 @@ func Pattern(patt string) def.CommandGenerator {
 		ctx.RE = regexp.MustCompile(ctx.Pattern)
 	}
 }
-
 // Short is the short help text for a def.Command
 func Short(usage string) def.CommandGenerator {
 	return func(ctx *def.Command) {
 		ctx.Short = usage
 	}
 }
-
 // Detail is the long help text for a def.Command
 func Detail(usage string) def.CommandGenerator {
 	return func(ctx *def.Command) {
 		ctx.Detail = usage
 	}
 }
-
 // Opts is the collection of valid options for a def.Command
 func Opts(opts ...string) def.CommandGenerator {
 	return func(ctx *def.Command) {
 		ctx.Opts = opts
 	}
 }
-
 // Precs is the collection of tags for items that are preferentially selected when
 // an two or more items are specified (for example, help always overrides everything)
 func Precs(precs ...string) def.CommandGenerator {
@@ -138,16 +119,13 @@ func Precs(precs ...string) def.CommandGenerator {
 		ctx.Precedent = precs
 	}
 }
-
 // Handler is the function that is called when a command is selected
 func Handler(hnd func(args []string, tokens def.Tokens, app *def.App) int) def.CommandGenerator {
 	return func(ctx *def.Command) {
 		ctx.Handler = hnd
 	}
 }
-
 // Group Item Generators
-
 // File is an item storing a filename
 func File(name string, g ...def.RowGenerator) def.CatGenerator {
 	G := def.RowGenerators(g)
@@ -176,7 +154,6 @@ func File(name string, g ...def.RowGenerator) def.CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 // Dir is an item storing a directory specification
 func Dir(name string, g ...def.RowGenerator) def.CatGenerator {
 	G := def.RowGenerators(g)
@@ -205,7 +182,6 @@ func Dir(name string, g ...def.RowGenerator) def.CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 // Port is a 16 bit sized number that represents a network port number
 func Port(name string, g ...def.RowGenerator) def.CatGenerator {
 	G := def.RowGenerators(g)
@@ -233,7 +209,6 @@ func Port(name string, g ...def.RowGenerator) def.CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 // Enable is a boolean item that is false by default
 func Enable(name string, g ...def.RowGenerator) def.CatGenerator {
 	G := def.RowGenerators(g)
@@ -262,7 +237,6 @@ func Enable(name string, g ...def.RowGenerator) def.CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 // Enabled is an boolean item that is true by default
 func Enabled(name string, g ...def.RowGenerator) def.CatGenerator {
 	G := def.RowGenerators(g)
@@ -291,7 +265,6 @@ func Enabled(name string, g ...def.RowGenerator) def.CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 // Int stores an integer number (signed integer width of current platform's processor)
 func Int(name string, g ...def.RowGenerator) def.CatGenerator {
 	G := def.RowGenerators(g)
@@ -318,7 +291,6 @@ func Int(name string, g ...def.RowGenerator) def.CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 // Tag is basically just a string that can store any string value
 func Tag(name string, g ...def.RowGenerator) def.CatGenerator {
 	G := def.RowGenerators(g)
@@ -345,7 +317,6 @@ func Tag(name string, g ...def.RowGenerator) def.CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 // Tags is a collection of strings containing arbitrary content
 func Tags(name string, g ...def.RowGenerator) def.CatGenerator {
 	G := def.RowGenerators(g)
@@ -372,7 +343,6 @@ func Tags(name string, g ...def.RowGenerator) def.CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 // Addr is a network address specification for dialing
 func Addr(name string, defPort int, g ...def.RowGenerator) def.CatGenerator {
 	G := def.RowGenerators(g)
@@ -402,7 +372,6 @@ func Addr(name string, defPort int, g ...def.RowGenerator) def.CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 // Addrs is a collection of addresses
 func Addrs(name string, defPort int, g ...def.RowGenerator) def.CatGenerator {
 	G := def.RowGenerators(g)
@@ -429,7 +398,6 @@ func Addrs(name string, defPort int, g ...def.RowGenerator) def.CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 // Level is debug logging level specification one of a set of predefined values
 func Level(g ...def.RowGenerator) def.CatGenerator {
 	G := def.RowGenerators(g)
@@ -458,7 +426,6 @@ func Level(g ...def.RowGenerator) def.CatGenerator {
 		(*ctx)[lvl] = c
 	}
 }
-
 // Algo is a multi-item select that contains all of the different block-algorithms
 // available to mine with, as well as algorithmic selectors
 func Algo(name string, g ...def.RowGenerator) def.CatGenerator {
@@ -487,7 +454,6 @@ func Algo(name string, g ...def.RowGenerator) def.CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 // Float is a floating point number, 64 bits by default (same as JSON spec)
 func Float(name string, g ...def.RowGenerator) def.CatGenerator {
 	G := def.RowGenerators(g)
@@ -514,7 +480,6 @@ func Float(name string, g ...def.RowGenerator) def.CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 // Duration is a time library duration specification for an amount of time.
 // The value is a 64 bit integer being the number of nanoseconds for a period of time
 func Duration(name string, g ...def.RowGenerator) def.CatGenerator {
@@ -542,7 +507,6 @@ func Duration(name string, g ...def.RowGenerator) def.CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 // Net is the various types of network a blockchain server can connect to - test, main
 // and so forth
 func Net(name string, g ...def.RowGenerator) def.CatGenerator {
@@ -571,16 +535,13 @@ func Net(name string, g ...def.RowGenerator) def.CatGenerator {
 		(*ctx)[name] = c
 	}
 }
-
 // which is populated by
-
 // Usage populates the usage field for information about a config item
 func Usage(usage string) def.RowGenerator {
 	return func(ctx *def.Row) {
 		ctx.Usage = usage + " " + ctx.Usage
 	}
 }
-
 // Default sets the default value for a config item
 func Default(in interface{}) def.RowGenerator {
 	return func(ctx *def.Row) {
@@ -635,7 +596,6 @@ func Default(in interface{}) def.RowGenerator {
 				ctx.Default.Put(I)
 			}
 		case nil:
-
 		default:
 			fmt.Println("type not found", ctx.Name, reflect.TypeOf(in))
 			return
@@ -643,7 +603,6 @@ func Default(in interface{}) def.RowGenerator {
 		// ctx.Value.Put(nil)
 	}
 }
-
 // Min attaches to the validator a test that enforces a minimum
 func Min(min int) def.RowGenerator {
 	return func(ctx *def.Row) {
@@ -677,7 +636,6 @@ func Min(min int) def.RowGenerator {
 		}
 	}
 }
-
 // Max attaches to the validator a test that enforces a maximum
 func Max(max int) def.RowGenerator {
 	return func(ctx *def.Row) {
@@ -711,7 +669,6 @@ func Max(max int) def.RowGenerator {
 		}
 	}
 }
-
 // RandomString generates a random number and converts to base32 for
 // a default random password of some number of characters
 func RandomString(n int) def.RowGenerator {
@@ -737,7 +694,6 @@ func RandomString(n int) def.RowGenerator {
 			cache >>= letterIdxBits
 			remain--
 		}
-
 		sb := string(b)
 		ctx.Value = ctx.Value.Put(sb)
 	}

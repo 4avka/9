@@ -1,5 +1,4 @@
 package log
-
 import (
 	"bytes"
 	"fmt"
@@ -12,26 +11,19 @@ import (
 	"sync/atomic"
 	"time"
 )
-
 // defaultFlags specifies changes to the default logger behavior.  It is set
 // during package init and configured using the LOGFLAGS environment variable.
 // New logger backends can override these default flags using WithFlags.
 var defaultFlags uint32
-
 // Flags to modify Backend's behavior.
 const (
-
 	// Llongfile modifies the logger output to include full path and line number
-
 	// of the logging callsite, e.g. /a/b/c/main.go:123.
 	Llongfile uint32 = 1 << iota
-
 	// Lshortfile modifies the logger output to include filename and line number
-
 	// of the logging callsite, e.g. main.go:123.  Overrides Llongfile.
 	Lshortfile
 )
-
 var (
 	colorOff     = []byte("\033[0m")
 	colorRed     = []byte("\033[0;31m")
@@ -50,15 +42,11 @@ var (
 	colorGrayB   = []byte("\033[0;37;1m")
 	styleBold    = []byte("\033[1m")
 )
-
 // Read logger flags from the LOGFLAGS environment variable.  Multiple flags can
 // be set at once, separated by commas.
 func init() {
-
 	for _, f := range strings.Split(os.Getenv("LOGFLAGS"), ",") {
-
 		switch f {
-
 		case "longfile":
 			defaultFlags |= Llongfile
 		case "shortfile":
@@ -66,12 +54,9 @@ func init() {
 		}
 	}
 }
-
 // Level is the level at which a logger is configured.  All messages sent
 // to a level which is below the current level are filtered.
-
 type Level uint32
-
 // Level constants.
 const (
 	LevelTrace Level = iota
@@ -82,19 +67,14 @@ const (
 	LevelCritical
 	LevelOff
 )
-
 // levelStrs defines the human-readable names for each logging level.
 var levelStrs = [...]string{"TRC", "DBG", "INF", "WRN", "ERR", "CRT", "OFF"}
-
 // LevelFromString returns a level based on the input string s.  If the input
 // can't be interpreted as a valid log level, the info level and false is
 // returned.
 func LevelFromString(
-
 	s string) (l Level, ok bool) {
-
 	switch strings.ToLower(s) {
-
 	case "trace", "trc":
 		return LevelTrace, true
 	case "debug", "dbg":
@@ -113,55 +93,39 @@ func LevelFromString(
 		return LevelInfo, false
 	}
 }
-
 // String returns the tag of the logger used in log messages, or "OFF" if
 // the level will not produce any log output.
 func (l Level) String() string {
-
 	if l >= LevelOff {
-
 		return "OFF"
 	}
 	return levelStrs[l]
 }
-
 // NewBackend creates a logger backend from a Writer.
 func NewBackend(
-
 	w io.Writer, opts ...BackendOption) *Backend {
-
 	b := &Backend{w: w, flag: defaultFlags}
-
 	for _, o := range opts {
-
 		o(b)
 	}
 	return b
 }
-
 // Backend is a logging backend.  Subsystems created from the backend write to
 // the backend's Writer.  Backend provides atomic writes to the Writer from all
 // subsystems.
-
 type Backend struct {
 	w    io.Writer
 	mu   sync.Mutex // ensures atomic writes
 	flag uint32
 }
-
 // BackendOption is a function used to modify the behavior of a Backend.
-
 type BackendOption func(b *Backend)
-
 // WithFlags configures a Backend to use the specified flags rather than using
 // the package's defaults as determined through the LOGFLAGS environment
 // variable.
 func WithFlags(
-
 	flags uint32) BackendOption {
-
 	return func(b *Backend) {
-
 		b.flag = flags
 	}
 }

@@ -1,112 +1,80 @@
 package wire
-
 import (
 	"bytes"
 	"io"
 	"reflect"
 	"testing"
-
 	chainhash "git.parallelcoin.io/dev/9/pkg/chain/hash"
 	"github.com/davecgh/go-spew/spew"
 )
-
 // TestInv tests the MsgInv API.
 func TestInv(
 	t *testing.T) {
-
 	pver := ProtocolVersion
-
 	// Ensure the command is expected value.
 	wantCmd := "inv"
 	msg := NewMsgInv()
-
 	if cmd := msg.Command(); cmd != wantCmd {
-
 		t.Errorf("NewMsgInv: wrong command - got %v want %v",
 			cmd, wantCmd)
 	}
-
 	// Ensure max payload is expected value for latest protocol version. Num inventory vectors (varInt) + max allowed inventory vectors.
 	wantPayload := uint32(1800009)
 	maxPayload := msg.MaxPayloadLength(pver)
-
 	if maxPayload != wantPayload {
-
 		t.Errorf("MaxPayloadLength: wrong max payload length for "+
 			"protocol version %d - got %v, want %v", pver,
 			maxPayload, wantPayload)
 	}
-
 	// Ensure inventory vectors are added properly.
 	hash := chainhash.Hash{}
 	iv := NewInvVect(InvTypeBlock, &hash)
 	err := msg.AddInvVect(iv)
-
 	if err != nil {
-
 		t.Errorf("AddInvVect: %v", err)
 	}
-
 	if msg.InvList[0] != iv {
-
 		t.Errorf("AddInvVect: wrong invvect added - got %v, want %v",
 			spew.Sprint(msg.InvList[0]), spew.Sprint(iv))
 	}
-
 	// Ensure adding more than the max allowed inventory vectors per message returns an error.
-
 	for i := 0; i < MaxInvPerMsg; i++ {
-
 		err = msg.AddInvVect(iv)
 	}
-
 	if err == nil {
-
 		t.Errorf("AddInvVect: expected error on too many inventory " +
 			"vectors not received")
 	}
-
 	// Ensure creating the message with a size hint larger than the max works as expected.
 	msg = NewMsgInvSizeHint(MaxInvPerMsg + 1)
 	wantCap := MaxInvPerMsg
-
 	if cap(msg.InvList) != wantCap {
-
 		t.Errorf("NewMsgInvSizeHint: wrong cap for size hint - "+
 			"got %v, want %v", cap(msg.InvList), wantCap)
 	}
 }
-
 // TestInvWire tests the MsgInv wire encode and decode for various numbers of inventory vectors and protocol versions.
 func TestInvWire(
 	t *testing.T) {
-
 	// Block 203707 hash.
 	hashStr := "3264bc2ac36a60840790ba1d475d01367e7c723da941069e9dc"
 	blockHash, err := chainhash.NewHashFromStr(hashStr)
-
 	if err != nil {
-
 		t.Errorf("NewHashFromStr: %v", err)
 	}
-
 	// Transaction 1 of Block 203707 hash.
 	hashStr = "d28a3dc7392bf00a9855ee93dd9a81eff82a2c4fe57fbd42cfe71b487accfaf0"
 	txHash, err := chainhash.NewHashFromStr(hashStr)
-
 	if err != nil {
-
 		t.Errorf("NewHashFromStr: %v", err)
 	}
 	iv := NewInvVect(InvTypeBlock, blockHash)
 	iv2 := NewInvVect(InvTypeTx, txHash)
-
 	// Empty inv message.
 	NoInv := NewMsgInv()
 	NoInvEncoded := []byte{
 		0x00, // Varint for number of inventory vectors
 	}
-
 	// Inv message with multiple inventory vectors.
 	MultiInv := NewMsgInv()
 	MultiInv.AddInvVect(iv)
@@ -213,21 +181,15 @@ func TestInvWire(
 		},
 	}
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		// Encode the message to wire format.
 		var buf bytes.Buffer
 		err := test.in.BtcEncode(&buf, test.pver, test.enc)
-
 		if err != nil {
-
 			t.Errorf("BtcEncode #%d error %v", i, err)
 			continue
 		}
-
 		if !bytes.Equal(buf.Bytes(), test.buf) {
-
 			t.Errorf("BtcEncode #%d\n got: %s want: %s", i,
 				spew.Sdump(buf.Bytes()), spew.Sdump(test.buf))
 			continue
@@ -236,39 +198,29 @@ func TestInvWire(
 		var msg MsgInv
 		rbuf := bytes.NewReader(test.buf)
 		err = msg.BtcDecode(rbuf, test.pver, test.enc)
-
 		if err != nil {
-
 			t.Errorf("BtcDecode #%d error %v", i, err)
 			continue
 		}
-
 		if !reflect.DeepEqual(&msg, test.out) {
-
 			t.Errorf("BtcDecode #%d\n got: %s want: %s", i,
 				spew.Sdump(msg), spew.Sdump(test.out))
 			continue
 		}
 	}
 }
-
 // TestInvWireErrors performs negative tests against wire encode and decode of MsgInv to confirm error paths work correctly.
 func TestInvWireErrors(
 	t *testing.T) {
-
 	pver := ProtocolVersion
 	wireErr := &MessageError{}
-
 	// Block 203707 hash.
 	hashStr := "3264bc2ac36a60840790ba1d475d01367e7c723da941069e9dc"
 	blockHash, err := chainhash.NewHashFromStr(hashStr)
-
 	if err != nil {
-
 		t.Errorf("NewHashFromStr: %v", err)
 	}
 	iv := NewInvVect(InvTypeBlock, blockHash)
-
 	// Base inv message used to induce errors.
 	baseInv := NewMsgInv()
 	baseInv.AddInvVect(iv)
@@ -280,12 +232,9 @@ func TestInvWireErrors(
 		0x79, 0x40, 0x08, 0xa6, 0x36, 0xac, 0xc2, 0x4b,
 		0x26, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // Block 203707 hash
 	}
-
 	// Inv message that forces an error by having more than the max allowed inv vectors.
 	maxInv := NewMsgInv()
-
 	for i := 0; i < MaxInvPerMsg; i++ {
-
 		maxInv.AddInvVect(iv)
 	}
 	maxInv.InvList = append(maxInv.InvList, iv)
@@ -309,25 +258,18 @@ func TestInvWireErrors(
 		{maxInv, maxInvEncoded, pver, BaseEncoding, 3, wireErr, wireErr},
 	}
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		// Encode to wire format.
 		w := newFixedWriter(test.max)
 		err := test.in.BtcEncode(w, test.pver, test.enc)
-
 		if reflect.TypeOf(err) != reflect.TypeOf(test.writeErr) {
-
 			t.Errorf("BtcEncode #%d wrong error got: %v, want: %v",
 				i, err, test.writeErr)
 			continue
 		}
 		// For errors which are not of type MessageError, check them for equality.
-
 		if _, ok := err.(*MessageError); !ok {
-
 			if err != test.writeErr {
-
 				t.Errorf("BtcEncode #%d wrong error got: %v, "+
 					"want: %v", i, err, test.writeErr)
 				continue
@@ -337,19 +279,14 @@ func TestInvWireErrors(
 		var msg MsgInv
 		r := newFixedReader(test.max, test.buf)
 		err = msg.BtcDecode(r, test.pver, test.enc)
-
 		if reflect.TypeOf(err) != reflect.TypeOf(test.readErr) {
-
 			t.Errorf("BtcDecode #%d wrong error got: %v, want: %v",
 				i, err, test.readErr)
 			continue
 		}
 		// For errors which are not of type MessageError, check them for equality.
-
 		if _, ok := err.(*MessageError); !ok {
-
 			if err != test.readErr {
-
 				t.Errorf("BtcDecode #%d wrong error got: %v, "+
 					"want: %v", i, err, test.readErr)
 				continue

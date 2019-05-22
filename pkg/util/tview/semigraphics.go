@@ -1,7 +1,5 @@
 package tview
-
 import "git.parallelcoin.io/dev/9/pkg/util/tcell"
-
 // Semigraphics provides an easy way to access unicode characters for drawing.
 //
 // Named like the unicode characters, 'Semigraphics'-prefix used if unicode block
@@ -9,7 +7,6 @@ import "git.parallelcoin.io/dev/9/pkg/util/tcell"
 const (
 	// Block: General Punctation U+2000-U+206F (http://unicode.org/charts/PDF/U2000.pdf)
 	SemigraphicsHorizontalEllipsis rune = '\u2026' // …
-
 	// Block: Box Drawing U+2500-U+257F (http://unicode.org/charts/PDF/U2500.pdf)
 	BoxDrawingsLightHorizontal                    rune = '\u2500' // ─
 	BoxDrawingsHeavyHorizontal                    rune = '\u2501' // ━
@@ -140,7 +137,6 @@ const (
 	BoxDrawingsHeavyLeftAndLightRight             rune = '\u257e' // ╾
 	BoxDrawingsHeavyUpAndLightDown                rune = '\u257f' // ╿
 )
-
 // SemigraphicJoints is a map for joining semigraphic (or otherwise) runes.
 // So far only light lines are supported but if you want to change the border
 // styling you need to provide the joints, too.
@@ -168,7 +164,6 @@ var SemigraphicJoints = map[string]rune{
 	string([]rune{BoxDrawingsLightHorizontal, BoxDrawingsLightUpAndHorizontal}): BoxDrawingsLightUpAndHorizontal,
 	// (─) + (┼) = (┼)
 	string([]rune{BoxDrawingsLightHorizontal, BoxDrawingsLightVerticalAndHorizontal}): BoxDrawingsLightVerticalAndHorizontal,
-
 	// (│) + (┌) = (├)
 	string([]rune{BoxDrawingsLightVertical, BoxDrawingsLightDownAndRight}): BoxDrawingsLightVerticalAndRight,
 	// (│) + (┐) = (┤)
@@ -187,7 +182,6 @@ var SemigraphicJoints = map[string]rune{
 	string([]rune{BoxDrawingsLightVertical, BoxDrawingsLightUpAndHorizontal}): BoxDrawingsLightVerticalAndHorizontal,
 	// (│) + (┼) = (┼)
 	string([]rune{BoxDrawingsLightVertical, BoxDrawingsLightVerticalAndHorizontal}): BoxDrawingsLightVerticalAndHorizontal,
-
 	// (┌) + (┐) = (┬)
 	string([]rune{BoxDrawingsLightDownAndRight, BoxDrawingsLightDownAndLeft}): BoxDrawingsLightDownAndHorizontal,
 	// (┌) + (└) = (├)
@@ -204,7 +198,6 @@ var SemigraphicJoints = map[string]rune{
 	string([]rune{BoxDrawingsLightDownAndRight, BoxDrawingsLightUpAndHorizontal}): BoxDrawingsLightVerticalAndHorizontal,
 	// (┌) + (┴) = (┼)
 	string([]rune{BoxDrawingsLightDownAndRight, BoxDrawingsLightVerticalAndHorizontal}): BoxDrawingsLightVerticalAndHorizontal,
-
 	// (┐) + (└) = (┼)
 	string([]rune{BoxDrawingsLightDownAndLeft, BoxDrawingsLightUpAndRight}): BoxDrawingsLightVerticalAndHorizontal,
 	// (┐) + (┘) = (┤)
@@ -219,7 +212,6 @@ var SemigraphicJoints = map[string]rune{
 	string([]rune{BoxDrawingsLightDownAndLeft, BoxDrawingsLightUpAndHorizontal}): BoxDrawingsLightVerticalAndHorizontal,
 	// (┐) + (┼) = (┼)
 	string([]rune{BoxDrawingsLightDownAndLeft, BoxDrawingsLightVerticalAndHorizontal}): BoxDrawingsLightVerticalAndHorizontal,
-
 	// (└) + (┘) = (┴)
 	string([]rune{BoxDrawingsLightUpAndRight, BoxDrawingsLightUpAndLeft}): BoxDrawingsLightUpAndHorizontal,
 	// (└) + (├) = (├)
@@ -232,7 +224,6 @@ var SemigraphicJoints = map[string]rune{
 	string([]rune{BoxDrawingsLightUpAndRight, BoxDrawingsLightUpAndHorizontal}): BoxDrawingsLightUpAndHorizontal,
 	// (└) + (┼) = (┼)
 	string([]rune{BoxDrawingsLightUpAndRight, BoxDrawingsLightVerticalAndHorizontal}): BoxDrawingsLightVerticalAndHorizontal,
-
 	// (┘) + (├) = (┼)
 	string([]rune{BoxDrawingsLightUpAndLeft, BoxDrawingsLightVerticalAndRight}): BoxDrawingsLightVerticalAndHorizontal,
 	// (┘) + (┤) = (┤)
@@ -243,7 +234,6 @@ var SemigraphicJoints = map[string]rune{
 	string([]rune{BoxDrawingsLightUpAndLeft, BoxDrawingsLightUpAndHorizontal}): BoxDrawingsLightUpAndHorizontal,
 	// (┘) + (┼) = (┼)
 	string([]rune{BoxDrawingsLightUpAndLeft, BoxDrawingsLightVerticalAndHorizontal}): BoxDrawingsLightVerticalAndHorizontal,
-
 	// (├) + (┤) = (┼)
 	string([]rune{BoxDrawingsLightVerticalAndRight, BoxDrawingsLightVerticalAndLeft}): BoxDrawingsLightVerticalAndHorizontal,
 	// (├) + (┬) = (┼)
@@ -252,23 +242,19 @@ var SemigraphicJoints = map[string]rune{
 	string([]rune{BoxDrawingsLightVerticalAndRight, BoxDrawingsLightUpAndHorizontal}): BoxDrawingsLightVerticalAndHorizontal,
 	// (├) + (┼) = (┼)
 	string([]rune{BoxDrawingsLightVerticalAndRight, BoxDrawingsLightVerticalAndHorizontal}): BoxDrawingsLightVerticalAndHorizontal,
-
 	// (┤) + (┬) = (┼)
 	string([]rune{BoxDrawingsLightVerticalAndLeft, BoxDrawingsLightDownAndHorizontal}): BoxDrawingsLightVerticalAndHorizontal,
 	// (┤) + (┴) = (┼)
 	string([]rune{BoxDrawingsLightVerticalAndLeft, BoxDrawingsLightUpAndHorizontal}): BoxDrawingsLightVerticalAndHorizontal,
 	// (┤) + (┼) = (┼)
 	string([]rune{BoxDrawingsLightVerticalAndLeft, BoxDrawingsLightVerticalAndHorizontal}): BoxDrawingsLightVerticalAndHorizontal,
-
 	// (┬) + (┴) = (┼)
 	string([]rune{BoxDrawingsLightDownAndHorizontal, BoxDrawingsLightUpAndHorizontal}): BoxDrawingsLightVerticalAndHorizontal,
 	// (┬) + (┼) = (┼)
 	string([]rune{BoxDrawingsLightDownAndHorizontal, BoxDrawingsLightVerticalAndHorizontal}): BoxDrawingsLightVerticalAndHorizontal,
-
 	// (┴) + (┼) = (┼)
 	string([]rune{BoxDrawingsLightUpAndHorizontal, BoxDrawingsLightVerticalAndHorizontal}): BoxDrawingsLightVerticalAndHorizontal,
 }
-
 // PrintJoinedSemigraphics prints a semigraphics rune into the screen at the given
 // position with the given color, joining it with any existing semigraphics
 // rune. Background colors are preserved. At this point, only regular single
@@ -276,7 +262,6 @@ var SemigraphicJoints = map[string]rune{
 func PrintJoinedSemigraphics(screen tcell.Screen, x, y int, ch rune, color tcell.Color) {
 	previous, _, style, _ := screen.GetContent(x, y)
 	style = style.Foreground(color)
-
 	// What's the resulting rune?
 	var result rune
 	if ch == previous {
@@ -290,7 +275,6 @@ func PrintJoinedSemigraphics(screen tcell.Screen, x, y int, ch rune, color tcell
 	if result == 0 {
 		result = ch
 	}
-
 	// We only print something if we have something.
 	screen.SetContent(x, y, result, nil, style)
 }

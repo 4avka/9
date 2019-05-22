@@ -11,14 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package tcell
-
 import (
 	"github.com/lucasb-eyer/go-colorful"
 	"math"
 )
-
 // FindColor attempts to find a given color, or the best match possible for it,
 // from the palette given.  This is an expensive operation, so results should
 // be cached by the caller.

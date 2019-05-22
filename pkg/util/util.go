@@ -1,5 +1,4 @@
 package util
-
 import (
 	"net"
 	"os"
@@ -7,7 +6,6 @@ import (
 	"runtime"
 	"strings"
 )
-
 // MinUint32 is a helper function to return the minimum of two uint32s. This avoids a math import and the need to cast to floats.
 func MinUint32(a, b uint32) uint32 {
 	if a < b {
@@ -15,11 +13,9 @@ func MinUint32(a, b uint32) uint32 {
 	}
 	return b
 }
-
 func isWindows() bool {
 	return runtime.GOOS == "windows"
 }
-
 // EnsureDir checks a file could be written to a path, creates the directories as needed
 func EnsureDir(fileName string) bool {
 	dirName := filepath.Dir(fileName)
@@ -32,20 +28,17 @@ func EnsureDir(fileName string) bool {
 	}
 	return false
 }
-
 // FileExists reports whether the named file or directory exists.
 func FileExists(filePath string) bool {
 	_, err := os.Stat(filePath)
 	return err == nil
 }
-
 // CleanAndExpandPath expands environment variables and leading ~ in the passed path, cleans the result, and returns it.
 func CleanAndExpandPath(path, datadir string) string {
 	// Expand initial ~ to OS specific home directory.
 	homeDir := filepath.Dir(AppDataDir("9", false))
 	if strings.HasPrefix(path, "~") {
 		return strings.Replace(path, "~", homeDir, 1)
-
 	}
 	if strings.HasPrefix(path, "./") {
 		// explicitly prefix is this must be a relative path
@@ -60,7 +53,6 @@ func CleanAndExpandPath(path, datadir string) string {
 	path = filepath.Clean(os.ExpandEnv(path))
 	return path
 }
-
 // NormalizeAddress returns addr with the passed default port appended if there is not already a port specified.
 func NormalizeAddress(addr, defaultPort string) string {
 	_, _, err := net.SplitHostPort(addr)
@@ -69,7 +61,6 @@ func NormalizeAddress(addr, defaultPort string) string {
 	}
 	return addr
 }
-
 // NormalizeAddresses returns a new slice with all the passed peer addresses normalized with the given default port, and all duplicates removed.
 func NormalizeAddresses(addrs []string, defaultPort string) []string {
 	for i, addr := range addrs {
@@ -77,7 +68,6 @@ func NormalizeAddresses(addrs []string, defaultPort string) []string {
 	}
 	return RemoveDuplicateAddresses(addrs)
 }
-
 // RemoveDuplicateAddresses returns a new slice with all duplicate entries in addrs removed.
 func RemoveDuplicateAddresses(addrs []string) []string {
 	result := make([]string, 0, len(addrs))
@@ -90,7 +80,6 @@ func RemoveDuplicateAddresses(addrs []string) []string {
 	}
 	return result
 }
-
 func Intersection(a, b []string) (out []string) {
 	for _, x := range a {
 		for _, y := range b {
@@ -101,12 +90,10 @@ func Intersection(a, b []string) (out []string) {
 	}
 	return
 }
-
 func Uniq(elements []string) []string {
 	// Use map to record duplicates as we find them.
 	encountered := map[string]bool{}
 	result := []string{}
-
 	for v := range elements {
 		if encountered[elements[v]] == true {
 			// Do not add duplicate.

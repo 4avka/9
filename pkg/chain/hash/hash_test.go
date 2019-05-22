@@ -1,11 +1,9 @@
 package chainhash
-
 import (
 	"bytes"
 	"encoding/hex"
 	"testing"
 )
-
 // mainNetGenesisHash is the hash of the first block in the block chain for the main network (genesis block).
 var mainNetGenesisHash = Hash([HashSize]byte{ // Make go vet happy.
 	0x6f, 0xe2, 0x8c, 0x0a, 0xb6, 0xf1, 0xb3, 0x72,
@@ -13,7 +11,6 @@ var mainNetGenesisHash = Hash([HashSize]byte{ // Make go vet happy.
 	0x93, 0x1e, 0x83, 0x65, 0xe1, 0x5a, 0x08, 0x9c,
 	0x68, 0xd6, 0x19, 0x00, 0x00, 0x00, 0x00, 0x00,
 })
-
 // TestHash tests the Hash API.
 func TestHash(
 	t *testing.T) {
@@ -77,7 +74,6 @@ func TestHash(
 		t.Errorf("NewHash: failed to received expected err - got: nil")
 	}
 }
-
 // TestHashString  tests the stringized output for hashes.
 func TestHashString(t *testing.T) {
 	// Block 100000 hash.
@@ -94,7 +90,6 @@ func TestHashString(t *testing.T) {
 			hashStr, wantStr)
 	}
 }
-
 // TestNewHashFromStr executes tests against the NewHashFromStr function.
 func TestNewHashFromStr(
 	t *testing.T) {

@@ -1,11 +1,8 @@
 package libs
-
 import (
 	"io/ioutil"
 )
-
 type VIcons map[string]string
-
 var icoLogo, _ = ioutil.ReadFile("./gui/assets/icons/IcoLogo.svg")
 var icoReceive, _ = ioutil.ReadFile("./gui/assets/icons/IcoReceive.svg")
 var icoReceived, _ = ioutil.ReadFile("./gui/assets/icons/IcoReceived.svg")
@@ -25,9 +22,7 @@ var icoLoading, _ = ioutil.ReadFile("./gui/assets/icons/IcoLoading.svg")
 var icoAddressBook, _ = ioutil.ReadFile("./gui/assets/icons/IcoAddressBook.svg")
 var icoUnconfirmed, _ = ioutil.ReadFile("./gui/assets/icons/IcoUnconfirmed.svg")
 var icoTxNumber, _ = ioutil.ReadFile("./gui/assets/icons/IcoTxNumber.svg")
-
 var VIC VIcons = VIcons{
-
 	"logo":        string(icoLogo),
 	"overview":    string(icoOverview),
 	"send":        string(icoSend),

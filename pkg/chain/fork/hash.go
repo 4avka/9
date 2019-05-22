@@ -1,9 +1,7 @@
 package fork
-
 import (
 	"crypto/sha256"
 	"io"
-
 	"ekyu.moe/cryptonight"
 	chainhash "git.parallelcoin.io/dev/9/pkg/chain/hash"
 	"github.com/aead/skein"
@@ -17,13 +15,11 @@ import (
 	"golang.org/x/crypto/blake2s"
 	"golang.org/x/crypto/scrypt"
 )
-
 // Argon2i takes bytes, generates a Lyra2REv2 hash as salt, generates an argon2i key
 func Argon2i(
 	bytes []byte) []byte {
 	return argon2.IDKey(Lyra2REv2(bytes), bytes, 1, 32*1024, 1, 32)
 }
-
 // Blake14lr takes bytes and returns a blake14lr 256 bit hash
 func Blake14lr(
 	bytes []byte) []byte {
@@ -31,27 +27,23 @@ func Blake14lr(
 	_, _ = a.Write(bytes)
 	return a.Sum(nil)
 }
-
 // Blake2b takes bytes and returns a blake2b 256 bit hash
 func Blake2b(
 	bytes []byte) []byte {
 	b := blake2b.Sum256(bytes)
 	return b[:]
 }
-
 // Blake2s takes bytes and returns a blake2s 256 bit hash
 func Blake2s(
 	bytes []byte) []byte {
 	b := blake2s.Sum256(bytes)
 	return b[:]
 }
-
 // Cryptonight7v2 takes bytes and returns a cryptonight 7 v2 256 bit hash
 func Cryptonight7v2(
 	bytes []byte) []byte {
 	return cryptonight.Sum(bytes, 2)
 }
-
 // Hash computes the hash of bytes using the named hash
 func Hash(
 	bytes []byte, name string, height int32) (out chainhash.Hash) {
@@ -97,7 +89,6 @@ func Hash(
 	}
 	return
 }
-
 // Keccak takes bytes and returns a keccak (sha-3) 256 bit hash
 func Keccak(bytes []byte) []byte {
 	k := keccak.New256()
@@ -105,20 +96,17 @@ func Keccak(bytes []byte) []byte {
 	_, _ = k.Write(bytes)
 	return bytes
 }
-
 // Lyra2REv2 takes bytes and returns a lyra2rev2 256 bit hash
 func Lyra2REv2(bytes []byte) []byte {
 	bytes, _ = lyra2rev2.Sum(bytes)
 	return bytes
 }
-
 // SHA256D takes bytes and returns a double SHA256 hash
 func SHA256D(bytes []byte) []byte {
 	h := sha256.Sum256(bytes)
 	h = sha256.Sum256(h[:])
 	return h[:]
 }
-
 // Scrypt takes bytes and returns a scrypt 256 bit hash
 func Scrypt(bytes []byte) []byte {
 	b := bytes
@@ -135,19 +123,16 @@ func Scrypt(bytes []byte) []byte {
 	copy(o, dk)
 	return o
 }
-
 // Skein takes bytes and returns a skein 256 bit hash
 func Skein(bytes []byte) []byte {
 	h := skein.New256(nil)
 	_, _ = io.WriteString(h, string(bytes))
 	return bytes
 }
-
 // Stribog takes bytes and returns a double GOST Stribog 256 bit hash
 func Stribog(bytes []byte) []byte {
 	return gost.Hash(bytes, "256")
 }
-
 // X11 takes bytes and returns an x11 256 bit hash
 func X11(bytes []byte) []byte {
 	o := [32]byte{}

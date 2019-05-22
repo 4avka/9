@@ -1,3 +1,5 @@
+// +build test
+package bdb_test
 // This file intended to be copied into each backend driver directory.  Each
 // driver should have their own driver_test.go file which creates a database and
 // invokes the testInterface function in this file to ensure the driver properly
@@ -5,20 +7,14 @@
 //
 // NOTE: When copying this file into the backend driver folder, the package name
 // will need to be changed accordingly.
-
-package bdb_test
-
 import (
 	"os"
 	"testing"
-
-	"git.parallelcoin.io/dev/9/pkg/walletdb/walletdbtest"
+	"git.parallelcoin.io/dev/9/pkg/wallet/walletdbtest"
 )
-
 // TestInterface performs all interfaces tests for this database driver.
 func TestInterface(
 	t *testing.T) {
-
 	dbPath := "interfacetest.db"
 	defer os.RemoveAll(dbPath)
 	walletdbtest.TestInterface(t, dbType, dbPath)

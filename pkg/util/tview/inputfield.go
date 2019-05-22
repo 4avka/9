@@ -1,14 +1,11 @@
 package tview
-
 import (
 	"math"
 	"regexp"
 	"strings"
 	"unicode/utf8"
-
 	"git.parallelcoin.io/dev/9/pkg/util/tcell"
 )
-
 // InputField is a one-line box (three lines if there is a title) where the
 // user can enter text. Use SetAcceptanceFunc() to accept or reject input,
 // SetChangedFunc() to listen for changes, and SetMaskCharacter() to hide input
@@ -31,62 +28,45 @@ import (
 // See https://git.parallelcoin.io/dev/9/pkg/util/tview/wiki/InputField for an example.
 type InputField struct {
 	*Box
-
 	// The text that was entered.
 	text string
-
 	// The text to be displayed before the input area.
 	label string
-
 	// The text to be displayed in the input area when "text" is empty.
 	placeholder string
-
 	// The label color.
 	labelColor tcell.Color
-
 	// The background color of the input area.
 	fieldBackgroundColor tcell.Color
-
 	// The text color of the input area.
 	fieldTextColor tcell.Color
-
 	// The text color of the placeholder.
 	placeholderTextColor tcell.Color
-
 	// The screen width of the label area. A value of 0 means use the width of
 	// the label text.
 	labelWidth int
-
 	// The screen width of the input area. A value of 0 means extend as much as
 	// possible.
 	fieldWidth int
-
 	// A character to mask entered text (useful for password fields). A value of 0
 	// disables masking.
 	maskCharacter rune
-
 	// The cursor position as a byte index into the text string.
 	cursorPos int
-
 	// The number of bytes of the text string skipped ahead while drawing.
 	offset int
-
 	// An optional function which may reject the last character that was entered.
 	accept func(text string, ch rune) bool
-
 	// An optional function which is called when the input has changed.
 	changed func(text string)
-
 	// An optional function which is called when the user indicated that they
 	// are done entering text. The key which was pressed is provided (tab,
 	// shift-tab, enter, or escape).
 	done func(tcell.Key)
-
 	// A callback function set by the Form class and called when the user leaves
 	// this form item.
 	finished func(tcell.Key)
 }
-
 // NewInputField returns a new input field.
 func NewInputField() *InputField {
 	return &InputField{
@@ -97,7 +77,6 @@ func NewInputField() *InputField {
 		placeholderTextColor: Styles.ContrastSecondaryTextColor,
 	}
 }
-
 // SetText sets the current text of the input field.
 func (i *InputField) SetText(text string) *InputField {
 	i.text = text
@@ -107,60 +86,50 @@ func (i *InputField) SetText(text string) *InputField {
 	}
 	return i
 }
-
 // GetText returns the current text of the input field.
 func (i *InputField) GetText() string {
 	return i.text
 }
-
 // SetLabel sets the text to be displayed before the input area.
 func (i *InputField) SetLabel(label string) *InputField {
 	i.label = label
 	return i
 }
-
 // GetLabel returns the text to be displayed before the input area.
 func (i *InputField) GetLabel() string {
 	return i.label
 }
-
 // SetLabelWidth sets the screen width of the label. A value of 0 will cause the
 // primitive to use the width of the label string.
 func (i *InputField) SetLabelWidth(width int) *InputField {
 	i.labelWidth = width
 	return i
 }
-
 // SetPlaceholder sets the text to be displayed when the input text is empty.
 func (i *InputField) SetPlaceholder(text string) *InputField {
 	i.placeholder = text
 	return i
 }
-
 // SetLabelColor sets the color of the label.
 func (i *InputField) SetLabelColor(color tcell.Color) *InputField {
 	i.labelColor = color
 	return i
 }
-
 // SetFieldBackgroundColor sets the background color of the input area.
 func (i *InputField) SetFieldBackgroundColor(color tcell.Color) *InputField {
 	i.fieldBackgroundColor = color
 	return i
 }
-
 // SetFieldTextColor sets the text color of the input area.
 func (i *InputField) SetFieldTextColor(color tcell.Color) *InputField {
 	i.fieldTextColor = color
 	return i
 }
-
 // SetPlaceholderTextColor sets the text color of placeholder text.
 func (i *InputField) SetPlaceholderTextColor(color tcell.Color) *InputField {
 	i.placeholderTextColor = color
 	return i
 }
-
 // SetFormAttributes sets attributes shared by all form items.
 func (i *InputField) SetFormAttributes(labelWidth int, labelColor, bgColor, fieldTextColor, fieldBgColor tcell.Color) FormItem {
 	i.labelWidth = labelWidth
@@ -170,26 +139,22 @@ func (i *InputField) SetFormAttributes(labelWidth int, labelColor, bgColor, fiel
 	i.fieldBackgroundColor = fieldBgColor
 	return i
 }
-
 // SetFieldWidth sets the screen width of the input area. A value of 0 means
 // extend as much as possible.
 func (i *InputField) SetFieldWidth(width int) *InputField {
 	i.fieldWidth = width
 	return i
 }
-
 // GetFieldWidth returns this primitive's field width.
 func (i *InputField) GetFieldWidth() int {
 	return i.fieldWidth
 }
-
 // SetMaskCharacter sets a character that masks user input on a screen. A value
 // of 0 disables masking.
 func (i *InputField) SetMaskCharacter(mask rune) *InputField {
 	i.maskCharacter = mask
 	return i
 }
-
 // SetAcceptanceFunc sets a handler which may reject the last character that was
 // entered (by returning false).
 //
@@ -199,14 +164,12 @@ func (i *InputField) SetAcceptanceFunc(handler func(textToCheck string, lastChar
 	i.accept = handler
 	return i
 }
-
 // SetChangedFunc sets a handler which is called whenever the text of the input
 // field has changed. It receives the current text (after the change).
 func (i *InputField) SetChangedFunc(handler func(text string)) *InputField {
 	i.changed = handler
 	return i
 }
-
 // SetDoneFunc sets a handler which is called when the user is done entering
 // text. The callback function is provided with the key that was pressed, which
 // is one of the following:
@@ -219,24 +182,20 @@ func (i *InputField) SetDoneFunc(handler func(key tcell.Key)) *InputField {
 	i.done = handler
 	return i
 }
-
 // SetFinishedFunc sets a callback invoked when the user leaves this form item.
 func (i *InputField) SetFinishedFunc(handler func(key tcell.Key)) FormItem {
 	i.finished = handler
 	return i
 }
-
 // Draw draws this primitive onto the screen.
 func (i *InputField) Draw(screen tcell.Screen) {
 	i.Box.Draw(screen)
-
 	// Prepare
 	x, y, width, height := i.GetInnerRect()
 	rightLimit := x + width
 	if height < 1 || rightLimit <= x {
 		return
 	}
-
 	// Draw label.
 	if i.labelWidth > 0 {
 		labelWidth := i.labelWidth
@@ -249,7 +208,6 @@ func (i *InputField) Draw(screen tcell.Screen) {
 		_, drawnWidth := Print(screen, i.label, x, y, rightLimit-x, AlignLeft, i.labelColor)
 		x += drawnWidth
 	}
-
 	// Draw input area.
 	fieldWidth := i.fieldWidth
 	if fieldWidth == 0 {
@@ -262,7 +220,6 @@ func (i *InputField) Draw(screen tcell.Screen) {
 	for index := 0; index < fieldWidth; index++ {
 		screen.SetContent(x+index, y, ' ', nil, fieldStyle)
 	}
-
 	// Text.
 	var cursorScreenPos int
 	text := i.text
@@ -318,13 +275,11 @@ func (i *InputField) Draw(screen tcell.Screen) {
 			Print(screen, Escape(text[i.offset:]), x, y, fieldWidth, AlignLeft, i.fieldTextColor)
 		}
 	}
-
 	// Set cursor.
 	if i.focus.HasFocus() {
 		screen.ShowCursor(x+cursorScreenPos, y)
 	}
 }
-
 // InputHandler returns the handler for this primitive.
 func (i *InputField) InputHandler() func(event *tcell.EventKey, setFocus func(p Primitive)) {
 	return i.WrapInputHandler(func(event *tcell.EventKey, setFocus func(p Primitive)) {
@@ -335,7 +290,6 @@ func (i *InputField) InputHandler() func(event *tcell.EventKey, setFocus func(p 
 				i.changed(i.text)
 			}
 		}()
-
 		// Movement functions.
 		home := func() { i.cursorPos = 0 }
 		end := func() { i.cursorPos = len(i.text) }
@@ -357,7 +311,6 @@ func (i *InputField) InputHandler() func(event *tcell.EventKey, setFocus func(p 
 		moveWordRight := func() {
 			i.cursorPos = len(i.text) - len(regexp.MustCompile(`^\s*\S+\s*`).ReplaceAllString(i.text[i.cursorPos:], ""))
 		}
-
 		// Add character function. Returns whether or not the rune character is
 		// accepted.
 		add := func(r rune) bool {
@@ -369,7 +322,6 @@ func (i *InputField) InputHandler() func(event *tcell.EventKey, setFocus func(p 
 			i.cursorPos += len(string(r))
 			return true
 		}
-
 		// Process key event.
 		switch key := event.Key(); key {
 		case tcell.KeyRune: // Regular character.

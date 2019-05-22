@@ -1,5 +1,4 @@
 package conf
-
 import (
 	"encoding/json"
 	"fmt"
@@ -8,18 +7,14 @@ import (
 	"sort"
 	"strings"
 	"time"
-
 	"git.parallelcoin.io/dev/9/cmd/def"
 	"git.parallelcoin.io/dev/9/pkg/util"
 	"git.parallelcoin.io/dev/tcell"
 	"git.parallelcoin.io/dev/tview"
 )
-
 const menutitle = "ⓟ parallelcoin 9 configuration CLI"
-
 var iteminput *tview.InputField
 var toggle *tview.Table
-
 // Run the menu system
 func Run(args []string, tokens def.Tokens, ap *def.App) int {
 	var cattable *tview.Table
@@ -27,16 +22,13 @@ func Run(args []string, tokens def.Tokens, ap *def.App) int {
 	var activepage *tview.Flex
 	var inputhandler func(event *tcell.EventKey) *tcell.EventKey
 	var cat, itemname string
-
 	// tapp pulls everything together to create the configuration interface
 	tapp := tview.NewApplication()
-
 	// titlebar tells the user what app they are using
 	titlebar := tview.NewTextView().
 		SetTextColor(TextColor()).
 		SetText(menutitle)
 	titlebar.Box.SetBackgroundColor(MainColor())
-
 	coverbox := tview.NewTextView()
 	coverbox.
 		SetTextColor(TextColor())
@@ -45,23 +37,18 @@ func Run(args []string, tokens def.Tokens, ap *def.App) int {
 		SetBackgroundColor(BackgroundColor())
 	coverbox.SetBorderPadding(1, 1, 2, 2)
 	// coverbox.SetBorder(true)
-
 	roottable, roottablewidth := genMenu("launch", "configure", "reinitialize")
 	activateTable(roottable)
-
 	launchmenutexts := []string{"node", "wallet", "shell"}
 	launchtable, launchtablewidth := genMenu(launchmenutexts...)
 	prelightTable(launchtable)
-
 	catstable, catstablewidth := genMenu(ap.Cats.GetSortedKeys()...)
 	prelightTable(catstable)
-
 	menuflex := tview.NewFlex().
 		SetDirection(tview.FlexColumn).
 		AddItem(roottable, roottablewidth, 1, true).
 		AddItem(coverbox, 0, 1, false)
 	menuflex.Box.SetBackgroundColor(BackgroundColor())
-
 	var leftExitActive bool
 	var confirm *tview.Flex
 	roottable.SetSelectionChangedFunc(func(y, x int) {
@@ -228,7 +215,6 @@ func Run(args []string, tokens def.Tokens, ap *def.App) int {
 		}
 		return event
 	})
-
 	launchtable.SetSelectionChangedFunc(func(y, x int) {
 		switch y {
 		case 0:
@@ -276,7 +262,6 @@ func Run(args []string, tokens def.Tokens, ap *def.App) int {
 		}
 		return event
 	})
-
 	saveConfig := func() {
 		ddir, ok := ap.Cats["app"]["datadir"].Get().(string)
 		if ok {
@@ -298,10 +283,8 @@ func Run(args []string, tokens def.Tokens, ap *def.App) int {
 			}
 		}
 	}
-
 	var genPage func(cat, item string, active bool, ap *def.App,
 		editoreventhandler func(event *tcell.EventKey) *tcell.EventKey, idx int) (out *tview.Flex)
-
 	inputhandler = func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
 		case tcell.KeyEsc:
@@ -318,7 +301,6 @@ func Run(args []string, tokens def.Tokens, ap *def.App) int {
 		}
 		return event
 	}
-
 	genPage = func(cat, item string, active bool, ap *def.App,
 		editoreventhandler func(event *tcell.EventKey) *tcell.EventKey, idx int) (out *tview.Flex) {
 		currow := ap.Cats[cat][item]
@@ -381,7 +363,6 @@ func Run(args []string, tokens def.Tokens, ap *def.App) int {
 		infoblock.SetText(infostring)
 		switch itemtype {
 		case "string", "int", "float", "duration", "port":
-
 			iteminput = tview.NewInputField()
 			iteminput.
 				SetFieldTextColor(darkness).
@@ -551,7 +532,6 @@ func Run(args []string, tokens def.Tokens, ap *def.App) int {
 					activatedTable(catstable)
 					activateTable(cattable)
 					tapp.SetFocus(cattable)
-
 				default:
 				}
 				saveConfig()
@@ -689,7 +669,6 @@ func Run(args []string, tokens def.Tokens, ap *def.App) int {
 							saveConfig()
 							out.RemoveItem(snackbar)
 						}
-
 						// itemname = item
 						// inputhandler = func(event *tcell.EventKey) *tcell.EventKey {
 						// 	switch event.Key() {
@@ -710,7 +689,6 @@ func Run(args []string, tokens def.Tokens, ap *def.App) int {
 						// 	}
 						// 	return event
 						// }
-
 						menuflex.
 							RemoveItem(coverbox).
 							RemoveItem(activepage)
@@ -736,7 +714,6 @@ func Run(args []string, tokens def.Tokens, ap *def.App) int {
 						tapp.SetFocus(activepage)
 						// return event //&tcell.EventKey{}
 					}
-
 				}
 			}
 			slice.SetSelectedFunc(func(y, x int) {
@@ -768,11 +745,9 @@ func Run(args []string, tokens def.Tokens, ap *def.App) int {
 					out.AddItem(input, 1, 0, true).
 						AddItem(infoblock, 0, 1, false)
 					tapp.SetFocus(input)
-
 				// set default
 				case y == len(slicevalue)+1:
 					currow.Init(currow)
-
 					menuflex.
 						RemoveItem(coverbox).
 						RemoveItem(activepage)
@@ -783,7 +758,6 @@ func Run(args []string, tokens def.Tokens, ap *def.App) int {
 					activatedTable(catstable)
 					activateTable(cattable)
 					tapp.SetFocus(cattable)
-
 				// back
 				case y == len(slicevalue)+2:
 					menuflex.
@@ -796,7 +770,6 @@ func Run(args []string, tokens def.Tokens, ap *def.App) int {
 					activatedTable(catstable)
 					activateTable(cattable)
 					tapp.SetFocus(cattable)
-
 					//existing
 				default:
 					rw := currow
@@ -835,7 +808,6 @@ func Run(args []string, tokens def.Tokens, ap *def.App) int {
 						out.AddItem(input, 1, 0, true).
 							AddItem(infoblock, 0, 1, false)
 						tapp.SetFocus(input)
-
 					}
 				}
 			})
@@ -848,7 +820,6 @@ func Run(args []string, tokens def.Tokens, ap *def.App) int {
 			out.AddItem(slice, len(slicevalue)+5, 0, true)
 		}
 		out.AddItem(infoblock, 0, 1, false)
-
 		return
 	}
 	catstable.SetSelectionChangedFunc(func(y, x int) {
@@ -897,7 +868,6 @@ func Run(args []string, tokens def.Tokens, ap *def.App) int {
 				itemname = catkeys[y-1]
 				activepage = genPage(cat, itemname, true, ap, inputhandler, 0)
 				menuflex.AddItem(activepage, 0, 1, true)
-
 				tapp.SetFocus(activepage)
 			}
 		})
@@ -941,7 +911,6 @@ func Run(args []string, tokens def.Tokens, ap *def.App) int {
 				itemname = catkeys[y-1]
 				activepage = genPage(cat, itemname, true, ap, inputhandler, 0)
 				menuflex.AddItem(activepage, 0, 1, true)
-
 				tapp.SetFocus(activepage)
 			case tcell.KeyEsc, tcell.KeyLeft:
 				// pressed escape
@@ -1023,10 +992,8 @@ func Run(args []string, tokens def.Tokens, ap *def.App) int {
 		SetDirection(tview.FlexRow).
 		AddItem(titlebar, 1, 0, false).
 		AddItem(menuflex, 0, 1, true)
-
 	if e := tapp.SetRoot(root, true).Run(); e != nil {
 		panic(e)
 	}
-
 	return 0
 }

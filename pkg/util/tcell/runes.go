@@ -11,9 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package tcell
-
 // The names of these constants are chosen to match Terminfo names,
 // modulo case, and changing the prefix from ACS_ to Rune.  These are
 // the runes we provide extra special handling for, with ASCII fallbacks
@@ -52,7 +50,6 @@ const (
 	RuneURCorner = '┐'
 	RuneVLine    = '│'
 )
-
 // RuneFallbacks is the default map of fallback strings that will be
 // used to replace a rune when no other more appropriate transformation
 // is available, and the rune cannot be displayed directly.

@@ -1,5 +1,4 @@
 package tview
-
 // Borders defines various borders used when primitives are drawn.
 // These may be changed to accommodate a different look and feel.
 var Borders = struct {
@@ -9,13 +8,11 @@ var Borders = struct {
 	TopRight    rune
 	BottomLeft  rune
 	BottomRight rune
-
 	LeftT   rune
 	RightT  rune
 	TopT    rune
 	BottomT rune
 	Cross   rune
-
 	HorizontalFocus  rune
 	VerticalFocus    rune
 	TopLeftFocus     rune
@@ -29,13 +26,11 @@ var Borders = struct {
 	TopRight:    BoxDrawingsLightDownAndLeft,
 	BottomLeft:  BoxDrawingsLightUpAndRight,
 	BottomRight: BoxDrawingsLightUpAndLeft,
-
 	LeftT:   BoxDrawingsLightVerticalAndRight,
 	RightT:  BoxDrawingsLightVerticalAndLeft,
 	TopT:    BoxDrawingsLightDownAndHorizontal,
 	BottomT: BoxDrawingsLightUpAndHorizontal,
 	Cross:   BoxDrawingsLightVerticalAndHorizontal,
-
 	HorizontalFocus:  BoxDrawingsDoubleHorizontal,
 	VerticalFocus:    BoxDrawingsDoubleVertical,
 	TopLeftFocus:     BoxDrawingsDoubleDownAndRight,

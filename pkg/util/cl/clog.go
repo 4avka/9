@@ -1,19 +1,14 @@
 package cl
-
 import (
 	"fmt"
 	"time"
-
 	"git.parallelcoin.io/dev/9/pkg/util/interrupt"
-
 	"github.com/mitchellh/colorstring"
 )
-
 // Close a SubSystem logger
 func (s *SubSystem) Close() {
 	close(s.Ch)
 }
-
 // SetLevel changes the level of a subsystem by level name
 func (s *SubSystem) SetLevel(level string) {
 	if i, ok := Levels[level]; ok {
@@ -28,7 +23,6 @@ func (s *SubSystem) SetLevel(level string) {
 		s.LevelString = "off"
 	}
 }
-
 // NewSubSystem starts up a new subsystem logger
 func NewSubSystem(name, level string) (ss *SubSystem) {
 	wg.Add(1)
@@ -40,7 +34,6 @@ func NewSubSystem(name, level string) (ss *SubSystem) {
 	if len(name) > maxLen {
 		maxLen = len(name)
 	}
-
 	// The main subsystem processing loop
 	go func() {
 		for i := range ss.Ch {
@@ -193,7 +186,6 @@ func NewSubSystem(name, level string) (ss *SubSystem) {
 	wg.Done()
 	return
 }
-
 func init() {
 	wg.Add(1)
 	worker := func() {
@@ -303,7 +295,6 @@ func init() {
 	go worker()
 	wg.Done()
 }
-
 // Shutdown the application, allowing the logger a moment to clear the channels
 func Shutdown() {
 	close(Quit)

@@ -1,5 +1,4 @@
 package tview
-
 import (
 	"bytes"
 	"fmt"
@@ -7,7 +6,6 @@ import (
 	"strconv"
 	"strings"
 )
-
 // The states of the ANSI escape code parser.
 const (
 	ansiText = iota
@@ -15,20 +13,16 @@ const (
 	ansiSubstring
 	ansiControlSequence
 )
-
 // ansi is a io.Writer which translates ANSI escape codes into tview color
 // tags.
 type ansi struct {
 	io.Writer
-
 	// Reusable buffers.
 	buffer                        *bytes.Buffer // The entire output text of one Write().
 	csiParameter, csiIntermediate *bytes.Buffer // Partial CSI strings.
-
 	// The current state of the parser. One of the ansi constants.
 	state int
 }
-
 // ANSIWriter returns an io.Writer which translates any ANSI escape codes
 // written to it into tview color tags. Other escape codes don't have an effect
 // and are simply removed. The translated text is written to the provided
@@ -42,17 +36,14 @@ func ANSIWriter(writer io.Writer) io.Writer {
 		state:           ansiText,
 	}
 }
-
 // Write parses the given text as a string of runes, translates ANSI escape
 // codes to color tags and writes them to the output writer.
 func (a *ansi) Write(text []byte) (int, error) {
 	defer func() {
 		a.buffer.Reset()
 	}()
-
 	for _, r := range string(text) {
 		switch a.state {
-
 		// We just entered an escape sequence.
 		case ansiEscape:
 			switch r {
@@ -68,7 +59,6 @@ func (a *ansi) Write(text []byte) (int, error) {
 			default: // Ignore.
 				a.state = ansiText
 			}
-
 		// CSI Sequences.
 		case ansiControlSequence:
 			switch {
@@ -198,13 +188,11 @@ func (a *ansi) Write(text []byte) (int, error) {
 			default: // Undefined byte.
 				a.state = ansiText // Abort CSI.
 			}
-
 			// We just entered a substring/command sequence.
 		case ansiSubstring:
 			if r == 27 { // Most likely the end of the substring.
 				a.state = ansiEscape
 			} // Ignore all other characters.
-
 			// "ansiText" and all others.
 		default:
 			if r == 27 {
@@ -218,7 +206,6 @@ func (a *ansi) Write(text []byte) (int, error) {
 			}
 		}
 	}
-
 	// Write buffer to target writer.
 	n, err := a.buffer.WriteTo(a.Writer)
 	if err != nil {
@@ -226,7 +213,6 @@ func (a *ansi) Write(text []byte) (int, error) {
 	}
 	return len(text), nil
 }
-
 // TranslateANSI replaces ANSI escape sequences found in the provided string
 // with tview's color tags and returns the resulting string.
 func TranslateANSI(text string) string {

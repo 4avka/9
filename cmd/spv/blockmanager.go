@@ -2217,7 +2217,6 @@ func (b *blockManager) calcNextRequiredDifficulty(newBlockTime time.Time,
 	// Log new target difficulty and return it.  The new target logging is intentionally converting the bits back to a number instead of using newTarget since conversion to the compact representation loses precision.
 	newTargetBits := blockchain.BigToCompact(newTarget)
 	log <- cl.Debugf{`
-
 difficulty retarget at block height %d
 old target %08x (%064x)
 new target %08x (%064x)

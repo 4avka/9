@@ -1,19 +1,14 @@
 package chain
-
 import (
 	"testing"
 )
-
 // TestErrorCodeStringer tests the stringized output for the ErrorCode type.
 func TestErrorCodeStringer(
-
 	t *testing.T) {
-
 	tests := []struct {
 		in   ErrorCode
 		want string
 	}{
-
 		{ErrDuplicateBlock, "ErrDuplicateBlock"},
 		{ErrBlockTooBig, "ErrBlockTooBig"},
 		{ErrBlockWeightTooHigh, "ErrBlockWeightTooHigh"},
@@ -60,108 +55,70 @@ func TestErrorCodeStringer(
 		{ErrPrevBlockNotBest, "ErrPrevBlockNotBest"},
 		{0xffff, "Unknown ErrorCode (65535)"},
 	}
-
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		result := test.in.String()
-
 		if result != test.want {
-
 			t.Errorf("String #%d\n got: %s want: %s", i, result,
 				test.want)
 			continue
 		}
-
 	}
-
 }
-
 // TestRuleError tests the error output for the RuleError type.
 func TestRuleError(
-
 	t *testing.T) {
-
 	tests := []struct {
 		in   RuleError
 		want string
 	}{
-
 		{
-
 			RuleError{Description: "duplicate block"},
 			"duplicate block",
 		},
-
 		{
-
 			RuleError{Description: "human-readable error"},
 			"human-readable error",
 		},
 	}
-
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		result := test.in.Error()
-
 		if result != test.want {
-
 			t.Errorf("Error #%d\n got: %s want: %s", i, result,
 				test.want)
 			continue
 		}
-
 	}
-
 }
-
 // TestDeploymentError tests the stringized output for the DeploymentError type.
 func TestDeploymentError(
-
 	t *testing.T) {
-
 	t.Parallel()
-
 	tests := []struct {
 		in   DeploymentError
 		want string
 	}{
-
 		{
-
 			DeploymentError(0),
 			"deployment ID 0 does not exist",
 		},
-
 		{
-
 			DeploymentError(10),
 			"deployment ID 10 does not exist",
 		},
-
 		{
-
 			DeploymentError(123),
 			"deployment ID 123 does not exist",
 		},
 	}
-
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		result := test.in.Error()
-
 		if result != test.want {
-
 			t.Errorf("Error #%d\n got: %s want: %s", i, result,
 				test.want)
 			continue
 		}
-
 	}
-
 }

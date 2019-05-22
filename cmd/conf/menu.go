@@ -1,11 +1,8 @@
 package conf
-
 import (
 	"strings"
-
 	"git.parallelcoin.io/dev/tview"
 )
-
 func getMaxWidth(ss []string) (maxwidth int) {
 	for _, x := range ss {
 		if len(x) > maxwidth {
@@ -14,7 +11,6 @@ func getMaxWidth(ss []string) (maxwidth int) {
 	}
 	return
 }
-
 func genMenu(items ...string) (table *tview.Table, menuwidth int) {
 	menuwidth = getMaxWidth(items)
 	table = tview.NewTable().SetSelectable(true, true)

@@ -1,15 +1,11 @@
 package json_test
-
 import (
 	"testing"
-
 	"git.parallelcoin.io/dev/9/pkg/rpc/json"
 )
-
 // TestErrorCodeStringer tests the stringized output for the ErrorCode type.
 func TestErrorCodeStringer(
 	t *testing.T) {
-
 	t.Parallel()
 	tests := []struct {
 		in   json.ErrorCode
@@ -29,33 +25,24 @@ func TestErrorCodeStringer(
 		{json.ErrMissingDescription, "ErrMissingDescription"},
 		{0xffff, "Unknown ErrorCode (65535)"},
 	}
-
 	// Detect additional error codes that don't have the stringer added.
-
 	if len(tests)-1 != int(json.TstNumErrorCodes) {
-
 		t.Errorf("It appears an error code was added without adding an " +
 			"associated stringer test")
 	}
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		result := test.in.String()
-
 		if result != test.want {
-
 			t.Errorf("String #%d\n got: %s want: %s", i, result,
 				test.want)
 			continue
 		}
 	}
 }
-
 // TestError tests the error output for the Error type.
 func TestError(
 	t *testing.T) {
-
 	t.Parallel()
 	tests := []struct {
 		in   json.Error
@@ -71,13 +58,9 @@ func TestError(
 		},
 	}
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		result := test.in.Error()
-
 		if result != test.want {
-
 			t.Errorf("Error #%d\n got: %s want: %s", i, result,
 				test.want)
 			continue

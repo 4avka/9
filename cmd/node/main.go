@@ -1,5 +1,4 @@
 package node
-
 import (
 	"fmt"
 	"net"
@@ -8,26 +7,20 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/pprof"
-
 	"git.parallelcoin.io/dev/9/cmd/nine"
 	indexers "git.parallelcoin.io/dev/9/pkg/chain/index"
 	database "git.parallelcoin.io/dev/9/pkg/db"
 	cl "git.parallelcoin.io/dev/9/pkg/util/cl"
 	"git.parallelcoin.io/dev/9/pkg/util/interrupt"
 )
-
 // blockDbNamePrefix is the prefix for the block database name.  The database type is appended to this value to form the full block database name.
 const blockDbNamePrefix = "blocks"
-
 var StateCfg = &nine.StateConfig{}
 var Cfg = &nine.Config{}
-
 // // winServiceMain is only invoked on Windows.  It detects when pod is running as a service and reacts accordingly.
 // var winServiceMain func() (bool, error)
-
 // Main is the real main function for pod.  It is necessary to work around the fact that deferred functions do not run when os.Exit() is called.  The optional serverChan parameter is mainly used by the service code to be notified with the server once it is setup so it can gracefully stop it when requested from the service control manager.
 func Main(serverChan chan<- *server, started chan struct{}) (err error) {
-
 	// // Call serviceMain on Windows to handle running as a service.  When
 	// // the return isService flag is true, exit now since we ran as a
 	// // service.  Otherwise, just fall through to normal operation.
@@ -41,7 +34,6 @@ func Main(serverChan chan<- *server, started chan struct{}) (err error) {
 	// 		os.Exit(0)
 	// 	}
 	// }
-
 	shutdownChan := make(chan struct{})
 	interrupt.AddHandler(
 		func() {
@@ -163,7 +155,6 @@ func Main(serverChan chan<- *server, started chan struct{}) (err error) {
 	<-interrupt.HandlersDone
 	return nil
 }
-
 // dbPath returns the path to the block database given a database type.
 func blockDbPath(dbType string) string {
 	// The database name is based on the database type.
@@ -176,7 +167,6 @@ func blockDbPath(dbType string) string {
 			*Cfg.AppDataDir, NetName(ActiveNetParams)), dbName)
 	return dbPath
 }
-
 // loadBlockDB loads (or creates when needed) the block database taking into account the selected database backend and returns a handle to it.  It also additional logic such warning the user if there are multiple databases which consume space on the file system and ensuring the regression test database is clean when in regression test mode.
 func loadBlockDB() (database.DB, error) {
 	// The memdb backend does not have a file path associated with it, so handle it uniquely.  We also don't want to worry about the multiple database type warnings when running with the memory database.
@@ -189,7 +179,6 @@ func loadBlockDB() (database.DB, error) {
 		return db, nil
 	}
 	warnMultipleDBs()
-
 	// The database name is based on the database type.
 	dbPath := blockDbPath(*Cfg.DbType)
 	// The regression test is special in that it needs a clean database for each run, so remove it now if it already exists.
@@ -218,53 +207,30 @@ func loadBlockDB() (database.DB, error) {
 	log <- cl.Inf("block database loaded")
 	return db, nil
 }
-
 /*
 func PreMain() {
-
-
 	// Use all processor cores.
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	// Block and transaction processing can cause bursty allocations.  This limits the garbage collector from excessively overallocating during bursts.  This value was arrived at with the help of profiling live usage.
 	debug.SetGCPercent(10)
 	// Up some limits.
-
-
 	if err := limits.SetLimits(); err != nil {
-
 		fmt.Fprintf(os.Stderr, "failed to set limits: %v\n", err)
 		os.Exit(1)
 	}
-
 	// Call serviceMain on Windows to handle running as a service.  When the return isService flag is true, exit now since we ran as a service.  Otherwise, just fall through to normal operation.
-
-
 	if runtime.GOOS == "windows" {
-
 		isService, err := winServiceMain()
-
-
 		if err != nil {
-
-
 			fmt.Println(err)
 			os.Exit(1)
 		}
-
-
-
 		if isService {
-
-
 			os.Exit(0)
 		}
 	}
-
 	// Work around defer not working after os.Exit()
-
-
 	if err := Main(nil); err != nil {
-
 		os.Exit(1)
 	}
 }
@@ -296,7 +262,6 @@ func removeRegressionDB(
 	}
 	return nil
 }
-
 // warnMultipleDBs shows a warning if multiple block database types are detected. This is not a situation most users want.  It is handy for development however to support multiple side-by-side databases.
 func warnMultipleDBs() {
 	// This is intentionally not using the known db types which depend on the database types compiled into the binary since we want to detect legacy db types as well.

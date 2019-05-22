@@ -1,19 +1,15 @@
 package ctl
-
 import (
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
-
 	"git.parallelcoin.io/dev/9/pkg/pod"
 	"git.parallelcoin.io/dev/9/pkg/rpc/json"
 	"git.parallelcoin.io/dev/9/pkg/util"
 )
-
 // unusableFlags are the command usage flags which this utility are not able to use.  In particular it doesn't support websockets and consequently notifications.
 const unusableFlags = json.UFWebsocketOnly | json.UFNotification
-
 var DefaultConfigFile = filepath.Join(PodCtlHomeDir, "conf.json")
 var DefaultRPCCertFile = filepath.Join(NodeHomeDir, "rpc.cert")
 var DefaultRPCServer = "127.0.0.1:11048"
@@ -22,7 +18,6 @@ var DefaultWalletCertFile = filepath.Join(SPVHomeDir, "rpc.cert")
 var NodeHomeDir = util.AppDataDir("pod", false)
 var PodCtlHomeDir = util.AppDataDir("pod/ctl", false)
 var SPVHomeDir = util.AppDataDir("pod/spv", false)
-
 // ListCommands categorizes and lists all of the usable commands along with their one-line usage.
 func ListCommands() {
 	const (
@@ -68,7 +63,6 @@ func ListCommands() {
 		fmt.Println()
 	}
 }
-
 // cleanAndExpandPath expands environement variables and leading ~ in the passed path, cleans the result, and returns it.
 func cleanAndExpandPath(
 	path string,
@@ -81,7 +75,6 @@ func cleanAndExpandPath(
 	// NOTE: The os.ExpandEnv doesn't work with Windows-style %VARIABLE%, but they variables can still be expanded via POSIX-style $VARIABLE.
 	return filepath.Clean(os.ExpandEnv(path))
 }
-
 // loadConfig initializes and parses the config using a config file and command line options.
 // The configuration proceeds as follows:
 // 	1) Start with a default config with sane settings

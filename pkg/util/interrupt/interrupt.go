@@ -1,29 +1,21 @@
 package interrupt
-
 import (
 	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 )
-
 var requested bool
-
 // InterruptChan is used to receive SIGINT (Ctrl+C) signals.
 var InterruptChan chan os.Signal
-
 // InterruptSignals is the list of signals that cause the interrupt
 var InterruptSignals = []os.Signal{os.Interrupt, syscall.SIGTERM}
-
 // ShutdownRequestChan is a channel that can receive shutdown requests
 var ShutdownRequestChan = make(chan struct{})
-
 // AddHandlerChannel is used to add an interrupt handler to the list of handlers to be invoked on SIGINT (Ctrl+C) signals.
 var AddHandlerChannel = make(chan func())
-
 // HandlersDone is closed after all interrupt handlers run the first time an interrupt is signaled.
 var HandlersDone = make(chan struct{})
-
 // Listener listens for interrupt signals, registers interrupt callbacks, and responds to custom shutdown signals as required
 func Listener() {
 	var interruptCallbacks []func()
@@ -53,7 +45,6 @@ func Listener() {
 		}
 	}
 }
-
 // AddHandler adds a handler to call when a SIGINT (Ctrl+C) is received.
 func AddHandler(
 	handler func()) {
@@ -65,12 +56,10 @@ func AddHandler(
 	}
 	AddHandlerChannel <- handler
 }
-
 // Request programatically requests a shutdown
 func Request() {
 	close(ShutdownRequestChan)
 }
-
 // Requested returns true if an interrupt has been requested
 func Requested() bool {
 	return requested

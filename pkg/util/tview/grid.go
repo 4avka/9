@@ -1,11 +1,8 @@
 package tview
-
 import (
 	"math"
-
 	"git.parallelcoin.io/dev/9/pkg/util/tcell"
 )
-
 // gridItem represents one primitive and its possible position on a grid.
 type gridItem struct {
 	Item                        Primitive // The item to be positioned. May be nil for an empty item.
@@ -13,11 +10,9 @@ type gridItem struct {
 	Width, Height               int       // The number of rows and columns the item occupies.
 	MinGridWidth, MinGridHeight int       // The minimum grid width/height for which this item is visible.
 	Focus                       bool      // Whether or not this item attracts the layout's focus.
-
 	visible    bool // Whether or not this item was visible the last time the grid was drawn.
 	x, y, w, h int  // The last position of the item relative to the top-left corner of the grid. Undefined if visible is false.
 }
-
 // Grid is an implementation of a grid-based layout. It works by defining the
 // size of the rows and columns, then placing primitives into the grid.
 //
@@ -30,34 +25,26 @@ type gridItem struct {
 // See https://git.parallelcoin.io/dev/9/pkg/util/tview/wiki/Grid for an example.
 type Grid struct {
 	*Box
-
 	// The items to be positioned.
 	items []*gridItem
-
 	// The definition of the rows and columns of the grid. See
 	// SetRows()/SetColumns() for details.
 	rows, columns []int
-
 	// The minimum sizes for rows and columns.
 	minWidth, minHeight int
-
 	// The size of the gaps between neighboring primitives. This is automatically
 	// set to 1 if borders is true.
 	gapRows, gapColumns int
-
 	// The number of rows and columns skipped before drawing the top-left corner
 	// of the grid.
 	rowOffset, columnOffset int
-
 	// Whether or not borders are drawn around grid items. If this is set to true,
 	// a gap size of 1 is automatically assumed (which is filled with the border
 	// graphics).
 	borders bool
-
 	// The color of the borders around grid items.
 	bordersColor tcell.Color
 }
-
 // NewGrid returns a new grid-based layout container with no initial primitives.
 //
 // Note that Box, the superclass of Grid, will have its background color set to
@@ -74,7 +61,6 @@ func NewGrid() *Grid {
 	g.focus = g
 	return g
 }
-
 // SetColumns defines how the columns of the grid are distributed. Each value
 // defines the size of one column, starting with the leftmost column. Values
 // greater 0 represent absolute column widths (gaps not included). Values less
@@ -108,7 +94,6 @@ func (g *Grid) SetColumns(columns ...int) *Grid {
 	g.columns = columns
 	return g
 }
-
 // SetRows defines how the rows of the grid are distributed. These values behave
 // the same as the column values provided with SetColumns(), see there for a
 // definition and examples.
@@ -119,7 +104,6 @@ func (g *Grid) SetRows(rows ...int) *Grid {
 	g.rows = rows
 	return g
 }
-
 // SetSize is a shortcut for SetRows() and SetColumns() where all row and column
 // values are set to the given size values. See SetRows() for details on sizes.
 func (g *Grid) SetSize(numRows, numColumns, rowSize, columnSize int) *Grid {
@@ -133,7 +117,6 @@ func (g *Grid) SetSize(numRows, numColumns, rowSize, columnSize int) *Grid {
 	}
 	return g
 }
-
 // SetMinSize sets an absolute minimum width for rows and an absolute minimum
 // height for columns. Panics if negative values are provided.
 func (g *Grid) SetMinSize(row, column int) *Grid {
@@ -143,7 +126,6 @@ func (g *Grid) SetMinSize(row, column int) *Grid {
 	g.minHeight, g.minWidth = row, column
 	return g
 }
-
 // SetGap sets the size of the gaps between neighboring primitives on the grid.
 // If borders are drawn (see SetBorders()), these values are ignored and a gap
 // of 1 is assumed. Panics if negative values are provided.
@@ -154,7 +136,6 @@ func (g *Grid) SetGap(row, column int) *Grid {
 	g.gapRows, g.gapColumns = row, column
 	return g
 }
-
 // SetBorders sets whether or not borders are drawn around grid items. Setting
 // this value to true will cause the gap values (see SetGap()) to be ignored and
 // automatically assumed to be 1 where the border graphics are drawn.
@@ -162,13 +143,11 @@ func (g *Grid) SetBorders(borders bool) *Grid {
 	g.borders = borders
 	return g
 }
-
 // SetBordersColor sets the color of the item borders.
 func (g *Grid) SetBordersColor(color tcell.Color) *Grid {
 	g.bordersColor = color
 	return g
 }
-
 // AddItem adds a primitive and its position to the grid. The top-left corner
 // of the primitive will be located in the top-left corner of the grid cell at
 // the given row and column and will span "rowSpan" rows and "colSpan" columns.
@@ -208,7 +187,6 @@ func (g *Grid) AddItem(p Primitive, row, column, rowSpan, colSpan, minGridHeight
 	})
 	return g
 }
-
 // RemoveItem removes all items for the given primitive from the grid, keeping
 // the order of the remaining items intact.
 func (g *Grid) RemoveItem(p Primitive) *Grid {
@@ -219,13 +197,11 @@ func (g *Grid) RemoveItem(p Primitive) *Grid {
 	}
 	return g
 }
-
 // Clear removes all items from the grid.
 func (g *Grid) Clear() *Grid {
 	g.items = nil
 	return g
 }
-
 // SetOffset sets the number of rows and columns which are skipped before
 // drawing the first grid cell in the top-left corner. As the grid will never
 // completely move off the screen, these values may be adjusted the next time
@@ -235,13 +211,11 @@ func (g *Grid) SetOffset(rows, columns int) *Grid {
 	g.rowOffset, g.columnOffset = rows, columns
 	return g
 }
-
 // GetOffset returns the current row and column offset (see SetOffset() for
 // details).
 func (g *Grid) GetOffset() (rows, columns int) {
 	return g.rowOffset, g.columnOffset
 }
-
 // Focus is called when this primitive receives focus.
 func (g *Grid) Focus(delegate func(p Primitive)) {
 	for _, item := range g.items {
@@ -252,12 +226,10 @@ func (g *Grid) Focus(delegate func(p Primitive)) {
 	}
 	g.hasFocus = true
 }
-
 // Blur is called when this primitive loses focus.
 func (g *Grid) Blur() {
 	g.hasFocus = false
 }
-
 // HasFocus returns whether or not this primitive has focus.
 func (g *Grid) HasFocus() bool {
 	for _, item := range g.items {
@@ -267,7 +239,6 @@ func (g *Grid) HasFocus() bool {
 	}
 	return g.hasFocus
 }
-
 // InputHandler returns the handler for this primitive.
 func (g *Grid) InputHandler() func(event *tcell.EventKey, setFocus func(p Primitive)) {
 	return g.WrapInputHandler(func(event *tcell.EventKey, setFocus func(p Primitive)) {
@@ -302,13 +273,11 @@ func (g *Grid) InputHandler() func(event *tcell.EventKey, setFocus func(p Primit
 		}
 	})
 }
-
 // Draw draws this primitive onto the screen.
 func (g *Grid) Draw(screen tcell.Screen) {
 	g.Box.Draw(screen)
 	x, y, width, height := g.GetInnerRect()
 	screenWidth, screenHeight := screen.Size()
-
 	// Make a list of items which apply.
 	items := make(map[Primitive]*gridItem)
 	for _, item := range g.items {
@@ -322,7 +291,6 @@ func (g *Grid) Draw(screen tcell.Screen) {
 		}
 		items[item.Item] = item
 	}
-
 	// How many rows and columns do we have?
 	rows := len(g.rows)
 	columns := len(g.columns)
@@ -339,13 +307,11 @@ func (g *Grid) Draw(screen tcell.Screen) {
 	if rows == 0 || columns == 0 {
 		return // No content.
 	}
-
 	// Where are they located?
 	rowPos := make([]int, rows)
 	rowHeight := make([]int, rows)
 	columnPos := make([]int, columns)
 	columnWidth := make([]int, columns)
-
 	// How much space do we distribute?
 	remainingWidth := width
 	remainingHeight := height
@@ -390,7 +356,6 @@ func (g *Grid) Draw(screen tcell.Screen) {
 	if columns > len(g.columns) {
 		proportionalWidth += columns - len(g.columns)
 	}
-
 	// Distribute proportional rows/columns.
 	gridWidth := 0
 	gridHeight := 0
@@ -451,7 +416,6 @@ func (g *Grid) Draw(screen tcell.Screen) {
 		gridHeight += (rows - 1) * g.gapRows
 		gridWidth += (columns - 1) * g.gapColumns
 	}
-
 	// Calculate row/column positions.
 	columnX, rowY := x, y
 	if g.borders {
@@ -474,7 +438,6 @@ func (g *Grid) Draw(screen tcell.Screen) {
 		}
 		columnX += column + gap
 	}
-
 	// Calculate primitive positions.
 	var focus *gridItem // The item which has focus.
 	for primitive, item := range items {
@@ -500,7 +463,6 @@ func (g *Grid) Draw(screen tcell.Screen) {
 			focus = item
 		}
 	}
-
 	// Calculate screen offsets.
 	var offsetX, offsetY, add int
 	if g.rowOffset < 0 {
@@ -547,7 +509,6 @@ func (g *Grid) Draw(screen tcell.Screen) {
 		}
 		offsetX = columnPos[column+1] - add
 	}
-
 	// Draw primitives and borders.
 	for primitive, item := range items {
 		// Final primitive position.
@@ -575,14 +536,12 @@ func (g *Grid) Draw(screen tcell.Screen) {
 			continue
 		}
 		primitive.SetRect(item.x, item.y, item.w, item.h)
-
 		// Draw primitive.
 		if item == focus {
 			defer primitive.Draw(screen)
 		} else {
 			primitive.Draw(screen)
 		}
-
 		// Draw border around primitive.
 		if g.borders {
 			for bx := item.x; bx < item.x+item.w; bx++ { // Top/bottom lines.

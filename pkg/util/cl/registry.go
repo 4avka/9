@@ -1,5 +1,4 @@
 package cl
-
 // Add appends a new subsystem to its map for access and introspeection
 func (r *Registry) Add(s *SubSystem) {
 	_, ok := (*r)[s.Name]
@@ -9,7 +8,6 @@ func (r *Registry) Add(s *SubSystem) {
 		(*r)[s.Name] = s
 	}
 }
-
 // List returns a string slice containing all the available subsystems registered with clog
 func (r *Registry) List() (out []string) {
 	for _, x := range *r {
@@ -17,7 +15,6 @@ func (r *Registry) List() (out []string) {
 	}
 	return
 }
-
 // Get returns the subsystem. This could then be used to close or set its level eg `*r.Get("subsystem").SetLevel("debug")`
 func (r *Registry) Get(name string) (out *SubSystem) {
 	var ok bool

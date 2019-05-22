@@ -1,5 +1,4 @@
 package spv_test
-
 import (
 	"bytes"
 	"encoding/hex"
@@ -13,7 +12,6 @@ import (
 	"sync"
 	"testing"
 	"time"
-
 	"git.parallelcoin.io/dev/9/cmd/node/integration/rpctest"
 	"git.parallelcoin.io/dev/9/cmd/spv"
 	chaincfg "git.parallelcoin.io/dev/9/pkg/chain/config"
@@ -31,7 +29,6 @@ import (
 	walletdb "git.parallelcoin.io/dev/9/pkg/wallet/db"
 	_ "git.parallelcoin.io/dev/9/pkg/wallet/db/bdb"
 )
-
 var (
 	// Try log.LevelInfo for output like you'd see in normal operation,
 	// or log.LevelTrace to help debug code. Anything but
@@ -172,7 +169,6 @@ var (
 	// OnFilteredBlockDisconnected.
 	ourKnownTxsByFilteredBlock = make(map[chainhash.Hash][]*util.Tx)
 )
-
 // secSource is an implementation of btcwallet/txauthor/SecretsSource that
 // stores WitnessPubKeyHash addresses.
 type secSource struct {
@@ -180,7 +176,6 @@ type secSource struct {
 	scripts map[string]*[]byte
 	params  *chaincfg.Params
 }
-
 func (s *secSource) add(privKey *ec.PrivateKey) (util.Address, error) {
 	pubKeyHash := util.Hash160(privKey.PubKey().SerializeCompressed())
 	addr, err := util.NewAddressWitnessPubKeyHash(pubKeyHash, s.params)
@@ -203,7 +198,6 @@ func (s *secSource) add(privKey *ec.PrivateKey) (util.Address, error) {
 	}
 	return addr, nil
 }
-
 // GetKey is required by the txscript.KeyDB interface
 func (s *secSource) GetKey(addr util.Address) (*ec.PrivateKey, bool,
 	error) {
@@ -213,7 +207,6 @@ func (s *secSource) GetKey(addr util.Address) (*ec.PrivateKey, bool,
 	}
 	return privKey, true, nil
 }
-
 // GetScript is required by the txscript.ScriptDB interface
 func (s *secSource) GetScript(addr util.Address) ([]byte, error) {
 	script, ok := s.scripts[addr.String()]
@@ -222,7 +215,6 @@ func (s *secSource) GetScript(addr util.Address) ([]byte, error) {
 	}
 	return *script, nil
 }
-
 // ChainParams is required by the SecretsSource interface
 func (s *secSource) ChainParams() *chaincfg.Params {
 	return s.params
@@ -235,7 +227,6 @@ func newSecSource(
 		params:  params,
 	}
 }
-
 type testLogger struct {
 	t *testing.T
 }
@@ -247,7 +238,6 @@ type syncTestCase struct {
 	name string
 	test func(harness *neutrinoHarness, t *testing.T)
 }
-
 var testCases = []*syncTestCase{
 	{
 		name: "initial sync",
@@ -270,7 +260,6 @@ var testCases = []*syncTestCase{
 		test: testRescanResults,
 	},
 }
-
 // Make sure the client synchronizes with the correct node.
 func testInitialSync(
 	harness *neutrinoHarness, t *testing.T) {
@@ -279,7 +268,6 @@ func testInitialSync(
 		t.Fatalf("Couldn't sync ChainService: %s", err)
 	}
 }
-
 // Variables used to track state between multiple rescan tests.
 var (
 	quitRescan                chan struct{}
@@ -292,7 +280,6 @@ var (
 	tx1, tx2, tx3             *wire.MsgTx
 	ourOutPoint               wire.OutPoint
 )
-
 // testRescan tests several rescan modes. This should be broken up into
 // smaller tests.
 func testRescan(
@@ -739,7 +726,6 @@ func testRescanResults(
 		t.Fatalf("Expected update call to fail, it did not")
 	}
 }
-
 // testRandomBlocks goes through all blocks in random order and ensures we can
 // correctly get cfilters from them. It uses numQueryThreads goroutines running
 // at the same time to go through this. 50 is comfortable on my somewhat dated
@@ -1077,7 +1063,6 @@ func TestNeutrinoSync(
 		})
 	}
 }
-
 // csd does a connect-sync-disconnect between nodes in order to support
 // reorg testing. It brings up and tears down a temporary node, otherwise the
 // nodes try to reconnect to each other which results in unintended reorgs.
@@ -1101,7 +1086,6 @@ func csd(
 	}
 	return rpctest.JoinNodes(harnesses, rpctest.Blocks)
 }
-
 // checkErrChan tries to read the passed error channel if possible and logs the
 // error it found, if any. This is useful to help troubleshoot any timeouts
 // during a rescan.
@@ -1113,7 +1097,6 @@ func checkErrChan(
 	default:
 	}
 }
-
 // waitForSync waits for the ChainService to sync to the current chain state.
 func waitForSync(
 	t *testing.T, svc *spv.ChainService,
@@ -1271,7 +1254,6 @@ func waitForSync(
 	}
 	return nil
 }
-
 // startRescan starts a rescan in another goroutine, and logs all notifications
 // from the rescan. At the end, the log should match one we precomputed based
 // on the flow of the test. The rescan starts at the genesis block and the
@@ -1376,7 +1358,6 @@ func startRescan(
 	errChan := rescan.Start()
 	return rescan, errChan
 }
-
 // checkRescanStatus returns the number of relevant transactions we currently
 // know about and the currently known height.
 func checkRescanStatus() (int, int32, error) {
@@ -1405,7 +1386,6 @@ func checkRescanStatus() (int, int32, error) {
 	}
 	return txCount[0], curBlockHeight, nil
 }
-
 // banPeer bans and disconnects the requested harness from the ChainService
 // instance for BanDuration seconds.
 func banPeer(
@@ -1418,7 +1398,6 @@ func banPeer(
 		}
 	}
 }
-
 // goroutineDump returns a string with the current goroutine dump in order to
 // show what's going on in case of timeout.
 func goroutineDump() string {

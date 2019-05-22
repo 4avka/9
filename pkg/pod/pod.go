@@ -1,9 +1,7 @@
 package pod
-
 import (
 	"time"
 )
-
 type Config struct {
 	ConfigFile               *string
 	DataDir                  *string

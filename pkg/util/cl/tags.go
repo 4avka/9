@@ -1,7 +1,5 @@
 package cl
-
 import "github.com/mitchellh/colorstring"
-
 func ftlTag(
 	color bool) string {
 	tag := "FTL"
@@ -14,7 +12,6 @@ func ftlTag(
 	}
 	return " " + tag + " "
 }
-
 func errTag(
 	color bool) string {
 	tag := "ERR"
@@ -27,7 +24,6 @@ func errTag(
 	}
 	return " " + tag + " "
 }
-
 func wrnTag(
 	color bool) string {
 	tag := "WRN"
@@ -40,7 +36,6 @@ func wrnTag(
 	}
 	return " " + tag + " "
 }
-
 func infTag(
 	color bool) string {
 	tag := "INF"
@@ -53,7 +48,6 @@ func infTag(
 	}
 	return " " + tag + " "
 }
-
 func dbgTag(
 	color bool) string {
 	tag := "DBG"
@@ -66,7 +60,6 @@ func dbgTag(
 	}
 	return " " + tag + " "
 }
-
 func trcTag(
 	color bool) string {
 	tag := "TRC"

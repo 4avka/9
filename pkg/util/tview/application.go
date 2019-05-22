@@ -1,14 +1,10 @@
 package tview
-
 import (
 	"sync"
-
 	"git.parallelcoin.io/dev/9/pkg/util/tcell"
 )
-
 // The size of the event/update/redraw channels.
 const queueSize = 100
-
 // Application represents the top node of an application.
 //
 // It is not strictly required to use this class as none of the other classes
@@ -23,47 +19,36 @@ const queueSize = 100
 //   }
 type Application struct {
 	sync.RWMutex
-
 	// The application's screen. Apart from Run(), this variable should never be
 	// set directly. Always use the screenReplacement channel after calling
 	// Fini(), to set a new screen (or nil to stop the application).
 	screen tcell.Screen
-
 	// The primitive which currently has the keyboard focus.
 	focus Primitive
-
 	// The root primitive to be seen on the screen.
 	root Primitive
-
 	// Whether or not the application resizes the root primitive.
 	rootFullscreen bool
-
 	// An optional capture function which receives a key event and returns the
 	// event to be forwarded to the default input handler (nil if nothing should
 	// be forwarded).
 	inputCapture func(event *tcell.EventKey) *tcell.EventKey
-
 	// An optional callback function which is invoked just before the root
 	// primitive is drawn.
 	beforeDraw func(screen tcell.Screen) bool
-
 	// An optional callback function which is invoked after the root primitive
 	// was drawn.
 	afterDraw func(screen tcell.Screen)
-
 	// Used to send screen events from separate goroutine to main event loop
 	events chan tcell.Event
-
 	// Functions queued from goroutines, used to serialize updates to primitives.
 	updates chan func()
-
 	// An object that the screen variable will be set to after Fini() was called.
 	// Use this channel to set a new screen object for the application
 	// (screen.Init() and draw() will be called implicitly). A value of nil will
 	// stop the application.
 	screenReplacement chan tcell.Screen
 }
-
 // NewApplication creates and returns a new application.
 func NewApplication() *Application {
 	return &Application{
@@ -72,7 +57,6 @@ func NewApplication() *Application {
 		screenReplacement: make(chan tcell.Screen, 1),
 	}
 }
-
 // SetInputCapture sets a function which captures all key events before they are
 // forwarded to the key event handler of the primitive which currently has
 // focus. This function can then choose to forward that key event (or a
@@ -86,13 +70,11 @@ func (a *Application) SetInputCapture(capture func(event *tcell.EventKey) *tcell
 	a.inputCapture = capture
 	return a
 }
-
 // GetInputCapture returns the function installed with SetInputCapture() or nil
 // if no such function has been installed.
 func (a *Application) GetInputCapture() func(event *tcell.EventKey) *tcell.EventKey {
 	return a.inputCapture
 }
-
 // SetScreen allows you to provide your own tcell.Screen object. For most
 // applications, this is not needed and you should be familiar with
 // tcell.Screen when using this function.
@@ -103,7 +85,6 @@ func (a *Application) SetScreen(screen tcell.Screen) *Application {
 	if screen == nil {
 		return a // Invalid input. Do nothing.
 	}
-
 	a.Lock()
 	if a.screen == nil {
 		// Run() has not been called yet.
@@ -111,22 +92,18 @@ func (a *Application) SetScreen(screen tcell.Screen) *Application {
 		a.Unlock()
 		return a
 	}
-
 	// Run() is already in progress. Exchange screen.
 	oldScreen := a.screen
 	a.Unlock()
 	oldScreen.Fini()
 	a.screenReplacement <- screen
-
 	return a
 }
-
 // Run starts the application and thus the event loop. This function returns
 // when Stop() was called.
 func (a *Application) Run() error {
 	var err error
 	a.Lock()
-
 	// Make a screen if there is none yet.
 	if a.screen == nil {
 		a.screen, err = tcell.NewScreen()
@@ -139,7 +116,6 @@ func (a *Application) Run() error {
 			return err
 		}
 	}
-
 	// We catch panics to clean up because they mess up the terminal.
 	defer func() {
 		if p := recover(); p != nil {
@@ -149,11 +125,9 @@ func (a *Application) Run() error {
 			panic(p)
 		}
 	}()
-
 	// Draw the screen for the first time.
 	a.Unlock()
 	a.draw()
-
 	// Separate loop to wait for screen events.
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -168,7 +142,6 @@ func (a *Application) Run() error {
 				a.QueueEvent(nil)
 				break
 			}
-
 			// Wait for next event and queue it.
 			event := screen.PollEvent()
 			if event != nil {
@@ -176,7 +149,6 @@ func (a *Application) Run() error {
 				a.QueueEvent(event)
 				continue
 			}
-
 			// A screen was finalized (event is nil). Wait for a new scren.
 			screen = <-a.screenReplacement
 			if screen == nil {
@@ -184,12 +156,10 @@ func (a *Application) Run() error {
 				a.QueueEvent(nil)
 				return
 			}
-
 			// We have a new screen. Keep going.
 			a.Lock()
 			a.screen = screen
 			a.Unlock()
-
 			// Initialize and draw this screen.
 			if err := screen.Init(); err != nil {
 				panic(err)
@@ -197,7 +167,6 @@ func (a *Application) Run() error {
 			a.draw()
 		}
 	}()
-
 	// Start event loop.
 EventLoop:
 	for {
@@ -206,14 +175,12 @@ EventLoop:
 			if event == nil {
 				break EventLoop
 			}
-
 			switch event := event.(type) {
 			case *tcell.EventKey:
 				a.RLock()
 				p := a.focus
 				inputCapture := a.inputCapture
 				a.RUnlock()
-
 				// Intercept keys.
 				if inputCapture != nil {
 					event = inputCapture(event)
@@ -222,12 +189,10 @@ EventLoop:
 						continue // Don't forward event.
 					}
 				}
-
 				// Ctrl-C closes the application.
 				if event.Key() == tcell.KeyCtrlC {
 					a.Stop()
 				}
-
 				// Pass other key events to the currently focused primitive.
 				if p != nil {
 					if handler := p.InputHandler(); handler != nil {
@@ -247,20 +212,16 @@ EventLoop:
 				screen.Clear()
 				a.draw()
 			}
-
 		// If we have updates, now is the time to execute them.
 		case updater := <-a.updates:
 			updater()
 		}
 	}
-
 	// Wait for the event loop to finish.
 	wg.Wait()
 	a.screen = nil
-
 	return nil
 }
-
 // Stop stops the application, causing Run() to return.
 func (a *Application) Stop() {
 	a.Lock()
@@ -273,7 +234,6 @@ func (a *Application) Stop() {
 	screen.Fini()
 	a.screenReplacement <- nil
 }
-
 // Suspend temporarily suspends the application by exiting terminal UI mode and
 // invoking the provided function "f". When "f" returns, terminal UI mode is
 // entered again and the application resumes.
@@ -288,13 +248,10 @@ func (a *Application) Suspend(f func()) bool {
 	if screen == nil {
 		return false // Screen has not yet been initialized.
 	}
-
 	// Enter suspended mode.
 	screen.Fini()
-
 	// Wait for "f" to return.
 	f()
-
 	// Make a new screen.
 	var err error
 	screen, err = tcell.NewScreen()
@@ -303,11 +260,9 @@ func (a *Application) Suspend(f func()) bool {
 	}
 	a.screenReplacement <- screen
 	// One key event will get lost, see https://git.parallelcoin.io/dev/9/pkg/util/tview/issues/194
-
 	// Continue application loop.
 	return true
 }
-
 // Draw refreshes the screen (during the next update cycle). It calls the Draw()
 // function of the application's root primitive and then syncs the screen
 // buffer.
@@ -317,7 +272,6 @@ func (a *Application) Draw() *Application {
 	})
 	return a
 }
-
 // ForceDraw refreshes the screen immediately. Use this function with caution as
 // it may lead to race conditions with updates to primitives in other
 // goroutines. It is always preferrable to use Draw() instead. Never call this
@@ -328,29 +282,24 @@ func (a *Application) Draw() *Application {
 func (a *Application) ForceDraw() *Application {
 	return a.draw()
 }
-
 // draw actually does what Draw() promises to do.
 func (a *Application) draw() *Application {
 	a.Lock()
 	defer a.Unlock()
-
 	screen := a.screen
 	root := a.root
 	fullscreen := a.rootFullscreen
 	before := a.beforeDraw
 	after := a.afterDraw
-
 	// Maybe we're not ready yet or not anymore.
 	if screen == nil || root == nil {
 		return a
 	}
-
 	// Resize if requested.
 	if fullscreen && root != nil {
 		width, height := screen.Size()
 		root.SetRect(0, 0, width, height)
 	}
-
 	// Call before handler if there is one.
 	if before != nil {
 		if before(screen) {
@@ -358,21 +307,16 @@ func (a *Application) draw() *Application {
 			return a
 		}
 	}
-
 	// Draw all primitives.
 	root.Draw(screen)
-
 	// Call after handler if there is one.
 	if after != nil {
 		after(screen)
 	}
-
 	// Sync screen.
 	screen.Show()
-
 	return a
 }
-
 // SetBeforeDrawFunc installs a callback function which is invoked just before
 // the root primitive is drawn during screen updates. If the function returns
 // true, drawing will not continue, i.e. the root primitive will not be drawn
@@ -386,13 +330,11 @@ func (a *Application) SetBeforeDrawFunc(handler func(screen tcell.Screen) bool) 
 	a.beforeDraw = handler
 	return a
 }
-
 // GetBeforeDrawFunc returns the callback function installed with
 // SetBeforeDrawFunc() or nil if none has been installed.
 func (a *Application) GetBeforeDrawFunc() func(screen tcell.Screen) bool {
 	return a.beforeDraw
 }
-
 // SetAfterDrawFunc installs a callback function which is invoked after the root
 // primitive was drawn during screen updates.
 //
@@ -401,13 +343,11 @@ func (a *Application) SetAfterDrawFunc(handler func(screen tcell.Screen)) *Appli
 	a.afterDraw = handler
 	return a
 }
-
 // GetAfterDrawFunc returns the callback function installed with
 // SetAfterDrawFunc() or nil if none has been installed.
 func (a *Application) GetAfterDrawFunc() func(screen tcell.Screen) {
 	return a.afterDraw
 }
-
 // SetRoot sets the root primitive for this application. If "fullscreen" is set
 // to true, the root primitive's position will be changed to fill the screen.
 //
@@ -423,12 +363,9 @@ func (a *Application) SetRoot(root Primitive, fullscreen bool) *Application {
 		a.screen.Clear()
 	}
 	a.Unlock()
-
 	a.SetFocus(root)
-
 	return a
 }
-
 // ResizeToFullScreen resizes the given primitive such that it fills the entire
 // screen.
 func (a *Application) ResizeToFullScreen(p Primitive) *Application {
@@ -438,7 +375,6 @@ func (a *Application) ResizeToFullScreen(p Primitive) *Application {
 	p.SetRect(0, 0, width, height)
 	return a
 }
-
 // SetFocus sets the focus on a new primitive. All key events will be redirected
 // to that primitive. Callers must ensure that the primitive will handle key
 // events.
@@ -460,10 +396,8 @@ func (a *Application) SetFocus(p Primitive) *Application {
 			a.SetFocus(p)
 		})
 	}
-
 	return a
 }
-
 // GetFocus returns the primitive which has the current focus. If none has it,
 // nil is returned.
 func (a *Application) GetFocus() Primitive {
@@ -471,7 +405,6 @@ func (a *Application) GetFocus() Primitive {
 	defer a.RUnlock()
 	return a.focus
 }
-
 // QueueUpdate is used to synchronize access to primitives from non-main
 // goroutines. The provided function will be executed as part of the event loop
 // and thus will not cause race conditions with other such update functions or
@@ -485,7 +418,6 @@ func (a *Application) QueueUpdate(f func()) *Application {
 	a.updates <- f
 	return a
 }
-
 // QueueUpdateDraw works like QueueUpdate() except it refreshes the screen
 // immediately after executing f.
 func (a *Application) QueueUpdateDraw(f func()) *Application {
@@ -495,7 +427,6 @@ func (a *Application) QueueUpdateDraw(f func()) *Application {
 	})
 	return a
 }
-
 // QueueEvent sends an event to the Application event loop.
 //
 // It is not recommended for event to be nil.

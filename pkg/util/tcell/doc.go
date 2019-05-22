@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 // Package tcell provides a lower-level, portable API for building
 // programs that interact with terminals or consoles.  It works with
 // both common (and many uncommon!) terminals or terminal emulators,

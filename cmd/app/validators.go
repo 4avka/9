@@ -1,5 +1,4 @@
 package app
-
 import (
 	"errors"
 	"fmt"
@@ -11,9 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
 	"git.parallelcoin.io/dev/9/pkg/chain"
-
 	"git.parallelcoin.io/dev/9/cmd/def"
 	"git.parallelcoin.io/dev/9/cmd/nine"
 	"git.parallelcoin.io/dev/9/cmd/node"
@@ -24,7 +21,6 @@ import (
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 	"github.com/btcsuite/go-socks/socks"
 )
-
 // GenAddr returns a validator with a set default port assumed if one is not present
 func GenAddr(name string, port int) func(r *def.Row, in interface{}) bool {
 	return func(r *def.Row, in interface{}) bool {
@@ -77,7 +73,6 @@ func GenAddr(name string, port int) func(r *def.Row, in interface{}) bool {
 		return true
 	}
 }
-
 // GenAddrs returns a validator with a set default port assumed if one is not present
 func GenAddrs(name string, port int) func(r *def.Row, in interface{}) bool {
 	return func(r *def.Row, in interface{}) bool {
@@ -148,7 +143,6 @@ func GenAddrs(name string, port int) func(r *def.Row, in interface{}) bool {
 		return true
 	}
 }
-
 func getAlgoOptions() (options []string) {
 	var modernd = "random"
 	for _, x := range fork.P9AlgoVers {
@@ -158,7 +152,6 @@ func getAlgoOptions() (options []string) {
 	sort.Strings(options)
 	return
 }
-
 // Valid is a collection of validator functions for the different types used
 // in a configuration. These functions optionally can accept a *def.Row and with
 // this they assign the validated, parsed value into the Value slot.
@@ -166,7 +159,6 @@ var Valid = struct {
 	File, Dir, Port, Bool, Int, Tag, Tags, Algo, Float, Duration, Net,
 	Level func(*def.Row, interface{}) bool
 }{}
-
 func init() {
 	Valid.File = func(r *def.Row, in interface{}) bool {
 		var s *string
@@ -552,12 +544,10 @@ func setAppDataDir(ap *def.App, name string) {
 		}
 	}
 }
-
 func validateWhitelists(ap *def.App) int {
 	// Validate any given whitelisted IP addresses and networks.
 	if ap.Config.Whitelists != nil {
 		var ip net.IP
-
 		ap.Config.State.ActiveWhitelists =
 			make([]*net.IPNet, 0, len(*ap.Config.Whitelists))
 		for _, addr := range *ap.Config.Whitelists {
@@ -588,7 +578,6 @@ func validateWhitelists(ap *def.App) int {
 	}
 	return 0
 }
-
 func validateProxyListeners(ap *def.App) int {
 	// if proxy is not enabled, empty the proxy field as node sees presence as a
 	// on switch
@@ -614,9 +603,7 @@ func validateProxyListeners(ap *def.App) int {
 	}
 	return 0
 }
-
 func validatePasswords(ap *def.App) int {
-
 	// Check to make sure limited and admin users don't have the same username
 	if *ap.Config.Username != "" && *ap.Config.Username == *ap.Config.LimitUser {
 		str := "%s: --username and --limituser must not specify the same username"
@@ -634,7 +621,6 @@ func validatePasswords(ap *def.App) int {
 	}
 	return 0
 }
-
 func validateRPCCredentials(ap *def.App) int {
 	// The RPC server is disabled if no username or password is provided.
 	if (*ap.Config.Username == "" || *ap.Config.Password == "") &&
@@ -656,7 +642,6 @@ func validateRPCCredentials(ap *def.App) int {
 	}
 	return 0
 }
-
 func validateBlockLimits(ap *def.App) int {
 	// Validate the the minrelaytxfee.
 	// log <- cl.Debug{"checking min relay tx fee"}
@@ -696,7 +681,6 @@ func validateBlockLimits(ap *def.App) int {
 	}
 	return 0
 }
-
 func validateUAComments(ap *def.App) int {
 	// Look for illegal characters in the user agent comments.
 	// log <- cl.Debug{"checking user agent comments"}
@@ -713,7 +697,6 @@ func validateUAComments(ap *def.App) int {
 	}
 	return 0
 }
-
 func validateMiner(ap *def.App) int {
 	// Check mining addresses are valid and saved parsed versions.
 	// log <- cl.Debug{"checking mining addresses"}
@@ -760,7 +743,6 @@ func validateMiner(ap *def.App) int {
 	}
 	return 0
 }
-
 func validateCheckpoints(ap *def.App) int {
 	var err error
 	// Check the checkpoints for syntax errors.
@@ -777,13 +759,11 @@ func validateCheckpoints(ap *def.App) int {
 	}
 	return 0
 }
-
 func validateDialers(ap *def.App) int {
 	// if !*Config.Onion && *Config.OnionProxy != "" {
 	// 	// log <- cl.Error{"cannot enable tor proxy without an address specified"}
 	// 	return 1
 	// }
-
 	// Tor stream isolation requires either proxy or onion proxy to be set.
 	if *ap.Config.TorIsolation &&
 		ap.Config.Proxy == nil {
@@ -874,7 +854,6 @@ func validateDialers(ap *def.App) int {
 	}
 	return 0
 }
-
 func validateAddresses(ap *def.App) int {
 	// TODO: simplify this to a boolean and one slice for config fercryinoutloud
 	if ap.Config.AddPeers != nil && ap.Config.ConnectPeers != nil {

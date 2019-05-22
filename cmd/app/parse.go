@@ -1,20 +1,16 @@
 package app
-
 import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-
 	"git.parallelcoin.io/dev/9/cmd/def"
 	"git.parallelcoin.io/dev/9/cmd/node"
 	"git.parallelcoin.io/dev/9/pkg/util"
 	"git.parallelcoin.io/dev/9/pkg/util/cl"
 )
-
 var datadir = new(string)
-
 // Parse commandline
 func Parse(ap *def.App, args []string) int {
 	cmd, tokens := parseCLI(ap, args)
@@ -43,14 +39,12 @@ func Parse(ap *def.App, args []string) int {
 	// 		ap.Cats[i][j].Init(ap.Cats[i][j])
 	// 	}
 	// }
-
 	// // set AppDataDir for running as node
 	// aa := util.CleanAndExpandPath(filepath.Join(
 	// 	*datadir,
 	// 	cmd.Name),
 	// 	*datadir)
 	// ap.Config.AppDataDir, ap.Config.LogDir = &aa, &aa
-
 	configFile := util.CleanAndExpandPath(filepath.Join(
 		*datadir, "config"), *datadir)
 	// *ap.Config.ConfigFile = configFile
@@ -98,7 +92,6 @@ func Parse(ap *def.App, args []string) int {
 		ap)
 	return r
 }
-
 func parseCLI(ap *def.App, args []string) (cmd *def.Command, tokens def.Tokens) {
 	cmd = new(def.Command)
 	// collect set of items in commandline

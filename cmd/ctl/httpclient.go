@@ -1,5 +1,4 @@
 package ctl
-
 import (
 	"bytes"
 	"crypto/tls"
@@ -9,12 +8,10 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
-
 	"git.parallelcoin.io/dev/9/cmd/nine"
 	"git.parallelcoin.io/dev/9/pkg/rpc/json"
 	"github.com/btcsuite/go-socks/socks"
 )
-
 // newHTTPClient returns a new HTTP client that is configured according to the proxy and TLS settings in the associated connection configuration.
 func newHTTPClient(cfg *nine.Config) (*http.Client, error) {
 	// Configure proxy if needed.
@@ -56,7 +53,6 @@ func newHTTPClient(cfg *nine.Config) (*http.Client, error) {
 	}
 	return &client, nil
 }
-
 // sendPostRequest sends the marshalled JSON-RPC command using HTTP-POST mode to the server described in the passed config struct.  It also attempts to unmarshal the response as a JSON-RPC response and returns either the result field or the error field depending on whether or not there is an error.
 func sendPostRequest(marshalledJSON []byte, cfg *nine.Config) ([]byte, error) {
 	// Generate a request to the configured RPC server.

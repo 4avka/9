@@ -1,5 +1,6 @@
 // +build solaris
 
+
 // Copyright 2017 The TCell Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,15 +14,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package tcell
-
 import (
 	"os"
 	"os/signal"
 	"syscall"
 )
-
 // #include <termios.h>
 // #include <sys/ioctl.h>
 //
@@ -117,26 +115,21 @@ import (
 //	return (0);
 // }
 import "C"
-
 type termiosPrivate struct {
 	tios C.struct_termios
 }
-
 func (t *tScreen) termioInit() error {
 	var e error
 	var rv C.int
 	var newtios C.struct_termios
 	var fd C.int
-
 	if t.in, e = os.OpenFile("/dev/tty", os.O_RDONLY, 0); e != nil {
 		goto failed
 	}
 	if t.out, e = os.OpenFile("/dev/tty", os.O_WRONLY, 0); e != nil {
 		goto failed
 	}
-
 	t.tiosp = &termiosPrivate{}
-
 	fd = C.int(t.out.Fd())
 	if rv, e = C.tcgetattr(fd, &t.tiosp.tios); rv != 0 {
 		goto failed
@@ -151,26 +144,20 @@ func (t *tScreen) termioInit() error {
 		C.ISIG | C.IEXTEN
 	newtios.c_cflag &^= C.CSIZE | C.PARENB
 	newtios.c_cflag |= C.CS8
-
 	// This is setup for blocking reads.  In the past we attempted to
 	// use non-blocking reads, but now a separate input loop and timer
 	// copes with the problems we had on some systems (BSD/Darwin)
 	// where close hung forever.
 	newtios.Cc[syscall.VMIN] = 1
 	newtios.Cc[syscall.VTIME] = 0
-
 	if rv, e = C.tcsetattr(fd, C.TCSANOW|C.TCSAFLUSH, &newtios); rv != 0 {
 		goto failed
 	}
-
 	signal.Notify(t.sigwinch, syscall.SIGWINCH)
-
 	if w, h, e := t.getWinSize(); e == nil && w != 0 && h != 0 {
 		t.cells.Resize(w, h)
 	}
-
 	return nil
-
 failed:
 	if t.in != nil {
 		t.in.Close()
@@ -180,13 +167,9 @@ failed:
 	}
 	return e
 }
-
 func (t *tScreen) termioFini() {
-
 	signal.Stop(t.sigwinch)
-
 	<-t.indoneq
-
 	if t.out != nil {
 		fd := C.int(t.out.Fd())
 		C.tcsetattr(fd, C.TCSANOW|C.TCSAFLUSH, &t.tiosp.tios)
@@ -196,7 +179,6 @@ func (t *tScreen) termioFini() {
 		t.in.Close()
 	}
 }
-
 func (t *tScreen) getWinSize() (int, int, error) {
 	var cx, cy C.int
 	if r, e := C.getwinsize(C.int(t.out.Fd()), &cx, &cy); r != 0 {

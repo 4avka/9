@@ -1,17 +1,15 @@
 // +build !windows,!plan9
 
-package limits
 
+package limits
 import (
 	"fmt"
 	"syscall"
 )
-
 const (
 	fileLimitWant = 8192
 	fileLimitMin  = 1024
 )
-
 // SetLimits raises some process limits to values which allow pod and associated utilities to run.
 func SetLimits() error {
 	var rLimit syscall.Rlimit

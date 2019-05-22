@@ -1,18 +1,14 @@
 package votingpool_test
-
 import (
 	"testing"
-
 	vp "git.parallelcoin.io/dev/9/pkg/wallet/votingpool"
 )
-
 // TestErrorCodeStringer tests that all error codes has a text
 // representation and that text representation is still correct,
 // ie. that a refactoring and renaming of the error code has not
 // drifted from the textual representation.
 func TestErrorCodeStringer(
 	t *testing.T) {
-
 	// All the errors in ths
 	tests := []struct {
 		in   vp.ErrorCode
@@ -54,19 +50,13 @@ func TestErrorCodeStringer(
 		{vp.ErrWithdrawalStorage, "ErrWithdrawalStorage"},
 		{0xffff, "Unknown ErrorCode (65535)"},
 	}
-
 	if int(vp.TstLastErr) != len(tests)-1 {
-
 		t.Errorf("Wrong number of errorCodeStrings. Got: %d, want: %d",
 			int(vp.TstLastErr), len(tests))
 	}
-
 	for i, test := range tests {
-
 		result := test.in.String()
-
 		if result != test.want {
-
 			t.Errorf("String #%d\ngot: %s\nwant: %s", i, result,
 				test.want)
 		}

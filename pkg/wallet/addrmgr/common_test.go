@@ -1,5 +1,4 @@
 package waddrmgr_test
-
 import (
 	"encoding/hex"
 	"io/ioutil"
@@ -7,15 +6,12 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
-
 	chaincfg "git.parallelcoin.io/dev/9/pkg/chain/config"
 	waddrmgr "git.parallelcoin.io/dev/9/pkg/wallet/addrmgr"
 	walletdb "git.parallelcoin.io/dev/9/pkg/wallet/db"
 	_ "git.parallelcoin.io/dev/9/pkg/wallet/db/bdb"
 )
-
 var (
-
 	// seed is the master seed used throughout the tests.
 	seed = []byte{
 		0x2a, 0x64, 0xdf, 0x08, 0x5e, 0xef, 0xed, 0xd8, 0xbf,
@@ -23,26 +19,20 @@ var (
 		0xbe, 0x8b, 0x56, 0xc8, 0x83, 0x77, 0x95, 0x59, 0x8b,
 		0xb6, 0xc4, 0x40, 0xc0, 0x64,
 	}
-
 	pubPassphrase   = []byte("_DJr{fL4H0O}*-0\n:V1izc)(6BomK")
 	privPassphrase  = []byte("81lUHXnOMZ@?XXd7O9xyDIWIbXX-lj")
 	pubPassphrase2  = []byte("-0NV4P~VSJBWbunw}%<Z]fuGpbN[ZI")
 	privPassphrase2 = []byte("~{<]08%6!-?2s<$(8$8:f(5[4/!/{Y")
-
 	// fastScrypt are parameters used throughout the tests to speed up the
-
 	// scrypt operations.
 	fastScrypt = &waddrmgr.ScryptOptions{
 		N: 16,
 		R: 8,
 		P: 1,
 	}
-
 	// waddrmgrNamespaceKey is the namespace key for the waddrmgr package.
 	waddrmgrNamespaceKey = []byte("waddrmgrNamespace")
-
 	// expectedAddrs is the list of all expected addresses generated from the
-
 	// seed.
 	expectedAddrs = []expectedAddr{
 		{
@@ -196,129 +186,94 @@ var (
 			},
 		},
 	}
-
 	// expectedExternalAddrs is the list of expected external addresses
-
 	// generated from the seed
 	expectedExternalAddrs = expectedAddrs[:5]
-
 	// expectedInternalAddrs is the list of expected internal addresses
-
 	// generated from the seed
 	expectedInternalAddrs = expectedAddrs[5:]
 )
-
 // checkManagerError ensures the passed error is a ManagerError with an error
 // code that matches the passed  error code.
 func checkManagerError(
 	t *testing.T, testName string, gotErr error, wantErrCode waddrmgr.ErrorCode) bool {
-
 	merr, ok := gotErr.(waddrmgr.ManagerError)
-
 	if !ok {
-
 		t.Errorf("%s: unexpected error type - got %T, want %T",
 			testName, gotErr, waddrmgr.ManagerError{})
 		return false
 	}
-
 	if merr.ErrorCode != wantErrCode {
-
 		t.Errorf("%s: unexpected error code - got %s (%s), want %s",
 			testName, merr.ErrorCode, merr.Description, wantErrCode)
 		return false
 	}
-
 	return true
 }
-
 // hexToBytes is a wrapper around hex.DecodeString that panics if there is an
 // error.  It MUST only be used with hard coded values in the tests.
 func hexToBytes(
 	origHex string) []byte {
-
 	buf, err := hex.DecodeString(origHex)
-
 	if err != nil {
-
 		panic(err)
 	}
 	return buf
 }
 func emptyDB(
 	t *testing.T) (tearDownFunc func(), db walletdb.DB) {
-
 	dirName, err := ioutil.TempDir("", "mgrtest")
-
 	if err != nil {
-
 		t.Fatalf("Failed to create db temp dir: %v", err)
 	}
 	dbPath := filepath.Join(dirName, "mgrtest.db")
 	db, err = walletdb.Create("bdb", dbPath)
-
 	if err != nil {
-
 		_ = os.RemoveAll(dirName)
 		t.Fatalf("createDbNamespace: unexpected error: %v", err)
 	}
 	tearDownFunc = func() {
-
 		db.Close()
 		_ = os.RemoveAll(dirName)
 	}
 	return
 }
-
 // setupManager creates a new address manager and returns a teardown function
 // that should be invoked to ensure it is closed and removed upon completion.
 func setupManager(
 	t *testing.T) (tearDownFunc func(), db walletdb.DB, mgr *waddrmgr.Manager) {
-
 	// Create a new manager in a temp directory.
 	dirName, err := ioutil.TempDir("", "mgrtest")
-
 	if err != nil {
-
 		t.Fatalf("Failed to create db temp dir: %v", err)
 	}
 	dbPath := filepath.Join(dirName, "mgrtest.db")
 	db, err = walletdb.Create("bdb", dbPath)
-
 	if err != nil {
-
 		_ = os.RemoveAll(dirName)
 		t.Fatalf("createDbNamespace: unexpected error: %v", err)
 	}
 	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
-
 		ns, err := tx.CreateTopLevelBucket(waddrmgrNamespaceKey)
-
 		if err != nil {
-
 			return err
 		}
 		err = waddrmgr.Create(
 			ns, seed, pubPassphrase, privPassphrase,
 			&chaincfg.MainNetParams, fastScrypt, time.Time{},
 		)
-
 		if err != nil {
-
 			return err
 		}
 		mgr, err = waddrmgr.Open(ns, pubPassphrase, &chaincfg.MainNetParams)
 		return err
 	})
-
 	if err != nil {
-
 		db.Close()
 		_ = os.RemoveAll(dirName)
 		t.Fatalf("Failed to create Manager: %v", err)
 	}
 	tearDownFunc = func() {
-
 		mgr.Close()
 		db.Close()
 		_ = os.RemoveAll(dirName)

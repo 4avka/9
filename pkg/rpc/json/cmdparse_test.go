@@ -1,18 +1,14 @@
 package json_test
-
 import (
 	"encoding/json"
 	"math"
 	"reflect"
 	"testing"
-
 	"git.parallelcoin.io/dev/9/pkg/rpc/json"
 )
-
 // TestAssignField tests the assignField function handles supported combinations properly.
 func TestAssignField(
 	t *testing.T) {
-
 	t.Parallel()
 	tests := []struct {
 		name     string
@@ -30,7 +26,6 @@ func TestAssignField(
 			name: "same types - more source pointers",
 			dest: int8(0),
 			src: func() interface{} {
-
 				i := int8(100)
 				return &i
 			}(),
@@ -39,7 +34,6 @@ func TestAssignField(
 		{
 			name: "same types - more dest pointers",
 			dest: func() interface{} {
-
 				i := int8(0)
 				return &i
 			}(),
@@ -50,7 +44,6 @@ func TestAssignField(
 			name: "convertible types - more source pointers",
 			dest: int16(0),
 			src: func() interface{} {
-
 				i := int8(100)
 				return &i
 			}(),
@@ -59,12 +52,10 @@ func TestAssignField(
 		{
 			name: "convertible types - both pointers",
 			dest: func() interface{} {
-
 				i := int8(0)
 				return &i
 			}(),
 			src: func() interface{} {
-
 				i := int16(100)
 				return &i
 			}(),
@@ -134,9 +125,7 @@ func TestAssignField(
 			name: "convertible types - typecase string -> string",
 			dest: "",
 			src: func() interface{} {
-
 				type foo string
-
 				return foo("foo")
 			}(),
 			expected: "foo",
@@ -167,28 +156,20 @@ func TestAssignField(
 		},
 	}
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		dst := reflect.New(reflect.TypeOf(test.dest)).Elem()
 		src := reflect.ValueOf(test.src)
 		err := json.TstAssignField(1, "testField", dst, src)
-
 		if err != nil {
-
 			t.Errorf("Test #%d (%s) unexpected error: %v", i,
 				test.name, err)
 			continue
 		}
 		// Inidirect through to the base types to ensure their values are the same.
-
 		for dst.Kind() == reflect.Ptr {
-
 			dst = dst.Elem()
 		}
-
 		if !reflect.DeepEqual(dst.Interface(), test.expected) {
-
 			t.Errorf("Test #%d (%s) unexpected value - got %v, "+
 				"want %v", i, test.name, dst.Interface(),
 				test.expected)
@@ -196,11 +177,9 @@ func TestAssignField(
 		}
 	}
 }
-
 // TestAssignFieldErrors tests the assignField function error paths.
 func TestAssignFieldErrors(
 	t *testing.T) {
-
 	t.Parallel()
 	tests := []struct {
 		name string
@@ -336,23 +315,17 @@ func TestAssignFieldErrors(
 		},
 	}
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		dst := reflect.New(reflect.TypeOf(test.dest)).Elem()
 		src := reflect.ValueOf(test.src)
 		err := json.TstAssignField(1, "testField", dst, src)
-
 		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
-
 			t.Errorf("Test #%d (%s) wrong error - got %T (%[3]v), "+
 				"want %T", i, test.name, err, test.err)
 			continue
 		}
 		gotErrorCode := err.(json.Error).ErrorCode
-
 		if gotErrorCode != test.err.ErrorCode {
-
 			t.Errorf("Test #%d (%s) mismatched error code - got "+
 				"%v (%v), want %v", i, test.name, gotErrorCode,
 				err, test.err.ErrorCode)
@@ -360,11 +333,9 @@ func TestAssignFieldErrors(
 		}
 	}
 }
-
 // TestNewCmdErrors ensures the error paths of NewCmd behave as expected.
 func TestNewCmdErrors(
 	t *testing.T) {
-
 	t.Parallel()
 	tests := []struct {
 		name   string
@@ -398,21 +369,15 @@ func TestNewCmdErrors(
 		},
 	}
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		_, err := json.NewCmd(test.method, test.args...)
-
 		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
-
 			t.Errorf("Test #%d (%s) wrong error - got %T (%v), "+
 				"want %T", i, test.name, err, err, test.err)
 			continue
 		}
 		gotErrorCode := err.(json.Error).ErrorCode
-
 		if gotErrorCode != test.err.ErrorCode {
-
 			t.Errorf("Test #%d (%s) mismatched error code - got "+
 				"%v (%v), want %v", i, test.name, gotErrorCode,
 				err, test.err.ErrorCode)
@@ -420,11 +385,9 @@ func TestNewCmdErrors(
 		}
 	}
 }
-
 // TestMarshalCmdErrors  tests the error paths of the MarshalCmd function.
 func TestMarshalCmdErrors(
 	t *testing.T) {
-
 	t.Parallel()
 	tests := []struct {
 		name string
@@ -452,21 +415,15 @@ func TestMarshalCmdErrors(
 		},
 	}
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		_, err := json.MarshalCmd(test.id, test.cmd)
-
 		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
-
 			t.Errorf("Test #%d (%s) wrong error - got %T (%v), "+
 				"want %T", i, test.name, err, err, test.err)
 			continue
 		}
 		gotErrorCode := err.(json.Error).ErrorCode
-
 		if gotErrorCode != test.err.ErrorCode {
-
 			t.Errorf("Test #%d (%s) mismatched error code - got "+
 				"%v (%v), want %v", i, test.name, gotErrorCode,
 				err, test.err.ErrorCode)
@@ -474,11 +431,9 @@ func TestMarshalCmdErrors(
 		}
 	}
 }
-
 // TestUnmarshalCmdErrors  tests the error paths of the UnmarshalCmd function.
 func TestUnmarshalCmdErrors(
 	t *testing.T) {
-
 	t.Parallel()
 	tests := []struct {
 		name    string
@@ -527,21 +482,15 @@ func TestUnmarshalCmdErrors(
 		},
 	}
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		_, err := json.UnmarshalCmd(&test.request)
-
 		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
-
 			t.Errorf("Test #%d (%s) wrong error - got %T (%v), "+
 				"want %T", i, test.name, err, err, test.err)
 			continue
 		}
 		gotErrorCode := err.(json.Error).ErrorCode
-
 		if gotErrorCode != test.err.ErrorCode {
-
 			t.Errorf("Test #%d (%s) mismatched error code - got "+
 				"%v (%v), want %v", i, test.name, gotErrorCode,
 				err, test.err.ErrorCode)

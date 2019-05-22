@@ -1,16 +1,12 @@
 package json_test
-
 import (
 	"encoding/json"
 	"testing"
-
 	"git.parallelcoin.io/dev/9/pkg/rpc/json"
 )
-
 // TestChainSvrCustomResults ensures any results that have custom marshalling work as intended and unmarshal code of results are as expected.
 func TestChainSvrCustomResults(
 	t *testing.T) {
-
 	t.Parallel()
 	tests := []struct {
 		name     string
@@ -65,20 +61,14 @@ func TestChainSvrCustomResults(
 		},
 	}
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		marshalled, err := json.Marshal(test.result)
-
 		if err != nil {
-
 			t.Errorf("Test #%d (%s) unexpected error: %v", i,
 				test.name, err)
 			continue
 		}
-
 		if string(marshalled) != test.expected {
-
 			t.Errorf("Test #%d (%s) unexpected marhsalled data - "+
 				"got %s, want %s", i, test.name, marshalled,
 				test.expected)

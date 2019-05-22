@@ -1,12 +1,9 @@
 package def
-
 import (
 	"sort"
 	"time"
-
 	"git.parallelcoin.io/dev/9/cmd/nine"
 )
-
 // getValue returns the value contained in a Cats
 func (r *Cats) getValue(cat, item string) (out *interface{}) {
 	if r == nil {
@@ -20,7 +17,6 @@ func (r *Cats) getValue(cat, item string) (out *interface{}) {
 		return &o
 	}
 }
-
 // Str returns the pointer to a value in the category map
 func (r *Cats) Str(cat, item string) (out *string) {
 	cv := r.getValue(cat, item)
@@ -34,7 +30,6 @@ func (r *Cats) Str(cat, item string) (out *string) {
 		return &ci
 	}
 }
-
 // Tags returns the pointer to a value in the category map
 func (r *Cats) Tags(cat, item string) (out *[]string) {
 	cv := r.getValue(cat, item)
@@ -48,7 +43,6 @@ func (r *Cats) Tags(cat, item string) (out *[]string) {
 		return &ci
 	}
 }
-
 // Map returns the pointer to a value in the category map
 func (r *Cats) Map(cat, item string) (out *nine.Mapstringstring) {
 	cv := r.getValue(cat, item)
@@ -62,7 +56,6 @@ func (r *Cats) Map(cat, item string) (out *nine.Mapstringstring) {
 		return &ci
 	}
 }
-
 // Int returns the pointer to a value in the category map
 func (r *Cats) Int(cat, item string) (out *int) {
 	cv := r.getValue(cat, item)
@@ -76,7 +69,6 @@ func (r *Cats) Int(cat, item string) (out *int) {
 		return &ci
 	}
 }
-
 // Bool returns the pointer to a value in the category map
 func (r *Cats) Bool(cat, item string) (out *bool) {
 	cv := r.getValue(cat, item)
@@ -90,7 +82,6 @@ func (r *Cats) Bool(cat, item string) (out *bool) {
 		return &ci
 	}
 }
-
 // Float returns the pointer to a value in the category map
 func (r *Cats) Float(cat, item string) (out *float64) {
 	cv := r.getValue(cat, item)
@@ -104,7 +95,6 @@ func (r *Cats) Float(cat, item string) (out *float64) {
 		return &ci
 	}
 }
-
 // Duration returns the pointer to a value in the category map
 func (r *Cats) Duration(cat, item string) (out *time.Duration) {
 	cv := r.getValue(cat, item)
@@ -118,31 +108,24 @@ func (r *Cats) Duration(cat, item string) (out *time.Duration) {
 		return &ci
 	}
 }
-
 func (r *Row) Bool() bool {
 	return r.Value.Get().(bool)
 }
-
 func (r *Row) Int() int {
 	return r.Value.Get().(int)
 }
-
 func (r *Row) Float() float64 {
 	return r.Value.Get().(float64)
 }
-
 func (r *Row) Duration() time.Duration {
 	return r.Value.Get().(time.Duration)
 }
-
 func (r *Row) Tag() string {
 	return r.Value.Get().(string)
 }
-
 func (r *Row) Tags() []string {
 	return r.Value.Get().([]string)
 }
-
 // GetSortedKeys returns the keys of a map in alphabetical order
 func (r *CatJSON) GetSortedKeys() (out []string) {
 	for i := range *r {
@@ -151,7 +134,6 @@ func (r *CatJSON) GetSortedKeys() (out []string) {
 	sort.Strings(out)
 	return
 }
-
 func (r *CatsJSON) GetSortedKeys() (out []string) {
 	for i := range *r {
 		out = append(out, i)
@@ -159,7 +141,6 @@ func (r *CatsJSON) GetSortedKeys() (out []string) {
 	sort.Strings(out)
 	return
 }
-
 func (r *Cats) GetSortedKeys() (out []string) {
 	for i := range *r {
 		out = append(out, i)
@@ -167,7 +148,6 @@ func (r *Cats) GetSortedKeys() (out []string) {
 	sort.Strings(out)
 	return
 }
-
 func (r Cat) GetSortedKeys() (out []string) {
 	for i := range r {
 		out = append(out, i)
@@ -175,7 +155,6 @@ func (r Cat) GetSortedKeys() (out []string) {
 	sort.Strings(out)
 	return
 }
-
 func (r *Tokens) GetSortedKeys() (out []string) {
 	for i := range *r {
 		out = append(out, i)
@@ -183,7 +162,6 @@ func (r *Tokens) GetSortedKeys() (out []string) {
 	sort.Strings(out)
 	return
 }
-
 func (r *Commands) GetSortedKeys() (out []string) {
 	for i := range *r {
 		out = append(out, i)

@@ -1,5 +1,4 @@
 package walletmain
-
 import (
 	"crypto/tls"
 	"errors"
@@ -11,7 +10,6 @@ import (
 	"runtime"
 	"strings"
 	"time"
-
 	legacyrpc "git.parallelcoin.io/dev/9/pkg/rpc/legacy"
 	rpcserver "git.parallelcoin.io/dev/9/pkg/rpc/server"
 	"git.parallelcoin.io/dev/9/pkg/util"
@@ -20,10 +18,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
-
 type listenFunc func(
 	net string, laddr string) (net.Listener, error)
-
 // generateRPCKeyPair generates a new RPC TLS keypair and writes the cert and
 // possibly also the key in PEM format to the paths specified by the config.  If
 // successful, the new keypair is returned.
@@ -70,7 +66,6 @@ func generateRPCKeyPair(
 	log <- cl.Inf("done generating TLS certificates")
 	return keyPair, nil
 }
-
 // makeListeners splits the normalized listen addresses into IPv4 and IPv6
 // addresses and creates new net.Listeners for each with the passed listen func.
 // Invalid addresses are logged and skipped.
@@ -136,7 +131,6 @@ func makeListeners(
 	}
 	return listeners
 }
-
 // openRPCKeyPair creates or loads the RPC TLS keypair specified by the
 // application config.  This function respects the cfg.OneTimeTLSKey setting.
 func openRPCKeyPair() (tls.Certificate, error) {
@@ -237,7 +231,6 @@ func startRPCServers(
 	}
 	return server, legacyServer, nil
 }
-
 // startWalletRPCServices associates each of the (optionally-nil) RPC servers
 // with a wallet to enable remote wallet access.  For the GRPC server, this
 // registers the WalletService service, and for the legacy JSON-RPC server it

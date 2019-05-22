@@ -1,12 +1,10 @@
 package main
-
 import (
 	"fmt"
 	"os"
 	"runtime"
 	"runtime/debug"
 	"time"
-
 	"git.parallelcoin.io/dev/9/cmd/app"
 	. "git.parallelcoin.io/dev/9/cmd/app"
 	"git.parallelcoin.io/dev/9/cmd/def"
@@ -14,7 +12,6 @@ import (
 	"git.parallelcoin.io/dev/9/cmd/node/mempool"
 	"git.parallelcoin.io/dev/9/pkg/util/limits"
 )
-
 func main() {
 	// Use all processor cores. Use only half because most processors have
 	// two threads per core, and cache lines will suffer contention with
@@ -32,7 +29,6 @@ func main() {
 	// bursts.
 	// This value was arrived at with the help of profiling live usage.
 	debug.SetGCPercent(10)
-
 	// Up some limits.
 	if err := limits.SetLimits(); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to set limits: %v\n", err)
@@ -42,7 +38,6 @@ func main() {
 	rv := app.Parse(ap, os.Args)
 	os.Exit(rv)
 }
-
 var nineApp = func() *def.App {
 	return NewApp("9",
 		Version("v0.9.0"),

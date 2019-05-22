@@ -1,7 +1,5 @@
 package tview
-
 import "git.parallelcoin.io/dev/9/pkg/util/tcell"
-
 // Theme defines the colors used when primitives are initialized.
 type Theme struct {
 	PrimitiveBackgroundColor    tcell.Color // Main background color for primitives.
@@ -16,7 +14,6 @@ type Theme struct {
 	InverseTextColor            tcell.Color // Text on primary-colored backgrounds.
 	ContrastSecondaryTextColor  tcell.Color // Secondary text on ContrastBackgroundColor-colored backgrounds.
 }
-
 // Styles defines the theme for applications. The default is for a black
 // background and some basic colors: black, white, yellow, green, cyan, and
 // blue.

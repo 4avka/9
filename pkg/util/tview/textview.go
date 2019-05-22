@@ -1,5 +1,4 @@
 package tview
-
 import (
 	"bytes"
 	"fmt"
@@ -7,21 +6,17 @@ import (
 	"strings"
 	"sync"
 	"unicode/utf8"
-
 	"git.parallelcoin.io/dev/9/pkg/util/tcell"
 	colorful "github.com/lucasb-eyer/go-colorful"
 	runewidth "github.com/mattn/go-runewidth"
 )
-
 var (
 	openColorRegex  = regexp.MustCompile(`\[([a-zA-Z]*|#[0-9a-zA-Z]*)$`)
 	openRegionRegex = regexp.MustCompile(`\["[a-zA-Z0-9_,;: \-\.]*"?$`)
 	newLineRegex    = regexp.MustCompile(`\r?\n`)
-
 	// TabSize is the number of spaces with which a tab character will be replaced.
 	TabSize = 4
 )
-
 // textViewIndex contains information about each line displayed in the text
 // view.
 type textViewIndex struct {
@@ -34,7 +29,6 @@ type textViewIndex struct {
 	Attributes      string // The starting attributes ("" = don't change, "-" = reset).
 	Region          string // The starting region ID.
 }
-
 // TextView is a box which displays text. It implements the io.Writer interface
 // so you can stream text to it. This does not trigger a redraw automatically
 // but if a handler is installed via SetChangedFunc(), you can cause it to be
@@ -91,86 +85,63 @@ type textViewIndex struct {
 type TextView struct {
 	sync.Mutex
 	*Box
-
 	// The text buffer.
 	buffer []string
-
 	// The last bytes that have been received but are not part of the buffer yet.
 	recentBytes []byte
-
 	// The processed line index. This is nil if the buffer has changed and needs
 	// to be re-indexed.
 	index []*textViewIndex
-
 	// The text alignment, one of AlignLeft, AlignCenter, or AlignRight.
 	align int
-
 	// Indices into the "index" slice which correspond to the first line of the
 	// first highlight and the last line of the last highlight. This is calculated
 	// during re-indexing. Set to -1 if there is no current highlight.
 	fromHighlight, toHighlight int
-
 	// The screen space column of the highlight in its first line. Set to -1 if
 	// there is no current highlight.
 	posHighlight int
-
 	// A set of region IDs that are currently highlighted.
 	highlights map[string]struct{}
-
 	// The last width for which the current table is drawn.
 	lastWidth int
-
 	// The screen width of the longest line in the index (not the buffer).
 	longestLine int
-
 	// The index of the first line shown in the text view.
 	lineOffset int
-
 	// If set to true, the text view will always remain at the end of the content.
 	trackEnd bool
-
 	// The number of characters to be skipped on each line (not in wrap mode).
 	columnOffset int
-
 	// The height of the content the last time the text view was drawn.
 	pageSize int
-
 	// If set to true, the text view will keep a buffer of text which can be
 	// navigated when the text is longer than what fits into the box.
 	scrollable bool
-
 	// If set to true, lines that are longer than the available width are wrapped
 	// onto the next line. If set to false, any characters beyond the available
 	// width are discarded.
 	wrap bool
-
 	// If set to true and if wrap is also true, lines are split at spaces or
 	// after punctuation characters.
 	wordWrap bool
-
 	// The (starting) color of the text.
 	textColor tcell.Color
-
 	// If set to true, the text color can be changed dynamically by piping color
 	// strings in square brackets to the text view.
 	dynamicColors bool
-
 	// If set to true, region tags can be used to define regions.
 	regions bool
-
 	// A temporary flag which, when true, will automatically bring the current
 	// highlight(s) into the visible screen.
 	scrollToHighlights bool
-
 	// An optional function which is called when the content of the text view has
 	// changed.
 	changed func()
-
 	// An optional function which is called when the user presses one of the
 	// following keys: Escape, Enter, Tab, Backtab.
 	done func(tcell.Key)
 }
-
 // NewTextView returns a new text view.
 func NewTextView() *TextView {
 	return &TextView{
@@ -185,7 +156,6 @@ func NewTextView() *TextView {
 		dynamicColors: false,
 	}
 }
-
 // SetScrollable sets the flag that decides whether or not the text view is
 // scrollable. If true, text is kept in a buffer and can be navigated.
 func (t *TextView) SetScrollable(scrollable bool) *TextView {
@@ -195,7 +165,6 @@ func (t *TextView) SetScrollable(scrollable bool) *TextView {
 	}
 	return t
 }
-
 // SetWrap sets the flag that, if true, leads to lines that are longer than the
 // available width being wrapped onto the next line. If false, any characters
 // beyond the available width are not displayed.
@@ -206,7 +175,6 @@ func (t *TextView) SetWrap(wrap bool) *TextView {
 	t.wrap = wrap
 	return t
 }
-
 // SetWordWrap sets the flag that, if true and if the "wrap" flag is also true
 // (see SetWrap()), wraps the line at spaces or after punctuation marks. Note
 // that trailing spaces will not be printed.
@@ -219,7 +187,6 @@ func (t *TextView) SetWordWrap(wrapOnWords bool) *TextView {
 	t.wordWrap = wrapOnWords
 	return t
 }
-
 // SetTextAlign sets the text alignment within the text view. This must be
 // either AlignLeft, AlignCenter, or AlignRight.
 func (t *TextView) SetTextAlign(align int) *TextView {
@@ -229,7 +196,6 @@ func (t *TextView) SetTextAlign(align int) *TextView {
 	t.align = align
 	return t
 }
-
 // SetTextColor sets the initial color of the text (which can be changed
 // dynamically by sending color strings in square brackets to the text view if
 // dynamic colors are enabled).
@@ -237,7 +203,6 @@ func (t *TextView) SetTextColor(color tcell.Color) *TextView {
 	t.textColor = color
 	return t
 }
-
 // SetText sets the text of this text view to the provided string. Previously
 // contained text will be removed.
 func (t *TextView) SetText(text string) *TextView {
@@ -245,7 +210,6 @@ func (t *TextView) SetText(text string) *TextView {
 	fmt.Fprint(t, text)
 	return t
 }
-
 // GetText returns the current text of this text view. If "stripTags" is set
 // to true, any region/color tags are stripped from the text.
 func (t *TextView) GetText(stripTags bool) string {
@@ -254,10 +218,8 @@ func (t *TextView) GetText(stripTags bool) string {
 	if !stripTags {
 		buffer = append(buffer, string(t.recentBytes))
 	}
-
 	// Add newlines again.
 	text := strings.Join(buffer, "\n")
-
 	// Strip from tags if required.
 	if stripTags {
 		if t.regions {
@@ -270,10 +232,8 @@ func (t *TextView) GetText(stripTags bool) string {
 			text = escapePattern.ReplaceAllString(text, `[$1$2]`)
 		}
 	}
-
 	return text
 }
-
 // SetDynamicColors sets the flag that allows the text color to be changed
 // dynamically. See class description for details.
 func (t *TextView) SetDynamicColors(dynamic bool) *TextView {
@@ -283,7 +243,6 @@ func (t *TextView) SetDynamicColors(dynamic bool) *TextView {
 	t.dynamicColors = dynamic
 	return t
 }
-
 // SetRegions sets the flag that allows to define regions in the text. See class
 // description for details.
 func (t *TextView) SetRegions(regions bool) *TextView {
@@ -293,7 +252,6 @@ func (t *TextView) SetRegions(regions bool) *TextView {
 	t.regions = regions
 	return t
 }
-
 // SetChangedFunc sets a handler function which is called when the text of the
 // text view has changed. This is useful when text is written to this io.Writer
 // in a separate goroutine. This does not automatically cause the screen to be
@@ -313,7 +271,6 @@ func (t *TextView) SetChangedFunc(handler func()) *TextView {
 	t.changed = handler
 	return t
 }
-
 // SetDoneFunc sets a handler which is called when the user presses on the
 // following keys: Escape, Enter, Tab, Backtab. The key is passed to the
 // handler.
@@ -321,7 +278,6 @@ func (t *TextView) SetDoneFunc(handler func(key tcell.Key)) *TextView {
 	t.done = handler
 	return t
 }
-
 // ScrollTo scrolls to the specified row and column (both starting with 0).
 func (t *TextView) ScrollTo(row, column int) *TextView {
 	if !t.scrollable {
@@ -331,7 +287,6 @@ func (t *TextView) ScrollTo(row, column int) *TextView {
 	t.columnOffset = column
 	return t
 }
-
 // ScrollToBeginning scrolls to the top left corner of the text if the text view
 // is scrollable.
 func (t *TextView) ScrollToBeginning() *TextView {
@@ -343,7 +298,6 @@ func (t *TextView) ScrollToBeginning() *TextView {
 	t.columnOffset = 0
 	return t
 }
-
 // ScrollToEnd scrolls to the bottom left corner of the text if the text view
 // is scrollable. Adding new rows to the end of the text view will cause it to
 // scroll with the new data.
@@ -355,13 +309,11 @@ func (t *TextView) ScrollToEnd() *TextView {
 	t.columnOffset = 0
 	return t
 }
-
 // GetScrollOffset returns the number of rows and columns that are skipped at
 // the top left corner when the text view has been scrolled.
 func (t *TextView) GetScrollOffset() (row, column int) {
 	return t.lineOffset, t.columnOffset
 }
-
 // Clear removes all text from the buffer.
 func (t *TextView) Clear() *TextView {
 	t.buffer = nil
@@ -369,7 +321,6 @@ func (t *TextView) Clear() *TextView {
 	t.index = nil
 	return t
 }
-
 // Highlight specifies which regions should be highlighted. See class
 // description for details on regions. Empty region strings are ignored.
 //
@@ -389,7 +340,6 @@ func (t *TextView) Highlight(regionIDs ...string) *TextView {
 	t.index = nil
 	return t
 }
-
 // GetHighlights returns the IDs of all currently highlighted regions.
 func (t *TextView) GetHighlights() (regionIDs []string) {
 	for id := range t.highlights {
@@ -397,7 +347,6 @@ func (t *TextView) GetHighlights() (regionIDs []string) {
 	}
 	return
 }
-
 // ScrollToHighlight will cause the visible area to be scrolled so that the
 // highlighted regions appear in the visible area of the text view. This
 // repositioning happens the next time the text view is drawn. It happens only
@@ -415,7 +364,6 @@ func (t *TextView) ScrollToHighlight() *TextView {
 	t.trackEnd = false
 	return t
 }
-
 // GetRegionText returns the text of the region with the given ID. If dynamic
 // colors are enabled, color tags are stripped from the text. Newlines are
 // always returned as '\n' runes.
@@ -426,19 +374,16 @@ func (t *TextView) GetRegionText(regionID string) string {
 	if !t.regions || regionID == "" {
 		return ""
 	}
-
 	var (
 		buffer          bytes.Buffer
 		currentRegionID string
 	)
-
 	for _, str := range t.buffer {
 		// Find all color tags in this line.
 		var colorTagIndices [][]int
 		if t.dynamicColors {
 			colorTagIndices = colorPattern.FindAllStringIndex(str, -1)
 		}
-
 		// Find all regions in this line.
 		var (
 			regionIndices [][]int
@@ -448,7 +393,6 @@ func (t *TextView) GetRegionText(regionID string) string {
 			regionIndices = regionPattern.FindAllStringIndex(str, -1)
 			regions = regionPattern.FindAllStringSubmatch(str, -1)
 		}
-
 		// Analyze this line.
 		var currentTag, currentRegion int
 		for pos, ch := range str {
@@ -459,7 +403,6 @@ func (t *TextView) GetRegionText(regionID string) string {
 				}
 				continue
 			}
-
 			// Skip any regions.
 			if currentRegion < len(regionIndices) && pos >= regionIndices[currentRegion][0] && pos < regionIndices[currentRegion][1] {
 				if pos == regionIndices[currentRegion][1]-1 {
@@ -472,22 +415,18 @@ func (t *TextView) GetRegionText(regionID string) string {
 				}
 				continue
 			}
-
 			// Add this rune.
 			if currentRegionID == regionID {
 				buffer.WriteRune(ch)
 			}
 		}
-
 		// Add newline.
 		if currentRegionID == regionID {
 			buffer.WriteRune('\n')
 		}
 	}
-
 	return escapePattern.ReplaceAllString(buffer.String(), `[$1$2]`)
 }
-
 // Focus is called when this primitive receives focus.
 func (t *TextView) Focus(delegate func(p Primitive)) {
 	// Implemented here with locking because this is used by layout primitives.
@@ -495,7 +434,6 @@ func (t *TextView) Focus(delegate func(p Primitive)) {
 	defer t.Unlock()
 	t.hasFocus = true
 }
-
 // HasFocus returns whether or not this primitive has focus.
 func (t *TextView) HasFocus() bool {
 	// Implemented here with locking because this may be used in the "changed"
@@ -504,7 +442,6 @@ func (t *TextView) HasFocus() bool {
 	defer t.Unlock()
 	return t.hasFocus
 }
-
 // Write lets us implement the io.Writer interface. Tab characters will be
 // replaced with TabSize space characters. A "\n" or "\r\n" will be interpreted
 // as a new line.
@@ -516,20 +453,16 @@ func (t *TextView) Write(p []byte) (n int, err error) {
 	if changed != nil {
 		defer changed() // Deadlocks may occur if we lock here.
 	}
-
 	t.Lock()
 	defer t.Unlock()
-
 	// Copy data over.
 	newBytes := append(t.recentBytes, p...)
 	t.recentBytes = nil
-
 	// If we have a trailing invalid UTF-8 byte, we'll wait.
 	if r, _ := utf8.DecodeLastRune(p); r == utf8.RuneError {
 		t.recentBytes = newBytes
 		return len(p), nil
 	}
-
 	// If we have a trailing open dynamic color, exclude it.
 	if t.dynamicColors {
 		location := openColorRegex.FindIndex(newBytes)
@@ -538,7 +471,6 @@ func (t *TextView) Write(p []byte) (n int, err error) {
 			newBytes = newBytes[:location[0]]
 		}
 	}
-
 	// If we have a trailing open region, exclude it.
 	if t.regions {
 		location := openRegionRegex.FindIndex(newBytes)
@@ -547,7 +479,6 @@ func (t *TextView) Write(p []byte) (n int, err error) {
 			newBytes = newBytes[:location[0]]
 		}
 	}
-
 	// Transform the new bytes into strings.
 	newBytes = bytes.Replace(newBytes, []byte{'\t'}, bytes.Repeat([]byte{' '}, TabSize), -1)
 	for index, line := range newLineRegex.Split(string(newBytes), -1) {
@@ -561,13 +492,10 @@ func (t *TextView) Write(p []byte) (n int, err error) {
 			t.buffer = append(t.buffer, line)
 		}
 	}
-
 	// Reset the index.
 	t.index = nil
-
 	return len(p), nil
 }
-
 // reindexBuffer re-indexes the buffer such that we can use it to easily draw
 // the buffer onto the screen. Each line in the index will contain a pointer
 // into the buffer from which on we will print text. It will also contain the
@@ -578,20 +506,16 @@ func (t *TextView) reindexBuffer(width int) {
 	}
 	t.index = nil
 	t.fromHighlight, t.toHighlight, t.posHighlight = -1, -1, -1
-
 	// If there's no space, there's no index.
 	if width < 1 {
 		return
 	}
-
 	// Initial states.
 	regionID := ""
 	var highlighted bool
-
 	// Go through each line in the buffer.
 	for bufferIndex, str := range t.buffer {
 		colorTagIndices, colorTags, regionIndices, regions, escapeIndices, strippedStr, _ := decomposeString(str, t.dynamicColors, t.regions)
-
 		// Split the line if required.
 		var splitLines []string
 		str = strippedStr
@@ -603,7 +527,6 @@ func (t *TextView) reindexBuffer(width int) {
 					if spaces := spacePattern.FindStringIndex(str[len(extract):]); spaces != nil && spaces[0] == 0 {
 						extract = str[:len(extract)+spaces[1]]
 					}
-
 					// Can we split before the mandatory end?
 					matches := boundaryPattern.FindAllStringIndex(extract, -1)
 					if len(matches) > 0 {
@@ -618,7 +541,6 @@ func (t *TextView) reindexBuffer(width int) {
 			// No need to split the line.
 			splitLines = []string{str}
 		}
-
 		// Create index from split lines.
 		var (
 			originalPos, colorPos, regionPos, escapePos  int
@@ -633,7 +555,6 @@ func (t *TextView) reindexBuffer(width int) {
 				Attributes:      attributes,
 				Region:          regionID,
 			}
-
 			// Shift original position with tags.
 			lineLength := len(splitLine)
 			remainingLength := lineLength
@@ -659,12 +580,10 @@ func (t *TextView) reindexBuffer(width int) {
 						tagIndex = index
 					}
 				}
-
 				// Is the next tag in range?
 				if tagIndex < 0 || minPos >= tagEnd+remainingLength {
 					break // No. We're done with this line.
 				}
-
 				// Advance.
 				strippedTagStart := nextTag[tagIndex][0] - originalPos - totalTagLength
 				tagEnd = nextTag[tagIndex][1]
@@ -674,7 +593,6 @@ func (t *TextView) reindexBuffer(width int) {
 				}
 				totalTagLength += tagLength
 				remainingLength = lineLength - (tagEnd - originalPos - totalTagLength)
-
 				// Process the tag.
 				switch nextTag[tagIndex][2] {
 				case 0:
@@ -685,7 +603,6 @@ func (t *TextView) reindexBuffer(width int) {
 					// Process region tags.
 					regionID = regions[regionPos][1]
 					_, highlighted = t.highlights[regionID]
-
 					// Update highlight range.
 					if highlighted {
 						line := len(t.index)
@@ -696,23 +613,19 @@ func (t *TextView) reindexBuffer(width int) {
 							t.toHighlight = line
 						}
 					}
-
 					regionPos++
 				case 2:
 					// Process escape tags.
 					escapePos++
 				}
 			}
-
 			// Advance to next line.
 			originalPos += lineLength + totalTagLength
-
 			// Append this line.
 			line.NextPos = originalPos
 			line.Width = stringWidth(splitLine)
 			t.index = append(t.index, line)
 		}
-
 		// Word-wrapped lines may have trailing whitespace. Remove it.
 		if t.wrap && t.wordWrap {
 			for _, line := range t.index {
@@ -726,7 +639,6 @@ func (t *TextView) reindexBuffer(width int) {
 			}
 		}
 	}
-
 	// Calculate longest line.
 	t.longestLine = 0
 	for _, line := range t.index {
@@ -735,31 +647,25 @@ func (t *TextView) reindexBuffer(width int) {
 		}
 	}
 }
-
 // Draw draws this primitive onto the screen.
 func (t *TextView) Draw(screen tcell.Screen) {
 	t.Lock()
 	defer t.Unlock()
 	t.Box.Draw(screen)
-
 	// Get the available size.
 	x, y, width, height := t.GetInnerRect()
 	t.pageSize = height
-
 	// If the width has changed, we need to reindex.
 	if width != t.lastWidth && t.wrap {
 		t.index = nil
 	}
 	t.lastWidth = width
-
 	// Re-index.
 	t.reindexBuffer(width)
-
 	// If we don't have an index, there's nothing to draw.
 	if t.index == nil {
 		return
 	}
-
 	// Move to highlighted regions.
 	if t.regions && t.scrollToHighlights && t.fromHighlight >= 0 {
 		// Do we fit the entire height?
@@ -770,19 +676,16 @@ func (t *TextView) Draw(screen tcell.Screen) {
 			// No, let's move to the start of the highlights.
 			t.lineOffset = t.fromHighlight
 		}
-
 		// If the highlight is too far to the right, move it to the middle.
 		if t.posHighlight-t.columnOffset > 3*width/4 {
 			t.columnOffset = t.posHighlight - width/2
 		}
-
 		// If the highlight is off-screen on the left, move it on-screen.
 		if t.posHighlight-t.columnOffset < 0 {
 			t.columnOffset = t.posHighlight - width/4
 		}
 	}
 	t.scrollToHighlights = false
-
 	// Adjust line offset.
 	if t.lineOffset+height > len(t.index) {
 		t.trackEnd = true
@@ -793,7 +696,6 @@ func (t *TextView) Draw(screen tcell.Screen) {
 	if t.lineOffset < 0 {
 		t.lineOffset = 0
 	}
-
 	// Adjust column offset.
 	if t.align == AlignLeft {
 		if t.columnOffset+width > t.longestLine {
@@ -822,7 +724,6 @@ func (t *TextView) Draw(screen tcell.Screen) {
 			t.columnOffset = 0
 		}
 	}
-
 	// Draw the buffer.
 	defaultStyle := tcell.StyleDefault.Foreground(t.textColor)
 	for line := t.lineOffset; line < len(t.index); line++ {
@@ -830,7 +731,6 @@ func (t *TextView) Draw(screen tcell.Screen) {
 		if line-t.lineOffset >= height {
 			break
 		}
-
 		// Get the text for this line.
 		index := t.index[line]
 		text := t.buffer[index.Line][index.Pos:index.NextPos]
@@ -838,10 +738,8 @@ func (t *TextView) Draw(screen tcell.Screen) {
 		backgroundColor := index.BackgroundColor
 		attributes := index.Attributes
 		regionID := index.Region
-
 		// Process tags.
 		colorTagIndices, colorTags, regionIndices, regions, escapeIndices, strippedText, _ := decomposeString(text, t.dynamicColors, t.regions)
-
 		// Calculate the position of the line.
 		var skip, posX int
 		if t.align == AlignLeft {
@@ -855,7 +753,6 @@ func (t *TextView) Draw(screen tcell.Screen) {
 			skip = -posX
 			posX = 0
 		}
-
 		// Print the line.
 		var colorPos, regionPos, escapePos, tagOffset, skipped int
 		iterateString(strippedText, func(main rune, comb []rune, textPos, textWidth, screenPos, screenWidth int) bool {
@@ -875,18 +772,15 @@ func (t *TextView) Draw(screen tcell.Screen) {
 					break
 				}
 			}
-
 			// Skip the second-to-last character of an escape tag.
 			if escapePos < len(escapeIndices) && textPos+tagOffset == escapeIndices[escapePos][1]-2 {
 				tagOffset++
 				escapePos++
 			}
-
 			// Mix the existing style with the new style.
 			_, _, existingStyle, _ := screen.GetContent(x+posX, y+line-t.lineOffset)
 			_, background, _ := existingStyle.Decompose()
 			style := overlayStyle(background, defaultStyle, foregroundColor, backgroundColor, attributes)
-
 			// Do we highlight this character?
 			var highlighted bool
 			if len(regionID) > 0 {
@@ -908,18 +802,15 @@ func (t *TextView) Draw(screen tcell.Screen) {
 				}
 				style = style.Background(fg).Foreground(bg)
 			}
-
 			// Skip to the right.
 			if !t.wrap && skipped < skip {
 				skipped += screenWidth
 				return false
 			}
-
 			// Stop at the right border.
 			if posX+screenWidth > width {
 				return true
 			}
-
 			// Draw the character.
 			for offset := screenWidth - 1; offset >= 0; offset-- {
 				if offset == 0 {
@@ -928,13 +819,11 @@ func (t *TextView) Draw(screen tcell.Screen) {
 					screen.SetContent(x+posX+offset, y+line-t.lineOffset, ' ', nil, style)
 				}
 			}
-
 			// Advance.
 			posX += screenWidth
 			return false
 		})
 	}
-
 	// If this view is not scrollable, we'll purge the buffer of lines that have
 	// scrolled out of view.
 	if !t.scrollable && t.lineOffset > 0 {
@@ -942,23 +831,19 @@ func (t *TextView) Draw(screen tcell.Screen) {
 		t.index = nil
 	}
 }
-
 // InputHandler returns the handler for this primitive.
 func (t *TextView) InputHandler() func(event *tcell.EventKey, setFocus func(p Primitive)) {
 	return t.WrapInputHandler(func(event *tcell.EventKey, setFocus func(p Primitive)) {
 		key := event.Key()
-
 		if key == tcell.KeyEscape || key == tcell.KeyEnter || key == tcell.KeyTab || key == tcell.KeyBacktab {
 			if t.done != nil {
 				t.done(key)
 			}
 			return
 		}
-
 		if !t.scrollable {
 			return
 		}
-
 		switch key {
 		case tcell.KeyRune:
 			switch event.Rune() {

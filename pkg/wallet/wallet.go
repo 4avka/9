@@ -1,5 +1,4 @@
 package wallet
-
 import (
 	"bytes"
 	"encoding/hex"
@@ -9,7 +8,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
 	blockchain "git.parallelcoin.io/dev/9/pkg/chain"
 	chaincfg "git.parallelcoin.io/dev/9/pkg/chain/config"
 	chainhash "git.parallelcoin.io/dev/9/pkg/chain/hash"
@@ -29,7 +27,6 @@ import (
 	walletdb "git.parallelcoin.io/dev/9/pkg/wallet/db"
 	"github.com/davecgh/go-spew/spew"
 )
-
 const (
 	// InsecurePubPassphrase is the default outer encryption passphrase used
 	// for public data (everything but private keys).  Using a non-default
@@ -46,18 +43,15 @@ const (
 	// wallet is started in recovery mode.
 	recoveryBatchSize = 2000
 )
-
 // ErrNotSynced describes an error where an operation cannot complete
 // due wallet being out of sync (and perhaps currently syncing with)
 // the remote chain server.
 var ErrNotSynced = errors.New("wallet is not synchronized with the chain server")
-
 // Namespace bucket keys.
 var (
 	waddrmgrNamespaceKey = []byte("waddrmgr")
 	wtxmgrNamespaceKey   = []byte("wtxmgr")
 )
-
 // Wallet is a structure containing all the components for a
 // complete wallet.  It contains the Armory-style key store
 // addresses and keys),
@@ -101,7 +95,6 @@ type Wallet struct {
 	quit             chan struct{}
 	quitMu           sync.Mutex
 }
-
 // Start starts the goroutines necessary to manage a wallet.
 func (w *Wallet) Start() {
 	w.quitMu.Lock()
@@ -123,7 +116,6 @@ func (w *Wallet) Start() {
 	go w.txCreator()
 	go w.walletLocker()
 }
-
 // SynchronizeRPC associates the wallet with the consensus RPC client,
 // synchronizes the wallet with the latest changes to the blockchain, and
 // continuously updates the wallet through RPC notifications.
@@ -166,7 +158,6 @@ func (w *Wallet) SynchronizeRPC(chainClient chain.Interface) {
 	go w.rescanProgressHandler()
 	go w.rescanRPCHandler()
 }
-
 // requireChainClient marks that a wallet method can only be completed when the
 // consensus RPC server is set.  This function and all functions that call it
 // are unstable and will need to be moved when the syncing code is moved out of
@@ -180,7 +171,6 @@ func (w *Wallet) requireChainClient() (chain.Interface, error) {
 	}
 	return chainClient, nil
 }
-
 // ChainClient returns the optional consensus RPC client associated with the
 // wallet.
 //
@@ -192,7 +182,6 @@ func (w *Wallet) ChainClient() chain.Interface {
 	w.chainClientLock.Unlock()
 	return chainClient
 }
-
 // quitChan atomically reads the quit channel.
 func (w *Wallet) quitChan() <-chan struct{} {
 	w.quitMu.Lock()
@@ -200,7 +189,6 @@ func (w *Wallet) quitChan() <-chan struct{} {
 	w.quitMu.Unlock()
 	return c
 }
-
 // Stop signals all wallet goroutines to shutdown.
 func (w *Wallet) Stop() {
 	w.quitMu.Lock()
@@ -218,7 +206,6 @@ func (w *Wallet) Stop() {
 		w.chainClientLock.Unlock()
 	}
 }
-
 // ShuttingDown returns whether the wallet is currently in the process of
 // shutting down or not.
 func (w *Wallet) ShuttingDown() bool {
@@ -229,7 +216,6 @@ func (w *Wallet) ShuttingDown() bool {
 		return false
 	}
 }
-
 // WaitForShutdown blocks until all wallet goroutines have finished executing.
 func (w *Wallet) WaitForShutdown() {
 	w.chainClientLock.Lock()
@@ -239,7 +225,6 @@ func (w *Wallet) WaitForShutdown() {
 	w.chainClientLock.Unlock()
 	w.wg.Wait()
 }
-
 // SynchronizingToNetwork returns whether the wallet is currently synchronizing
 // with the Bitcoin network.
 func (w *Wallet) SynchronizingToNetwork() bool {
@@ -252,7 +237,6 @@ func (w *Wallet) SynchronizingToNetwork() bool {
 	w.chainClientSyncMtx.Unlock()
 	return syncing
 }
-
 // ChainSynced returns whether the wallet has been attached to a chain server
 // and synced up to the best block on the main chain.
 func (w *Wallet) ChainSynced() bool {
@@ -261,7 +245,6 @@ func (w *Wallet) ChainSynced() bool {
 	w.chainClientSyncMtx.Unlock()
 	return synced
 }
-
 // SetChainSynced marks whether the wallet is connected to and currently in sync
 // with the latest block notified by the chain server.
 //
@@ -274,7 +257,6 @@ func (w *Wallet) SetChainSynced(synced bool) {
 	w.chainClientSynced = synced
 	w.chainClientSyncMtx.Unlock()
 }
-
 // activeData returns the currently-active receiving addresses and all unspent
 // outputs.  This is primarely intended to provide the parameters for a
 // rescan request.
@@ -292,7 +274,6 @@ func (w *Wallet) activeData(dbtx walletdb.ReadTx) ([]util.Address, []wtxmgr.Cred
 	unspent, err := w.TxStore.UnspentOutputs(txmgrNs)
 	return addrs, unspent, err
 }
-
 // syncWithChain brings the wallet up to date with the current chain server
 // connection.  It creates a rescan request and blocks until the rescan has
 // finished.
@@ -598,7 +579,6 @@ func (w *Wallet) syncWithChain() error {
 	}
 	return w.rescanWithTarget(addrs, unspent, birthdayStamp)
 }
-
 // defaultScopeManagers fetches the ScopedKeyManagers from the wallet using the
 // default set of key scopes.
 func (w *Wallet) defaultScopeManagers() (
@@ -613,7 +593,6 @@ func (w *Wallet) defaultScopeManagers() (
 	}
 	return scopedMgrs, nil
 }
-
 // recoverDefaultScopes attempts to recover any addresses belonging to any
 // active scoped key managers known to the wallet. Recovery of each scope's
 // default account will be done iteratively against the same batch of blocks.
@@ -632,7 +611,6 @@ func (w *Wallet) recoverDefaultScopes(
 		chainClient, tx, ns, batch, recoveryState, scopedMgrs,
 	)
 }
-
 // recoverAccountAddresses scans a range of blocks in attempts to recover any
 // previously used addresses for a particular account derivation path. At a high
 // level, the algorithm works as follows:
@@ -728,7 +706,6 @@ expandHorizons:
 	}
 	return nil
 }
-
 // expandScopeHorizons ensures that the ScopeRecoveryState has an adequately
 // sized look ahead for both its internal and external branches. The keys
 // derived here are added to the scope's recovery state, but do not affect the
@@ -793,7 +770,6 @@ func expandScopeHorizons(
 	}
 	return nil
 }
-
 // externalKeyPath returns the relative external derivation path /0/0/index.
 func externalKeyPath(
 	index uint32) waddrmgr.DerivationPath {
@@ -803,7 +779,6 @@ func externalKeyPath(
 		Index:   index,
 	}
 }
-
 // internalKeyPath returns the relative internal derivation path /0/1/index.
 func internalKeyPath(
 	index uint32) waddrmgr.DerivationPath {
@@ -813,7 +788,6 @@ func internalKeyPath(
 		Index:   index,
 	}
 }
-
 // newFilterBlocksRequest constructs FilterBlocksRequests using our current
 // block range, scoped managers, and recovery state.
 func newFilterBlocksRequest(
@@ -847,7 +821,6 @@ func newFilterBlocksRequest(
 	}
 	return filterReq
 }
-
 // extendFoundAddresses accepts a filter blocks response that contains addresses
 // found on chain, and advances the state of all relevant derivation paths to
 // match the highest found child index for each branch.
@@ -932,7 +905,6 @@ func extendFoundAddresses(
 	}
 	return nil
 }
-
 // logFilterBlocksResp provides useful logging information when filtering
 // succeeded in finding relevant transactions.
 func logFilterBlocksResp(
@@ -969,7 +941,6 @@ func logFilterBlocksResp(
 		}
 	}
 }
-
 type (
 	createTxRequest struct {
 		account     uint32
@@ -983,7 +954,6 @@ type (
 		err error
 	}
 )
-
 // txCreator is responsible for the input selection and creation of
 // transactions.  These functions are the responsibility of this method
 // (designed to be run as its own goroutine) since input selection must be
@@ -1015,7 +985,6 @@ out:
 	}
 	w.wg.Done()
 }
-
 // CreateSimpleTx creates a new signed transaction spending unspent P2PKH
 // outputs with at laest minconf confirmations spending to any number of
 // address/amount pairs.  Change and an appropriate transaction fee are
@@ -1035,7 +1004,6 @@ func (w *Wallet) CreateSimpleTx(account uint32, outputs []*wire.TxOut,
 	resp := <-req.resp
 	return resp.tx, resp.err
 }
-
 type (
 	unlockRequest struct {
 		passphrase []byte
@@ -1059,7 +1027,6 @@ type (
 	// will forever remain unlocked.
 	heldUnlock chan struct{}
 )
-
 // walletLocker manages the locked/unlocked state of a wallet.
 func (w *Wallet) walletLocker() {
 	var timeout <-chan time.Time
@@ -1149,7 +1116,6 @@ out:
 	}
 	w.wg.Done()
 }
-
 // Unlock unlocks the wallet's address manager and relocks it after timeout has
 // expired.  If the wallet is already unlocked and the new passphrase is
 // correct, the current timeout is replaced with the new one.  The wallet will
@@ -1164,17 +1130,14 @@ func (w *Wallet) Unlock(passphrase []byte, lock <-chan time.Time) error {
 	}
 	return <-err
 }
-
 // Lock locks the wallet's address manager.
 func (w *Wallet) Lock() {
 	w.lockRequests <- struct{}{}
 }
-
 // Locked returns whether the account manager for a wallet is locked.
 func (w *Wallet) Locked() bool {
 	return <-w.lockState
 }
-
 // holdUnlock prevents the wallet from being locked.  The heldUnlock object
 // *must* be released, or the wallet will forever remain unlocked.
 //
@@ -1195,14 +1158,12 @@ func (w *Wallet) holdUnlock() (heldUnlock, error) {
 	}
 	return hl, nil
 }
-
 // release releases the hold on the unlocked-state of the wallet and allows the
 // wallet to be locked again.  If a lock timeout has already expired, the
 // wallet is locked again as soon as release is called.
 func (c heldUnlock) release() {
 	c <- struct{}{}
 }
-
 // ChangePrivatePassphrase attempts to change the passphrase for a wallet from
 // old to new.  Changing the passphrase is synchronized with all other address
 // manager locking and unlocking.  The lock state will be the same as it was
@@ -1217,7 +1178,6 @@ func (w *Wallet) ChangePrivatePassphrase(old, new []byte) error {
 	}
 	return <-err
 }
-
 // ChangePublicPassphrase modifies the public passphrase of the wallet.
 func (w *Wallet) ChangePublicPassphrase(old, new []byte) error {
 	err := make(chan error, 1)
@@ -1229,7 +1189,6 @@ func (w *Wallet) ChangePublicPassphrase(old, new []byte) error {
 	}
 	return <-err
 }
-
 // ChangePassphrases modifies the public and private passphrase of the wallet
 // atomically.
 func (w *Wallet) ChangePassphrases(publicOld, publicNew, privateOld,
@@ -1244,7 +1203,6 @@ func (w *Wallet) ChangePassphrases(publicOld, publicNew, privateOld,
 	}
 	return <-err
 }
-
 // accountUsed returns whether there are any recorded transactions spending to
 // a given account. It returns true if atleast one address in the account was
 // used and false if no address in the account was used.
@@ -1263,7 +1221,6 @@ func (w *Wallet) accountUsed(addrmgrNs walletdb.ReadWriteBucket, account uint32)
 	}
 	return used, err
 }
-
 // AccountAddresses returns the addresses for every created address for an
 // account.
 func (w *Wallet) AccountAddresses(account uint32) (addrs []util.Address, err error) {
@@ -1276,7 +1233,6 @@ func (w *Wallet) AccountAddresses(account uint32) (addrs []util.Address, err err
 	})
 	return
 }
-
 // CalculateBalance sums the amounts of all unspent transaction
 // outputs to addresses of a wallet and returns the balance.
 //
@@ -1296,7 +1252,6 @@ func (w *Wallet) CalculateBalance(confirms int32) (util.Amount, error) {
 	})
 	return balance, err
 }
-
 // Balances records total, spendable (by policy), and immature coinbase
 // reward balance amounts.
 type Balances struct {
@@ -1304,7 +1259,6 @@ type Balances struct {
 	Spendable      util.Amount
 	ImmatureReward util.Amount
 }
-
 // CalculateAccountBalances sums the amounts of all unspent transaction
 // outputs to the given account of a wallet and returns the balance.
 //
@@ -1346,7 +1300,6 @@ func (w *Wallet) CalculateAccountBalances(account uint32, confirms int32) (Balan
 	})
 	return bals, err
 }
-
 // CurrentAddress gets the most recently requested Bitcoin payment address
 // from a wallet for a particular key-chain scope.  If the address has already
 // been used (there is at least one transaction spending to it in the
@@ -1402,7 +1355,6 @@ func (w *Wallet) CurrentAddress(account uint32, scope waddrmgr.KeyScope) (util.A
 	}
 	return addr, nil
 }
-
 // PubKeyForAddress looks up the associated public key for a P2PKH address.
 func (w *Wallet) PubKeyForAddress(a util.Address) (*ec.PublicKey, error) {
 	var pubKey *ec.PublicKey
@@ -1421,7 +1373,6 @@ func (w *Wallet) PubKeyForAddress(a util.Address) (*ec.PublicKey, error) {
 	})
 	return pubKey, err
 }
-
 // PrivKeyForAddress looks up the associated private key for a P2PKH or P2PK
 // address.
 func (w *Wallet) PrivKeyForAddress(a util.Address) (*ec.PrivateKey, error) {
@@ -1441,7 +1392,6 @@ func (w *Wallet) PrivKeyForAddress(a util.Address) (*ec.PrivateKey, error) {
 	})
 	return privKey, err
 }
-
 // HaveAddress returns whether the wallet is the owner of the address a.
 func (w *Wallet) HaveAddress(a util.Address) (bool, error) {
 	err := walletdb.View(w.db, func(tx walletdb.ReadTx) error {
@@ -1457,7 +1407,6 @@ func (w *Wallet) HaveAddress(a util.Address) (bool, error) {
 	}
 	return false, err
 }
-
 // AccountOfAddress finds the account that an address is associated with.
 func (w *Wallet) AccountOfAddress(a util.Address) (uint32, error) {
 	var account uint32
@@ -1469,7 +1418,6 @@ func (w *Wallet) AccountOfAddress(a util.Address) (uint32, error) {
 	})
 	return account, err
 }
-
 // AddressInfo returns detailed information regarding a wallet address.
 func (w *Wallet) AddressInfo(a util.Address) (waddrmgr.ManagedAddress, error) {
 	var managedAddress waddrmgr.ManagedAddress
@@ -1481,7 +1429,6 @@ func (w *Wallet) AddressInfo(a util.Address) (waddrmgr.ManagedAddress, error) {
 	})
 	return managedAddress, err
 }
-
 // AccountNumber returns the account number for an account name under a
 // particular key scope.
 func (w *Wallet) AccountNumber(scope waddrmgr.KeyScope, accountName string) (uint32, error) {
@@ -1498,7 +1445,6 @@ func (w *Wallet) AccountNumber(scope waddrmgr.KeyScope, accountName string) (uin
 	})
 	return account, err
 }
-
 // AccountName returns the name of an account.
 func (w *Wallet) AccountName(scope waddrmgr.KeyScope, accountNumber uint32) (string, error) {
 	manager, err := w.Manager.FetchScopedKeyManager(scope)
@@ -1514,7 +1460,6 @@ func (w *Wallet) AccountName(scope waddrmgr.KeyScope, accountNumber uint32) (str
 	})
 	return accountName, err
 }
-
 // AccountProperties returns the properties of an account, including address
 // indexes and name. It first fetches the desynced information from the address
 // manager, then updates the indexes based on the address pools.
@@ -1532,7 +1477,6 @@ func (w *Wallet) AccountProperties(scope waddrmgr.KeyScope, acct uint32) (*waddr
 	})
 	return props, err
 }
-
 // RenameAccount sets the name for an account number to newName.
 func (w *Wallet) RenameAccount(scope waddrmgr.KeyScope, account uint32, newName string) error {
 	manager, err := w.Manager.FetchScopedKeyManager(scope)
@@ -1554,9 +1498,7 @@ func (w *Wallet) RenameAccount(scope waddrmgr.KeyScope, account uint32, newName 
 	}
 	return err
 }
-
 const maxEmptyAccounts = 100
-
 // NextAccount creates the next account and returns its account number.  The
 // name must be unique to the account.  In order to support automatic seed
 // restoring, new accounts may not be created when all of the previous 100
@@ -1590,21 +1532,18 @@ func (w *Wallet) NextAccount(scope waddrmgr.KeyScope, name string) (uint32, erro
 	}
 	return account, err
 }
-
 // CreditCategory describes the type of wallet transaction output.  The category
 // of "sent transactions" (debits) is always "send", and is not expressed by
 // this type.
 //
 // TODO: This is a requirement of the RPC server and should be moved.
 type CreditCategory byte
-
 // These constants define the possible credit categories.
 const (
 	CreditReceive CreditCategory = iota
 	CreditGenerate
 	CreditImmature
 )
-
 // String returns the category as a string.  This string may be used as the
 // JSON string for categories as part of listtransactions and gettransaction
 // RPC responses.
@@ -1620,7 +1559,6 @@ func (c CreditCategory) String() string {
 		return "unknown"
 	}
 }
-
 // RecvCategory returns the category of received credit outputs from a
 // transaction record.  The passed block chain height is used to distinguish
 // immature from mature coinbase outputs.
@@ -1638,7 +1576,6 @@ func RecvCategory(
 	}
 	return CreditReceive
 }
-
 // listTransactions creates a object that may be marshalled to a response result
 // for a listtransactions RPC.
 //
@@ -1757,7 +1694,6 @@ outputs:
 	}
 	return results
 }
-
 // ListSinceBlock returns a slice of objects with details about transactions
 // since the given block. If the block is -1 then all transactions are included.
 // This is intended to be used for listsinceblock RPC replies.
@@ -1777,7 +1713,6 @@ func (w *Wallet) ListSinceBlock(start, end, syncHeight int32) ([]json.ListTransa
 	})
 	return txList, err
 }
-
 // ListTransactions returns a slice of objects with details about a recorded
 // transaction.  This is intended to be used for listtransactions RPC
 // replies.
@@ -1821,7 +1756,6 @@ func (w *Wallet) ListTransactions(from, count int) ([]json.ListTransactionsResul
 	})
 	return txList, err
 }
-
 // ListAddressTransactions returns a slice of objects with details about
 // recorded transactions to or from any address belonging to a set.  This is
 // intended to be used for listaddresstransactions RPC replies.
@@ -1866,7 +1800,6 @@ func (w *Wallet) ListAddressTransactions(pkHashes map[string]struct{}) ([]json.L
 	})
 	return txList, err
 }
-
 // ListAllTransactions returns a slice of objects with details about a recorded
 // transaction.  This is intended to be used for listalltransactions RPC
 // replies.
@@ -1895,32 +1828,27 @@ func (w *Wallet) ListAllTransactions() ([]json.ListTransactionsResult, error) {
 	})
 	return txList, err
 }
-
 // BlockIdentifier identifies a block by either a height or a hash.
 type BlockIdentifier struct {
 	height int32
 	hash   *chainhash.Hash
 }
-
 // NewBlockIdentifierFromHeight constructs a BlockIdentifier for a block height.
 func NewBlockIdentifierFromHeight(
 	height int32) *BlockIdentifier {
 	return &BlockIdentifier{height: height}
 }
-
 // NewBlockIdentifierFromHash constructs a BlockIdentifier for a block hash.
 func NewBlockIdentifierFromHash(
 	hash *chainhash.Hash) *BlockIdentifier {
 	return &BlockIdentifier{hash: hash}
 }
-
 // GetTransactionsResult is the result of the wallet's GetTransactions method.
 // See GetTransactions for more details.
 type GetTransactionsResult struct {
 	MinedTransactions   []Block
 	UnminedTransactions []TransactionSummary
 }
-
 // GetTransactions returns transaction results between a starting and ending
 // block.  Blocks in the block range may be specified by either a height or a
 // hash.
@@ -2034,13 +1962,11 @@ func (w *Wallet) GetTransactions(startBlock, endBlock *BlockIdentifier, cancel <
 	})
 	return &res, err
 }
-
 // AccountResult is a single account result for the AccountsResult type.
 type AccountResult struct {
 	waddrmgr.AccountProperties
 	TotalBalance util.Amount
 }
-
 // AccountsResult is the resutl of the wallet's Accounts method.  See that
 // method for more details.
 type AccountsResult struct {
@@ -2048,7 +1974,6 @@ type AccountsResult struct {
 	CurrentBlockHash   *chainhash.Hash
 	CurrentBlockHeight int32
 }
-
 // Accounts returns the current names, numbers, and total balances of all
 // accounts in the wallet restricted to a particular key scope.  The current
 // chain tip is included in the result for atomicity reasons.
@@ -2117,14 +2042,12 @@ func (w *Wallet) Accounts(scope waddrmgr.KeyScope) (*AccountsResult, error) {
 		},
 		err
 }
-
 // AccountBalanceResult is a single result for the Wallet.AccountBalances method.
 type AccountBalanceResult struct {
 	AccountNumber  uint32
 	AccountName    string
 	AccountBalance util.Amount
 }
-
 // AccountBalances returns all accounts in the wallet and their balances.
 // Balances are determined by excluding transactions that have not met
 // requiredConfs confirmations.
@@ -2193,14 +2116,12 @@ func (w *Wallet) AccountBalances(scope waddrmgr.KeyScope,
 	})
 	return results, err
 }
-
 // creditSlice satisifies the sort.Interface interface to provide sorting
 // transaction credits from oldest to newest.  Credits with the same receive
 // time and mined in the same block are not guaranteed to be sorted by the order
 // they appear in the block.  Credits from the same transaction are sorted by
 // output index.
 type creditSlice []wtxmgr.Credit
-
 func (s creditSlice) Len() int {
 	return len(s)
 }
@@ -2225,7 +2146,6 @@ func (s creditSlice) Less(i, j int) bool {
 func (s creditSlice) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
-
 // ListUnspent returns a slice of objects representing the unspent wallet
 // transactions fitting the given criteria. The confirmations will be more than
 // minconf, less than maxconf and if addresses is populated only the addresses
@@ -2352,7 +2272,6 @@ func (w *Wallet) ListUnspent(minconf, maxconf int32,
 	})
 	return results, err
 }
-
 // DumpPrivKeys returns the WIF-encoded private keys for all addresses with
 // private keys in a wallet.
 func (w *Wallet) DumpPrivKeys() ([]string, error) {
@@ -2384,7 +2303,6 @@ func (w *Wallet) DumpPrivKeys() ([]string, error) {
 	})
 	return privkeys, err
 }
-
 // DumpWIFPrivateKey returns the WIF encoded private key for a
 // single wallet address.
 func (w *Wallet) DumpWIFPrivateKey(addr util.Address) (string, error) {
@@ -2409,7 +2327,6 @@ func (w *Wallet) DumpWIFPrivateKey(addr util.Address) (string, error) {
 	}
 	return wif.String(), nil
 }
-
 // ImportPrivateKey imports a private key to the wallet and writes the new
 // wallet to disk.
 func (w *Wallet) ImportPrivateKey(scope waddrmgr.KeyScope, wif *util.WIF,
@@ -2481,32 +2398,27 @@ func (w *Wallet) ImportPrivateKey(scope waddrmgr.KeyScope, wif *util.WIF,
 	// Return the payment address string of the imported private key.
 	return addrStr, nil
 }
-
 // LockedOutpoint returns whether an outpoint has been marked as locked and
 // should not be used as an input for created transactions.
 func (w *Wallet) LockedOutpoint(op wire.OutPoint) bool {
 	_, locked := w.lockedOutpoints[op]
 	return locked
 }
-
 // LockOutpoint marks an outpoint as locked, that is, it should not be used as
 // an input for newly created transactions.
 func (w *Wallet) LockOutpoint(op wire.OutPoint) {
 	w.lockedOutpoints[op] = struct{}{}
 }
-
 // UnlockOutpoint marks an outpoint as unlocked, that is, it may be used as an
 // input for newly created transactions.
 func (w *Wallet) UnlockOutpoint(op wire.OutPoint) {
 	delete(w.lockedOutpoints, op)
 }
-
 // ResetLockedOutpoints resets the set of locked outpoints so all may be used
 // as inputs for new transactions.
 func (w *Wallet) ResetLockedOutpoints() {
 	w.lockedOutpoints = map[wire.OutPoint]struct{}{}
 }
-
 // LockedOutpoints returns a slice of currently locked outpoints.  This is
 // intended to be used by marshaling the result as a JSON array for
 // listlockunspent RPC results.
@@ -2522,7 +2434,6 @@ func (w *Wallet) LockedOutpoints() []json.TransactionInput {
 	}
 	return locked
 }
-
 // resendUnminedTxs iterates through all transactions that spend from wallet
 // credits that are not known to have been mined into a block, and attempts
 // to send each to the chain server for relay.
@@ -2604,7 +2515,6 @@ func (w *Wallet) resendUnminedTxs() {
 		}
 	}
 }
-
 // SortedActivePaymentAddresses returns a slice of all active payment
 // addresses in a wallet.
 func (w *Wallet) SortedActivePaymentAddresses() ([]string, error) {
@@ -2622,7 +2532,6 @@ func (w *Wallet) SortedActivePaymentAddresses() ([]string, error) {
 	sort.Sort(sort.StringSlice(addrStrs))
 	return addrStrs, nil
 }
-
 // NewAddress returns the next external chained address for a wallet.
 func (w *Wallet) NewAddress(account uint32,
 	scope waddrmgr.KeyScope) (util.Address, error) {
@@ -2672,7 +2581,6 @@ func (w *Wallet) newAddress(addrmgrNs walletdb.ReadWriteBucket, account uint32,
 	}
 	return addrs[0].Address(), props, nil
 }
-
 // NewChangeAddress returns a new change address for a wallet.
 func (w *Wallet) NewChangeAddress(account uint32,
 	scope waddrmgr.KeyScope) (util.Address, error) {
@@ -2715,14 +2623,12 @@ func (w *Wallet) newChangeAddress(addrmgrNs walletdb.ReadWriteBucket,
 	}
 	return addrs[0].Address(), nil
 }
-
 // confirmed checks whether a transaction at height txHeight has met minconf
 // confirmations for a blockchain at height curHeight.
 func confirmed(
 	minconf, txHeight, curHeight int32) bool {
 	return confirms(txHeight, curHeight) >= minconf
 }
-
 // confirms returns the number of confirmations for a transaction in a block at
 // height txHeight (or -1 for an unconfirmed tx) given the chain height
 // curHeight.
@@ -2735,7 +2641,6 @@ func confirms(
 		return curHeight - txHeight + 1
 	}
 }
-
 // AccountTotalReceivedResult is a single result for the
 // Wallet.TotalReceivedForAccounts method.
 type AccountTotalReceivedResult struct {
@@ -2744,7 +2649,6 @@ type AccountTotalReceivedResult struct {
 	TotalReceived    util.Amount
 	LastConfirmation int32
 }
-
 // TotalReceivedForAccounts iterates through a wallet's transaction history,
 // returning the total amount of Bitcoin received for all accounts.
 func (w *Wallet) TotalReceivedForAccounts(scope waddrmgr.KeyScope,
@@ -2806,7 +2710,6 @@ func (w *Wallet) TotalReceivedForAccounts(scope waddrmgr.KeyScope,
 	})
 	return results, err
 }
-
 // TotalReceivedForAddr iterates through a wallet's transaction history,
 // returning the total amount of bitcoins received for a single wallet
 // address.
@@ -2850,7 +2753,6 @@ func (w *Wallet) TotalReceivedForAddr(addr util.Address, minConf int32) (util.Am
 	})
 	return amount, err
 }
-
 // SendOutputs creates and sends payment transactions. It returns the
 // transaction hash upon success.
 func (w *Wallet) SendOutputs(outputs []*wire.TxOut, account uint32,
@@ -2872,14 +2774,12 @@ func (w *Wallet) SendOutputs(outputs []*wire.TxOut, account uint32,
 	}
 	return w.publishTransaction(createdTx.Tx)
 }
-
 // SignatureError records the underlying error when validating a transaction
 // input signature.
 type SignatureError struct {
 	InputIndex uint32
 	Error      error
 }
-
 // SignTransaction uses secrets of the wallet, as well as additional secrets
 // passed in by the caller, to create and add input signatures to a transaction.
 //
@@ -2999,7 +2899,6 @@ func (w *Wallet) SignTransaction(tx *wire.MsgTx, hashType txscript.SigHashType,
 	})
 	return signErrors, err
 }
-
 // PublishTransaction sends the transaction to the consensus RPC server so it
 // can be propagated to other nodes and eventually mined.
 //
@@ -3009,7 +2908,6 @@ func (w *Wallet) PublishTransaction(tx *wire.MsgTx) error {
 	_, err := w.publishTransaction(tx)
 	return err
 }
-
 // publishTransaction is the private version of PublishTransaction which
 // contains the primary logic required for publishing a transaction, updating
 // the relevant database state, and finally possible removing the transaction
@@ -3068,20 +2966,17 @@ func (w *Wallet) publishTransaction(tx *wire.MsgTx) (*chainhash.Hash, error) {
 		return nil, err
 	}
 }
-
 // ChainParams returns the network parameters for the blockchain the wallet
 // belongs to.
 func (w *Wallet) ChainParams() *chaincfg.Params {
 	return w.chainParams
 }
-
 // Database returns the underlying walletdb database. This method is provided
 // in order to allow applications wrapping btcwallet to store app-specific data
 // with the wallet's database.
 func (w *Wallet) Database() walletdb.DB {
 	return w.db
 }
-
 // Create creates an new wallet, writing it to an empty database.  If the passed
 // seed is non-nil, it is used.  Otherwise, a secure random seed of the
 // recommended length is generated.
@@ -3122,7 +3017,6 @@ func Create(
 		return wtxmgr.Create(txmgrNs)
 	})
 }
-
 // Open loads an already-created wallet from the passed database and namespaces.
 func Open(
 	db walletdb.DB, pubPass []byte, cbs *waddrmgr.OpenCallbacks,

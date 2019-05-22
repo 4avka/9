@@ -11,11 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package tcell
-
 import "strconv"
-
 // Color represents a color.  The low numeric values are the same as used
 // by ECMA-48, and beyond that XTerm.  A 24-bit RGB value may be used by
 // adding in the ColorIsRGB flag.  For Color names we use the W3C approved
@@ -26,18 +23,15 @@ import "strconv"
 // the library will simply not set any color, deferring to whatever default
 // attributes the terminal uses.
 type Color int32
-
 const (
 	// ColorDefault is used to leave the Color unchanged from whatever
 	// system or teminal default may exist.
 	ColorDefault Color = -1
-
 	// ColorIsRGB is used to indicate that the numeric value is not
 	// a known color constant, but rather an RGB value.  The lower
 	// order 3 bytes are RGB.
 	ColorIsRGB Color = 1 << 24
 )
-
 // Note that the order of these options is important -- it follows the
 // definitions used by ECMA and XTerm.  Hence any further named colors
 // must begin at a value not less than 256.
@@ -422,7 +416,6 @@ const (
 	ColorWhiteSmoke
 	ColorYellowGreen
 )
-
 // These are aliases for the color gray, because some of us spell
 // it as grey.
 const (
@@ -434,7 +427,6 @@ const (
 	ColorLightSlateGrey = ColorLightSlateGray
 	ColorSlateGrey      = ColorSlateGray
 )
-
 // ColorValues maps color constants to their RGB values.
 var ColorValues = map[Color]int32{
 	ColorBlack:                0x000000,
@@ -817,7 +809,6 @@ var ColorValues = map[Color]int32{
 	ColorWhiteSmoke:           0xF5F5F5,
 	ColorYellowGreen:          0x9ACD32,
 }
-
 // ColorNames holds the written names of colors. Useful to present a list of
 // recognized named colors.
 var ColorNames = map[string]Color{
@@ -968,7 +959,6 @@ var ColorNames = map[string]Color{
 	"lightslategrey":       ColorLightSlateGray,
 	"slategrey":            ColorSlateGray,
 }
-
 // Hex returns the color's hexadecimal RGB 24-bit value with each component
 // consisting of a single byte, ala R << 16 | G << 8 | B.  If the color
 // is unknown or unset, -1 is returned.
@@ -981,7 +971,6 @@ func (c Color) Hex() int32 {
 	}
 	return -1
 }
-
 // RGB returns the red, green, and blue components of the color, with
 // each component represented as a value 0-255.  In the event that the
 // color cannot be broken up (not set usually), -1 is returned for each value.
@@ -992,18 +981,15 @@ func (c Color) RGB() (int32, int32, int32) {
 	}
 	return (v >> 16) & 0xff, (v >> 8) & 0xff, v & 0xff
 }
-
 // NewRGBColor returns a new color with the given red, green, and blue values.
 // Each value must be represented in the range 0-255.
 func NewRGBColor(r, g, b int32) Color {
 	return NewHexColor(((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff))
 }
-
 // NewHexColor returns a color using the given 24-bit RGB value.
 func NewHexColor(v int32) Color {
 	return ColorIsRGB | Color(v)
 }
-
 // GetColor creates a Color from a color name (W3C name). A hex value may
 // be supplied as a string in the format "#ffffff".
 func GetColor(name string) Color {

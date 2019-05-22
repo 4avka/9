@@ -2,9 +2,9 @@ package wallet
 import (
 	"bytes"
 	"strings"
-	cl "git.parallelcoin.io/dev/9/pkg/util/cl"
 	wtxmgr "git.parallelcoin.io/dev/9/pkg/chain/tx/mgr"
 	txscript "git.parallelcoin.io/dev/9/pkg/chain/tx/script"
+	cl "git.parallelcoin.io/dev/9/pkg/util/cl"
 	waddrmgr "git.parallelcoin.io/dev/9/pkg/wallet/addrmgr"
 	chain "git.parallelcoin.io/dev/9/pkg/wallet/chain"
 	walletdb "git.parallelcoin.io/dev/9/pkg/wallet/db"

@@ -1,21 +1,16 @@
 package tview
-
 import "git.parallelcoin.io/dev/9/pkg/util/tcell"
-
 // Primitive is the top-most interface for all graphical primitives.
 type Primitive interface {
 	// Draw draws this primitive onto the screen. Implementers can call the
 	// screen's ShowCursor() function but should only do so when they have focus.
 	// (They will need to keep track of this themselves.)
 	Draw(screen tcell.Screen)
-
 	// GetRect returns the current position of the primitive, x, y, width, and
 	// height.
 	GetRect() (int, int, int, int)
-
 	// SetRect sets a new position of the primitive.
 	SetRect(x, y, width, height int)
-
 	// InputHandler returns a handler which receives key events when it has focus.
 	// It is called by the Application class.
 	//
@@ -33,14 +28,11 @@ type Primitive interface {
 	// subclass from Box, it is recommended that you wrap your handler using
 	// Box.WrapInputHandler() so you inherit that functionality.
 	InputHandler() func(event *tcell.EventKey, setFocus func(p Primitive))
-
 	// Focus is called by the application when the primitive receives focus.
 	// Implementers may call delegate() to pass the focus on to another primitive.
 	Focus(delegate func(p Primitive))
-
 	// Blur is called by the application when the primitive loses focus.
 	Blur()
-
 	// GetFocusable returns the item's Focusable.
 	GetFocusable() Focusable
 }

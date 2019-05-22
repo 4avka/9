@@ -1,66 +1,47 @@
 package mining
-
 import (
 	"encoding/hex"
 	"testing"
-
 	blockchain "git.parallelcoin.io/dev/9/pkg/chain"
 	chainhash "git.parallelcoin.io/dev/9/pkg/chain/hash"
 	"git.parallelcoin.io/dev/9/pkg/chain/wire"
 	"git.parallelcoin.io/dev/9/pkg/util"
 )
-
 // newHashFromStr converts the passed big-endian hex string into a chainhash.Hash.  It only differs from the one available in chainhash in that it panics on an error since it will only (and must only) be called with hard-coded, and therefore known good, hashes.
 func newHashFromStr(
 	hexStr string) *chainhash.Hash {
-
 	hash, err := chainhash.NewHashFromStr(hexStr)
-
 	if err != nil {
-
 		panic("invalid hash in source file: " + hexStr)
 	}
 	return hash
 }
-
 // hexToBytes converts the passed hex string into bytes and will panic if there is an error.  This is only provided for the hard-coded constants so errors in the source code can be detected. It will only (and must only) be called with hard-coded values.
 func hexToBytes(
 	s string) []byte {
-
 	b, err := hex.DecodeString(s)
-
 	if err != nil {
-
 		panic("invalid hex in source file: " + s)
 	}
 	return b
 }
-
 // newUtxoViewpoint returns a new utxo view populated with outputs of the provided source transactions as if there were available at the respective block height specified in the heights slice.  The length of the source txns and source tx heights must match or it will panic.
 func newUtxoViewpoint(
 	sourceTxns []*wire.MsgTx, sourceTxHeights []int32) *blockchain.UtxoViewpoint {
-
 	if len(sourceTxns) != len(sourceTxHeights) {
-
 		panic("each transaction must have its block height specified")
 	}
 	view := blockchain.NewUtxoViewpoint()
-
 	for i, tx := range sourceTxns {
-
 		view.AddTxOuts(util.NewTx(tx), sourceTxHeights[i])
 	}
 	return view
 }
-
 // TestCalcPriority ensures the priority calculations work as intended.
 func TestCalcPriority(
 	t *testing.T) {
-
 	// commonSourceTx1 is a valid transaction used in the tests below as an input to transactions that are having their priority calculated.
-
 	// From block 7 in main blockchain.
-
 	// tx 0437cd7f8525ceed2324359c2d0ba26006d92d856a9c20fa0241106ee5a597c9
 	commonSourceTx1 := &wire.MsgTx{
 		Version: 1,
@@ -81,9 +62,7 @@ func TestCalcPriority(
 		}},
 		LockTime: 0,
 	}
-
 	// commonRedeemTx1 is a valid transaction used in the tests below as the transaction to calculate the priority for.
-
 	// It originally came from block 170 in main blockchain.
 	commonRedeemTx1 := &wire.MsgTx{
 		Version: 1,
@@ -107,7 +86,6 @@ func TestCalcPriority(
 				"397f554a7df5f142c21c1b7303b8a0626f1baded5c72" +
 				"a704f7e6cd84cac"),
 		}, {
-
 			Value: 4000000000,
 			PkScript: hexToBytes("410411db93e1dcdb8a016b49840f8c5" +
 				"3bc1eb68a382e97b1482ecad7b148a6909a5cb2e0ead" +
@@ -156,13 +134,9 @@ func TestCalcPriority(
 			want:       3083333333333.3335,
 		},
 	}
-
 	for i, test := range tests {
-
 		got := CalcPriority(test.tx, test.utxoView, test.nextHeight)
-
 		if got != test.want {
-
 			t.Errorf("CalcPriority #%d (%q): unexpected priority "+
 				"got %v want %v", i, test.name, got, test.want)
 			continue

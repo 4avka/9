@@ -1,5 +1,4 @@
 package json
-
 // General application defined JSON errors.
 const (
 	ErrRPCMisc                RPCErrorCode = -1
@@ -12,14 +11,12 @@ const (
 	ErrRPCDeserialization     RPCErrorCode = -22
 	ErrRPCVerify              RPCErrorCode = -25
 )
-
 // Peer-to-peer client errors.
 const (
 	ErrRPCClientNotConnected      RPCErrorCode = -9
 	ErrRPCClientInInitialDownload RPCErrorCode = -10
 	ErrRPCClientNodeNotAdded      RPCErrorCode = -24
 )
-
 // Wallet JSON errors
 const (
 	ErrRPCWallet                    RPCErrorCode = -4
@@ -32,7 +29,6 @@ const (
 	ErrRPCWalletEncryptionFailed    RPCErrorCode = -16
 	ErrRPCWalletAlreadyUnlocked     RPCErrorCode = -17
 )
-
 // Specific Errors related to commands.  These are the ones a user of the RPC server are most likely to see.  Generally, the codes should match one of the more general errors above.
 const (
 	ErrRPCBlockNotFound     RPCErrorCode = -5
@@ -47,13 +43,11 @@ const (
 	ErrRPCRawTxString       RPCErrorCode = -32602
 	ErrRPCDecodeHexString   RPCErrorCode = -22
 )
-
 // Errors that are specific to pod.
 const (
 	ErrRPCNoWallet      RPCErrorCode = -1
 	ErrRPCUnimplemented RPCErrorCode = -1
 )
-
 // Standard JSON-RPC 2.0 errors.
 var (
 	ErrRPCInternal = &RPCError{
@@ -61,7 +55,6 @@ var (
 		Message: "Internal error",
 	}
 )
-
 // Standard JSON-RPC 2.0 errors.
 var (
 	ErrRPCInvalidParams = &RPCError{
@@ -69,7 +62,6 @@ var (
 		Message: "Invalid parameters",
 	}
 )
-
 // Standard JSON-RPC 2.0 errors.
 var (
 	ErrRPCInvalidRequest = &RPCError{
@@ -77,7 +69,6 @@ var (
 		Message: "Invalid request",
 	}
 )
-
 // Standard JSON-RPC 2.0 errors.
 var (
 	ErrRPCMethodNotFound = &RPCError{
@@ -85,7 +76,6 @@ var (
 		Message: "Method not found",
 	}
 )
-
 // Standard JSON-RPC 2.0 errors.
 var (
 	ErrRPCParse = &RPCError{

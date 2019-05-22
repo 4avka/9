@@ -1,16 +1,12 @@
 package json_test
-
 import (
 	"reflect"
 	"testing"
-
 	"git.parallelcoin.io/dev/9/pkg/rpc/json"
 )
-
 // TestHelpReflectInternals ensures the various help functions which deal with reflect types work as expected for various Go types.
 func TestHelpReflectInternals(
 	t *testing.T) {
-
 	t.Parallel()
 	tests := []struct {
 		name        string
@@ -167,7 +163,6 @@ func TestHelpReflectInternals(
 		{
 			name: "array of struct indent level 0",
 			reflectType: func() reflect.Type {
-
 				type s struct {
 					field int
 				}
@@ -187,7 +182,6 @@ func TestHelpReflectInternals(
 		{
 			name: "array of struct indent level 1",
 			reflectType: func() reflect.Type {
-
 				type s struct {
 					field int
 				}
@@ -228,18 +222,13 @@ func TestHelpReflectInternals(
 		},
 	}
 	xT := func(key string) string {
-
 		return key
 	}
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		// Ensure the description key is the expected value.
 		key := json.TstReflectTypeToJSONType(xT, test.reflectType)
-
 		if key != test.key {
-
 			t.Errorf("Test #%d (%s) unexpected key - got: %v, "+
 				"want: %v", i, test.name, key, test.key)
 			continue
@@ -247,27 +236,20 @@ func TestHelpReflectInternals(
 		// Ensure the generated example is as expected.
 		examples, isComplex := json.TstReflectTypeToJSONExample(xT,
 			test.reflectType, test.indentLevel, "fdk")
-
 		if isComplex != test.isComplex {
-
 			t.Errorf("Test #%d (%s) unexpected isComplex - got: %v, "+
 				"want: %v", i, test.name, isComplex,
 				test.isComplex)
 			continue
 		}
-
 		if len(examples) != len(test.examples) {
-
 			t.Errorf("Test #%d (%s) unexpected result length - "+
 				"got: %v, want: %v", i, test.name, len(examples),
 				len(test.examples))
 			continue
 		}
-
 		for j, example := range examples {
-
 			if example != test.examples[j] {
-
 				t.Errorf("Test #%d (%s) example #%d unexpected "+
 					"example - got: %v, want: %v", i,
 					test.name, j, example, test.examples[j])
@@ -276,29 +258,23 @@ func TestHelpReflectInternals(
 		}
 		// Ensure the generated result type help is as expected.
 		helpText := json.TstResultTypeHelp(xT, test.reflectType, "fdk")
-
 		if helpText != test.help {
-
 			t.Errorf("Test #%d (%s) unexpected result help - "+
 				"got: %v, want: %v", i, test.name, helpText,
 				test.help)
 			continue
 		}
 		isValid := json.TstIsValidResultType(test.reflectType.Kind())
-
 		if isValid != !test.isInvalid {
-
 			t.Errorf("Test #%d (%s) unexpected result type validity "+
 				"- got: %v", i, test.name, isValid)
 			continue
 		}
 	}
 }
-
 // TestResultStructHelp ensures the expected help text format is returned for various Go struct types.
 func TestResultStructHelp(
 	t *testing.T) {
-
 	t.Parallel()
 	tests := []struct {
 		name        string
@@ -308,9 +284,7 @@ func TestResultStructHelp(
 		{
 			name: "empty struct",
 			reflectType: func() reflect.Type {
-
 				type s struct{}
-
 				return reflect.TypeOf(s{})
 			}(),
 			expected: nil,
@@ -318,7 +292,6 @@ func TestResultStructHelp(
 		{
 			name: "struct with primitive field",
 			reflectType: func() reflect.Type {
-
 				type s struct {
 					field int
 				}
@@ -331,7 +304,6 @@ func TestResultStructHelp(
 		{
 			name: "struct with primitive field and json tag",
 			reflectType: func() reflect.Type {
-
 				type s struct {
 					Field int `json:"f"`
 				}
@@ -344,7 +316,6 @@ func TestResultStructHelp(
 		{
 			name: "struct with array of primitive field",
 			reflectType: func() reflect.Type {
-
 				type s struct {
 					field []int
 				}
@@ -357,11 +328,9 @@ func TestResultStructHelp(
 		{
 			name: "struct with sub-struct field",
 			reflectType: func() reflect.Type {
-
 				type s2 struct {
 					subField int
 				}
-
 				type s struct {
 					field s2
 				}
@@ -377,11 +346,9 @@ func TestResultStructHelp(
 		{
 			name: "struct with sub-struct field pointer",
 			reflectType: func() reflect.Type {
-
 				type s2 struct {
 					subField int
 				}
-
 				type s struct {
 					field *s2
 				}
@@ -397,11 +364,9 @@ func TestResultStructHelp(
 		{
 			name: "struct with array of structs field",
 			reflectType: func() reflect.Type {
-
 				type s2 struct {
 					subField int
 				}
-
 				type s struct {
 					field []s2
 				}
@@ -416,27 +381,19 @@ func TestResultStructHelp(
 		},
 	}
 	xT := func(key string) string {
-
 		return key
 	}
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		results := json.TstResultStructHelp(xT, test.reflectType, 0)
-
 		if len(results) != len(test.expected) {
-
 			t.Errorf("Test #%d (%s) unexpected result length - "+
 				"got: %v, want: %v", i, test.name, len(results),
 				len(test.expected))
 			continue
 		}
-
 		for j, result := range results {
-
 			if result != test.expected[j] {
-
 				t.Errorf("Test #%d (%s) result #%d unexpected "+
 					"result - got: %v, want: %v", i,
 					test.name, j, result, test.expected[j])
@@ -445,11 +402,9 @@ func TestResultStructHelp(
 		}
 	}
 }
-
 // TestHelpArgInternals ensures the various help functions which deal with arguments work as expected for various argument types.
 func TestHelpArgInternals(
 	t *testing.T) {
-
 	t.Parallel()
 	tests := []struct {
 		name        string
@@ -462,9 +417,7 @@ func TestHelpArgInternals(
 			name:   "command with no args",
 			method: "test",
 			reflectType: func() reflect.Type {
-
 				type s struct{}
-
 				return reflect.TypeOf((*s)(nil))
 			}(),
 			defaults: nil,
@@ -474,7 +427,6 @@ func TestHelpArgInternals(
 			name:   "command with one required arg",
 			method: "test",
 			reflectType: func() reflect.Type {
-
 				type s struct {
 					Field int
 				}
@@ -487,7 +439,6 @@ func TestHelpArgInternals(
 			name:   "command with one optional arg, no default",
 			method: "test",
 			reflectType: func() reflect.Type {
-
 				type s struct {
 					Optional *int
 				}
@@ -500,14 +451,12 @@ func TestHelpArgInternals(
 			name:   "command with one optional arg with default",
 			method: "test",
 			reflectType: func() reflect.Type {
-
 				type s struct {
 					Optional *string
 				}
 				return reflect.TypeOf((*s)(nil))
 			}(),
 			defaults: func() map[int]reflect.Value {
-
 				defVal := "test"
 				return map[int]reflect.Value{
 					0: reflect.ValueOf(&defVal),
@@ -519,11 +468,9 @@ func TestHelpArgInternals(
 			name:   "command with struct field",
 			method: "test",
 			reflectType: func() reflect.Type {
-
 				type s2 struct {
 					F int8
 				}
-
 				type s struct {
 					Field s2
 				}
@@ -539,7 +486,6 @@ func TestHelpArgInternals(
 			name:   "command with map field",
 			method: "test",
 			reflectType: func() reflect.Type {
-
 				type s struct {
 					Field map[string]float64
 				}
@@ -556,7 +502,6 @@ func TestHelpArgInternals(
 			name:   "command with slice of primitives field",
 			method: "test",
 			reflectType: func() reflect.Type {
-
 				type s struct {
 					Field []int64
 				}
@@ -569,11 +514,9 @@ func TestHelpArgInternals(
 			name:   "command with slice of structs field",
 			method: "test",
 			reflectType: func() reflect.Type {
-
 				type s2 struct {
 					F int64
 				}
-
 				type s struct {
 					Field []s2
 				}
@@ -587,29 +530,22 @@ func TestHelpArgInternals(
 		},
 	}
 	xT := func(key string) string {
-
 		return key
 	}
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		help := json.TstArgHelp(xT, test.reflectType, test.defaults,
 			test.method)
-
 		if help != test.help {
-
 			t.Errorf("Test #%d (%s) unexpected help - got:\n%v\n"+
 				"want:\n%v", i, test.name, help, test.help)
 			continue
 		}
 	}
 }
-
 // TestMethodHelp ensures the method help function works as expected for various command structs.
 func TestMethodHelp(
 	t *testing.T) {
-
 	t.Parallel()
 	tests := []struct {
 		name        string
@@ -623,9 +559,7 @@ func TestMethodHelp(
 			name:   "command with no args or results",
 			method: "test",
 			reflectType: func() reflect.Type {
-
 				type s struct{}
-
 				return reflect.TypeOf((*s)(nil))
 			}(),
 			help: "test\n\ntest--synopsis\n\n" +
@@ -636,9 +570,7 @@ func TestMethodHelp(
 			name:   "command with no args and one primitive result",
 			method: "test",
 			reflectType: func() reflect.Type {
-
 				type s struct{}
-
 				return reflect.TypeOf((*s)(nil))
 			}(),
 			resultTypes: []interface{}{(*int64)(nil)},
@@ -650,9 +582,7 @@ func TestMethodHelp(
 			name:   "command with no args and two results",
 			method: "test",
 			reflectType: func() reflect.Type {
-
 				type s struct{}
-
 				return reflect.TypeOf((*s)(nil))
 			}(),
 			resultTypes: []interface{}{(*int64)(nil), nil},
@@ -665,7 +595,6 @@ func TestMethodHelp(
 			name:   "command with primitive arg and no results",
 			method: "test",
 			reflectType: func() reflect.Type {
-
 				type s struct {
 					Field bool
 				}
@@ -679,7 +608,6 @@ func TestMethodHelp(
 			name:   "command with primitive optional and no results",
 			method: "test",
 			reflectType: func() reflect.Type {
-
 				type s struct {
 					Field *bool
 				}
@@ -691,29 +619,22 @@ func TestMethodHelp(
 		},
 	}
 	xT := func(key string) string {
-
 		return key
 	}
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		help := json.TestMethodHelp(xT, test.reflectType,
 			test.defaults, test.method, test.resultTypes)
-
 		if help != test.help {
-
 			t.Errorf("Test #%d (%s) unexpected help - got:\n%v\n"+
 				"want:\n%v", i, test.name, help, test.help)
 			continue
 		}
 	}
 }
-
 // TestGenerateHelpErrors ensures the GenerateHelp function returns the expected errors.
 func TestGenerateHelpErrors(
 	t *testing.T) {
-
 	t.Parallel()
 	tests := []struct {
 		name        string
@@ -746,22 +667,16 @@ func TestGenerateHelpErrors(
 		},
 	}
 	t.Logf("Running %d tests", len(tests))
-
 	for i, test := range tests {
-
 		_, err := json.GenerateHelp(test.method, nil,
 			test.resultTypes...)
-
 		if reflect.TypeOf(err) != reflect.TypeOf(test.err) {
-
 			t.Errorf("Test #%d (%s) wrong error - got %T (%v), "+
 				"want %T", i, test.name, err, err, test.err)
 			continue
 		}
 		gotErrorCode := err.(json.Error).ErrorCode
-
 		if gotErrorCode != test.err.ErrorCode {
-
 			t.Errorf("Test #%d (%s) mismatched error code - got "+
 				"%v (%v), want %v", i, test.name, gotErrorCode,
 				err, test.err.ErrorCode)
@@ -769,28 +684,22 @@ func TestGenerateHelpErrors(
 		}
 	}
 }
-
 // TestGenerateHelp performs a very basic test to ensure GenerateHelp is working as expected.  The internal are testd much more thoroughly in other tests, so there is no need to add more tests here.
 func TestGenerateHelp(
 	t *testing.T) {
-
 	t.Parallel()
 	descs := map[string]string{
 		"help--synopsis": "test",
 		"help-command":   "test",
 	}
 	help, err := json.GenerateHelp("help", descs)
-
 	if err != nil {
-
 		t.Fatalf("GenerateHelp: unexpected error: %v", err)
 	}
 	wantHelp := "help (\"command\")\n\n" +
 		"test\n\nArguments:\n1. command (string, optional) test\n\n" +
 		"Result:\nNothing\n"
-
 	if help != wantHelp {
-
 		t.Fatalf("GenerateHelp: unexpected help - got\n%v\nwant\n%v",
 			help, wantHelp)
 	}

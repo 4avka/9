@@ -1,9 +1,7 @@
 package tview
-
 import (
 	"git.parallelcoin.io/dev/9/pkg/util/tcell"
 )
-
 // page represents one page of a Pages object.
 type page struct {
 	Name    string    // The page's name.
@@ -11,7 +9,6 @@ type page struct {
 	Resize  bool      // Whether or not to resize the page when it is drawn.
 	Visible bool      // Whether or not this page is visible.
 }
-
 // Pages is a container for other primitives often used as the application's
 // root primitive. It allows to easily switch the visibility of the contained
 // primitives.
@@ -19,19 +16,15 @@ type page struct {
 // See https://git.parallelcoin.io/dev/9/pkg/util/tview/wiki/Pages for an example.
 type Pages struct {
 	*Box
-
 	// The contained pages.
 	pages []*page
-
 	// We keep a reference to the function which allows us to set the focus to
 	// a newly visible page.
 	setFocus func(p Primitive)
-
 	// An optional handler which is called whenever the visibility or the order of
 	// pages changes.
 	changed func()
 }
-
 // NewPages returns a new Pages object.
 func NewPages() *Pages {
 	p := &Pages{
@@ -40,14 +33,12 @@ func NewPages() *Pages {
 	p.focus = p
 	return p
 }
-
 // SetChangedFunc sets a handler which is called whenever the visibility or the
 // order of any visible pages changes. This can be used to redraw the pages.
 func (p *Pages) SetChangedFunc(handler func()) *Pages {
 	p.changed = handler
 	return p
 }
-
 // AddPage adds a new page with the given name and primitive. If there was
 // previously a page with the same name, it is overwritten. Leaving the name
 // empty may cause conflicts in other functions so always specify a non-empty
@@ -74,7 +65,6 @@ func (p *Pages) AddPage(name string, item Primitive, resize, visible bool) *Page
 	}
 	return p
 }
-
 // AddAndSwitchToPage calls AddPage(), then SwitchToPage() on that newly added
 // page.
 func (p *Pages) AddAndSwitchToPage(name string, item Primitive, resize bool) *Pages {
@@ -82,7 +72,6 @@ func (p *Pages) AddAndSwitchToPage(name string, item Primitive, resize bool) *Pa
 	p.SwitchToPage(name)
 	return p
 }
-
 // RemovePage removes the page with the given name. If that page was the only
 // visible page, visibility is assigned to the last page.
 func (p *Pages) RemovePage(name string) *Pages {
@@ -114,7 +103,6 @@ func (p *Pages) RemovePage(name string) *Pages {
 	}
 	return p
 }
-
 // HasPage returns true if a page with the given name exists in this object.
 func (p *Pages) HasPage(name string) bool {
 	for _, page := range p.pages {
@@ -124,7 +112,6 @@ func (p *Pages) HasPage(name string) bool {
 	}
 	return false
 }
-
 // ShowPage sets a page's visibility to "true" (in addition to any other pages
 // which are already visible).
 func (p *Pages) ShowPage(name string) *Pages {
@@ -142,7 +129,6 @@ func (p *Pages) ShowPage(name string) *Pages {
 	}
 	return p
 }
-
 // HidePage sets a page's visibility to "false".
 func (p *Pages) HidePage(name string) *Pages {
 	for _, page := range p.pages {
@@ -159,7 +145,6 @@ func (p *Pages) HidePage(name string) *Pages {
 	}
 	return p
 }
-
 // SwitchToPage sets a page's visibility to "true" and all other pages'
 // visibility to "false".
 func (p *Pages) SwitchToPage(name string) *Pages {
@@ -178,7 +163,6 @@ func (p *Pages) SwitchToPage(name string) *Pages {
 	}
 	return p
 }
-
 // SendToFront changes the order of the pages such that the page with the given
 // name comes last, causing it to be drawn last with the next update (if
 // visible).
@@ -199,7 +183,6 @@ func (p *Pages) SendToFront(name string) *Pages {
 	}
 	return p
 }
-
 // SendToBack changes the order of the pages such that the page with the given
 // name comes first, causing it to be drawn first with the next update (if
 // visible).
@@ -220,7 +203,6 @@ func (p *Pages) SendToBack(name string) *Pages {
 	}
 	return p
 }
-
 // HasFocus returns whether or not this primitive has focus.
 func (p *Pages) HasFocus() bool {
 	for _, page := range p.pages {
@@ -230,7 +212,6 @@ func (p *Pages) HasFocus() bool {
 	}
 	return false
 }
-
 // Focus is called by the application when the primitive receives focus.
 func (p *Pages) Focus(delegate func(p Primitive)) {
 	if delegate == nil {
@@ -247,7 +228,6 @@ func (p *Pages) Focus(delegate func(p Primitive)) {
 		delegate(topItem)
 	}
 }
-
 // Draw draws this primitive onto the screen.
 func (p *Pages) Draw(screen tcell.Screen) {
 	p.Box.Draw(screen)

@@ -1,4 +1,5 @@
 package peer_test
+
 import (
 	"errors"
 	"io"
@@ -6,12 +7,14 @@ import (
 	"strconv"
 	"testing"
 	"time"
+
 	chaincfg "git.parallelcoin.io/dev/9/pkg/chain/config"
 	chainhash "git.parallelcoin.io/dev/9/pkg/chain/hash"
 	"git.parallelcoin.io/dev/9/pkg/chain/wire"
 	"git.parallelcoin.io/dev/9/pkg/peer"
 	"github.com/btcsuite/go-socks/socks"
 )
+
 // conn mocks a network connection by implementing the net.Conn interface.  It is used to test peer connection without actually opening a network connection.
 type conn struct {
 	io.Reader
@@ -24,10 +27,12 @@ type conn struct {
 	// mocks socks proxy if true
 	proxy bool
 }
+
 // LocalAddr returns the local address for the connection.
 func (c conn) LocalAddr() net.Addr {
 	return &addr{c.lnet, c.laddr}
 }
+
 // Remote returns the remote address for the connection.
 func (c conn) RemoteAddr() net.Addr {
 	if !c.proxy {
@@ -41,6 +46,7 @@ func (c conn) RemoteAddr() net.Addr {
 		Port: port,
 	}
 }
+
 // Close handles closing the connection.
 func (c conn) Close() error {
 	if c.Closer == nil {
@@ -51,12 +57,15 @@ func (c conn) Close() error {
 func (c conn) SetDeadline(t time.Time) error      { return nil }
 func (c conn) SetReadDeadline(t time.Time) error  { return nil }
 func (c conn) SetWriteDeadline(t time.Time) error { return nil }
+
 // addr mocks a network address
 type addr struct {
 	net, address string
 }
+
 func (m addr) Network() string { return m.net }
 func (m addr) String() string  { return m.address }
+
 // pipe turns two mock connections into a full-duplex connection similar to net.Pipe to allow pipe's with (fake) addresses.
 func pipe(
 	c1, c2 *conn) (*conn, *conn) {
@@ -70,6 +79,7 @@ func pipe(
 	c2.Closer = w2
 	return c1, c2
 }
+
 // peerStats holds the expected peer stats used for testing peer.
 type peerStats struct {
 	wantUserAgent       string
@@ -88,6 +98,7 @@ type peerStats struct {
 	wantBytesReceived   uint64
 	wantWitnessEnabled  bool
 }
+
 // testPeer tests the given peer's flags and stats
 func testPeer(
 	t *testing.T, p *peer.Peer, s peerStats) {
@@ -172,6 +183,7 @@ func testPeer(
 		return
 	}
 }
+
 // TestPeerConnection tests connection between inbound and outbound peers.
 func TestPeerConnection(
 	t *testing.T) {
@@ -303,6 +315,7 @@ func TestPeerConnection(
 		outPeer.WaitForDisconnect()
 	}
 }
+
 // TestPeerListeners tests that the peer listeners are called as expected.
 func TestPeerListeners(
 	t *testing.T) {
@@ -555,6 +568,7 @@ func TestPeerListeners(
 	inPeer.Disconnect()
 	outPeer.Disconnect()
 }
+
 // TestOutboundPeer tests that the outbound peer works as expected.
 func TestOutboundPeer(
 	t *testing.T) {
@@ -680,6 +694,7 @@ func TestOutboundPeer(
 	p2.QueueMessage(wire.NewMsgFeeFilter(20000), nil)
 	p2.Disconnect()
 }
+
 // Tests that the node disconnects from peers with an unsupported protocol version.
 func TestUnsupportedVersionPeer(
 	t *testing.T) {
@@ -773,6 +788,7 @@ func TestUnsupportedVersionPeer(
 		t.Fatal("Timeout waiting for remote reader to close")
 	}
 }
+
 // TestDuplicateVersionMsg ensures that receiving a version message after one has already been received results in the peer being disconnected.
 func TestDuplicateVersionMsg(
 	t *testing.T) {

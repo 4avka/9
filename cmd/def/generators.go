@@ -1,15 +1,12 @@
 package def
-
 import (
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"time"
-
 	"git.parallelcoin.io/dev/9/pkg/util"
 )
-
 // SaveConfig writes all the data in Cats the config file at the root of DataDir
 func (app *App) SaveConfig() {
 	if app == nil {
@@ -35,7 +32,6 @@ func (app *App) SaveConfig() {
 		panic(err)
 	}
 }
-
 // MarshalJSON cherrypicks Cats for the values needed to correctly configure it
 // and some extra information to make the JSON output friendly to human editors
 func (r *App) MarshalJSON() ([]byte, error) {
@@ -56,7 +52,6 @@ func (r *App) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(out)
 }
-
 // UnmarshalJSON takes the cherrypicked JSON output of Marshal and puts it back into
 // an App
 func (r *App) UnmarshalJSON(data []byte) error {
@@ -94,7 +89,6 @@ func (r *App) UnmarshalJSON(data []byte) error {
 	}
 	return nil
 }
-
 // RunAll triggers AppGenerators to configure an App
 func (r *AppGenerators) RunAll(app *App) {
 	for _, x := range *r {
@@ -102,7 +96,6 @@ func (r *AppGenerators) RunAll(app *App) {
 	}
 	return
 }
-
 // RunAll runs a collection of CatGenerators on a Cat
 func (r *CatGenerators) RunAll(cat Cat) {
 	for _, x := range *r {
@@ -110,13 +103,11 @@ func (r *CatGenerators) RunAll(cat Cat) {
 	}
 	return
 }
-
 func (r *RowGenerators) RunAll(row *Row) {
 	for _, x := range *r {
 		x(row)
 	}
 }
-
 func (r *CommandGenerators) RunAll() *Command {
 	c := &Command{}
 	for _, x := range *r {
