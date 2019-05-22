@@ -244,7 +244,7 @@ func TestExtractPkScriptAddrs(
 		},
 		// The below are nonstandard script due to things such as invalid pubkeys, failure to parse, and not being of a standard form.
 		{
-			name: "p2pk with uncompressed pk missing OP_CHECKSIG",
+			name: "p2pk with uncompressed pk missing OpCheckSig",
 			script: hexToBytes("410411db93e1dcdb8a016b49840f8c53b" +
 				"c1eb68a382e97b1482ecad7b148a6909a5cb2e0eaddf" +
 				"b84ccf9744464f82e160bfa9b8b64f9d4c03f999b864" +
@@ -430,7 +430,7 @@ func TestCalcScriptInfo(
 		{
 			// Script is invented, numbers all fake.
 			name: "multisig script",
-			// Extra 0 arg on the end for OP_CHECKMULTISIG bug.
+			// Extra 0 arg on the end for OpCheckMultiSig bug.
 			sigScript: "1 1 1 0",
 			pkScript: "3 " +
 				"DATA_33 0x0102030405060708090a0b0c0d0e0f1011" +

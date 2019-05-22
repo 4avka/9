@@ -24,12 +24,12 @@ const (
 	// P2PKHPkScriptSize is the size of a transaction output script that
 	// pays to a compressed pubkey hash.  It is calculated as:
 	//
-	//   - OP_DUP
-	//   - OP_HASH160
+	//   - OpDup
+	//   - OpHash160
 	//   - OpData20
 	//   - 20 bytes pubkey hash
-	//   - OP_EQUALVERIFY
-	//   - OP_CHECKSIG
+	//   - OpEqualVerify
+	//   - OpCheckSig
 	P2PKHPkScriptSize = 1 + 1 + 1 + 20 + 1 + 1
 
 	// RedeemP2PKHInputSize is the worst case (largest) serialize size of a

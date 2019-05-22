@@ -339,9 +339,9 @@ func BuildBasicFilter(
 
 				continue
 			}
-			// In order to allow the filters to later be committed to within an OP_RETURN output, we ignore all OP_RETURNs to avoid a circular dependency.
+			// In order to allow the filters to later be committed to within an OpReturn output, we ignore all OP_RETURNs to avoid a circular dependency.
 
-			if txOut.PkScript[0] == txscript.OP_RETURN &&
+			if txOut.PkScript[0] == txscript.OpReturn &&
 
 				txscript.IsPushOnlyScript(txOut.PkScript[1:]) {
 

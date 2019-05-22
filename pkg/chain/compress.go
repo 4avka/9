@@ -226,42 +226,42 @@ func decompressScript(
 
 	// Pay-to-pubkey-hash script.  The resulting script is:
 
-	// <OP_DUP><OP_HASH160><20 byte hash><OP_EQUALVERIFY><OP_CHECKSIG>
+	// <OpDup><OpHash160><20 byte hash><OpEqualVerify><OpCheckSig>
 	case cstPayToPubKeyHash:
 		pkScript := make([]byte, 25)
-		pkScript[0] = txscript.OP_DUP
-		pkScript[1] = txscript.OP_HASH160
+		pkScript[0] = txscript.OpDup
+		pkScript[1] = txscript.OpHash160
 		pkScript[2] = txscript.OpData20
 		copy(pkScript[3:], compressedPkScript[bytesRead:bytesRead+20])
-		pkScript[23] = txscript.OP_EQUALVERIFY
-		pkScript[24] = txscript.OP_CHECKSIG
+		pkScript[23] = txscript.OpEqualVerify
+		pkScript[24] = txscript.OpCheckSig
 		return pkScript
 
 	// Pay-to-script-hash script.  The resulting script is:
 
-	// <OP_HASH160><20 byte script hash><OP_EQUAL>
+	// <OpHash160><20 byte script hash><OpEqual>
 	case cstPayToScriptHash:
 		pkScript := make([]byte, 23)
-		pkScript[0] = txscript.OP_HASH160
+		pkScript[0] = txscript.OpHash160
 		pkScript[1] = txscript.OpData20
 		copy(pkScript[2:], compressedPkScript[bytesRead:bytesRead+20])
-		pkScript[22] = txscript.OP_EQUAL
+		pkScript[22] = txscript.OpEqual
 		return pkScript
 
 	// Pay-to-compressed-pubkey script.  The resulting script is:
 
-	// <OpData33><33 byte compressed pubkey><OP_CHECKSIG>
+	// <OpData33><33 byte compressed pubkey><OpCheckSig>
 	case cstPayToPubKeyComp2, cstPayToPubKeyComp3:
 		pkScript := make([]byte, 35)
 		pkScript[0] = txscript.OpData33
 		pkScript[1] = byte(encodedScriptSize)
 		copy(pkScript[2:], compressedPkScript[bytesRead:bytesRead+32])
-		pkScript[34] = txscript.OP_CHECKSIG
+		pkScript[34] = txscript.OpCheckSig
 		return pkScript
 
 	// Pay-to-uncompressed-pubkey script.  The resulting script is:
 
-	// <OpData65><65 byte uncompressed pubkey><OP_CHECKSIG>
+	// <OpData65><65 byte uncompressed pubkey><OpCheckSig>
 	case cstPayToPubKeyUncomp4, cstPayToPubKeyUncomp5:
 		// Change the leading byte to the appropriate compressed pubkey identifier (0x02 or 0x03) so it can be decoded as a compressed pubkey.  This really should never fail since the encoding ensures it is valid before compressing to this type.
 		compressedKey := make([]byte, 33)
@@ -276,7 +276,7 @@ func decompressScript(
 		pkScript := make([]byte, 67)
 		pkScript[0] = txscript.OpData65
 		copy(pkScript[1:], key.SerializeUncompressed())
-		pkScript[66] = txscript.OP_CHECKSIG
+		pkScript[66] = txscript.OpCheckSig
 		return pkScript
 	}
 
@@ -371,7 +371,7 @@ func isPubKey(
 	// Pay-to-compressed-pubkey script.
 
 	if len(script) == 35 && script[0] == txscript.OpData33 &&
-		script[34] == txscript.OP_CHECKSIG && (script[1] == 0x02 ||
+		script[34] == txscript.OpCheckSig && (script[1] == 0x02 ||
 
 		script[1] == 0x03) {
 
@@ -389,7 +389,7 @@ func isPubKey(
 
 	if len(script) == 67 && script[0] == txscript.OpData65 &&
 
-		script[66] == txscript.OP_CHECKSIG && script[1] == 0x04 {
+		script[66] == txscript.OpCheckSig && script[1] == 0x04 {
 
 		// Ensure the public key is valid.
 		serializedPubKey := script[1:66]
@@ -408,12 +408,12 @@ func isPubKeyHash(
 
 	script []byte) (bool, []byte) {
 
-	if len(script) == 25 && script[0] == txscript.OP_DUP &&
-		script[1] == txscript.OP_HASH160 &&
+	if len(script) == 25 && script[0] == txscript.OpDup &&
+		script[1] == txscript.OpHash160 &&
 		script[2] == txscript.OpData20 &&
-		script[23] == txscript.OP_EQUALVERIFY &&
+		script[23] == txscript.OpEqualVerify &&
 
-		script[24] == txscript.OP_CHECKSIG {
+		script[24] == txscript.OpCheckSig {
 
 		return true, script[3:23]
 	}
@@ -425,10 +425,10 @@ func isScriptHash(
 
 	script []byte) (bool, []byte) {
 
-	if len(script) == 23 && script[0] == txscript.OP_HASH160 &&
+	if len(script) == 23 && script[0] == txscript.OpHash160 &&
 		script[1] == txscript.OpData20 &&
 
-		script[22] == txscript.OP_EQUAL {
+		script[22] == txscript.OpEqual {
 
 		return true, script[2:22]
 	}

@@ -1233,11 +1233,11 @@ func resolveCFHeaderMismatch(
 					// contain any useful information.
 					case len(txOut.PkScript) == 0:
 						continue
-					// We'll also skip any OP_RETURN
+					// We'll also skip any OpReturn
 					// scripts as well since we don't index
 					// these in order to avoid a circular
 					// dependency.
-					case txOut.PkScript[0] == txscript.OP_RETURN &&
+					case txOut.PkScript[0] == txscript.OpReturn &&
 						txscript.IsPushOnlyScript(txOut.PkScript[1:]):
 						continue
 					}

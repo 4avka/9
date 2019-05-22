@@ -77,7 +77,7 @@ func isPubkey(
 	// Valid pubkeys are either 33 or 65 bytes.
 	return len(pops) == 2 &&
 		(len(pops[0].data) == 33 || len(pops[0].data) == 65) &&
-		pops[1].opcode.value == OP_CHECKSIG
+		pops[1].opcode.value == OpCheckSig
 }
 
 // isPubkeyHash returns true if the script passed is a pay-to-pubkey-hash transaction, false otherwise.
@@ -85,11 +85,11 @@ func isPubkeyHash(
 	pops []parsedOpcode) bool {
 
 	return len(pops) == 5 &&
-		pops[0].opcode.value == OP_DUP &&
-		pops[1].opcode.value == OP_HASH160 &&
+		pops[0].opcode.value == OpDup &&
+		pops[1].opcode.value == OpHash160 &&
 		pops[2].opcode.value == OpData20 &&
-		pops[3].opcode.value == OP_EQUALVERIFY &&
-		pops[4].opcode.value == OP_CHECKSIG
+		pops[3].opcode.value == OpEqualVerify &&
+		pops[4].opcode.value == OpCheckSig
 }
 
 // isMultiSig returns true if the passed script is a multisig transaction, false otherwise.
@@ -98,7 +98,7 @@ func isMultiSig(
 
 	// The absolute minimum is 1 pubkey:
 
-	// OpZero/Op1-16 <pubkey> Op1 OP_CHECKMULTISIG
+	// OpZero/Op1-16 <pubkey> Op1 OpCheckMultiSig
 	l := len(pops)
 	if l < 4 {
 
@@ -112,7 +112,7 @@ func isMultiSig(
 
 		return false
 	}
-	if pops[l-1].opcode.value != OP_CHECKMULTISIG {
+	if pops[l-1].opcode.value != OpCheckMultiSig {
 
 		return false
 	}
@@ -139,14 +139,14 @@ func isMultiSig(
 func isNullData(
 	pops []parsedOpcode) bool {
 
-	// A nulldata transaction is either a single OP_RETURN or an OP_RETURN SMALLDATA (where SMALLDATA is a data push up to MaxDataCarrierSize bytes).
+	// A nulldata transaction is either a single OpReturn or an OpReturn SMALLDATA (where SMALLDATA is a data push up to MaxDataCarrierSize bytes).
 	l := len(pops)
-	if l == 1 && pops[0].opcode.value == OP_RETURN {
+	if l == 1 && pops[0].opcode.value == OpReturn {
 
 		return true
 	}
 	return l == 2 &&
-		pops[0].opcode.value == OP_RETURN &&
+		pops[0].opcode.value == OpReturn &&
 		(isSmallInt(pops[1].opcode) || pops[1].opcode.value <=
 			OpPushData4) &&
 		len(pops[1].data) <= MaxDataCarrierSize
@@ -212,7 +212,7 @@ func expectedInputs(
 		// Not including script.  That is handled by the caller.
 		return 1
 	case MultiSigTy:
-		// Standard multisig has a push a small number for the number of sigs and number of keys.  Check the first push instruction to see how many arguments are expected. typeOfScript already checked this so we know it'll be a small int.  Also, due to the original bitcoind bug where OP_CHECKMULTISIG pops an additional item from the stack, add an extra expected input for the extra push that is required to compensate.
+		// Standard multisig has a push a small number for the number of sigs and number of keys.  Check the first push instruction to see how many arguments are expected. typeOfScript already checked this so we know it'll be a small int.  Also, due to the original bitcoind bug where OpCheckMultiSig pops an additional item from the stack, add an extra expected input for the extra push that is required to compensate.
 		return asSmallInt(pops[0].opcode) + 1
 	case NullDataTy:
 		fallthrough
@@ -347,7 +347,7 @@ func CalcMultiSigStats(
 		return 0, 0, err
 	}
 
-	// A multi-signature script is of the pattern:  NUM_SIGS PUBKEY PUBKEY PUBKEY... NUM_PUBKEYS OP_CHECKMULTISIG Therefore the number of signatures is the oldest item on the stack and the number of pubkeys is the 2nd to last.  Also, the absolute minimum for a multi-signature script is 1 pubkey, so at least 4 items must be on the stack per:  Op1 PUBKEY Op1 OP_CHECKMULTISIG
+	// A multi-signature script is of the pattern:  NUM_SIGS PUBKEY PUBKEY PUBKEY... NUM_PUBKEYS OpCheckMultiSig Therefore the number of signatures is the oldest item on the stack and the number of pubkeys is the 2nd to last.  Also, the absolute minimum for a multi-signature script is 1 pubkey, so at least 4 items must be on the stack per:  Op1 PUBKEY Op1 OpCheckMultiSig
 	if len(pops) < 4 {
 
 		str := fmt.Sprintf("script %x is not a multisig script", script)
@@ -362,8 +362,8 @@ func CalcMultiSigStats(
 func payToPubKeyHashScript(
 	pubKeyHash []byte) ([]byte, error) {
 
-	return NewScriptBuilder().AddOp(OP_DUP).AddOp(OP_HASH160).
-		AddData(pubKeyHash).AddOp(OP_EQUALVERIFY).AddOp(OP_CHECKSIG).
+	return NewScriptBuilder().AddOp(OpDup).AddOp(OpHash160).
+		AddData(pubKeyHash).AddOp(OpEqualVerify).AddOp(OpCheckSig).
 		Script()
 }
 
@@ -378,8 +378,8 @@ func payToWitnessPubKeyHashScript(
 func payToScriptHashScript(
 	scriptHash []byte) ([]byte, error) {
 
-	return NewScriptBuilder().AddOp(OP_HASH160).AddData(scriptHash).
-		AddOp(OP_EQUAL).Script()
+	return NewScriptBuilder().AddOp(OpHash160).AddData(scriptHash).
+		AddOp(OpEqual).Script()
 }
 
 // payToWitnessPubKeyHashScript creates a new script to pay to a version 0 script hash witness program. The passed hash is expected to be valid.
@@ -394,7 +394,7 @@ func payToPubKeyScript(
 	serializedPubKey []byte) ([]byte, error) {
 
 	return NewScriptBuilder().AddData(serializedPubKey).
-		AddOp(OP_CHECKSIG).Script()
+		AddOp(OpCheckSig).Script()
 }
 
 // PayToAddrScript creates a new script to pay a transaction output to a the specified address.
@@ -451,7 +451,7 @@ func PayToAddrScript(
 	return nil, scriptError(ErrUnsupportedAddress, str)
 }
 
-// NullDataScript creates a provably-prunable script containing OP_RETURN followed by the passed data.  An Error with the error code ErrTooMuchNullData will be returned if the length of the passed data exceeds MaxDataCarrierSize.
+// NullDataScript creates a provably-prunable script containing OpReturn followed by the passed data.  An Error with the error code ErrTooMuchNullData will be returned if the length of the passed data exceeds MaxDataCarrierSize.
 func NullDataScript(
 	data []byte) ([]byte, error) {
 
@@ -461,7 +461,7 @@ func NullDataScript(
 			"allowed size %d", len(data), MaxDataCarrierSize)
 		return nil, scriptError(ErrTooMuchNullData, str)
 	}
-	return NewScriptBuilder().AddOp(OP_RETURN).AddData(data).Script()
+	return NewScriptBuilder().AddOp(OpReturn).AddData(data).Script()
 }
 
 // MultiSigScript returns a valid script for a multisignature redemption where nrequired of the keys in pubkeys are required to have signed the transaction for success.  An Error with the error code ErrTooManyRequiredSigs will be returned if nrequired is larger than the number of keys provided.
@@ -482,7 +482,7 @@ func MultiSigScript(
 		builder.AddData(key.ScriptAddress())
 	}
 	builder.AddInt64(int64(len(pubkeys)))
-	builder.AddOp(OP_CHECKMULTISIG)
+	builder.AddOp(OpCheckMultiSig)
 	return builder.Script()
 }
 
@@ -528,7 +528,7 @@ func ExtractPkScriptAddrs(
 	switch scriptClass {
 
 	case PubKeyHashTy:
-		// A pay-to-pubkey-hash script is of the form:  OP_ OP_HASH160 <hash> OP_EQUALVERIFY OP_CHECKSIG Therefore the pubkey hash is the 3rd item on the stack. Skip the pubkey hash if it's invalid for some reason.
+		// A pay-to-pubkey-hash script is of the form:  OP_ OpHash160 <hash> OpEqualVerify OpCheckSig Therefore the pubkey hash is the 3rd item on the stack. Skip the pubkey hash if it's invalid for some reason.
 		requiredSigs = 1
 		addr, err := util.NewAddressPubKeyHash(pops[2].data,
 			chainParams)
@@ -548,7 +548,7 @@ func ExtractPkScriptAddrs(
 			addrs = append(addrs, addr)
 		}
 	case PubKeyTy:
-		// A pay-to-pubkey script is of the form:  <pubkey> OP_CHECKSIG Therefore the pubkey is the first item on the stack. Skip the pubkey if it's invalid for some reason.
+		// A pay-to-pubkey script is of the form:  <pubkey> OpCheckSig Therefore the pubkey is the first item on the stack. Skip the pubkey if it's invalid for some reason.
 		requiredSigs = 1
 		addr, err := util.NewAddressPubKey(pops[0].data, chainParams)
 
@@ -557,7 +557,7 @@ func ExtractPkScriptAddrs(
 			addrs = append(addrs, addr)
 		}
 	case ScriptHashTy:
-		// A pay-to-script-hash script is of the form:  OP_HASH160 <scripthash> OP_EQUAL Therefore the script hash is the 2nd item on the stack. Skip the script hash if it's invalid for some reason.
+		// A pay-to-script-hash script is of the form:  OpHash160 <scripthash> OpEqual Therefore the script hash is the 2nd item on the stack. Skip the script hash if it's invalid for some reason.
 		requiredSigs = 1
 		addr, err := util.NewAddressScriptHashFromHash(pops[1].data,
 			chainParams)
@@ -577,7 +577,7 @@ func ExtractPkScriptAddrs(
 			addrs = append(addrs, addr)
 		}
 	case MultiSigTy:
-		// A multi-signature script is of the form:  <numsigs> <pubkey> <pubkey> <pubkey>... <numpubkeys> OP_CHECKMULTISIG Therefore the number of required signatures is the 1st item on the stack and the number of public keys is the 2nd to last item on the stack.
+		// A multi-signature script is of the form:  <numsigs> <pubkey> <pubkey> <pubkey>... <numpubkeys> OpCheckMultiSig Therefore the number of required signatures is the 1st item on the stack and the number of public keys is the 2nd to last item on the stack.
 		requiredSigs = asSmallInt(pops[0].opcode)
 		numPubKeys := asSmallInt(pops[len(pops)-2].opcode)
 		// Extract the public keys while skipping any that are invalid.
@@ -625,26 +625,26 @@ func ExtractAtomicSwapDataPushes(
 
 		return nil, nil
 	}
-	isAtomicSwap := pops[0].opcode.value == OP_IF &&
-		pops[1].opcode.value == OP_SIZE &&
+	isAtomicSwap := pops[0].opcode.value == OpIf &&
+		pops[1].opcode.value == OpSize &&
 		canonicalPush(pops[2]) &&
-		pops[3].opcode.value == OP_EQUALVERIFY &&
-		pops[4].opcode.value == OP_SHA256 &&
+		pops[3].opcode.value == OpEqualVerify &&
+		pops[4].opcode.value == OpSHA256 &&
 		pops[5].opcode.value == OpData32 &&
-		pops[6].opcode.value == OP_EQUALVERIFY &&
-		pops[7].opcode.value == OP_DUP &&
-		pops[8].opcode.value == OP_HASH160 &&
+		pops[6].opcode.value == OpEqualVerify &&
+		pops[7].opcode.value == OpDup &&
+		pops[8].opcode.value == OpHash160 &&
 		pops[9].opcode.value == OpData20 &&
-		pops[10].opcode.value == OP_ELSE &&
+		pops[10].opcode.value == OpElse &&
 		canonicalPush(pops[11]) &&
-		pops[12].opcode.value == OP_CHECKLOCKTIMEVERIFY &&
-		pops[13].opcode.value == OP_DROP &&
-		pops[14].opcode.value == OP_DUP &&
-		pops[15].opcode.value == OP_HASH160 &&
+		pops[12].opcode.value == OpCheckLockTimeVerify &&
+		pops[13].opcode.value == OpDrop &&
+		pops[14].opcode.value == OpDup &&
+		pops[15].opcode.value == OpHash160 &&
 		pops[16].opcode.value == OpData20 &&
-		pops[17].opcode.value == OP_ENDIF &&
-		pops[18].opcode.value == OP_EQUALVERIFY &&
-		pops[19].opcode.value == OP_CHECKSIG
+		pops[17].opcode.value == OpEndIf &&
+		pops[18].opcode.value == OpEqualVerify &&
+		pops[19].opcode.value == OpCheckSig
 	if !isAtomicSwap {
 
 		return nil, nil

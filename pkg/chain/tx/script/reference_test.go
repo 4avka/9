@@ -250,7 +250,7 @@ func parseExpectedResult(
 	case "UNBALANCED_CONDITIONAL":
 		return []ErrorCode{ErrUnbalancedConditional,
 			ErrInvalidStackOperation}, nil
-	case "OP_RETURN":
+	case "OpReturn":
 		return []ErrorCode{ErrEarlyReturn}, nil
 	case "VERIFY":
 		return []ErrorCode{ErrVerify}, nil

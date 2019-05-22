@@ -26,9 +26,9 @@ func TestScriptBuilderAddOp(
 			expected: []byte{Op1, Op2},
 		},
 		{
-			name:     "push OP_HASH160 OP_EQUAL",
-			opcodes:  []byte{OP_HASH160, OP_EQUAL},
-			expected: []byte{OP_HASH160, OP_EQUAL},
+			name:     "push OpHash160 OpEqual",
+			opcodes:  []byte{OpHash160, OpEqual},
+			expected: []byte{OpHash160, OpEqual},
 		},
 	}
 
@@ -103,7 +103,7 @@ func TestScriptBuilderAddInt64(
 		{name: "push small int 2", val: 2, expected: []byte{Op2}},
 		{name: "push small int 3", val: 3, expected: []byte{Op3}},
 		{name: "push small int 4", val: 4, expected: []byte{Op4}},
-		{name: "push small int 5", val: 5, expected: []byte{OP_5}},
+		{name: "push small int 5", val: 5, expected: []byte{Op5}},
 		{name: "push small int 6", val: 6, expected: []byte{Op6}},
 		{name: "push small int 7", val: 7, expected: []byte{Op7}},
 		{name: "push small int 8", val: 8, expected: []byte{Op8}},
@@ -180,7 +180,7 @@ func TestScriptBuilderAddData(
 		{name: "push 1 byte 0x02", data: []byte{0x02}, expected: []byte{Op2}},
 		{name: "push 1 byte 0x03", data: []byte{0x03}, expected: []byte{Op3}},
 		{name: "push 1 byte 0x04", data: []byte{0x04}, expected: []byte{Op4}},
-		{name: "push 1 byte 0x05", data: []byte{0x05}, expected: []byte{OP_5}},
+		{name: "push 1 byte 0x05", data: []byte{0x05}, expected: []byte{Op5}},
 		{name: "push 1 byte 0x06", data: []byte{0x06}, expected: []byte{Op6}},
 		{name: "push 1 byte 0x07", data: []byte{0x07}, expected: []byte{Op7}},
 		{name: "push 1 byte 0x08", data: []byte{0x08}, expected: []byte{Op8}},

@@ -181,7 +181,7 @@ func TestInvalidFlagCombinations(
 					}),
 					Index: 0,
 				},
-				SignatureScript: []uint8{OP_NOP},
+				SignatureScript: []uint8{OpNoOp},
 				Sequence:        4294967295,
 			},
 		},
@@ -193,7 +193,7 @@ func TestInvalidFlagCombinations(
 		},
 		LockTime: 0,
 	}
-	pkScript := []byte{OP_NOP}
+	pkScript := []byte{OpNoOp}
 
 	for i, test := range tests {
 

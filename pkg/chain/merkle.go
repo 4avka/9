@@ -10,13 +10,13 @@ import (
 const (
 	// CoinbaseWitnessDataLen is the required length of the only element within the coinbase's witness data if the coinbase transaction contains a witness commitment.
 	CoinbaseWitnessDataLen = 32
-	// CoinbaseWitnessPkScriptLength is the length of the public key script containing an OP_RETURN, the WitnessMagicBytes, and the witness commitment itself. In order to be a valid candidate for the output containing the witness commitment
+	// CoinbaseWitnessPkScriptLength is the length of the public key script containing an OpReturn, the WitnessMagicBytes, and the witness commitment itself. In order to be a valid candidate for the output containing the witness commitment
 	CoinbaseWitnessPkScriptLength = 38
 )
 var (
 	// WitnessMagicBytes is the prefix marker within the public key script of a coinbase output to indicate that this output holds the witness commitment for a block.
 	WitnessMagicBytes = []byte{
-		txscript.OP_RETURN,
+		txscript.OpReturn,
 		txscript.OpData36,
 		0xaa,
 		0x21,
@@ -97,7 +97,7 @@ func BuildMerkleTreeStore(
 	}
 	return merkles
 }
-// ExtractWitnessCommitment attempts to locate, and return the witness commitment for a block. The witness commitment is of the form: SHA256(witness root || witness nonce). The function additionally returns a boolean indicating if the witness root was located within any of the txOut's in the passed transaction. The witness commitment is stored as the data push for an OP_RETURN with special magic bytes to aide in location.
+// ExtractWitnessCommitment attempts to locate, and return the witness commitment for a block. The witness commitment is of the form: SHA256(witness root || witness nonce). The function additionally returns a boolean indicating if the witness root was located within any of the txOut's in the passed transaction. The witness commitment is stored as the data push for an OpReturn with special magic bytes to aide in location.
 func ExtractWitnessCommitment(
 	tx *util.Tx) ([]byte, bool) {
 	// The witness commitment *must* be located within one of the coinbase transaction's outputs.

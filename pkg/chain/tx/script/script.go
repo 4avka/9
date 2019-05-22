@@ -51,9 +51,9 @@ func isScriptHash(
 	pops []parsedOpcode) bool {
 
 	return len(pops) == 3 &&
-		pops[0].opcode.value == OP_HASH160 &&
+		pops[0].opcode.value == OpHash160 &&
 		pops[1].opcode.value == OpData20 &&
-		pops[2].opcode.value == OP_EQUAL
+		pops[2].opcode.value == OpEqual
 }
 
 // IsPayToScriptHash returns true if the script is in the standard pay-to-script-hash (P2SH) format, false otherwise.
@@ -482,12 +482,12 @@ func calcWitnessSignatureHash(
 
 		// The script code for a p2wkh is a length prefix varint for the next 25 bytes, followed by a re-creation of the original p2pkh pk script.
 		sigHash.Write([]byte{0x19})
-		sigHash.Write([]byte{OP_DUP})
-		sigHash.Write([]byte{OP_HASH160})
+		sigHash.Write([]byte{OpDup})
+		sigHash.Write([]byte{OpHash160})
 		sigHash.Write([]byte{OpData20})
 		sigHash.Write(subScript[1].data)
-		sigHash.Write([]byte{OP_EQUALVERIFY})
-		sigHash.Write([]byte{OP_CHECKSIG})
+		sigHash.Write([]byte{OpEqualVerify})
+		sigHash.Write([]byte{OpCheckSig})
 	} else {
 
 		// For p2wsh outputs, and future outputs, the script code is the original script, with all code separators removed, serialized with a var int length prefix.
@@ -600,8 +600,8 @@ func calcSignatureHash(
 		return hash[:]
 	}
 
-	// Remove all instances of OP_CODESEPARATOR from the script.
-	script = removeOpcode(script, OP_CODESEPARATOR)
+	// Remove all instances of OpCodeSeparator from the script.
+	script = removeOpcode(script, OpCodeSeparator)
 
 	// Make a shallow copy of the transaction, zeroing out the script for all inputs that are not currently being processed.
 	txCopy := shallowCopyTx(tx)
@@ -691,13 +691,13 @@ func getSigOpCount(
 
 		switch pop.opcode.value {
 
-		case OP_CHECKSIG:
+		case OpCheckSig:
 			fallthrough
-		case OP_CHECKSIGVERIFY:
+		case OpCheckSigVerify:
 			nSigs++
-		case OP_CHECKMULTISIG:
+		case OpCheckMultiSig:
 			fallthrough
-		case OP_CHECKMULTISIGVERIFY:
+		case OpCheckMultiSigVerify:
 			// If we are being precise then look for familiar patterns for multisig, for now all we recognize is Op1 - Op16 to signify the number of pubkeys. Otherwise, we use the max of 20.
 
 			if precise && i > 0 &&
@@ -828,5 +828,5 @@ func IsUnspendable(
 
 		return true
 	}
-	return len(pops) > 0 && pops[0].opcode.value == OP_RETURN
+	return len(pops) > 0 && pops[0].opcode.value == OpReturn
 }

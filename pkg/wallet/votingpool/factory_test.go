@@ -87,7 +87,7 @@ func createMsgTx(
 					Hash:  chainhash.Hash{},
 					Index: 0xffffffff,
 				},
-				SignatureScript: []byte{txscript.OP_NOP},
+				SignatureScript: []byte{txscript.OpNoOp},
 				Sequence:        0xffffffff,
 			},
 		},

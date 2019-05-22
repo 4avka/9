@@ -13,9 +13,9 @@ func TestOpcodeDisabled(
 	t *testing.T) {
 
 	t.Parallel()
-	tests := []byte{OP_CAT, OP_SUBSTR, OP_LEFT, OP_RIGHT, OP_INVERT,
-		OP_AND, OP_OR, OP_2MUL, OP_2DIV, OP_MUL, OP_DIV, OP_MOD,
-		OP_LSHIFT, OP_RSHIFT,
+	tests := []byte{OpCat, OpSubstr, OpLeft, OpRight, OpInvert,
+		OpAnd, OpOr, Op1Mul, Op2Div, OpMul, OpDiv, OpMod,
+		OpLShift, OpRShift,
 	}
 
 	for _, opcodeVal := range tests {
@@ -38,41 +38,41 @@ func TestOpcodeDisasm(
 
 	t.Parallel()
 
-	// First, test the oneline disassembly. The expected strings for the data push opcodes are replaced in the test loops below since they involve repeating bytes.  Also, the OP_NOP# and OP_UNKNOWN# are replaced below too, since it's easier than manually listing them here.
+	// First, test the oneline disassembly. The expected strings for the data push opcodes are replaced in the test loops below since they involve repeating bytes.  Also, the OpNoOp# and OP_UNKNOWN# are replaced below too, since it's easier than manually listing them here.
 	oneBytes := []byte{0x01}
 	oneStr := "01"
 	expectedStrings := [256]string{0x00: "0", 0x4f: "-1",
-		0x50: "OpReserved", 0x61: "OP_NOP", 0x62: "OP_VER",
-		0x63: "OP_IF", 0x64: "OP_NOTIF", 0x65: "OP_VERIF",
-		0x66: "OP_VERNOTIF", 0x67: "OP_ELSE", 0x68: "OP_ENDIF",
-		0x69: "OP_VERIFY", 0x6a: "OP_RETURN", 0x6b: "OP_TOALTSTACK",
-		0x6c: "OP_FROMALTSTACK", 0x6d: "OP_2DROP", 0x6e: "OP_2DUP",
-		0x6f: "OP_3DUP", 0x70: "OP_2OVER", 0x71: "OP_2ROT",
-		0x72: "OP_2SWAP", 0x73: "OP_IFDUP", 0x74: "OP_DEPTH",
-		0x75: "OP_DROP", 0x76: "OP_DUP", 0x77: "OP_NIP",
-		0x78: "OP_OVER", 0x79: "OP_PICK", 0x7a: "OP_ROLL",
-		0x7b: "OP_ROT", 0x7c: "OP_SWAP", 0x7d: "OP_TUCK",
-		0x7e: "OP_CAT", 0x7f: "OP_SUBSTR", 0x80: "OP_LEFT",
-		0x81: "OP_RIGHT", 0x82: "OP_SIZE", 0x83: "OP_INVERT",
-		0x84: "OP_AND", 0x85: "OP_OR", 0x86: "OP_XOR",
-		0x87: "OP_EQUAL", 0x88: "OP_EQUALVERIFY", 0x89: "OP_RESERVED1",
-		0x8a: "OP_RESERVED2", 0x8b: "OP_1ADD", 0x8c: "OP_1SUB",
-		0x8d: "OP_2MUL", 0x8e: "OP_2DIV", 0x8f: "OP_NEGATE",
-		0x90: "OP_ABS", 0x91: "OP_NOT", 0x92: "OP_0NOTEQUAL",
-		0x93: "OP_ADD", 0x94: "OP_SUB", 0x95: "OP_MUL", 0x96: "OP_DIV",
-		0x97: "OP_MOD", 0x98: "OP_LSHIFT", 0x99: "OP_RSHIFT",
-		0x9a: "OP_BOOLAND", 0x9b: "OP_BOOLOR", 0x9c: "OP_NUMEQUAL",
-		0x9d: "OP_NUMEQUALVERIFY", 0x9e: "OP_NUMNOTEQUAL",
-		0x9f: "OP_LESSTHAN", 0xa0: "OP_GREATERTHAN",
-		0xa1: "OP_LESSTHANOREQUAL", 0xa2: "OP_GREATERTHANOREQUAL",
-		0xa3: "OP_MIN", 0xa4: "OP_MAX", 0xa5: "OP_WITHIN",
-		0xa6: "OP_RIPEMD160", 0xa7: "OP_SHA1", 0xa8: "OP_SHA256",
-		0xa9: "OP_HASH160", 0xaa: "OP_HASH256", 0xab: "OP_CODESEPARATOR",
-		0xac: "OP_CHECKSIG", 0xad: "OP_CHECKSIGVERIFY",
-		0xae: "OP_CHECKMULTISIG", 0xaf: "OP_CHECKMULTISIGVERIFY",
-		0xfa: "OP_SMALLINTEGER", 0xfb: "OP_PUBKEYS",
-		0xfd: "OP_PUBKEYHASH", 0xfe: "OP_PUBKEY",
-		0xff: "OP_INVALIDOPCODE",
+		0x50: "OpReserved", 0x61: "OpNoOp", 0x62: "OpVer",
+		0x63: "OpIf", 0x64: "OpIfNot", 0x65: "OpVerIf",
+		0x66: "OpVerIfNot", 0x67: "OpElse", 0x68: "OpEndIf",
+		0x69: "OpVerify", 0x6a: "OpReturn", 0x6b: "OpToAltStack",
+		0x6c: "OpFromAltStack", 0x6d: "Op2Drop", 0x6e: "Op2Dup",
+		0x6f: "Op3Dup", 0x70: "Op2Over", 0x71: "Op2Rot",
+		0x72: "Op2Swap", 0x73: "OpIfDup", 0x74: "OpDepth",
+		0x75: "OpDrop", 0x76: "OpDup", 0x77: "OpNip",
+		0x78: "OpOver", 0x79: "OpPick", 0x7a: "OpRoll",
+		0x7b: "OpRot", 0x7c: "OpSwap", 0x7d: "OpTuck",
+		0x7e: "OpCat", 0x7f: "OpSubstr", 0x80: "OpLeft",
+		0x81: "OpRight", 0x82: "OpSize", 0x83: "OpInvert",
+		0x84: "OpAnd", 0x85: "OpOr", 0x86: "OpXor",
+		0x87: "OpEqual", 0x88: "OpEqualVerify", 0x89: "OpReserved1",
+		0x8a: "OpReserved2", 0x8b: "Op1Add", 0x8c: "Op1Sub",
+		0x8d: "Op1Mul", 0x8e: "Op2Div", 0x8f: "OpNegate",
+		0x90: "OpAbs", 0x91: "OpNot", 0x92: "Op0NotEqual",
+		0x93: "OpAdd", 0x94: "OpSub", 0x95: "OpMul", 0x96: "OpDiv",
+		0x97: "OpMod", 0x98: "OpLShift", 0x99: "OpRShift",
+		0x9a: "OpBoolAnd", 0x9b: "OpBoolOr", 0x9c: "OpNumEqual",
+		0x9d: "OpNumEqualVerify", 0x9e: "OpNumNotEqual",
+		0x9f: "OpLessThan", 0xa0: "OpGreaterThan",
+		0xa1: "OpLessThanOrEqual", 0xa2: "OpGreaterThanOrEqual",
+		0xa3: "OpMin", 0xa4: "OpMax", 0xa5: "OpWithin",
+		0xa6: "OpRipeMD160", 0xa7: "OpSHA1", 0xa8: "OpSHA256",
+		0xa9: "OpHash160", 0xaa: "OpHash256", 0xab: "OpCodeSeparator",
+		0xac: "OpCheckSig", 0xad: "OpCheckSigVerify",
+		0xae: "OpCheckMultiSig", 0xaf: "OpCheckMultiSigVerify",
+		0xfa: "OpSmallInteger", 0xfb: "OpPubKeys",
+		0xfd: "OpPubKeyHash", 0xfe: "OpPubKey",
+		0xff: "OpInvalidOpCode",
 	}
 
 	for opcodeVal, expectedStr := range expectedStrings {
@@ -102,20 +102,20 @@ func TestOpcodeDisasm(
 			val := byte(opcodeVal - (0x51 - 1))
 			data = []byte{val}
 			expectedStr = strconv.Itoa(int(val))
-		// OP_NOP1 through OP_NOP10.
+		// OpNoOp1 through OpNoOp10.
 		case opcodeVal >= 0xb0 && opcodeVal <= 0xb9:
 
 			switch opcodeVal {
 
 			case 0xb1:
-				// OP_NOP2 is an alias of OP_CHECKLOCKTIMEVERIFY
-				expectedStr = "OP_CHECKLOCKTIMEVERIFY"
+				// OpNoOp2 is an alias of OpCheckLockTimeVerify
+				expectedStr = "OpCheckLockTimeVerify"
 			case 0xb2:
-				// OP_NOP3 is an alias of OP_CHECKSEQUENCEVERIFY
-				expectedStr = "OP_CHECKSEQUENCEVERIFY"
+				// OpNoOp3 is an alias of OpCheckSequenceVerify
+				expectedStr = "OpCheckSequenceVerify"
 			default:
 				val := byte(opcodeVal - (0xb0 - 1))
-				expectedStr = "OP_NOP" + strconv.Itoa(int(val))
+				expectedStr = "OpNoOp" + strconv.Itoa(int(val))
 			}
 		// OP_UNKNOWN#.
 		case opcodeVal >= 0xba && opcodeVal <= 0xf9 || opcodeVal == 0xfc:
@@ -168,20 +168,20 @@ func TestOpcodeDisasm(
 			val := byte(opcodeVal - (0x51 - 1))
 			data = []byte{val}
 			expectedStr = "OP_" + strconv.Itoa(int(val))
-		// OP_NOP1 through OP_NOP10.
+		// OpNoOp1 through OpNoOp10.
 		case opcodeVal >= 0xb0 && opcodeVal <= 0xb9:
 
 			switch opcodeVal {
 
 			case 0xb1:
-				// OP_NOP2 is an alias of OP_CHECKLOCKTIMEVERIFY
-				expectedStr = "OP_CHECKLOCKTIMEVERIFY"
+				// OpNoOp2 is an alias of OpCheckLockTimeVerify
+				expectedStr = "OpCheckLockTimeVerify"
 			case 0xb2:
-				// OP_NOP3 is an alias of OP_CHECKSEQUENCEVERIFY
-				expectedStr = "OP_CHECKSEQUENCEVERIFY"
+				// OpNoOp3 is an alias of OpCheckSequenceVerify
+				expectedStr = "OpCheckSequenceVerify"
 			default:
 				val := byte(opcodeVal - (0xb0 - 1))
-				expectedStr = "OP_NOP" + strconv.Itoa(int(val))
+				expectedStr = "OpNoOp" + strconv.Itoa(int(val))
 			}
 		// OP_UNKNOWN#.
 		case opcodeVal >= 0xba && opcodeVal <= 0xf9 || opcodeVal == 0xfc:

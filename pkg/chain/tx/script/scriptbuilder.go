@@ -25,7 +25,7 @@ func (e ErrScriptNotCanonical) Error() string {
 // 	builder := txscript.NewScriptBuilder()
 // 	builder.AddOp(txscript.Op2).AddData(pubKey1).AddData(pubKey2)
 // 	builder.AddData(pubKey3).AddOp(txscript.Op3)
-// 	builder.AddOp(txscript.OP_CHECKMULTISIG)
+// 	builder.AddOp(txscript.OpCheckMultiSig)
 // 	script, err := builder.Script()
 // 	if err != nil {
 // 		// Handle the error.

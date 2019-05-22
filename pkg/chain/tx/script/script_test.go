@@ -1988,17 +1988,17 @@ func TestUnparsingInvalidOpcodes(
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_5",
+			name: "Op5",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_5],
+				opcode: &opcodeArray[Op5],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_5 long",
+			name: "Op5 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_5],
+				opcode: &opcodeArray[Op5],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
@@ -2180,1201 +2180,1201 @@ func TestUnparsingInvalidOpcodes(
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_NOP",
+			name: "OpNoOp",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOP],
+				opcode: &opcodeArray[OpNoOp],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_NOP long",
+			name: "OpNoOp long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOP],
+				opcode: &opcodeArray[OpNoOp],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_VER",
+			name: "OpVer",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_VER],
+				opcode: &opcodeArray[OpVer],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_VER long",
+			name: "OpVer long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_VER],
+				opcode: &opcodeArray[OpVer],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_IF",
+			name: "OpIf",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_IF],
+				opcode: &opcodeArray[OpIf],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_IF long",
+			name: "OpIf long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_IF],
+				opcode: &opcodeArray[OpIf],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_NOTIF",
+			name: "OpIfNot",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOTIF],
+				opcode: &opcodeArray[OpIfNot],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_NOTIF long",
+			name: "OpIfNot long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOTIF],
+				opcode: &opcodeArray[OpIfNot],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_VERIF",
+			name: "OpVerIf",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_VERIF],
+				opcode: &opcodeArray[OpVerIf],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_VERIF long",
+			name: "OpVerIf long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_VERIF],
+				opcode: &opcodeArray[OpVerIf],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_VERNOTIF",
+			name: "OpVerIfNot",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_VERNOTIF],
+				opcode: &opcodeArray[OpVerIfNot],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_VERNOTIF long",
+			name: "OpVerIfNot long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_VERNOTIF],
+				opcode: &opcodeArray[OpVerIfNot],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_ELSE",
+			name: "OpElse",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_ELSE],
+				opcode: &opcodeArray[OpElse],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_ELSE long",
+			name: "OpElse long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_ELSE],
+				opcode: &opcodeArray[OpElse],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_ENDIF",
+			name: "OpEndIf",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_ENDIF],
+				opcode: &opcodeArray[OpEndIf],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_ENDIF long",
+			name: "OpEndIf long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_ENDIF],
+				opcode: &opcodeArray[OpEndIf],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_VERIFY",
+			name: "OpVerify",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_VERIFY],
+				opcode: &opcodeArray[OpVerify],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_VERIFY long",
+			name: "OpVerify long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_VERIFY],
+				opcode: &opcodeArray[OpVerify],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_RETURN",
+			name: "OpReturn",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_RETURN],
+				opcode: &opcodeArray[OpReturn],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_RETURN long",
+			name: "OpReturn long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_RETURN],
+				opcode: &opcodeArray[OpReturn],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_TOALTSTACK",
+			name: "OpToAltStack",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_TOALTSTACK],
+				opcode: &opcodeArray[OpToAltStack],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_TOALTSTACK long",
+			name: "OpToAltStack long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_TOALTSTACK],
+				opcode: &opcodeArray[OpToAltStack],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_FROMALTSTACK",
+			name: "OpFromAltStack",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_FROMALTSTACK],
+				opcode: &opcodeArray[OpFromAltStack],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_FROMALTSTACK long",
+			name: "OpFromAltStack long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_FROMALTSTACK],
+				opcode: &opcodeArray[OpFromAltStack],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_2DROP",
+			name: "Op2Drop",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_2DROP],
+				opcode: &opcodeArray[Op2Drop],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_2DROP long",
+			name: "Op2Drop long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_2DROP],
+				opcode: &opcodeArray[Op2Drop],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_2DUP",
+			name: "Op2Dup",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_2DUP],
+				opcode: &opcodeArray[Op2Dup],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_2DUP long",
+			name: "Op2Dup long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_2DUP],
+				opcode: &opcodeArray[Op2Dup],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_3DUP",
+			name: "Op3Dup",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_3DUP],
+				opcode: &opcodeArray[Op3Dup],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_3DUP long",
+			name: "Op3Dup long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_3DUP],
+				opcode: &opcodeArray[Op3Dup],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_2OVER",
+			name: "Op2Over",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_2OVER],
+				opcode: &opcodeArray[Op2Over],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_2OVER long",
+			name: "Op2Over long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_2OVER],
+				opcode: &opcodeArray[Op2Over],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_2ROT",
+			name: "Op2Rot",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_2ROT],
+				opcode: &opcodeArray[Op2Rot],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_2ROT long",
+			name: "Op2Rot long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_2ROT],
+				opcode: &opcodeArray[Op2Rot],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_2SWAP",
+			name: "Op2Swap",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_2SWAP],
+				opcode: &opcodeArray[Op2Swap],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_2SWAP long",
+			name: "Op2Swap long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_2SWAP],
+				opcode: &opcodeArray[Op2Swap],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_IFDUP",
+			name: "OpIfDup",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_IFDUP],
+				opcode: &opcodeArray[OpIfDup],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_IFDUP long",
+			name: "OpIfDup long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_IFDUP],
+				opcode: &opcodeArray[OpIfDup],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DEPTH",
+			name: "OpDepth",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DEPTH],
+				opcode: &opcodeArray[OpDepth],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DEPTH long",
+			name: "OpDepth long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DEPTH],
+				opcode: &opcodeArray[OpDepth],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DROP",
+			name: "OpDrop",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DROP],
+				opcode: &opcodeArray[OpDrop],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DROP long",
+			name: "OpDrop long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DROP],
+				opcode: &opcodeArray[OpDrop],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DUP",
+			name: "OpDup",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DUP],
+				opcode: &opcodeArray[OpDup],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DUP long",
+			name: "OpDup long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DUP],
+				opcode: &opcodeArray[OpDup],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_NIP",
+			name: "OpNip",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NIP],
+				opcode: &opcodeArray[OpNip],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_NIP long",
+			name: "OpNip long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NIP],
+				opcode: &opcodeArray[OpNip],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_OVER",
+			name: "OpOver",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_OVER],
+				opcode: &opcodeArray[OpOver],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_OVER long",
+			name: "OpOver long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_OVER],
+				opcode: &opcodeArray[OpOver],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_PICK",
+			name: "OpPick",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_PICK],
+				opcode: &opcodeArray[OpPick],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_PICK long",
+			name: "OpPick long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_PICK],
+				opcode: &opcodeArray[OpPick],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_ROLL",
+			name: "OpRoll",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_ROLL],
+				opcode: &opcodeArray[OpRoll],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_ROLL long",
+			name: "OpRoll long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_ROLL],
+				opcode: &opcodeArray[OpRoll],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_ROT",
+			name: "OpRot",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_ROT],
+				opcode: &opcodeArray[OpRot],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_ROT long",
+			name: "OpRot long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_ROT],
+				opcode: &opcodeArray[OpRot],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_SWAP",
+			name: "OpSwap",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_SWAP],
+				opcode: &opcodeArray[OpSwap],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_SWAP long",
+			name: "OpSwap long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_SWAP],
+				opcode: &opcodeArray[OpSwap],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_TUCK",
+			name: "OpTuck",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_TUCK],
+				opcode: &opcodeArray[OpTuck],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_TUCK long",
+			name: "OpTuck long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_TUCK],
+				opcode: &opcodeArray[OpTuck],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_CAT",
+			name: "OpCat",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_CAT],
+				opcode: &opcodeArray[OpCat],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_CAT long",
+			name: "OpCat long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_CAT],
+				opcode: &opcodeArray[OpCat],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_SUBSTR",
+			name: "OpSubstr",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_SUBSTR],
+				opcode: &opcodeArray[OpSubstr],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_SUBSTR long",
+			name: "OpSubstr long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_SUBSTR],
+				opcode: &opcodeArray[OpSubstr],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_LEFT",
+			name: "OpLeft",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_LEFT],
+				opcode: &opcodeArray[OpLeft],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_LEFT long",
+			name: "OpLeft long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_LEFT],
+				opcode: &opcodeArray[OpLeft],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_LEFT",
+			name: "OpLeft",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_LEFT],
+				opcode: &opcodeArray[OpLeft],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_LEFT long",
+			name: "OpLeft long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_LEFT],
+				opcode: &opcodeArray[OpLeft],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_RIGHT",
+			name: "OpRight",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_RIGHT],
+				opcode: &opcodeArray[OpRight],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_RIGHT long",
+			name: "OpRight long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_RIGHT],
+				opcode: &opcodeArray[OpRight],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_SIZE",
+			name: "OpSize",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_SIZE],
+				opcode: &opcodeArray[OpSize],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_SIZE long",
+			name: "OpSize long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_SIZE],
+				opcode: &opcodeArray[OpSize],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_INVERT",
+			name: "OpInvert",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_INVERT],
+				opcode: &opcodeArray[OpInvert],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_INVERT long",
+			name: "OpInvert long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_INVERT],
+				opcode: &opcodeArray[OpInvert],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_AND",
+			name: "OpAnd",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_AND],
+				opcode: &opcodeArray[OpAnd],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_AND long",
+			name: "OpAnd long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_AND],
+				opcode: &opcodeArray[OpAnd],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_OR",
+			name: "OpOr",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_OR],
+				opcode: &opcodeArray[OpOr],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_OR long",
+			name: "OpOr long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_OR],
+				opcode: &opcodeArray[OpOr],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_XOR",
+			name: "OpXor",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_XOR],
+				opcode: &opcodeArray[OpXor],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_XOR long",
+			name: "OpXor long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_XOR],
+				opcode: &opcodeArray[OpXor],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_EQUAL",
+			name: "OpEqual",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_EQUAL],
+				opcode: &opcodeArray[OpEqual],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_EQUAL long",
+			name: "OpEqual long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_EQUAL],
+				opcode: &opcodeArray[OpEqual],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_EQUALVERIFY",
+			name: "OpEqualVerify",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_EQUALVERIFY],
+				opcode: &opcodeArray[OpEqualVerify],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_EQUALVERIFY long",
+			name: "OpEqualVerify long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_EQUALVERIFY],
+				opcode: &opcodeArray[OpEqualVerify],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_RESERVED1",
+			name: "OpReserved1",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_RESERVED1],
+				opcode: &opcodeArray[OpReserved1],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_RESERVED1 long",
+			name: "OpReserved1 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_RESERVED1],
+				opcode: &opcodeArray[OpReserved1],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_RESERVED2",
+			name: "OpReserved2",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_RESERVED2],
+				opcode: &opcodeArray[OpReserved2],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_RESERVED2 long",
+			name: "OpReserved2 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_RESERVED2],
+				opcode: &opcodeArray[OpReserved2],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_1ADD",
+			name: "Op1Add",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_1ADD],
+				opcode: &opcodeArray[Op1Add],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_1ADD long",
+			name: "Op1Add long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_1ADD],
+				opcode: &opcodeArray[Op1Add],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_1SUB",
+			name: "Op1Sub",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_1SUB],
+				opcode: &opcodeArray[Op1Sub],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_1SUB long",
+			name: "Op1Sub long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_1SUB],
+				opcode: &opcodeArray[Op1Sub],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_2MUL",
+			name: "Op1Mul",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_2MUL],
+				opcode: &opcodeArray[Op1Mul],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_2MUL long",
+			name: "Op1Mul long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_2MUL],
+				opcode: &opcodeArray[Op1Mul],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_2DIV",
+			name: "Op2Div",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_2DIV],
+				opcode: &opcodeArray[Op2Div],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_2DIV long",
+			name: "Op2Div long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_2DIV],
+				opcode: &opcodeArray[Op2Div],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_NEGATE",
+			name: "OpNegate",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NEGATE],
+				opcode: &opcodeArray[OpNegate],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_NEGATE long",
+			name: "OpNegate long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NEGATE],
+				opcode: &opcodeArray[OpNegate],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_ABS",
+			name: "OpAbs",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_ABS],
+				opcode: &opcodeArray[OpAbs],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_ABS long",
+			name: "OpAbs long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_ABS],
+				opcode: &opcodeArray[OpAbs],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_NOT",
+			name: "OpNot",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOT],
+				opcode: &opcodeArray[OpNot],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_NOT long",
+			name: "OpNot long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOT],
+				opcode: &opcodeArray[OpNot],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_0NOTEQUAL",
+			name: "Op0NotEqual",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_0NOTEQUAL],
+				opcode: &opcodeArray[Op0NotEqual],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_0NOTEQUAL long",
+			name: "Op0NotEqual long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_0NOTEQUAL],
+				opcode: &opcodeArray[Op0NotEqual],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_ADD",
+			name: "OpAdd",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_ADD],
+				opcode: &opcodeArray[OpAdd],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_ADD long",
+			name: "OpAdd long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_ADD],
+				opcode: &opcodeArray[OpAdd],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_SUB",
+			name: "OpSub",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_SUB],
+				opcode: &opcodeArray[OpSub],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_SUB long",
+			name: "OpSub long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_SUB],
+				opcode: &opcodeArray[OpSub],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_MUL",
+			name: "OpMul",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_MUL],
+				opcode: &opcodeArray[OpMul],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_MUL long",
+			name: "OpMul long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_MUL],
+				opcode: &opcodeArray[OpMul],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_DIV",
+			name: "OpDiv",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DIV],
+				opcode: &opcodeArray[OpDiv],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_DIV long",
+			name: "OpDiv long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_DIV],
+				opcode: &opcodeArray[OpDiv],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_MOD",
+			name: "OpMod",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_MOD],
+				opcode: &opcodeArray[OpMod],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_MOD long",
+			name: "OpMod long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_MOD],
+				opcode: &opcodeArray[OpMod],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_LSHIFT",
+			name: "OpLShift",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_LSHIFT],
+				opcode: &opcodeArray[OpLShift],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_LSHIFT long",
+			name: "OpLShift long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_LSHIFT],
+				opcode: &opcodeArray[OpLShift],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_RSHIFT",
+			name: "OpRShift",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_RSHIFT],
+				opcode: &opcodeArray[OpRShift],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_RSHIFT long",
+			name: "OpRShift long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_RSHIFT],
+				opcode: &opcodeArray[OpRShift],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_BOOLAND",
+			name: "OpBoolAnd",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_BOOLAND],
+				opcode: &opcodeArray[OpBoolAnd],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_BOOLAND long",
+			name: "OpBoolAnd long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_BOOLAND],
+				opcode: &opcodeArray[OpBoolAnd],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_BOOLOR",
+			name: "OpBoolOr",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_BOOLOR],
+				opcode: &opcodeArray[OpBoolOr],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_BOOLOR long",
+			name: "OpBoolOr long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_BOOLOR],
+				opcode: &opcodeArray[OpBoolOr],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_NUMEQUAL",
+			name: "OpNumEqual",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NUMEQUAL],
+				opcode: &opcodeArray[OpNumEqual],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_NUMEQUAL long",
+			name: "OpNumEqual long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NUMEQUAL],
+				opcode: &opcodeArray[OpNumEqual],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_NUMEQUALVERIFY",
+			name: "OpNumEqualVerify",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NUMEQUALVERIFY],
+				opcode: &opcodeArray[OpNumEqualVerify],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_NUMEQUALVERIFY long",
+			name: "OpNumEqualVerify long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NUMEQUALVERIFY],
+				opcode: &opcodeArray[OpNumEqualVerify],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_NUMNOTEQUAL",
+			name: "OpNumNotEqual",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NUMNOTEQUAL],
+				opcode: &opcodeArray[OpNumNotEqual],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_NUMNOTEQUAL long",
+			name: "OpNumNotEqual long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NUMNOTEQUAL],
+				opcode: &opcodeArray[OpNumNotEqual],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_LESSTHAN",
+			name: "OpLessThan",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_LESSTHAN],
+				opcode: &opcodeArray[OpLessThan],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_LESSTHAN long",
+			name: "OpLessThan long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_LESSTHAN],
+				opcode: &opcodeArray[OpLessThan],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_GREATERTHAN",
+			name: "OpGreaterThan",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_GREATERTHAN],
+				opcode: &opcodeArray[OpGreaterThan],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_GREATERTHAN long",
+			name: "OpGreaterThan long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_GREATERTHAN],
+				opcode: &opcodeArray[OpGreaterThan],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_LESSTHANOREQUAL",
+			name: "OpLessThanOrEqual",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_LESSTHANOREQUAL],
+				opcode: &opcodeArray[OpLessThanOrEqual],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_LESSTHANOREQUAL long",
+			name: "OpLessThanOrEqual long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_LESSTHANOREQUAL],
+				opcode: &opcodeArray[OpLessThanOrEqual],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_GREATERTHANOREQUAL",
+			name: "OpGreaterThanOrEqual",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_GREATERTHANOREQUAL],
+				opcode: &opcodeArray[OpGreaterThanOrEqual],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_GREATERTHANOREQUAL long",
+			name: "OpGreaterThanOrEqual long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_GREATERTHANOREQUAL],
+				opcode: &opcodeArray[OpGreaterThanOrEqual],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_MIN",
+			name: "OpMin",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_MIN],
+				opcode: &opcodeArray[OpMin],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_MIN long",
+			name: "OpMin long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_MIN],
+				opcode: &opcodeArray[OpMin],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_MAX",
+			name: "OpMax",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_MAX],
+				opcode: &opcodeArray[OpMax],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_MAX long",
+			name: "OpMax long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_MAX],
+				opcode: &opcodeArray[OpMax],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_WITHIN",
+			name: "OpWithin",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_WITHIN],
+				opcode: &opcodeArray[OpWithin],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_WITHIN long",
+			name: "OpWithin long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_WITHIN],
+				opcode: &opcodeArray[OpWithin],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_RIPEMD160",
+			name: "OpRipeMD160",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_RIPEMD160],
+				opcode: &opcodeArray[OpRipeMD160],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_RIPEMD160 long",
+			name: "OpRipeMD160 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_RIPEMD160],
+				opcode: &opcodeArray[OpRipeMD160],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_SHA1",
+			name: "OpSHA1",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_SHA1],
+				opcode: &opcodeArray[OpSHA1],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_SHA1 long",
+			name: "OpSHA1 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_SHA1],
+				opcode: &opcodeArray[OpSHA1],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_SHA256",
+			name: "OpSHA256",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_SHA256],
+				opcode: &opcodeArray[OpSHA256],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_SHA256 long",
+			name: "OpSHA256 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_SHA256],
+				opcode: &opcodeArray[OpSHA256],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_HASH160",
+			name: "OpHash160",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_HASH160],
+				opcode: &opcodeArray[OpHash160],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_HASH160 long",
+			name: "OpHash160 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_HASH160],
+				opcode: &opcodeArray[OpHash160],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_HASH256",
+			name: "OpHash256",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_HASH256],
+				opcode: &opcodeArray[OpHash256],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_HASH256 long",
+			name: "OpHash256 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_HASH256],
+				opcode: &opcodeArray[OpHash256],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
@@ -3382,287 +3382,287 @@ func TestUnparsingInvalidOpcodes(
 		{
 			name: "OP_CODESAPERATOR",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_CODESEPARATOR],
+				opcode: &opcodeArray[OpCodeSeparator],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_CODESEPARATOR long",
+			name: "OpCodeSeparator long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_CODESEPARATOR],
+				opcode: &opcodeArray[OpCodeSeparator],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_CHECKSIG",
+			name: "OpCheckSig",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_CHECKSIG],
+				opcode: &opcodeArray[OpCheckSig],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_CHECKSIG long",
+			name: "OpCheckSig long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_CHECKSIG],
+				opcode: &opcodeArray[OpCheckSig],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_CHECKSIGVERIFY",
+			name: "OpCheckSigVerify",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_CHECKSIGVERIFY],
+				opcode: &opcodeArray[OpCheckSigVerify],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_CHECKSIGVERIFY long",
+			name: "OpCheckSigVerify long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_CHECKSIGVERIFY],
+				opcode: &opcodeArray[OpCheckSigVerify],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_CHECKMULTISIG",
+			name: "OpCheckMultiSig",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_CHECKMULTISIG],
+				opcode: &opcodeArray[OpCheckMultiSig],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_CHECKMULTISIG long",
+			name: "OpCheckMultiSig long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_CHECKMULTISIG],
+				opcode: &opcodeArray[OpCheckMultiSig],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_CHECKMULTISIGVERIFY",
+			name: "OpCheckMultiSigVerify",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_CHECKMULTISIGVERIFY],
+				opcode: &opcodeArray[OpCheckMultiSigVerify],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_CHECKMULTISIGVERIFY long",
+			name: "OpCheckMultiSigVerify long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_CHECKMULTISIGVERIFY],
+				opcode: &opcodeArray[OpCheckMultiSigVerify],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_NOP1",
+			name: "OpNoOp1",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOP1],
+				opcode: &opcodeArray[OpNoOp1],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_NOP1 long",
+			name: "OpNoOp1 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOP1],
+				opcode: &opcodeArray[OpNoOp1],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_NOP2",
+			name: "OpNoOp2",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOP2],
+				opcode: &opcodeArray[OpNoOp2],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_NOP2 long",
+			name: "OpNoOp2 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOP2],
+				opcode: &opcodeArray[OpNoOp2],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_NOP3",
+			name: "OpNoOp3",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOP3],
+				opcode: &opcodeArray[OpNoOp3],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_NOP3 long",
+			name: "OpNoOp3 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOP3],
+				opcode: &opcodeArray[OpNoOp3],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_NOP4",
+			name: "OpNoOp4",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOP4],
+				opcode: &opcodeArray[OpNoOp4],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_NOP4 long",
+			name: "OpNoOp4 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOP4],
+				opcode: &opcodeArray[OpNoOp4],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_NOP5",
+			name: "OpNoOp5",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOP5],
+				opcode: &opcodeArray[OpNoOp5],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_NOP5 long",
+			name: "OpNoOp5 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOP5],
+				opcode: &opcodeArray[OpNoOp5],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_NOP6",
+			name: "OpNoOp6",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOP6],
+				opcode: &opcodeArray[OpNoOp6],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_NOP6 long",
+			name: "OpNoOp6 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOP6],
+				opcode: &opcodeArray[OpNoOp6],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_NOP7",
+			name: "OpNoOp7",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOP7],
+				opcode: &opcodeArray[OpNoOp7],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_NOP7 long",
+			name: "OpNoOp7 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOP7],
+				opcode: &opcodeArray[OpNoOp7],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_NOP8",
+			name: "OpNoOp8",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOP8],
+				opcode: &opcodeArray[OpNoOp8],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_NOP8 long",
+			name: "OpNoOp8 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOP8],
+				opcode: &opcodeArray[OpNoOp8],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_NOP9",
+			name: "OpNoOp9",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOP9],
+				opcode: &opcodeArray[OpNoOp9],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_NOP9 long",
+			name: "OpNoOp9 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOP9],
+				opcode: &opcodeArray[OpNoOp9],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_NOP10",
+			name: "OpNoOp10",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOP10],
+				opcode: &opcodeArray[OpNoOp10],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_NOP10 long",
+			name: "OpNoOp10 long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_NOP10],
+				opcode: &opcodeArray[OpNoOp10],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_PUBKEYHASH",
+			name: "OpPubKeyHash",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_PUBKEYHASH],
+				opcode: &opcodeArray[OpPubKeyHash],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_PUBKEYHASH long",
+			name: "OpPubKeyHash long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_PUBKEYHASH],
+				opcode: &opcodeArray[OpPubKeyHash],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_PUBKEY",
+			name: "OpPubKey",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_PUBKEY],
+				opcode: &opcodeArray[OpPubKey],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_PUBKEY long",
+			name: "OpPubKey long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_PUBKEY],
+				opcode: &opcodeArray[OpPubKey],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_INVALIDOPCODE",
+			name: "OpInvalidOpCode",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_INVALIDOPCODE],
+				opcode: &opcodeArray[OpInvalidOpCode],
 				data:   nil,
 			},
 			expectedErr: nil,
 		},
 		{
-			name: "OP_INVALIDOPCODE long",
+			name: "OpInvalidOpCode long",
 			pop: &parsedOpcode{
-				opcode: &opcodeArray[OP_INVALIDOPCODE],
+				opcode: &opcodeArray[OpInvalidOpCode],
 				data:   make([]byte, 1),
 			},
 			expectedErr: scriptError(ErrInternal, ""),
@@ -3978,39 +3978,39 @@ func TestRemoveOpcodes(
 			// Nothing to remove.
 			name:   "nothing to remove",
 			before: "NOP",
-			remove: OP_CODESEPARATOR,
+			remove: OpCodeSeparator,
 			after:  "NOP",
 		},
 		{
 			// Test basic opcode removal.
 			name:   "codeseparator 1",
 			before: "NOP CODESEPARATOR TRUE",
-			remove: OP_CODESEPARATOR,
+			remove: OpCodeSeparator,
 			after:  "NOP TRUE",
 		},
 		{
 			// The opcode in question is actually part of the data in a previous opcode.
 			name:   "codeseparator by coincidence",
 			before: "NOP DATA_1 CODESEPARATOR TRUE",
-			remove: OP_CODESEPARATOR,
+			remove: OpCodeSeparator,
 			after:  "NOP DATA_1 CODESEPARATOR TRUE",
 		},
 		{
 			name:   "invalid opcode",
 			before: "CAT",
-			remove: OP_CODESEPARATOR,
+			remove: OpCodeSeparator,
 			after:  "CAT",
 		},
 		{
 			name:   "invalid length (instruction)",
 			before: "PUSHDATA1",
-			remove: OP_CODESEPARATOR,
+			remove: OpCodeSeparator,
 			err:    scriptError(ErrMalformedPush, ""),
 		},
 		{
 			name:   "invalid length (data)",
 			before: "PUSHDATA1 0xff 0xfe",
-			remove: OP_CODESEPARATOR,
+			remove: OpCodeSeparator,
 			err:    scriptError(ErrMalformedPush, ""),
 		},
 	}
@@ -4062,9 +4062,9 @@ func TestRemoveOpcodeByData(
 	}{
 		{
 			name:   "nothing to do",
-			before: []byte{OP_NOP},
+			before: []byte{OpNoOp},
 			remove: []byte{1, 2, 3, 4},
-			after:  []byte{OP_NOP},
+			after:  []byte{OpNoOp},
 		},
 		{
 			name:   "simple case",
@@ -4153,9 +4153,9 @@ func TestRemoveOpcodeByData(
 		},
 		{
 			name:   "invalid opcode ",
-			before: []byte{OP_UNKNOWN187},
+			before: []byte{OpUnknown187},
 			remove: []byte{1, 2, 3, 4},
-			after:  []byte{OP_UNKNOWN187},
+			after:  []byte{OpUnknown187},
 		},
 		{
 			name:   "invalid length (instruction)",

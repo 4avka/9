@@ -546,7 +546,7 @@ mempoolLoop:
 	blockSigOpCost := coinbaseSigOpCost
 	totalFees := int64(0)
 
-	// Query the version bits state to see if segwit has been activated, if so then this means that we'll include any transactions with witness data in the mempool, and also add the witness commitment as an OP_RETURN output in the coinbase transaction.
+	// Query the version bits state to see if segwit has been activated, if so then this means that we'll include any transactions with witness data in the mempool, and also add the witness commitment as an OpReturn output in the coinbase transaction.
 	segwitState, err := g.chain.ThresholdState(chaincfg.DeploymentSegwit)
 
 	if err != nil {
@@ -747,7 +747,7 @@ mempoolLoop:
 	coinbaseTx.MsgTx().TxOut[0].Value += totalFees
 	txFees[0] = -totalFees
 
-	// If segwit is active and we included transactions with witness data, then we'll need to include a commitment to the witness data in an OP_RETURN output within the coinbase transaction.
+	// If segwit is active and we included transactions with witness data, then we'll need to include a commitment to the witness data in an OpReturn output within the coinbase transaction.
 	var witnessCommitment []byte
 
 	if witnessIncluded {
@@ -763,10 +763,10 @@ mempoolLoop:
 		var witnessPreimage [64]byte
 		copy(witnessPreimage[:32], witnessMerkleRoot[:])
 		copy(witnessPreimage[32:], witnessNonce[:])
-		// The witness commitment itself is the double-sha256 of the witness preimage generated above. With the commitment generated, the witness script for the output is: OP_RETURN OpData36 {0xaa21a9ed || witnessCommitment}. The leading prefix is referred to as the "witness magic bytes".
+		// The witness commitment itself is the double-sha256 of the witness preimage generated above. With the commitment generated, the witness script for the output is: OpReturn OpData36 {0xaa21a9ed || witnessCommitment}. The leading prefix is referred to as the "witness magic bytes".
 		witnessCommitment = chainhash.DoubleHashB(witnessPreimage[:])
 		witnessScript := append(blockchain.WitnessMagicBytes, witnessCommitment...)
-		// Finally, create the OP_RETURN carrying witness commitment output as an additional output within the coinbase.
+		// Finally, create the OpReturn carrying witness commitment output as an additional output within the coinbase.
 		commitmentOutput := &wire.TxOut{
 			Value:    0,
 			PkScript: witnessScript,

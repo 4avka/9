@@ -115,7 +115,7 @@ func signMultiSig(
 	tx *wire.MsgTx, idx int, subScript []byte, hashType SigHashType,
 	addresses []util.Address, nRequired int, kdb KeyDB) ([]byte, bool) {
 
-	// We start with a single OpFalse to work around the (now standard) but in the reference implementation that causes a spurious pop at the end of OP_CHECKMULTISIG.
+	// We start with a single OpFalse to work around the (now standard) but in the reference implementation that causes a spurious pop at the end of OpCheckMultiSig.
 	builder := NewScriptBuilder().AddOp(OpFalse)
 	signed := 0
 

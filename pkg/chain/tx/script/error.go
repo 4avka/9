@@ -35,7 +35,7 @@ const (
 
 	// Failures related to final execution state.
 
-	// ErrEarlyReturn is returned when OP_RETURN is executed in the script.
+	// ErrEarlyReturn is returned when OpReturn is executed in the script.
 	ErrEarlyReturn
 
 	// ErrEmptyStack is returned when the script evaluated without error, but terminated with an empty top stack element.
@@ -75,21 +75,21 @@ const (
 
 	// Failures related to verification operations.
 
-	// ErrVerify is returned when OP_VERIFY is encountered in a script and the top item on the data stack does not evaluate to true.
+	// ErrVerify is returned when OpVerify is encountered in a script and the top item on the data stack does not evaluate to true.
 	ErrVerify
 
-	// ErrEqualVerify is returned when OP_EQUALVERIFY is encountered in a script and the top item on the data stack does not evaluate to true.
+	// ErrEqualVerify is returned when OpEqualVerify is encountered in a script and the top item on the data stack does not evaluate to true.
 	ErrEqualVerify
 
-	// ErrNumEqualVerify is returned when OP_NUMEQUALVERIFY is encountered in a script and the top item on the data stack does not evaluate to
+	// ErrNumEqualVerify is returned when OpNumEqualVerify is encountered in a script and the top item on the data stack does not evaluate to
 
 	// true.
 	ErrNumEqualVerify
 
-	// ErrCheckSigVerify is returned when OP_CHECKSIGVERIFY is encountered in a script and the top item on the data stack does not evaluate to true.
+	// ErrCheckSigVerify is returned when OpCheckSigVerify is encountered in a script and the top item on the data stack does not evaluate to true.
 	ErrCheckSigVerify
 
-	// ErrCheckSigVerify is returned when OP_CHECKMULTISIGVERIFY is encountered in a script and the top item on the data stack does not evaluate to true.
+	// ErrCheckSigVerify is returned when OpCheckMultiSigVerify is encountered in a script and the top item on the data stack does not evaluate to true.
 	ErrCheckMultiSigVerify
 
 	// Failures related to improper use of opcodes.
@@ -106,7 +106,7 @@ const (
 	// ErrInvalidStackOperation is returned when a stack operation is attempted with a number that is invalid for the current stack size.
 	ErrInvalidStackOperation
 
-	// ErrUnbalancedConditional is returned when an OP_ELSE or OP_ENDIF is encountered in a script without first having an OP_IF or OP_NOTIF or the end of script is reached without encountering an OP_ENDIF when an OP_IF or OP_NOTIF was previously encountered.
+	// ErrUnbalancedConditional is returned when an OpElse or OpEndIf is encountered in a script without first having an OpIf or OpIfNot or the end of script is reached without encountering an OpEndIf when an OpIf or OpIfNot was previously encountered.
 	ErrUnbalancedConditional
 
 	// Failures related to malleability.
@@ -199,7 +199,7 @@ const (
 	// ErrUnsatisfiedLockTime is returned when a script contains an opcode that involves a lock time and the required lock time has not been reached.
 	ErrUnsatisfiedLockTime
 
-	// ErrMinimalIf is returned if ScriptVerifyWitness is set and the operand of an OP_IF/OP_NOF_IF are not either an empty vector or [0x01].
+	// ErrMinimalIf is returned if ScriptVerifyWitness is set and the operand of an OpIf/OP_NOF_IF are not either an empty vector or [0x01].
 	ErrMinimalIf
 
 	// ErrDiscourageUpgradableWitnessProgram is returned if ScriptVerifyWitness is set and the versino of an executing witness program is outside the set of currently defined witness program vesions.

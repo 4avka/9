@@ -60,7 +60,7 @@ const (
 	// ScriptVerifyDiscourageUpgradeableWitnessProgram makes witness program with versions 2-16 non-standard.
 	ScriptVerifyDiscourageUpgradeableWitnessProgram
 
-	// ScriptVerifyMinimalIf makes a script with an OP_IF/OP_NOTIF whose operand is anything other than empty vector or [0x01] non-standard.
+	// ScriptVerifyMinimalIf makes a script with an OpIf/OpIfNot whose operand is anything other than empty vector or [0x01] non-standard.
 	ScriptVerifyMinimalIf
 
 	// ScriptVerifyWitnessPubKeyType makes a script within a check-sig operation whose public key isn't serialized in a compressed format non-standard.
@@ -112,7 +112,7 @@ func (vm *Engine) hasFlag(flag ScriptFlags) bool {
 	return vm.flags&flag == flag
 }
 
-// isBranchExecuting returns whether or not the current conditional branch is actively executing.  For example, when the data stack has an OpFalse on it and an OP_IF is encountered, the branch is inactive until an OP_ELSE or OP_ENDIF is encountered.  It properly handles nested conditionals.
+// isBranchExecuting returns whether or not the current conditional branch is actively executing.  For example, when the data stack has an OpFalse on it and an OpIf is encountered, the branch is inactive until an OpElse or OpEndIf is encountered.  It properly handles nested conditionals.
 func (vm *Engine) isBranchExecuting() bool {
 
 	if len(vm.condStack) == 0 {
@@ -587,7 +587,7 @@ func (vm *Engine) Execute() (err error) {
 	return vm.CheckErrorCondition(true)
 }
 
-// subScript returns the script since the last OP_CODESEPARATOR.
+// subScript returns the script since the last OpCodeSeparator.
 func (vm *Engine) subScript() []parsedOpcode {
 
 	return vm.scripts[vm.scriptIdx.Load()][vm.lastCodeSep:]

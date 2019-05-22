@@ -1250,7 +1250,7 @@ func getRedeemScript(
 // redeem script is obtained by looking up the address of the given P2SH pkScript
 // on the address manager.
 // The order of the signatures must match that of the public keys in the multi-sig
-// script as OP_CHECKMULTISIG expects that.
+// script as OpCheckMultiSig expects that.
 // This function must be called with the manager unlocked.
 func signMultiSigUTXO(
 	mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, tx *wire.MsgTx, idx int, pkScript []byte, sigs []RawSig) error {

@@ -122,7 +122,7 @@ rev
 	0xb2, 0x3e, 0xe6, 0xe6, 0xaf, 0xed, 0x40, 0x97, 
 	0x88, 0x06, 0x68, 0x0c, 0x51, 0x72, 0x71, 0xd2, 
 	0xe0, 0x04, 0x41, 
-                            [04e0d27172510c6806889740edafe6e63eb23fca32786fccfdb282bb2876a9f43b228245df057661ff943f6150716a20ea1851e8a7e9f54e620297664618438dae OP_CHECKSIG]
+                            [04e0d27172510c6806889740edafe6e63eb23fca32786fccfdb282bb2876a9f43b228245df057661ff943f6150716a20ea1851e8a7e9f54e620297664618438dae OpCheckSig]
 abCFzjNoXHYxVQYP1WDBwpxgPCXzfqoxv7 +100000000000
 -----------------------------------------------------------------------------------
 testnet genesis block data
@@ -239,7 +239,7 @@ rev
 	0xb2, 0x3e, 0xe6, 0xe6, 0xaf, 0xed, 0x40, 0x97, 
 	0x88, 0x06, 0x68, 0x0c, 0x51, 0x72, 0x71, 0xd2, 
 	0xe0, 0x04, 0x41, 
-                            [04e0d27172510c6806889740edafe6e63eb23fca32786fccfdb282bb2876a9f43b228245df057661ff943f6150716a20ea1851e8a7e9f54e620297664618438dae OP_CHECKSIG]
+                            [04e0d27172510c6806889740edafe6e63eb23fca32786fccfdb282bb2876a9f43b228245df057661ff943f6150716a20ea1851e8a7e9f54e620297664618438dae OpCheckSig]
 abCFzjNoXHYxVQYP1WDBwpxgPCXzfqoxv7 +100000000000
 -----------------------------------------------------------------------------------
 regtestnet genesis block data
@@ -356,5 +356,5 @@ rev
 	0xb2, 0x3e, 0xe6, 0xe6, 0xaf, 0xed, 0x40, 0x97, 
 	0x88, 0x06, 0x68, 0x0c, 0x51, 0x72, 0x71, 0xd2, 
 	0xe0, 0x04, 0x41, 
-                            [04e0d27172510c6806889740edafe6e63eb23fca32786fccfdb282bb2876a9f43b228245df057661ff943f6150716a20ea1851e8a7e9f54e620297664618438dae OP_CHECKSIG]
+                            [04e0d27172510c6806889740edafe6e63eb23fca32786fccfdb282bb2876a9f43b228245df057661ff943f6150716a20ea1851e8a7e9f54e620297664618438dae OpCheckSig]
 abCFzjNoXHYxVQYP1WDBwpxgPCXzfqoxv7 +100000000000

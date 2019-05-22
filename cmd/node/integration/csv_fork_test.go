@@ -256,11 +256,11 @@ func createCSVOutput(
 	// if the lock is seconds or time based.
 	sequenceLock := blockchain.LockTimeToSequence(isSeconds,
 		uint32(timeLock))
-	// Our CSV script is simply: <sequenceLock> OP_CSV OP_DROP
+	// Our CSV script is simply: <sequenceLock> OP_CSV OpDrop
 	b := txscript.NewScriptBuilder().
 		AddInt64(int64(sequenceLock)).
-		AddOp(txscript.OP_CHECKSEQUENCEVERIFY).
-		AddOp(txscript.OP_DROP)
+		AddOp(txscript.OpCheckSequenceVerify).
+		AddOp(txscript.OpDrop)
 	csvScript, err := b.Script()
 
 	if err != nil {
