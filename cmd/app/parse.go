@@ -17,7 +17,7 @@ var datadir = new(string)
 
 // Parse commandline
 func Parse(ap *def.App, args []string) int {
-	cmd, tokens := ParseCLI(ap, args)
+	cmd, tokens := parseCLI(ap, args)
 	if cmd == nil {
 		cmd = ap.Commands["help"]
 	}
@@ -99,7 +99,7 @@ func Parse(ap *def.App, args []string) int {
 	return r
 }
 
-func ParseCLI(ap *def.App, args []string) (cmd *def.Command, tokens def.Tokens) {
+func parseCLI(ap *def.App, args []string) (cmd *def.Command, tokens def.Tokens) {
 	cmd = new(def.Command)
 	// collect set of items in commandline
 	if len(args) < 2 {
@@ -112,11 +112,11 @@ func ParseCLI(ap *def.App, args []string) (cmd *def.Command, tokens def.Tokens) 
 		for i, y := range ap.Commands {
 			if y.RE.MatchString(x) {
 				if _, ok := commandsFound[i]; ok {
-					tokens[i] = def.Token{x, *y}
+					tokens[i] = def.Token{Value: x, Cmd: *y}
 					commandsFound[i]++
 					break
 				} else {
-					tokens[i] = def.Token{x, *y}
+					tokens[i] = def.Token{Value: x, Cmd: *y}
 					commandsFound[i] = 1
 					break
 				}

@@ -165,8 +165,10 @@ func getAlgoOptions() (options []string) {
 var Valid = struct {
 	File, Dir, Port, Bool, Int, Tag, Tags, Algo, Float, Duration, Net,
 	Level func(*def.Row, interface{}) bool
-}{
-	File: func(r *def.Row, in interface{}) bool {
+}{}
+
+func init() {
+	Valid.File = func(r *def.Row, in interface{}) bool {
 		var s *string
 		switch I := in.(type) {
 		case string:
@@ -190,8 +192,8 @@ var Valid = struct {
 			return false
 		}
 		return false
-	},
-	Dir: func(r *def.Row, in interface{}) bool {
+	}
+	Valid.Dir = func(r *def.Row, in interface{}) bool {
 		var s *string
 		switch I := in.(type) {
 		case string:
@@ -211,13 +213,12 @@ var Valid = struct {
 				r.Value.Put(ss)
 				r.App.SaveConfig()
 				return true
-			} else {
-				return false
 			}
+			return false
 		}
 		return false
-	},
-	Port: func(r *def.Row, in interface{}) bool {
+	}
+	Valid.Port = func(r *def.Row, in interface{}) bool {
 		var s string
 		var ii int
 		isString := false
@@ -251,8 +252,8 @@ var Valid = struct {
 			r.App.SaveConfig()
 		}
 		return true
-	},
-	Bool: func(r *def.Row, in interface{}) bool {
+	}
+	Valid.Bool = func(r *def.Row, in interface{}) bool {
 		var sb string
 		var b bool
 		switch I := in.(type) {
@@ -290,8 +291,8 @@ var Valid = struct {
 			r.App.SaveConfig()
 		}
 		return true
-	},
-	Int: func(r *def.Row, in interface{}) bool {
+	}
+	Valid.Int = func(r *def.Row, in interface{}) bool {
 		var s string
 		var ii int
 		isString := false
@@ -323,8 +324,8 @@ var Valid = struct {
 			r.App.SaveConfig()
 		}
 		return true
-	},
-	Tag: func(r *def.Row, in interface{}) bool {
+	}
+	Valid.Tag = func(r *def.Row, in interface{}) bool {
 		var s string
 		switch I := in.(type) {
 		case string:
@@ -344,8 +345,8 @@ var Valid = struct {
 			r.App.SaveConfig()
 		}
 		return true
-	},
-	Tags: func(r *def.Row, in interface{}) bool {
+	}
+	Valid.Tags = func(r *def.Row, in interface{}) bool {
 		var s []string
 		existing, ok := r.Value.Get().([]string)
 		if !ok {
@@ -392,8 +393,8 @@ var Valid = struct {
 			r.App.SaveConfig()
 		}
 		return true
-	},
-	Algo: func(r *def.Row, in interface{}) bool {
+	}
+	Valid.Algo = func(r *def.Row, in interface{}) bool {
 		var s string
 		switch I := in.(type) {
 		case string:
@@ -420,8 +421,8 @@ var Valid = struct {
 			r.App.SaveConfig()
 		}
 		return true
-	},
-	Float: func(r *def.Row, in interface{}) bool {
+	}
+	Valid.Float = func(r *def.Row, in interface{}) bool {
 		var s string
 		var f float64
 		isString := false
@@ -452,8 +453,8 @@ var Valid = struct {
 			r.App.SaveConfig()
 		}
 		return true
-	},
-	Duration: func(r *def.Row, in interface{}) bool {
+	}
+	Valid.Duration = func(r *def.Row, in interface{}) bool {
 		var s string
 		var t time.Duration
 		isString := false
@@ -484,8 +485,8 @@ var Valid = struct {
 			r.App.SaveConfig()
 		}
 		return true
-	},
-	Net: func(r *def.Row, in interface{}) bool {
+	}
+	Valid.Net = func(r *def.Row, in interface{}) bool {
 		var sn string
 		switch I := in.(type) {
 		case string:
@@ -508,8 +509,8 @@ var Valid = struct {
 			r.App.SaveConfig()
 		}
 		return found
-	},
-	Level: func(r *def.Row, in interface{}) bool {
+	}
+	Valid.Level = func(r *def.Row, in interface{}) bool {
 		var sl string
 		switch I := in.(type) {
 		case string:
@@ -531,9 +532,8 @@ var Valid = struct {
 			r.App.SaveConfig()
 		}
 		return found
-	},
+	}
 }
-
 func setAppDataDir(ap *def.App, name string) {
 	if ap != nil {
 		if ap.Config != nil {

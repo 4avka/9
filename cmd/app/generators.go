@@ -18,7 +18,7 @@ import (
 
 // DataDir is the folder all servers and apps in this suite use to store
 // configuration and working data
-var DataDir string = filepath.Dir(util.AppDataDir("9", false))
+var DataDir = filepath.Dir(util.AppDataDir("9", false))
 
 // Networks is the list of network types the node and wallet can connect to
 var Networks = []string{"mainnet", "testnet", "simnet", "regtestnet"}
@@ -105,6 +105,7 @@ func Cmd(name string, g ...def.CommandGenerator) def.AppGenerator {
 func Pattern(patt string) def.CommandGenerator {
 	return func(ctx *def.Command) {
 		ctx.Pattern = patt
+		// Panic if RE is not correct - only the programmer affects these and they must work
 		ctx.RE = regexp.MustCompile(ctx.Pattern)
 	}
 }
