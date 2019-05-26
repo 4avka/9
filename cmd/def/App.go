@@ -1,29 +1,52 @@
 package def
+
 import (
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"time"
+
+	"git.parallelcoin.io/dev/9/cmd/nine"
 	"git.parallelcoin.io/dev/9/pkg/util"
 )
+
+// App contains all the configuration and subcommand definitions for an app
+type App struct {
+	Name     string
+	Tagline  string
+	About    string
+	Version  func() string
+	Default  func(ctx *App) int
+	Cats     Cats
+	Commands Commands
+	Config   *nine.Config
+	Started  chan struct{}
+}
+
+// AppGenerator is a function that configures an App
+type AppGenerator func(ctx *App)
+
+// AppGenerators is a collection of AppGenerators
+type AppGenerators []AppGenerator
+
 // SaveConfig writes all the data in Cats the config file at the root of DataDir
-func (app *App) SaveConfig() {
-	if app == nil {
+func (r *App) SaveConfig() {
+	if r == nil {
 		return
 	}
-	datadir, ok := app.Cats["app"]["datadir"].Value.Get().(string)
+	datadir, ok := r.Cats["app"]["datadir"].Value.Get().(string)
 	if !ok {
 		return
 	}
 	configFile := util.CleanAndExpandPath(filepath.Join(datadir, "config"), "")
-	if util.EnsureDir(configFile) {
-	}
+	// if util.EnsureDir(configFile) {
+	// }
 	fh, err := os.Create(configFile)
 	if err != nil {
 		panic(err)
 	}
-	j, e := json.MarshalIndent(app, "", "\t")
+	j, e := json.MarshalIndent(r, "", "\t")
 	if e != nil {
 		panic(e)
 	}
@@ -32,6 +55,7 @@ func (app *App) SaveConfig() {
 		panic(err)
 	}
 }
+
 // MarshalJSON cherrypicks Cats for the values needed to correctly configure it
 // and some extra information to make the JSON output friendly to human editors
 func (r *App) MarshalJSON() ([]byte, error) {
@@ -52,6 +76,7 @@ func (r *App) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(out)
 }
+
 // UnmarshalJSON takes the cherrypicked JSON output of Marshal and puts it back into
 // an App
 func (r *App) UnmarshalJSON(data []byte) error {
@@ -77,41 +102,21 @@ func (r *App) UnmarshalJSON(data []byte) error {
 							R.Validate(R, z)
 							ro = append(ro, z)
 						}
-						// R.Value.Put(ro)
+						R.Value.Put(ro)
 					}
-					// break
-				case "float":
+					// case "float":
 				}
 			}
 			R.Validate(R, y.Value)
-			// R.Value.Put(y.Value)
+			R.Value.Put(y.Value)
 		}
 	}
 	return nil
 }
+
 // RunAll triggers AppGenerators to configure an App
 func (r *AppGenerators) RunAll(app *App) {
 	for _, x := range *r {
 		x(app)
 	}
-	return
-}
-// RunAll runs a collection of CatGenerators on a Cat
-func (r *CatGenerators) RunAll(cat Cat) {
-	for _, x := range *r {
-		x(&cat)
-	}
-	return
-}
-func (r *RowGenerators) RunAll(row *Row) {
-	for _, x := range *r {
-		x(row)
-	}
-}
-func (r *CommandGenerators) RunAll() *Command {
-	c := &Command{}
-	for _, x := range *r {
-		x(c)
-	}
-	return c
 }
