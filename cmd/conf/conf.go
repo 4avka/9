@@ -1,4 +1,5 @@
 package conf
+
 import (
 	"encoding/json"
 	"fmt"
@@ -7,14 +8,18 @@ import (
 	"sort"
 	"strings"
 	"time"
+
 	"git.parallelcoin.io/dev/9/cmd/def"
 	"git.parallelcoin.io/dev/9/pkg/util"
 	"git.parallelcoin.io/dev/tcell"
 	"git.parallelcoin.io/dev/tview"
 )
+
 const menutitle = "ⓟ parallelcoin 9 configuration CLI"
+
 var iteminput *tview.InputField
 var toggle *tview.Table
+
 // Run the menu system
 func Run(args []string, tokens def.Tokens, ap *def.App) int {
 	var cattable *tview.Table
@@ -26,15 +31,15 @@ func Run(args []string, tokens def.Tokens, ap *def.App) int {
 	tapp := tview.NewApplication()
 	// titlebar tells the user what app they are using
 	titlebar := tview.NewTextView().
-		SetTextColor(TextColor()).
+		SetTextColor(col.Text()).
 		SetText(menutitle)
-	titlebar.Box.SetBackgroundColor(MainColor())
+	titlebar.Box.SetBackgroundColor(col.Main())
 	coverbox := tview.NewTextView()
 	coverbox.
-		SetTextColor(TextColor())
+		SetTextColor(col.Text())
 	coverbox.Box.
 		SetBorder(false).
-		SetBackgroundColor(BackgroundColor())
+		SetBackgroundColor(col.Background())
 	coverbox.SetBorderPadding(1, 1, 2, 2)
 	// coverbox.SetBorder(true)
 	roottable, roottablewidth := genMenu("launch", "configure", "reinitialize")
